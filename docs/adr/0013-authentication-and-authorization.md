@@ -1,8 +1,28 @@
 # ADR-0013 — Estratégia de Autenticação, Autorização, RBAC e ABAC
 
-**Status:** Aceito
+**Status:** Aceito (Fase 2A - Foundation Backend Implementada)
 **Data:** 2026-06-12
 **Projeto:** LedgerFlow — Enterprise Payment, Reconciliation & Observability Platform
+
+## Status da Implementação (Fase 2A & 2B)
+
+A **Fase 2A — Backend Authentication Foundation** implementou as seguintes funcionalidades no backend NestJS:
+- Autenticação de Login com `accessToken` e `refreshToken`.
+- Renovação de tokens (Refresh) e Logout com revogação explícita.
+- Regra de **Sessão única por usuário** (novo login revoga sessões e refresh tokens anteriores).
+- Captura e registro de IP e User-Agent.
+- Registro de tentativas de autenticação (`AuthAttempt`).
+- Controle avançado de sessões em banco de dados (`UserSession`).
+- Proteção por limite de tentativas (bloqueio temporário da conta via `failedLoginAttempts` e `lockedUntil`).
+- Armazenamento 100% seguro de tokens (apenas hash do `refreshToken` é salvo).
+
+A **Fase 2B — Auth Guards, Current User e RBAC Foundation** adicionou:
+- JWT Guard (`JwtAuthGuard`) aplicado globalmente em todas as rotas da aplicação, suportando rotas públicas via `@Public()`.
+- Criação e integração do `PermissionGuard` para validação de `permissions` no payload do usuário via decorador `@RequirePermissions()`.
+- Extensão do JWT com `sessionId` e validação real da sessão de acesso, revogando o token se a sessão for inativada ou expirar.
+- Endpoint protegido `GET /auth/me` que usa um decorador `@CurrentUser()` seguro para acessar dados do usuário logado.
+
+*Nota: Telas de frontend e validações contextuais de ABAC serão implementadas em fases subsequentes.*
 
 ---
 

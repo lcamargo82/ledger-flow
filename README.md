@@ -773,15 +773,22 @@ Ferramentas planejadas:
 * PostgreSQL.
 * Documentação inicial.
 
-## Fase 1 — Auth, Tenancy e RBAC
+## Fase 1 — Database Foundation Layer (Concluída)
 
 * Cadastro de tenant.
 * Owner inicial.
-* Login.
-* Refresh token.
 * Guards.
 * Permissões.
 * Isolamento por tenant.
+
+## Fase 2A — Backend Authentication Foundation (Concluída)
+
+* Login com accessToken e refreshToken.
+* Refresh de tokens e Logout.
+* Sessão única por usuário (revogação de tokens e sessões).
+* Captura de IP e User-Agent.
+* Auditoria de AuthAttempt e gestão de UserSession.
+* Bloqueio de conta por limite de tentativas (failedLoginAttempts).
 
 ## Fase 2 — UX Foundation
 
