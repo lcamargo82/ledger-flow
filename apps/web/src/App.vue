@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+// Dynamically resolve layout from route meta
+const layout = computed(() => {
+  return route.meta.layout || 'div'
+})
 </script>
 
 <template>
-  <RouterView />
+  <component :is="layout">
+    <router-view />
+  </component>
 </template>
 
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
-}
+/* App.vue style removed as main.css handles globals */
 </style>

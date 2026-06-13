@@ -1749,3 +1749,21 @@ Mitigação:
 * ExcelJS streaming para XLSX.
 * Swagger + Redoc + AsyncAPI para documentação.
 * Outbox e Inbox para confiabilidade.
+
+---
+
+# 30. Implementation Notes
+
+## Phase 2C
+Phase 2C — Frontend Authentication Foundation has been implemented.
+This included:
+- LoginView
+- AuthStore with Pinia
+- Token storage (localStorage)
+- Axios interceptors for automatic token refresh
+- Router guards for private routes
+- Authenticated layout
+- PermissionGate component
+- Consumption of `/auth/me` and frontend logout.
+
+*Known Limitation*: Currently, tokens are stored in `localStorage` to simplify the local environment and portfolio setup. In a production environment, this should be evaluated and moved to HttpOnly, Secure, and SameSite cookies for refresh tokens.

@@ -1,0 +1,365 @@
+:root {
+  /* Colors */
+  --lf-bg-main: #0f172a; /* Slate 900 */
+  --lf-bg-card: #1e293b; /* Slate 800 */
+  --lf-bg-sidebar: #020617; /* Slate 950 */
+  --lf-bg-header: #0f172a; /* Slate 900 */
+  
+  --lf-text-primary: #f8fafc; /* Slate 50 */
+  --lf-text-secondary: #94a3b8; /* Slate 400 */
+  --lf-text-muted: #64748b; /* Slate 500 */
+  
+  --lf-primary: #4f46e5; /* Indigo 600 */
+  --lf-primary-hover: #4338ca; /* Indigo 700 */
+  
+  --lf-danger: #ef4444;
+  --lf-danger-bg: rgba(239, 68, 68, 0.1);
+  --lf-success: #10b981;
+  --lf-warning: #f59e0b;
+  
+  --lf-border: #334155; /* Slate 700 */
+  --lf-border-focus: #4f46e5;
+
+  /* Typography */
+  --lf-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Spacing */
+  --lf-space-1: 0.25rem;
+  --lf-space-2: 0.5rem;
+  --lf-space-3: 0.75rem;
+  --lf-space-4: 1rem;
+  --lf-space-6: 1.5rem;
+  --lf-space-8: 2rem;
+
+  /* Radius */
+  --lf-radius: 0.5rem;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--lf-font-family);
+  background-color: var(--lf-bg-main);
+  color: var(--lf-text-primary);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Utils */
+.lf-mb-4 { margin-bottom: var(--lf-space-4); }
+.lf-mb-6 { margin-bottom: var(--lf-space-6); }
+.lf-mt-4 { margin-top: var(--lf-space-4); }
+.lf-w-full { width: 100%; }
+
+/* Card */
+.lf-card {
+  background-color: var(--lf-bg-card);
+  border: 1px solid var(--lf-border);
+  border-radius: var(--lf-radius);
+  padding: var(--lf-space-6);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Button */
+.lf-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1rem;
+  font-weight: 500;
+  border-radius: var(--lf-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  position: relative;
+}
+
+.lf-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lf-button--primary {
+  background-color: var(--lf-primary);
+  color: white;
+}
+.lf-button--primary:hover:not(:disabled) {
+  background-color: var(--lf-primary-hover);
+}
+
+.lf-button--secondary {
+  background-color: transparent;
+  border-color: var(--lf-border);
+  color: var(--lf-text-primary);
+}
+.lf-button--secondary:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.lf-button--small {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.lf-button__spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 0.5rem;
+}
+
+/* Input */
+.lf-input-group {
+  display: flex;
+  flex-direction: column;
+}
+.lf-label {
+  margin-bottom: var(--lf-space-2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--lf-text-secondary);
+}
+.lf-input {
+  background-color: var(--lf-bg-main);
+  border: 1px solid var(--lf-border);
+  color: var(--lf-text-primary);
+  border-radius: var(--lf-radius);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+.lf-input:focus {
+  outline: none;
+  border-color: var(--lf-border-focus);
+}
+.lf-input--error {
+  border-color: var(--lf-danger);
+}
+.lf-error-message {
+  margin-top: var(--lf-space-1);
+  font-size: 0.75rem;
+  color: var(--lf-danger);
+}
+
+/* Alert */
+.lf-alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--lf-radius);
+  font-size: 0.875rem;
+  border-left: 4px solid;
+}
+.lf-alert--error {
+  background-color: var(--lf-danger-bg);
+  border-left-color: var(--lf-danger);
+  color: #fca5a5;
+}
+
+/* Auth Layout & View */
+.lf-layout-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.lf-login-card {
+  width: 100%;
+  max-width: 400px;
+}
+.lf-login-header {
+  text-align: center;
+  margin-bottom: var(--lf-space-6);
+}
+.lf-login-header h1 {
+  margin: 0 0 var(--lf-space-2) 0;
+  font-size: 1.5rem;
+}
+.lf-login-header p {
+  margin: 0;
+  color: var(--lf-text-secondary);
+  font-size: 0.875rem;
+}
+.lf-demo-hint {
+  margin-top: var(--lf-space-6);
+  padding-top: var(--lf-space-4);
+  border-top: 1px dashed var(--lf-border);
+  font-size: 0.75rem;
+  color: var(--lf-text-muted);
+  text-align: center;
+}
+.lf-demo-hint p {
+  margin: 0 0 0.25rem 0;
+}
+
+/* App Layout & Dashboard */
+.lf-layout-app {
+  display: flex;
+  min-height: 100vh;
+}
+.lf-sidebar {
+  width: 250px;
+  background-color: var(--lf-bg-sidebar);
+  border-right: 1px solid var(--lf-border);
+  display: flex;
+  flex-direction: column;
+}
+.lf-sidebar__brand {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--lf-space-6);
+  border-bottom: 1px solid var(--lf-border);
+}
+.lf-sidebar__brand h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+.lf-sidebar__nav {
+  padding: var(--lf-space-4) 0;
+}
+.lf-nav-item {
+  display: block;
+  padding: var(--lf-space-3) var(--lf-space-6);
+  color: var(--lf-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+.lf-nav-item.router-link-active, .lf-nav-item:hover:not(.lf-nav-item--disabled) {
+  background-color: rgba(255,255,255,0.05);
+  color: var(--lf-text-primary);
+}
+.lf-nav-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lf-layout-app__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.lf-header {
+  height: 64px;
+  background-color: var(--lf-bg-header);
+  border-bottom: 1px solid var(--lf-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 var(--lf-space-6);
+  gap: var(--lf-space-6);
+}
+.lf-header__user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.lf-header__name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.lf-header__email {
+  font-size: 0.75rem;
+  color: var(--lf-text-secondary);
+}
+
+.lf-layout-app__content {
+  padding: var(--lf-space-8);
+  flex: 1;
+}
+
+/* Dashboard Specifics */
+.lf-page-header {
+  margin-bottom: var(--lf-space-8);
+}
+.lf-page-header h1 {
+  margin: 0 0 var(--lf-space-2) 0;
+}
+.lf-welcome-text {
+  margin: 0;
+  color: var(--lf-text-secondary);
+}
+.lf-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--lf-space-6);
+}
+.lf-dashboard-grid h3 {
+  margin: 0 0 var(--lf-space-4) 0;
+  font-size: 1rem;
+  color: var(--lf-text-secondary);
+}
+.lf-card-data {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  word-break: break-all;
+}
+.lf-tag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.lf-tag {
+  background-color: rgba(255,255,255,0.1);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+}
+.lf-status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.25rem;
+}
+.lf-status-active {
+  background-color: var(--lf-success);
+}
+
+/* Error Views */
+.lf-error-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 64px - 4rem); /* Approx for AppLayout content area */
+}
+.lf-error-card {
+  text-align: center;
+  max-width: 400px;
+}
+.lf-error-title {
+  font-size: 4rem;
+  color: var(--lf-danger);
+  margin: 0;
+  line-height: 1;
+}
+
+/* Loading */
+.lf-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--lf-space-4);
+}
+.lf-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  border-top-color: var(--lf-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
