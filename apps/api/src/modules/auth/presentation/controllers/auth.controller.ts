@@ -8,7 +8,10 @@ import { AuthResponse } from '../../application/types/auth-response.type';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../application/types/authenticated-user.type';
+import { ApiTags, ApiOperation, ApiOkResponse, ApiUnauthorizedResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { LoginResponseDto, RefreshTokenResponseDto, LogoutResponseDto, MeResponseDto } from '../../application/dto/auth-response.dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -16,6 +19,10 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Authenticate user' })
+  @ApiBody({ type: LoginDto })
+  @ApiOkResponse({ type: LoginResponseDto, description: 'Autentica o usuário e retorna o access e refresh tokens' })
+  @ApiUnauthorizedResponse({ description: 'Credenciais inválidas' })
   async login(@Body() loginDto: LoginDto, @Req() req: Request): Promise<AuthResponse> {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
@@ -26,6 +33,10 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiOkResponse({ type: RefreshTokenResponseDto, description: 'Gera um novo access token a partir de um refresh token' })
+  @ApiUnauthorizedResponse({ description: 'Token inválido ou revogado' })
   async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string }> {
     return this.authService.refresh(refreshTokenDto);
   }
@@ -33,11 +44,18 @@ export class AuthController {
   @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Logout user' })
+  @ApiBody({ type: LogoutDto })
+  @ApiOkResponse({ type: LogoutResponseDto, description: 'Revoga o refresh token e encerra a sessão' })
   async logout(@Body() logoutDto: LogoutDto): Promise<{ message: string }> {
     return this.authService.logout(logoutDto);
   }
 
   @Get('me')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Get authenticated user profile' })
+  @ApiOkResponse({ type: MeResponseDto, description: 'Retorna o usuário autenticado com roles, permissões, tenantId e sessionId' })
+  @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
   getProfile(@CurrentUser() user: AuthenticatedUser) {
     return { user };
   }

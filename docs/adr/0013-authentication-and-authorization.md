@@ -22,6 +22,10 @@ A **Fase 2B — Auth Guards, Current User e RBAC Foundation** adicionou:
 - Extensão do JWT com `sessionId` e validação real da sessão de acesso, revogando o token se a sessão for inativada ou expirar.
 - Endpoint protegido `GET /auth/me` que usa um decorador `@CurrentUser()` seguro para acessar dados do usuário logado.
 
+A **Fase 2D — API Documentation Foundation** garantiu que:
+- Endpoints de autenticação estão documentados interativamente com OpenAPI/Swagger.
+- Rotas protegidas agora estão sinalizadas com `Bearer Auth` (`@ApiBearerAuth`) na documentação Swagger UI e Redoc.
+
 *Nota: Telas de frontend e validações contextuais de ABAC serão implementadas em fases subsequentes.*
 
 ---

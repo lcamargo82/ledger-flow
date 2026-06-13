@@ -9,7 +9,6 @@ O projeto simula um sistema corporativo de grande escala, inspirado em plataform
 > Projeto desenvolvido para estudo avançado, portfólio técnico e simulação de ambiente enterprise.
 
 ---
-
 # 1. Visão Geral
 
 O LedgerFlow permite que empresas gerenciem cobranças, clientes, pagamentos, integrações com gateways, webhooks, relatórios financeiros e permissões de usuários em uma única plataforma.
@@ -37,7 +36,6 @@ O principal objetivo técnico é demonstrar uma arquitetura robusta usando:
 * Datadog opcional.
 
 ---
-
 # 2. Problema de Negócio
 
 Empresas que recebem pagamentos por múltiplos canais enfrentam desafios como:
@@ -55,7 +53,6 @@ Empresas que recebem pagamentos por múltiplos canais enfrentam desafios como:
 O LedgerFlow simula uma solução para esses problemas com uma arquitetura preparada para ambientes corporativos.
 
 ---
-
 # 3. Funcionalidades Planejadas
 
 ## Core
@@ -136,7 +133,6 @@ O LedgerFlow simula uma solução para esses problemas com uma arquitetura prepa
 * Datadog opcional.
 
 ---
-
 # 4. Stack Técnica
 
 ## Backend
@@ -195,7 +191,6 @@ O LedgerFlow simula uma solução para esses problemas com uma arquitetura prepa
 * npm audit.
 
 ---
-
 # 5. Arquitetura
 
 O LedgerFlow será desenvolvido inicialmente como um **Monólito Modular Microservices-Ready**.
@@ -221,6 +216,7 @@ apps/api/src/modules/
 ├── audit/
 ├── observability/
 └── health/
+
 ```
 
 ## Estrutura interna sugerida por módulo
@@ -244,10 +240,10 @@ modules/payments/
 │   ├── controllers/
 │   └── presenters/
 └── payments.module.ts
+
 ```
 
 ---
-
 # 6. Estrutura do Projeto
 
 ```text
@@ -266,10 +262,10 @@ ledgerflow/
 ├── docker-compose.yml
 ├── README.md
 └── .env.example
+
 ```
 
 ---
-
 # 7. Diagramas
 
 Os diagramas estão disponíveis em `docs/diagrams`.
@@ -292,7 +288,6 @@ Os diagramas estão disponíveis em `docs/diagrams`.
 * [Frontend Architecture](docs/diagrams/frontend-architecture.md)
 
 ---
-
 # 8. Documentação
 
 ## Produto e Arquitetura
@@ -324,7 +319,6 @@ Os diagramas estão disponíveis em `docs/diagrams`.
 * [ADR-0018 — Docker Local Development](docs/adr/0018-docker-local-development.md)
 
 ---
-
 # 9. Como Rodar Localmente
 
 ## Pré-requisitos
@@ -336,7 +330,6 @@ Os diagramas estão disponíveis em `docs/diagrams`.
 * Git.
 
 ---
-
 ## 1. Clonar o repositório
 
 HTTPS é recomendado para quem quer apenas clonar ou testar o projeto.
@@ -347,6 +340,7 @@ SSH é recomendado para quem já tem chave SSH configurada no GitHub e pretende 
 ```bash
 git clone https://github.com/lcamargo82/ledger-flow.git
 cd ledger-flow
+
 ```
 
 ### Clonar via SSH
@@ -354,10 +348,10 @@ cd ledger-flow
 ```bash
 git clone git@github.com:lcamargo82/ledger-flow.git
 cd ledger-flow
+
 ```
 
 ---
-
 ## 2. Criar arquivo `.env`
 
 O projeto usa um único `.env` na raiz.
@@ -368,6 +362,7 @@ Rodando via Docker, não é necessário criar `.env` dentro de `apps/api` ou `ap
 
 ```bash
 cp .env.example .env
+
 ```
 
 Exemplo com as principais variáveis:
@@ -377,9 +372,9 @@ NODE_ENV=development
 TZ=UTC
 APP_NAME=LedgerFlow
 
-APP_URL=http://localhost:5180
-API_URL=http://localhost:3010
-WEB_URL=http://localhost:5180
+APP_URL=<http://localhost:5180>
+API_URL=<http://localhost:3010>
+WEB_URL=<http://localhost:5180>
 
 API_HOST=0.0.0.0
 API_PORT=3000
@@ -391,7 +386,7 @@ HOST_WEB_PORT=5180
 
 VITE_APP_NAME=LedgerFlow
 VITE_APP_ENV=development
-VITE_API_BASE_URL=http://localhost:3010
+VITE_API_BASE_URL=<http://localhost:3010>
 VITE_WS_BASE_URL=ws://localhost:3010
 VITE_DEFAULT_LOCALE=pt-BR
 VITE_DEFAULT_TIMEZONE=America/Sao_Paulo
@@ -445,7 +440,7 @@ AUTH_LOCK_MINUTES=15
 
 ENCRYPTION_KEY=change-me-32-bytes-local-key-000
 
-CORS_ORIGIN=http://localhost:5180
+CORS_ORIGIN=<http://localhost:5180>
 CORS_CREDENTIALS=true
 
 HOST_PRISMA_STUDIO_PORT=5555
@@ -464,82 +459,101 @@ GRAFANA_ADMIN_USER=admin
 GRAFANA_ADMIN_PASSWORD=admin
 
 DATADOG_ENABLED=false
+
 ```
 
 Para a lista completa de variáveis, consulte o arquivo `.env.example`.
 
 ---
-
 ## 3. Subir e gerenciar ambiente local
 
 **Subir projeto:**
+
 ```bash
 docker compose up --build -d
+
 ```
 
 **Ver containers:**
+
 ```bash
 docker compose ps
+
 ```
 
 **Ver logs gerais:**
+
 ```bash
 docker compose logs -f
+
 ```
 
 **Ver logs da API:**
+
 ```bash
 docker compose logs -f api
+
 ```
 
 **Ver logs do frontend:**
+
 ```bash
 docker compose logs -f web
+
 ```
 
 **Derrubar ambiente:**
+
 ```bash
 docker compose down
+
 ```
 
 **Derrubar ambiente e apagar volumes:**
+
 ```bash
 docker compose down -v
+
 ```
 
 **Build backend:**
+
 ```bash
 docker compose exec api npm run build
+
 ```
 
 **Build frontend:**
+
 ```bash
 docker compose exec web npm run build
+
 ```
 
 ---
-
 ## 4. Acessar serviços locais
 
 | Serviço             | URL/Host               |
 | ------------------- | ---------------------- |
-| Frontend            | http://localhost:5180  |
-| Backend API         | http://localhost:3010  |
+| Frontend            | <http://localhost:5180>  |
+| Backend API         | <http://localhost:3010>  |
 | PostgreSQL          | localhost:55432        |
 | MongoDB             | localhost:27018        |
 | Redis               | localhost:6380         |
-| RabbitMQ Management | http://localhost:15682 |
-| Mailpit             | http://localhost:8026  |
-| Prometheus          | http://localhost:9091  |
-| Grafana             | http://localhost:3002  |
-| Prisma Studio       | http://localhost:5555  |
+| RabbitMQ Management | <http://localhost:15682> |
+| Mailpit             | <http://localhost:8026>  |
+| Prometheus          | <http://localhost:9091>  |
+| Grafana             | <http://localhost:3002>  |
+| Prisma Studio       | <http://localhost:5555>  |
 
 **Health checks da API:**
+
 ```bash
-curl http://localhost:3010/
-curl http://localhost:3010/health
-curl http://localhost:3010/health/liveness
-curl http://localhost:3010/health/readiness
+curl <http://localhost:3010>/
+curl <http://localhost:3010>/health
+curl <http://localhost:3010>/health/liveness
+curl <http://localhost:3010>/health/readiness
+
 ```
 
 **Credenciais:**
@@ -549,7 +563,6 @@ curl http://localhost:3010/health/readiness
 * **Usuário demo:** `owner@ledgerflow.local` / `ChangeMe123!`
 
 ---
-
 ## 5. Autenticação local
 
 O projeto já possui fluxo inicial de autenticação com:
@@ -572,11 +585,12 @@ O projeto já possui fluxo inicial de autenticação com:
 ```text
 E-mail: owner@ledgerflow.local
 Senha: ChangeMe123!
+
 ```
 
 **Fluxo esperado:**
 
-1. Acessar `http://localhost:5180`
+1. Acessar `<http://localhost:5180>`
 2. Se não autenticado, redireciona para `/login`
 3. Fazer login com `owner@ledgerflow.local` / `ChangeMe123!`
 4. Após login, redireciona para `/dashboard`
@@ -585,13 +599,11 @@ Senha: ChangeMe123!
 7. Acessar `/dashboard` sem token redireciona para `/login`
 
 ---
-
 # 10. Variáveis de Ambiente
 
 *(Esta seção foi combinada com a etapa de criação do `.env` na seção de Como Rodar Localmente. Consulte a etapa 2 acima para mais detalhes.)*
 
 ---
-
 # 11. Prisma
 
 Os comandos do Prisma devem ser executados via Docker:
@@ -601,33 +613,35 @@ Os comandos do Prisma devem ser executados via Docker:
 ```bash
 docker compose exec api npm run prisma:generate
 docker compose exec api npm run prisma:migrate
+
 ```
 
 ## Rodar seed
 
 ```bash
 docker compose exec api npm run prisma:seed
+
 ```
 
 ## Abrir Prisma Studio
 
 ```bash
 docker compose exec api npx prisma studio --hostname 0.0.0.0 --port 5555
+
 ```
 
-> **Observação:** O Prisma Studio precisa ficar com o terminal aberto enquanto estiver sendo usado. Acesse em `http://localhost:5555`.
+> **Observação:** O Prisma Studio precisa ficar com o terminal aberto enquanto estiver sendo usado. Acesse em `<http://localhost:5555>`.
 
 ---
-
 # 12. API Documentation
 
-## Swagger
+## Swagger UI
 
 ```text
 http://localhost:3010/api/docs
 ```
 
-Usado para testar rotas em desenvolvimento.
+Swagger UI é usado para testar endpoints durante desenvolvimento.
 
 ## Redoc
 
@@ -635,7 +649,24 @@ Usado para testar rotas em desenvolvimento.
 http://localhost:3010/api/reference
 ```
 
-Usado como documentação mais limpa e profissional da API. (Planejado, caso ainda não habilitado).
+Redoc é usado como referência de API mais limpa e profissional.
+
+## OpenAPI JSON
+
+```text
+http://localhost:3010/api/openapi.json
+```
+
+OpenAPI JSON é o contrato bruto da API.
+
+### Como testar endpoints protegidos
+
+1. Fazer login em `POST /auth/login` (via API ou Swagger).
+2. Copiar o valor do `accessToken` da resposta.
+3. Abrir o Swagger UI em `/api/docs`.
+4. Clicar no botão **Authorize**.
+5. Informar o Bearer token copiado.
+6. Testar endpoints protegidos, como o `GET /auth/me`.
 
 ## AsyncAPI
 
@@ -643,10 +674,10 @@ A documentação de eventos, filas e webhooks será mantida em:
 
 ```text
 docs/asyncapi/
+
 ```
 
---- 
-
+---
 # 13. Segurança
 
 O projeto aplica práticas de segurança como:
@@ -667,7 +698,6 @@ O projeto aplica práticas de segurança como:
 * Isolamento multitenant.
 
 ---
-
 # 14. Multitenancy
 
 O LedgerFlow usa isolamento lógico por `tenantId`.
@@ -684,12 +714,12 @@ api_keys.tenant_id
 webhook_endpoints.tenant_id
 export_jobs.tenant_id
 notifications.tenant_id
+
 ```
 
 O backend sempre deve usar o `tenantId` do contexto autenticado, nunca confiar em `tenantId` enviado livremente pelo frontend.
 
 ---
-
 # 15. Payment Gateway Abstraction
 
 O sistema usa Strategy + Factory para abstrair gateways de pagamento.
@@ -699,6 +729,7 @@ IPaymentGateway
 ├── StripePaymentGateway
 ├── AsaasPaymentGateway
 └── MercadoPagoPaymentGateway
+
 ```
 
 O Stripe será o primeiro provider real.
@@ -706,7 +737,6 @@ O Stripe será o primeiro provider real.
 O core de pagamento não deve importar SDK do Stripe diretamente. O SDK deve ficar isolado no adapter.
 
 ---
-
 # 16. Outbox e Inbox
 
 ## Outbox Pattern
@@ -729,6 +759,7 @@ Commit
 Outbox Worker
   ↓
 RabbitMQ
+
 ```
 
 ## Inbox Pattern
@@ -749,10 +780,10 @@ Verifica duplicidade
 Processa evento
   ↓
 Atualiza entidades internas
+
 ```
 
 ---
-
 # 17. Observabilidade
 
 A stack de observabilidade inclui:
@@ -785,7 +816,6 @@ A stack de observabilidade inclui:
 * Relatórios gerados.
 
 ---
-
 # 18. Frontend Architecture
 
 O frontend segue uma arquitetura baseada em:
@@ -811,7 +841,6 @@ O frontend segue uma arquitetura baseada em:
 * Backend continua sendo a fonte real de autorização.
 
 ---
-
 # 19. Internacionalização
 
 O sistema suporta traduções baseadas em arquivos JSON.
@@ -829,10 +858,10 @@ apps/web/src/locales/
 ├── pt-BR.json
 ├── en-US.json
 └── es-ES.json
+
 ```
 
 ---
-
 # 20. Datas e Timezones
 
 Estratégia:
@@ -850,10 +879,10 @@ Prioridade de timezone:
 2. Timezone do tenant
 3. Timezone do navegador
 4. UTC
+
 ```
 
 ---
-
 # 21. Relatórios e Exportações
 
 O LedgerFlow suporta exportações:
@@ -871,7 +900,6 @@ Estratégia:
 * Respeito a tenant e permissões.
 
 ---
-
 # 22. E-mails e Notificações
 
 ## E-mails
@@ -890,7 +918,6 @@ Estratégia:
 * Possibilidade de marcar como lida.
 
 ---
-
 # 23. Testes
 
 Estratégia de testes:
@@ -919,7 +946,6 @@ Fluxos prioritários:
 * Reports.
 
 ---
-
 # 24. Qualidade e Governança de Dependências
 
 O projeto deve evitar bibliotecas:
@@ -943,7 +969,6 @@ Ferramentas planejadas:
 * Commitlint.
 
 ---
-
 # 25. Roadmap
 
 ## Fase 0 — Fundação (Concluída)
@@ -1063,7 +1088,6 @@ Ferramentas planejadas:
 * Runbooks.
 
 ---
-
 # 26. Definition of Done
 
 Uma funcionalidade só será considerada pronta quando:
@@ -1082,17 +1106,16 @@ Uma funcionalidade só será considerada pronta quando:
 * Nenhuma dependência abandonada foi adicionada.
 
 ---
-
 # 27. Status do Projeto
 
 ```text
 Status atual: Fundação de autenticação backend/frontend implementada.
 Fase atual: Frontend Authentication Foundation.
 Próximo passo: UX Foundation, tratamento global de erros, toasts, modais e início dos módulos reais.
+
 ```
 
 ---
-
 # 28. Autor
 
 **Leandro Camargo Bahia**
@@ -1100,7 +1123,6 @@ Próximo passo: UX Foundation, tratamento global de erros, toasts, modais e iní
 Projeto desenvolvido como estudo avançado de arquitetura backend/frontend, sistemas distribuídos, pagamentos, observabilidade, segurança e práticas enterprise.
 
 ---
-
 # 29. Licença
 
 Este projeto é destinado a estudo e portfólio.

@@ -46,44 +46,37 @@ O LedgerFlow utilizará uma estratégia de documentação composta por:
 
 ## 3. Swagger/OpenAPI
 
-Swagger será usado principalmente para ambiente de desenvolvimento.
+Swagger é gerado a partir dos decorators do NestJS (`@nestjs/swagger`) e usado para ambiente de desenvolvimento.
 
-Rota:
+Rota Swagger UI:
 
 ```text
 /api/docs
 ```
 
+Rota OpenAPI JSON:
+
+```text
+/api/openapi.json
+```
+
 Objetivos:
 
 * Testar endpoints.
-* Visualizar DTOs.
-* Validar autenticação.
+* Visualizar DTOs documentados com `@ApiProperty`.
+* Validar autenticação (uso de `@ApiBearerAuth`).
 * Facilitar desenvolvimento.
-* Demonstrar rotas da API.
+* Demonstrar rotas da API com tags por módulo.
 
-Regras:
+Regras de Implementação:
 
-* Rotas protegidas devem documentar Bearer Auth.
-* DTOs devem possuir decorators.
-* Responses principais devem ser documentados.
-* Erros padrão devem aparecer.
-* Tags devem agrupar módulos.
-
-Exemplos de tags:
-
-```text
-Auth
-Tenants
-Users
-Customers
-Payments
-Webhooks
-Reports
-Notifications
-Gateways
-API Keys
-```
+* OpenAPI será gerado a partir dos decorators do NestJS.
+* Swagger UI ficará em `/api/docs`.
+* OpenAPI JSON ficará em `/api/openapi.json`.
+* DTOs devem ser documentados com `@ApiProperty`.
+* Endpoints protegidos devem usar `@ApiBearerAuth`.
+* Cada módulo deve possuir `@ApiTags`.
+* A documentação deve ser atualizada junto de cada nova feature.
 
 ---
 

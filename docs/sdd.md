@@ -5,7 +5,7 @@
 **Versão:** 1.0.0
 **Status:** Consolidado para início de desenvolvimento
 **Arquitetura:** Modular Monolith, Microservices-Ready, Clean Architecture
-**Backend:** NestJS + TypeScript
+**Backend:** NestJS + TypeScript (Swagger UI / Redoc para API Docs)
 **Frontend:** Vue 3 + TypeScript
 **Banco Relacional:** PostgreSQL
 **Banco Documental:** MongoDB
