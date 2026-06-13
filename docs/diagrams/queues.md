@@ -1,3 +1,4 @@
+```mermaid
 flowchart LR
     API[NestJS API]
     OUTBOX[(PostgreSQL Outbox Events)]
@@ -49,3 +50,4 @@ flowchart LR
     WEBHOOK_WORKER -->|Envia webhook assinado| CLIENT[Client Systems]
     REPORT_WORKER -->|Gera CSV/XLSX| FILES[(Temporary File Storage)]
     NOTIFICATION_WORKER -->|Cria notificação| PG
+```

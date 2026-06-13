@@ -1,3 +1,4 @@
+```mermaid
 flowchart TB
     APP[App.vue]
     ROUTER[Vue Router]
@@ -36,3 +37,4 @@ flowchart TB
     COMPONENTS --> TABLES[DataTable/Pagination]
     COMPONENTS --> FEEDBACK[Toast/Modal/States]
     COMPONENTS --> DASHBOARD[Dashboard Cards/Charts]
+```

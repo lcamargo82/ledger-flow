@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     autonumber
     actor User as Usuário Tenant A
@@ -25,3 +26,4 @@ sequenceDiagram
         API-->>Web: 404 NOT_FOUND ou 403 FORBIDDEN
         Web-->>User: Mensagem amigável
     end
+```

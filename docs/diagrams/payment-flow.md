@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     autonumber
     actor User as Usuário Financeiro
@@ -44,3 +45,4 @@ sequenceDiagram
     Outbox->>Rabbit: Worker publica payment.created
     Rabbit->>Worker: Consumer processa evento
     Worker->>PG: Cria notificação ou webhook pendente
+````

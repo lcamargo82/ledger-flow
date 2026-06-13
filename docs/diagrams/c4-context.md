@@ -1,3 +1,4 @@
+```mermaid
 C4Context
     title LedgerFlow — C4 Context Diagram
 
@@ -26,3 +27,4 @@ C4Context
     Rel(ledgerflow, emailProvider, "Envia e-mails transacionais")
     Rel(ledgerflow, clientSystems, "Envia webhooks outbound assinados")
     Rel(ledgerflow, datadog, "Envia traces/métricas opcionalmente")
+```

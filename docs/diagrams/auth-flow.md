@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     autonumber
     actor User as Usuário
@@ -35,3 +36,4 @@ sequenceDiagram
         API->>API: Gera novo access token
         API-->>Web: Novo access token
     end
+```

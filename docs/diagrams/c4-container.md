@@ -1,3 +1,4 @@
+```mermaid
 C4Container
     title LedgerFlow — C4 Container Diagram
 
@@ -39,3 +40,4 @@ C4Container
     Rel(prometheus, grafana, "Fonte de dados")
     Rel(api, datadog, "Envia traces opcionalmente")
     Rel(workers, datadog, "Envia traces opcionalmente")
+````

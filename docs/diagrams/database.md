@@ -1,3 +1,4 @@
+```mermaid
 erDiagram
     TENANT ||--o{ USER : has
     TENANT ||--o{ CUSTOMER : has
@@ -175,3 +176,4 @@ erDiagram
         datetime receivedAt
         datetime processedAt
     }
+```

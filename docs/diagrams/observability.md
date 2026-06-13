@@ -1,3 +1,4 @@
+```mermaid
 flowchart TB
     USER[User]
     WEB[Vue 3 Web App]
@@ -49,4 +50,4 @@ flowchart TB
     GRAFANA --> DASH3[RabbitMQ Dashboard]
     GRAFANA --> DASH4[Webhook Delivery Dashboard]
     GRAFANA --> DASH5[Reports Export Dashboard]
-    
+````

@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     autonumber
     participant Stripe as Stripe
@@ -40,3 +41,4 @@ sequenceDiagram
             Worker->>PG: Cria notificação/e-mail/webhook outbound
         end
     end
+```
