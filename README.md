@@ -339,100 +339,283 @@ Os diagramas estão disponíveis em `docs/diagrams`.
 
 ## 1. Clonar o repositório
 
+HTTPS é recomendado para quem quer apenas clonar ou testar o projeto.
+SSH é recomendado para quem já tem chave SSH configurada no GitHub e pretende contribuir/fazer push.
+
+### Clonar via HTTPS
+
 ```bash
-git clone https://github.com/seu-usuario/ledgerflow.git
-cd ledgerflow
+git clone https://github.com/lcamargo82/ledger-flow.git
+cd ledger-flow
+```
+
+### Clonar via SSH
+
+```bash
+git clone git@github.com:lcamargo82/ledger-flow.git
+cd ledger-flow
 ```
 
 ---
 
 ## 2. Criar arquivo `.env`
 
+O projeto usa um único `.env` na raiz.
+O `.env` real não deve ser versionado. O `.env.example` é o modelo seguro.
+O `docker-compose.yml` injeta as variáveis nos containers via `env_file`.
+O frontend só acessa variáveis prefixadas com `VITE_`.
+Rodando via Docker, não é necessário criar `.env` dentro de `apps/api` ou `apps/web`.
+
 ```bash
 cp .env.example .env
 ```
 
-Ajuste as variáveis conforme necessário.
+Exemplo com as principais variáveis:
+
+```env
+NODE_ENV=development
+TZ=UTC
+APP_NAME=LedgerFlow
+
+APP_URL=http://localhost:5180
+API_URL=http://localhost:3010
+WEB_URL=http://localhost:5180
+
+API_HOST=0.0.0.0
+API_PORT=3000
+HOST_API_PORT=3010
+
+WEB_HOST=0.0.0.0
+WEB_PORT=5173
+HOST_WEB_PORT=5180
+
+VITE_APP_NAME=LedgerFlow
+VITE_APP_ENV=development
+VITE_API_BASE_URL=http://localhost:3010
+VITE_WS_BASE_URL=ws://localhost:3010
+VITE_DEFAULT_LOCALE=pt-BR
+VITE_DEFAULT_TIMEZONE=America/Sao_Paulo
+
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_PUBLIC_PORT=55432
+POSTGRES_DB=ledgerflow
+POSTGRES_USER=ledgerflow
+POSTGRES_PASSWORD=ledgerflow
+DATABASE_URL=postgresql://ledgerflow:ledgerflow@postgres:5432/ledgerflow?schema=public
+
+MONGODB_HOST=mongodb
+MONGODB_PORT=27017
+MONGODB_PUBLIC_PORT=27018
+MONGODB_DATABASE=ledgerflow
+MONGODB_USERNAME=ledgerflow
+MONGODB_PASSWORD=ledgerflow
+MONGODB_URL=mongodb://ledgerflow:ledgerflow@mongodb:27017/ledgerflow?authSource=admin
+
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PUBLIC_PORT=6380
+REDIS_URL=redis://redis:6379
+
+RABBITMQ_HOST=rabbitmq
+RABBITMQ_AMQP_PORT=5672
+RABBITMQ_MANAGEMENT_PORT=15672
+RABBITMQ_PUBLIC_AMQP_PORT=5682
+RABBITMQ_PUBLIC_MANAGEMENT_PORT=15682
+RABBITMQ_DEFAULT_USER=ledgerflow
+RABBITMQ_DEFAULT_PASS=ledgerflow
+RABBITMQ_URL=amqp://ledgerflow:ledgerflow@rabbitmq:5672
+
+MAILPIT_SMTP_PORT=1026
+MAILPIT_UI_PORT=8026
+
+SMTP_HOST=mailpit
+SMTP_PORT=1025
+SMTP_SECURE=false
+SMTP_FROM_NAME=LedgerFlow
+SMTP_FROM_EMAIL=no-reply@ledgerflow.local
+
+JWT_ACCESS_SECRET=change-me-access-secret
+JWT_REFRESH_SECRET=change-me-refresh-secret
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+
+AUTH_MAX_FAILED_ATTEMPTS=5
+AUTH_LOCK_MINUTES=15
+
+ENCRYPTION_KEY=change-me-32-bytes-local-key-000
+
+CORS_ORIGIN=http://localhost:5180
+CORS_CREDENTIALS=true
+
+HOST_PRISMA_STUDIO_PORT=5555
+PRISMA_STUDIO_PORT=5555
+
+SWAGGER_ENABLED=true
+SWAGGER_PATH=api/docs
+REDOC_ENABLED=true
+REDOC_PATH=api/reference
+
+PROMETHEUS_ENABLED=true
+PROMETHEUS_PORT=9464
+PROMETHEUS_PORT_PUBLIC=9091
+GRAFANA_PORT=3002
+GRAFANA_ADMIN_USER=admin
+GRAFANA_ADMIN_PASSWORD=admin
+
+DATADOG_ENABLED=false
+```
+
+Para a lista completa de variáveis, consulte o arquivo `.env.example`.
 
 ---
 
-## 3. Subir ambiente local
+## 3. Subir e gerenciar ambiente local
 
+**Subir projeto:**
 ```bash
-docker compose up --build
+docker compose up --build -d
+```
+
+**Ver containers:**
+```bash
+docker compose ps
+```
+
+**Ver logs gerais:**
+```bash
+docker compose logs -f
+```
+
+**Ver logs da API:**
+```bash
+docker compose logs -f api
+```
+
+**Ver logs do frontend:**
+```bash
+docker compose logs -f web
+```
+
+**Derrubar ambiente:**
+```bash
+docker compose down
+```
+
+**Derrubar ambiente e apagar volumes:**
+```bash
+docker compose down -v
+```
+
+**Build backend:**
+```bash
+docker compose exec api npm run build
+```
+
+**Build frontend:**
+```bash
+docker compose exec web npm run build
 ```
 
 ---
 
 ## 4. Acessar serviços locais
 
-```text
-Frontend:       http://localhost:5173
-Backend API:    http://localhost:3000
-Swagger:        http://localhost:3000/api/docs
-Redoc:          http://localhost:3000/api/reference
-RabbitMQ UI:    http://localhost:15672
-Mailpit:        http://localhost:8025
-Prometheus:     http://localhost:9090
-Grafana:        http://localhost:3001
+| Serviço             | URL/Host               |
+| ------------------- | ---------------------- |
+| Frontend            | http://localhost:5180  |
+| Backend API         | http://localhost:3010  |
+| PostgreSQL          | localhost:55432        |
+| MongoDB             | localhost:27018        |
+| Redis               | localhost:6380         |
+| RabbitMQ Management | http://localhost:15682 |
+| Mailpit             | http://localhost:8026  |
+| Prometheus          | http://localhost:9091  |
+| Grafana             | http://localhost:3002  |
+| Prisma Studio       | http://localhost:5555  |
+
+**Health checks da API:**
+```bash
+curl http://localhost:3010/
+curl http://localhost:3010/health
+curl http://localhost:3010/health/liveness
+curl http://localhost:3010/health/readiness
 ```
+
+**Credenciais:**
+
+* **RabbitMQ:** `ledgerflow` / `ledgerflow`
+* **Grafana:** `admin` / `admin`
+* **Usuário demo:** `owner@ledgerflow.local` / `ChangeMe123!`
+
+---
+
+## 5. Autenticação local
+
+O projeto já possui fluxo inicial de autenticação com:
+
+* Login.
+* Access token JWT.
+* Refresh token com hash no banco.
+* Logout.
+* Sessão única por usuário.
+* Captura de IP e User-Agent.
+* Registro de AuthAttempt.
+* UserSession.
+* Proteção de rotas no frontend.
+* Router guards no Vue.
+* Pinia Auth Store.
+* Axios interceptor com refresh automático.
+
+**Credenciais demo:**
+
+```text
+E-mail: owner@ledgerflow.local
+Senha: ChangeMe123!
+```
+
+**Fluxo esperado:**
+
+1. Acessar `http://localhost:5180`
+2. Se não autenticado, redireciona para `/login`
+3. Fazer login com `owner@ledgerflow.local` / `ChangeMe123!`
+4. Após login, redireciona para `/dashboard`
+5. Recarregar página mantém sessão
+6. Logout limpa sessão local
+7. Acessar `/dashboard` sem token redireciona para `/login`
 
 ---
 
 # 10. Variáveis de Ambiente
 
-Exemplo base:
-
-```env
-NODE_ENV=development
-PORT=3000
-
-DATABASE_URL=postgresql://ledgerflow:ledgerflow@postgres:5432/ledgerflow
-MONGODB_URL=mongodb://mongodb:27017/ledgerflow
-REDIS_URL=redis://redis:6379
-RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
-
-JWT_ACCESS_SECRET=change-me
-JWT_REFRESH_SECRET=change-me
-JWT_ACCESS_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
-
-ENCRYPTION_KEY=change-me-32-bytes-key
-
-STRIPE_SECRET_KEY=sk_test_change_me
-STRIPE_WEBHOOK_SECRET=whsec_change_me
-
-SMTP_HOST=mailpit
-SMTP_PORT=1025
-
-OTEL_SERVICE_NAME=ledgerflow-api
-PROMETHEUS_ENABLED=true
-DATADOG_ENABLED=false
-```
-
-> Nunca versionar o arquivo `.env` real.
+*(Esta seção foi combinada com a etapa de criação do `.env` na seção de Como Rodar Localmente. Consulte a etapa 2 acima para mais detalhes.)*
 
 ---
 
 # 11. Prisma
 
-## Rodar migrations
+Os comandos do Prisma devem ser executados via Docker:
+
+## Rodar migrations e gerar client
 
 ```bash
-npm run prisma:migrate
+docker compose exec api npm run prisma:generate
+docker compose exec api npm run prisma:migrate
 ```
 
 ## Rodar seed
 
 ```bash
-npm run prisma:seed
+docker compose exec api npm run prisma:seed
 ```
 
 ## Abrir Prisma Studio
 
 ```bash
-npm run prisma:studio
+docker compose exec api npx prisma studio --hostname 0.0.0.0 --port 5555
 ```
+
+> **Observação:** O Prisma Studio precisa ficar com o terminal aberto enquanto estiver sendo usado. Acesse em `http://localhost:5555`.
 
 ---
 
@@ -441,7 +624,7 @@ npm run prisma:studio
 ## Swagger
 
 ```text
-http://localhost:3000/api/docs
+http://localhost:3010/api/docs
 ```
 
 Usado para testar rotas em desenvolvimento.
@@ -449,10 +632,10 @@ Usado para testar rotas em desenvolvimento.
 ## Redoc
 
 ```text
-http://localhost:3000/api/reference
+http://localhost:3010/api/reference
 ```
 
-Usado como documentação mais limpa e profissional da API.
+Usado como documentação mais limpa e profissional da API. (Planejado, caso ainda não habilitado).
 
 ## AsyncAPI
 
@@ -462,7 +645,7 @@ A documentação de eventos, filas e webhooks será mantida em:
 docs/asyncapi/
 ```
 
----
+--- 
 
 # 13. Segurança
 
@@ -763,7 +946,7 @@ Ferramentas planejadas:
 
 # 25. Roadmap
 
-## Fase 0 — Fundação
+## Fase 0 — Fundação (Concluída)
 
 * Estrutura do projeto.
 * NestJS.
@@ -773,13 +956,16 @@ Ferramentas planejadas:
 * PostgreSQL.
 * Documentação inicial.
 
-## Fase 1 — Database Foundation Layer (Concluída)
+## Fase 1A — Database Foundation (Concluída)
 
 * Cadastro de tenant.
 * Owner inicial.
-* Guards.
-* Permissões.
 * Isolamento por tenant.
+
+## Fase 1B — Auth Schema Foundation (Concluída)
+
+* Esquema de banco de dados para autenticação.
+* Modelagem de usuários e sessões.
 
 ## Fase 2A — Backend Authentication Foundation (Concluída)
 
@@ -790,13 +976,27 @@ Ferramentas planejadas:
 * Auditoria de AuthAttempt e gestão de UserSession.
 * Bloqueio de conta por limite de tentativas (failedLoginAttempts).
 
-## Fase 2 — UX Foundation
+## Fase 2B — Auth Guards & RBAC Foundation (Concluída)
+
+* Proteção de rotas.
+* Controle de acesso baseado em Roles.
+* Permissões granulares.
+
+## Fase 2C — Frontend Authentication Foundation (Em andamento)
+
+* Integração de login no Vue 3.
+* Axios interceptor para refresh token automático.
+* Auth Store no Pinia.
+* Router guards.
+
+## Próxima Fase: UX Foundation
 
 * Tratamento global de erros.
 * Toasts.
 * Modais.
 * i18n.
 * Estados de loading, erro e vazio.
+* Início dos módulos reais.
 
 ## Fase 3 — Payments MVP
 
@@ -886,8 +1086,9 @@ Uma funcionalidade só será considerada pronta quando:
 # 27. Status do Projeto
 
 ```text
-Status atual: Planejamento arquitetural e documentação inicial.
-Próximo passo: Fundação do repositório e setup local.
+Status atual: Fundação de autenticação backend/frontend implementada.
+Fase atual: Frontend Authentication Foundation.
+Próximo passo: UX Foundation, tratamento global de erros, toasts, modais e início dos módulos reais.
 ```
 
 ---
