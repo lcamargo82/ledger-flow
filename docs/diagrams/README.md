@@ -18,3 +18,5 @@ Este diretório contém diagramas em Mermaid para explicar a arquitetura e os pr
 - [Auth Flow](./auth-flow.md)
 - [Frontend Architecture](./frontend-architecture.md)
 - [Multitenancy Flow](./multitenancy-flow.md)
+
+> **Nota:** Os diagramas usam blocos Mermaid dentro de arquivos Markdown e são renderizados diretamente pelo GitHub.

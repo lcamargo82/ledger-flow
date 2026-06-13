@@ -1767,3 +1767,76 @@ This included:
 - Consumption of `/auth/me` and frontend logout.
 
 *Known Limitation*: Currently, tokens are stored in `localStorage` to simplify the local environment and portfolio setup. In a production environment, this should be evaluated and moved to HttpOnly, Secure, and SameSite cookies for refresh tokens.
+
+---
+
+# 12. Database Foundation
+
+* **Tenant**: Entidade raiz do isolamento lógico multitenant.
+* **User**: Entidade que representa o usuário do sistema.
+* **Role**: Papel do usuário no sistema (ex: admin, manager, viewer).
+* **Permission**: Permissão granular (ex: payments:refund).
+* **UserRole**: Vínculo entre User e Role.
+* **RolePermission**: Vínculo entre Role e Permission.
+* **RefreshToken**: Armazenamento seguro do refresh token em formato hash.
+* **UserSession**: Registro de sessão ativa do usuário.
+* **AuthAttempt**: Auditoria de tentativas de login, útil para bloqueios temporários de segurança.
+
+---
+
+# 13. Authentication Design
+
+* **Login**: Realizado com e-mail e senha.
+* **Senha**: Hasheada com bcrypt.
+* **Access token JWT**: Curta duração para segurança.
+* **Refresh token**: Seguro com hash armazenado no banco.
+* **Sessão única por usuário**: Controlado via banco de dados e JWT sessionId.
+* **Revogação**: Revogação de sessões anteriores e refresh tokens anteriores ao novo login.
+* **Captura de IP e User-Agent**: Para fins de auditoria e segurança.
+* **Registro de AuthAttempt**: Para monitoramento.
+* **Bloqueio temporário**: Bloqueio após tentativas de login inválidas sequenciais.
+* **Validações**: Validação rigorosa de usuário ativo, tenant ativo e sessão ativa via sessionId no JWT.
+
+---
+
+# 14. Authorization Design
+
+* **Roles e Permissions**: Implementados no banco de dados.
+* **JwtAuthGuard**: Protege rotas exigindo JWT válido.
+* **PermissionGuard**: Intercepta requisições e verifica permissões granulares.
+* **@RequirePermissions**: Decorator para definir permissões necessárias por rota.
+* **@CurrentUser**: Decorator para injetar dados do usuário autenticado no controller.
+* **@Public**: Decorator para liberar acesso anônimo em rotas específicas.
+* **RBAC inicial**: Baseado em permissões extraídas do token e banco.
+* **Fonte da Verdade**: Backend como fonte real e segura de autorização.
+
+---
+
+# 15. Frontend Authentication Design
+
+* **Views**: LoginView e Dashboard (como placeholder inicial).
+* **Layouts**: AuthLayout para páginas de login e AppLayout para a aplicação autenticada.
+* **Store**: AuthStore usando Pinia para gerenciar o estado global de autenticação.
+* **token-storage**: Módulo para centralizar persistência de tokens.
+* **auth.service**: Interage com a API REST.
+* **http-client (Axios)**: Cliente HTTP padronizado.
+* **Interceptors**: 
+  * Request interceptor para injetar o Bearer token.
+  * Response interceptor para refresh automático silencioso do token.
+* **Router guards**: Proteção de navegação. Rota `/login` é pública e `/dashboard` é privada.
+* **PermissionGate**: Componente para renderização condicional baseada em permissões do usuário.
+* **Persistência**: Manutenção de sessão entre reloads através de localStorage.
+* **Logout**: Limpeza de sessão no frontend e notificação de revogação no backend.
+
+---
+
+# 16. API Documentation Design
+
+* **OpenAPI**: Contrato oficial da API gerado através dos decorators do NestJS.
+* **Swagger UI**: Disponível em `/api/docs` para testes em desenvolvimento.
+* **Redoc**: Disponível em `/api/reference` como referência técnica e B2B.
+* **OpenAPI JSON**: Disponível em `/api/openapi.json` para integrações.
+* **DTOs**: Tipagem estrita documentada com `@ApiProperty`.
+* **Controllers**: Organizados e agrupados usando `@ApiTags`.
+* **Proteção**: Rotas protegidas documentadas adequadamente com `@ApiBearerAuth`.
+* **Atualização**: Documentação atualizada lado a lado com cada nova feature.

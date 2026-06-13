@@ -1841,3 +1841,51 @@ Uma issue só pode ser marcada como `DONE` quando:
 * Funcionalidade foi validada localmente.
 * Nenhuma vulnerabilidade high ou critical foi introduzida.
 * Nenhuma dependência abandonada foi adicionada.
+
+---
+
+# Checklist de Progresso Atual
+
+## Fase Foundation & Auth (Concluídos)
+* [x] Health checks
+* [x] Prisma setup
+* [x] Seed inicial
+* [x] Auth schema
+* [x] Login backend
+* [x] Refresh backend
+* [x] Logout backend
+* [x] Sessão única
+* [x] JWT guard
+* [x] PermissionGuard inicial
+* [x] Frontend login
+* [x] AuthStore
+* [x] Router guards
+* [x] Swagger
+* [x] Redoc
+* [x] OpenAPI JSON
+
+## UX Foundation
+* [ ] Toast global
+* [ ] Modal de confirmação
+* [ ] Error boundary ou tratamento global de erros
+* [ ] Loading states padronizados
+* [ ] Empty states
+* [ ] NotFound e Forbidden refinados
+
+## API Documentation DoD
+* [ ] Todo controller deve ter @ApiTags
+* [ ] Todo endpoint público deve ter @ApiOperation
+* [ ] Todo DTO público deve ter @ApiProperty
+* [ ] Toda rota protegida deve ter @ApiBearerAuth
+* [ ] Todo novo módulo deve aparecer no OpenAPI
+* [ ] README deve apontar para Swagger, Redoc e OpenAPI JSON
+
+## Security backlog
+* [ ] Rate limit para login
+* [ ] Helmet
+* [ ] CORS restrito por ambiente
+* [ ] GlobalExceptionFilter
+* [ ] RequestId/TraceId middleware
+* [ ] Logs sanitizados
+* [ ] AuditLog para ações sensíveis
+* [ ] Cookies HttpOnly para refresh token em produção
