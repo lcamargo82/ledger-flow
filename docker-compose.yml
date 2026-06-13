@@ -1,0 +1,188 @@
+
+services:
+  api:
+    container_name: ledgerflow-api
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: development
+    env_file:
+      - .env
+    ports:
+      - "${HOST_API_PORT:-3010}:${API_PORT:-3000}"
+    volumes:
+      - ./apps/api:/usr/src/app/apps/api
+      - ./docs:/usr/src/app/docs
+      - api_node_modules:/usr/src/app/apps/api/node_modules
+      - reports_data:/tmp/ledgerflow/reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+  web:
+    container_name: ledgerflow-web
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: development
+    env_file:
+      - .env
+    ports:
+      - "${HOST_WEB_PORT:-5180}:${WEB_PORT:-5173}"
+    volumes:
+      - ./apps/web:/usr/src/app/apps/web
+      - web_node_modules:/usr/src/app/apps/web/node_modules
+    depends_on:
+      - api
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+  postgres:
+    container_name: ledgerflow-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ledgerflow}
+      POSTGRES_USER: ${POSTGRES_USER:-ledgerflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ledgerflow}
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${POSTGRES_PUBLIC_PORT:-55432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ledgerflow} -d ${POSTGRES_DB:-ledgerflow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mongodb:
+    container_name: ledgerflow-mongodb
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-ledgerflow}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-ledgerflow}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-ledgerflow}
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${MONGODB_PUBLIC_PORT:-27018}:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    container_name: ledgerflow-redis
+    image: redis:7-alpine
+    command: >
+      sh -c "redis-server --appendonly yes"
+    ports:
+      - "${REDIS_PUBLIC_PORT:-6380}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  rabbitmq:
+    container_name: ledgerflow-rabbitmq
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-ledgerflow}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-ledgerflow}
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${RABBITMQ_PUBLIC_AMQP_PORT:-5682}:5672"
+      - "${RABBITMQ_PUBLIC_MANAGEMENT_PORT:-15682}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mailpit:
+    container_name: ledgerflow-mailpit
+    image: axllent/mailpit:latest
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1026}:1025"
+      - "${MAILPIT_UI_PORT:-8026}:8025"
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+  prometheus:
+    container_name: ledgerflow-prometheus
+    image: prom/prometheus:v2.54.1
+    ports:
+      - "${PROMETHEUS_PORT_PUBLIC:-9091}:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+  grafana:
+    container_name: ledgerflow-grafana
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${GRAFANA_PORT:-3002}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+networks:
+  ledgerflow_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+  reports_data:
+  api_node_modules:
+  web_node_modules:

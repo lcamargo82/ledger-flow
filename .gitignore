@@ -1,0 +1,412 @@
+# .gitignore
+
+# ============================================================
+# LedgerFlow — .gitignore
+# Linux, macOS, Windows, VS Code, JetBrains, Node, Docker, AI tools
+# ============================================================
+
+
+# ============================================================
+# Environment files
+# ============================================================
+
+.env
+.env.*
+!.env.example
+!.env.template
+!.env.local.example
+
+*.env
+*.env.*
+!.env.example
+
+# Local secrets
+secrets/
+.secret
+.secrets
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+
+# ============================================================
+# Node.js / Package managers
+# ============================================================
+
+node_modules/
+**/node_modules/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+.pnpm-store/
+.yarn/
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+.package-lock.json.tmp
+
+# Keep lockfiles tracked by default
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+
+# ============================================================
+# Build outputs
+# ============================================================
+
+dist/
+build/
+out/
+.output/
+.nuxt/
+.next/
+.cache/
+.tmp/
+temp/
+tmp/
+
+apps/api/dist/
+apps/web/dist/
+
+coverage/
+.nyc_output/
+
+
+# ============================================================
+# TypeScript
+# ============================================================
+
+*.tsbuildinfo
+
+
+# ============================================================
+# Logs
+# ============================================================
+
+logs/
+*.log
+log/
+*.pid
+*.seed
+*.pid.lock
+
+
+# ============================================================
+# Runtime / Generated files
+# ============================================================
+
+*.local
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+uploads/
+storage/
+reports/
+exports/
+tmp-reports/
+tmp-exports/
+
+apps/api/uploads/
+apps/api/storage/
+apps/api/reports/
+apps/api/exports/
+
+
+# ============================================================
+# Prisma
+# ============================================================
+
+# Keep Prisma schema and migrations tracked.
+# Ignore generated local artifacts only if created.
+prisma/dev.db
+apps/api/prisma/dev.db
+
+
+# ============================================================
+# Docker
+# ============================================================
+
+.docker/
+docker-data/
+docker-volumes/
+
+# Do not ignore docker-compose.yml or Dockerfiles.
+# docker-compose.override.yml can be local-only.
+docker-compose.override.yml
+docker-compose.*.override.yml
+
+
+# ============================================================
+# OS — macOS
+# ============================================================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.fseventsd
+
+
+# ============================================================
+# OS — Windows
+# ============================================================
+
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Windows thumbnail cache
+*.stackdump
+
+
+# ============================================================
+# OS — Linux
+# ============================================================
+
+*~
+.directory
+.Trash-*
+.nfs*
+
+
+# ============================================================
+# Editors / IDEs — VS Code
+# ============================================================
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+.history/
+
+
+# ============================================================
+# Editors / IDEs — JetBrains
+# ============================================================
+
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+
+# ============================================================
+# Editors — Vim / Nano / Emacs
+# ============================================================
+
+*.swp
+*.swo
+*.swn
+*.bak
+*.orig
+*~
+.#*
+\#*#
+.emacs.desktop
+.emacs.desktop.lock
+.elc
+auto-save-list/
+tramp
+.\#*
+
+
+# ============================================================
+# Testing
+# ============================================================
+
+coverage/
+test-results/
+playwright-report/
+blob-report/
+junit.xml
+*.lcov
+
+
+# ============================================================
+# Cypress / Playwright
+# ============================================================
+
+cypress/videos/
+cypress/screenshots/
+playwright/.cache/
+
+
+# ============================================================
+# k6
+# ============================================================
+
+k6-results/
+k6-summary.json
+
+
+# ============================================================
+# Storybook
+# ============================================================
+
+storybook-static/
+
+
+# ============================================================
+# Vite / Vue
+# ============================================================
+
+.vite/
+vite.config.*.timestamp-*
+
+
+# ============================================================
+# ESLint / Prettier cache
+# ============================================================
+
+.eslintcache
+.prettier-cache
+
+
+# ============================================================
+# Turbo / Nx / Monorepo tooling
+# ============================================================
+
+.turbo/
+.nx/
+.angular/
+
+
+# ============================================================
+# AI tools / Assistants / Local generated context
+# ============================================================
+# Keep prompts and docs if intentionally committed.
+# Ignore local assistant caches, generated scratchpads and private context.
+
+.ai/
+.ai-cache/
+.ai-output/
+.ai-tmp/
+.aider*
+.aider/
+.cursor/
+.cursor-tutor/
+.copilot/
+.windsurf/
+.tabnine/
+.codeium/
+.continue/
+.continueignore
+Continue/
+
+.chatgpt/
+.openai/
+.claude/
+.claude-cache/
+.claude.json
+.gemini/
+.qodo/
+.replit/
+
+*.prompt.local
+*.prompts.local
+*.ai.local
+*.chat.local
+*.scratch.md
+scratch.md
+notes.local.md
+
+
+# ============================================================
+# Local documentation exports
+# ============================================================
+
+*.pdf
+*.docx
+*.pptx
+*.xlsx
+
+# Exception: allow intentional docs if placed in docs/assets
+!docs/assets/**/*.pdf
+!docs/assets/**/*.docx
+!docs/assets/**/*.pptx
+!docs/assets/**/*.xlsx
+
+
+# ============================================================
+# Certificates / Keys / Credentials
+# ============================================================
+
+*.p8
+*.p7b
+*.p7c
+*.csr
+*.der
+*.srl
+id_rsa
+id_rsa.pub
+id_dsa
+id_dsa.pub
+id_ecdsa
+id_ecdsa.pub
+id_ed25519
+id_ed25519.pub
+
+
+# ============================================================
+# Misc
+# ============================================================
+
+.DS_Store?
+*.tgz
+*.tar
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+
+# ============================================================
+# Local database dumps
+# ============================================================
+
+*.dump
+*.sql
+*.backup
+*.bson
+*.archive
+
+# Allow intentional schema docs
+!docs/**/*.sql
+
+
+# ============================================================
+# Temporary lock files
+# ============================================================
+
+*.lock~
+.~lock.*
