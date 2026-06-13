@@ -313,6 +313,7 @@ vite.config.*.timestamp-*
 .ai-tmp/
 .aider*
 .aider/
+.agents/
 .cursor/
 .cursor-tutor/
 .copilot/

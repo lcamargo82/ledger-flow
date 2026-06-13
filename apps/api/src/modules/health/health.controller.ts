@@ -16,7 +16,7 @@ export class HealthController {
   }
 
   @Get('readiness')
-  getReadiness() {
+  async getReadiness() {
     return this.healthService.getReadiness();
   }
 }

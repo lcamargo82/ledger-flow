@@ -10,6 +10,7 @@ services:
       - .env
     ports:
       - "${HOST_API_PORT:-3010}:${API_PORT:-3000}"
+      - "${HOST_PRISMA_STUDIO_PORT:-5555}:5555"
     volumes:
       - ./apps/api:/usr/src/app/apps/api
       - ./docs:/usr/src/app/docs

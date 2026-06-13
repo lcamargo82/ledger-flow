@@ -120,6 +120,17 @@ Regras:
 
 ---
 
+## 3.4 Controle de Sessões e Segurança de Login (Planejamento Futuro)
+
+Para aumentar a segurança e a rastreabilidade, o fluxo de autenticação futuro deverá:
+* Capturar **IP e User-Agent** (e inferir dados do dispositivo) no momento do login para fins de auditoria e segurança.
+* Manter um registro das **sessões ativas** do usuário, vinculadas ao refresh token (`UserSession`).
+* Impor **Sessão Única por Usuário**: um novo login bem-sucedido deve revogar automaticamente sessões anteriores ativas.
+* Registrar e auditar todas as tentativas de autenticação (`AuthAttempt`), rastreando sucessos, falhas e o motivo das falhas.
+* Aplicar **bloqueio temporário** de conta após múltiplas falhas consecutivas de login (`failedLoginAttempts` e `lockedUntil`).
+
+---
+
 ## 4. Hash de Senhas
 
 Senhas devem ser armazenadas com algoritmo seguro e salt adequado.

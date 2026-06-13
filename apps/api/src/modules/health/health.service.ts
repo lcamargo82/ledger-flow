@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma/prisma.service';
 
 @Injectable()
 export class HealthService {
+  constructor(private readonly prisma: PrismaService) {}
+
   getHealth() {
     return {
       status: 'ok',
@@ -18,11 +21,22 @@ export class HealthService {
     };
   }
 
-  getReadiness() {
-    return {
-      status: 'ok',
-      check: 'readiness',
-      timestamp: new Date().toISOString(),
-    };
+  async getReadiness() {
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      return {
+        status: 'ok',
+        check: 'readiness',
+        database: 'ok',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      throw new ServiceUnavailableException({
+        status: 'error',
+        check: 'readiness',
+        database: 'error',
+        timestamp: new Date().toISOString(),
+      });
+    }
   }
 }
