@@ -1,1 +1,42 @@
-sequenceDiagram autonumber participant Stripe as Stripe participant API as NestJS API participant Signature as Signature Validator participant Inbox as Inbox Repository participant Mongo as MongoDB participant PG as PostgreSQL participant Outbox as Outbox Repository participant Rabbit as RabbitMQ participant Worker as Workers Stripe->>API: POST /webhooks/stripe API->>API: Captura raw body API->>Signature: Valida stripe-signature alt Assinatura inválida Signature-->>API: Invalid signature API-->>Stripe: 400 Bad Request else Assinatura válida Signature-->>API: Evento validado API->>Mongo: Salva payload bruto API->>Inbox: Verifica external_event_id alt Evento duplicado Inbox-->>API: Evento já processado API-->>Stripe: 200 OK else Evento novo API->>Inbox: Cria inbox_event RECEIVED API->>PG: Inicia transação API->>PG: Atualiza Payment conforme evento API->>PG: Cria PaymentEvent API->>Outbox: Cria evento payment.approved/payment.failed API->>Inbox: Marca inbox_event como PROCESSED API->>PG: Commit API-->>Stripe: 200 OK Outbox->>Rabbit: Publica evento interno Rabbit->>Worker: Consome evento Worker->>PG: Cria notificação/e-mail/webhook outbound end end
+sequenceDiagram
+    autonumber
+    participant Stripe as Stripe
+    participant API as NestJS API
+    participant Signature as Signature Validator
+    participant Inbox as Inbox Repository
+    participant Mongo as MongoDB
+    participant PG as PostgreSQL
+    participant Outbox as Outbox Repository
+    participant Rabbit as RabbitMQ
+    participant Worker as Workers
+
+    Stripe->>API: POST /webhooks/stripe
+    API->>API: Captura raw body
+    API->>Signature: Valida stripe-signature
+
+    alt Assinatura inválida
+        Signature-->>API: Invalid signature
+        API-->>Stripe: 400 Bad Request
+    else Assinatura válida
+        Signature-->>API: Evento validado
+        API->>Mongo: Salva payload bruto
+        API->>Inbox: Verifica external_event_id
+
+        alt Evento duplicado
+            Inbox-->>API: Evento já processado
+            API-->>Stripe: 200 OK
+        else Evento novo
+            API->>Inbox: Cria inbox_event RECEIVED
+            API->>PG: Inicia transação
+            API->>PG: Atualiza Payment conforme evento
+            API->>PG: Cria PaymentEvent
+            API->>Outbox: Cria evento payment.approved/payment.failed
+            API->>Inbox: Marca inbox_event como PROCESSED
+            API->>PG: Commit
+            API-->>Stripe: 200 OK
+
+            Outbox->>Rabbit: Publica evento interno
+            Rabbit->>Worker: Consome evento
+            Worker->>PG: Cria notificação/e-mail/webhook outbound
+        end
+    end

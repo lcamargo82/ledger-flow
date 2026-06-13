@@ -1,1 +1,41 @@
-C4Container title LedgerFlow — C4 Container Diagram Person(user, "Usuário B2B", "Owner, Finance Operator, Support Viewer ou Developer") System_Boundary(ledgerflow, "LedgerFlow") { Container(web, "Vue 3 Web App", "Vue 3, TypeScript, Pinia, Tailwind", "Dashboard corporativo para operação financeira.") Container(api, "NestJS API", "NestJS, TypeScript", "API REST, autenticação, autorização, regras de negócio e integração com providers.") Container(workers, "NestJS Workers", "NestJS, TypeScript", "Processa filas, e-mails, webhooks, relatórios, Outbox e notificações.") ContainerDb(postgres, "PostgreSQL", "Relational Database", "Dados transacionais: tenants, usuários, pagamentos, permissões, jobs, outbox e inbox.") ContainerDb(mongo, "MongoDB", "Document Database", "Payloads brutos, auditoria rica, logs de eventos externos e snapshots.") Container(redis, "Redis", "Cache/Lock Store", "Cache, rate limit, idempotência e locks distribuídos.") ContainerQueue(rabbitmq, "RabbitMQ", "Message Broker", "Filas, eventos assíncronos, retries e DLQ.") Container(prometheus, "Prometheus", "Metrics", "Coleta métricas técnicas e de negócio.") Container(grafana, "Grafana", "Dashboards", "Visualiza dashboards técnicos e de negócio.") Container(mailpit, "Mailpit", "Local SMTP", "Captura e-mails no ambiente local.") } System_Ext(stripe, "Stripe", "Gateway de pagamento inicial") System_Ext(clientSystems, "Client Systems", "Sistemas externos dos tenants") System_Ext(datadog, "Datadog", "APM opcional") Rel(user, web, "Acessa via navegador") Rel(web, api, "REST API / WebSocket", "HTTPS/JSON") Rel(api, postgres, "Lê e grava dados transacionais") Rel(api, mongo, "Registra payloads e auditoria") Rel(api, redis, "Consulta cache, locks, rate limit e idempotência") Rel(api, rabbitmq, "Publica eventos assíncronos") Rel(workers, rabbitmq, "Consome mensagens") Rel(workers, postgres, "Atualiza jobs, eventos e entidades") Rel(workers, mongo, "Registra auditoria e payloads") Rel(workers, redis, "Usa locks e idempotência") Rel(api, stripe, "Cria cobranças e valida webhooks") Rel(stripe, api, "Envia webhooks inbound") Rel(workers, clientSystems, "Envia webhooks outbound assinados") Rel(workers, mailpit, "Envia e-mails em ambiente local") Rel(api, prometheus, "Expõe métricas") Rel(workers, prometheus, "Expõe métricas") Rel(prometheus, grafana, "Fonte de dados") Rel(api, datadog, "Envia traces opcionalmente") Rel(workers, datadog, "Envia traces opcionalmente")
+C4Container
+    title LedgerFlow — C4 Container Diagram
+
+    Person(user, "Usuário B2B", "Owner, Finance Operator, Support Viewer ou Developer")
+
+    System_Boundary(ledgerflow, "LedgerFlow") {
+        Container(web, "Vue 3 Web App", "Vue 3, TypeScript, Pinia, Tailwind", "Dashboard corporativo para operação financeira.")
+        Container(api, "NestJS API", "NestJS, TypeScript", "API REST, autenticação, autorização, regras de negócio e integração com providers.")
+        Container(workers, "NestJS Workers", "NestJS, TypeScript", "Processa filas, e-mails, webhooks, relatórios, Outbox e notificações.")
+        ContainerDb(postgres, "PostgreSQL", "Relational Database", "Dados transacionais: tenants, usuários, pagamentos, permissões, jobs, outbox e inbox.")
+        ContainerDb(mongo, "MongoDB", "Document Database", "Payloads brutos, auditoria rica, logs de eventos externos e snapshots.")
+        Container(redis, "Redis", "Cache/Lock Store", "Cache, rate limit, idempotência e locks distribuídos.")
+        ContainerQueue(rabbitmq, "RabbitMQ", "Message Broker", "Filas, eventos assíncronos, retries e DLQ.")
+        Container(prometheus, "Prometheus", "Metrics", "Coleta métricas técnicas e de negócio.")
+        Container(grafana, "Grafana", "Dashboards", "Visualiza dashboards técnicos e de negócio.")
+        Container(mailpit, "Mailpit", "Local SMTP", "Captura e-mails no ambiente local.")
+    }
+
+    System_Ext(stripe, "Stripe", "Gateway de pagamento inicial")
+    System_Ext(clientSystems, "Client Systems", "Sistemas externos dos tenants")
+    System_Ext(datadog, "Datadog", "APM opcional")
+
+    Rel(user, web, "Acessa via navegador")
+    Rel(web, api, "REST API / WebSocket", "HTTPS/JSON")
+    Rel(api, postgres, "Lê e grava dados transacionais")
+    Rel(api, mongo, "Registra payloads e auditoria")
+    Rel(api, redis, "Consulta cache, locks, rate limit e idempotência")
+    Rel(api, rabbitmq, "Publica eventos assíncronos")
+    Rel(workers, rabbitmq, "Consome mensagens")
+    Rel(workers, postgres, "Atualiza jobs, eventos e entidades")
+    Rel(workers, mongo, "Registra auditoria e payloads")
+    Rel(workers, redis, "Usa locks e idempotência")
+    Rel(api, stripe, "Cria cobranças e valida webhooks")
+    Rel(stripe, api, "Envia webhooks inbound")
+    Rel(workers, clientSystems, "Envia webhooks outbound assinados")
+    Rel(workers, mailpit, "Envia e-mails em ambiente local")
+    Rel(api, prometheus, "Expõe métricas")
+    Rel(workers, prometheus, "Expõe métricas")
+    Rel(prometheus, grafana, "Fonte de dados")
+    Rel(api, datadog, "Envia traces opcionalmente")
+    Rel(workers, datadog, "Envia traces opcionalmente")
