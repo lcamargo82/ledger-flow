@@ -6,56 +6,48 @@
     </div>
 
     <AppAlert
-      v-if="error"
-      variant="error"
-      :message="error"
-      class="lf-mb-6"
-    />
-    
-    <AppAlert
       v-if="success"
       variant="success"
       :message="success"
       class="lf-mb-6"
     />
 
-    <form v-if="!success" @submit.prevent="onSubmit">
-      <p class="lf-text-secondary lf-mb-4" style="font-size: 0.9375rem; color: var(--lf-text-secondary); line-height: 1.5;">
-        {{ t('auth.forgotPassword.description') }}
+    <AppAlert
+      v-if="authStore.error"
+      variant="error"
+      :message="authStore.error"
+      class="lf-mb-6"
+    />
+
+    <form @submit.prevent="onSubmit" v-if="!success">
+      <p class="lf-text-secondary lf-mb-6 text-center text-sm">
+        {{ t('auth.forgotPassword.subtitle') }}
       </p>
 
       <AppInput
         id="email"
         type="email"
         v-model="email"
-        :label="t('auth.login.emailLabel')"
-        :placeholder="t('auth.login.emailPlaceholder')"
+        :label="t('auth.forgotPassword.emailLabel')"
+        :placeholder="t('auth.forgotPassword.emailPlaceholder')"
         required
         class="lf-mb-6"
-        autocomplete="email"
+        autocomplete="username"
       />
 
       <AppButton
         type="submit"
         variant="primary"
         block
-        :loading="isLoading"
+        :loading="authStore.isLoading"
       >
-        {{ t('auth.forgotPassword.submitButton') }}
+        {{ t('auth.forgotPassword.submit') }}
       </AppButton>
-      
-      <div class="lf-mt-4" style="text-align: center;">
-        <router-link to="/login" class="lf-auth-link">
-          {{ t('auth.forgotPassword.backToLogin') }}
-        </router-link>
-      </div>
     </form>
-    
-    <div v-else class="lf-mt-4" style="text-align: center;">
-      <router-link to="/login">
-        <AppButton variant="secondary" block>
-          {{ t('auth.forgotPassword.backToLogin') }}
-        </AppButton>
+
+    <div class="lf-mt-4 text-center">
+      <router-link to="/login" class="lf-auth-link">
+        &larr; {{ t('auth.forgotPassword.backToLogin') }}
       </router-link>
     </div>
   </AppCard>
@@ -63,6 +55,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useAuthStore } from '../stores/auth.store';
 import { useI18n } from '../composables/useI18n';
 import AppCard from '../components/common/AppCard.vue';
 import AppInput from '../components/common/AppInput.vue';
@@ -70,27 +63,21 @@ import AppButton from '../components/common/AppButton.vue';
 import AppAlert from '../components/common/AppAlert.vue';
 
 const email = ref('');
-const isLoading = ref(false);
-const error = ref('');
 const success = ref('');
 
+const authStore = useAuthStore();
 const { t } = useI18n();
 
 const onSubmit = async () => {
   if (!email.value) return;
-
-  isLoading.value = true;
-  error.value = '';
-  success.value = '';
-
-  try {
-    // Mock API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    success.value = t('auth.forgotPassword.successMessage');
-  } catch (err) {
-    error.value = t('errors.unexpected');
-  } finally {
-    isLoading.value = false;
-  }
+  
+  // Fake the loading and success since there's no endpoint yet
+  authStore.isLoading = true;
+  authStore.error = null;
+  
+  setTimeout(() => {
+    authStore.isLoading = false;
+    success.value = t('auth.forgotPassword.placeholderMessage');
+  }, 1000);
 };
 </script>

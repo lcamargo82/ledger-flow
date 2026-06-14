@@ -20,6 +20,7 @@
         :label="t('auth.login.emailLabel')"
         :placeholder="t('auth.login.emailPlaceholder')"
         required
+        :disabled="authStore.isLoading"
         class="lf-mb-4"
         autocomplete="username"
       />
@@ -30,12 +31,13 @@
         :label="t('auth.login.passwordLabel')"
         :placeholder="t('auth.login.passwordPlaceholder')"
         required
+        :disabled="authStore.isLoading"
         class="lf-mb-2"
         autocomplete="current-password"
       />
       
       <div class="lf-flex lf-justify-between lf-items-center lf-mb-6">
-        <router-link to="/forgot-password" class="lf-auth-link">
+        <router-link to="/forgot-password" class="lf-auth-link" :class="{ 'lf-pointer-events-none': authStore.isLoading }">
           {{ t('auth.login.forgotPassword') }}
         </router-link>
       </div>
@@ -46,14 +48,14 @@
         block
         :loading="authStore.isLoading"
       >
-        {{ t('auth.login.submitButton') }}
+        {{ authStore.isLoading ? t('auth.login.loading') : t('auth.login.submitButton') }}
       </AppButton>
     </form>
 
     <div class="lf-demo-hint">
       <p><strong>{{ t('auth.login.demoHintTitle') }}</strong></p>
-      <p>Admin: admin@ledgerflow.com / admin123</p>
-      <p>User: user@ledgerflow.com / user123</p>
+      <p>{{ t('auth.login.demoAdmin') }}</p>
+      <p>{{ t('auth.login.demoUser') }}</p>
     </div>
   </AppCard>
 </template>

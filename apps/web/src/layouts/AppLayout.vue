@@ -44,16 +44,29 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.store';
+import { useConfirmDialogStore } from '../stores/confirm-dialog.store';
 import { useI18n } from '../composables/useI18n';
 import AppButton from '../components/common/AppButton.vue';
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
 
 const authStore = useAuthStore();
+const confirmDialogStore = useConfirmDialogStore();
 const router = useRouter();
 const { t } = useI18n();
 
-const handleLogout = async () => {
-  await authStore.logout();
-  router.push('/login');
+const handleLogout = () => {
+  confirmDialogStore.open({
+    title: t('modal.confirmLogoutTitle'),
+    message: t('modal.confirmLogoutMessage'),
+    confirmText: t('common.logout'),
+    confirmLoadingText: t('common.loggingOut'),
+    cancelText: t('common.cancel'),
+    confirmVariant: 'danger',
+    onConfirm: async () => {
+      await authStore.logout();
+      router.push('/login');
+    },
+    onCancel: null
+  });
 };
 </script>

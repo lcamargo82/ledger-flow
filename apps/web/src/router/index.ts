@@ -54,6 +54,22 @@ const router = createRouter({
       }
     },
     {
+      path: '/dev/ui-kit',
+      name: 'ui-kit',
+      component: () => import('../views/UIKitView.vue'),
+      meta: {
+        requiresAuth: false,
+        layout: AppLayout
+      },
+      beforeEnter: (to, from, next) => {
+        if (import.meta.env.DEV) {
+          next()
+        } else {
+          next('/not-found')
+        }
+      }
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: NotFoundView,

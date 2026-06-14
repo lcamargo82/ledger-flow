@@ -6,6 +6,7 @@ interface ConfirmDialogState {
   title: string;
   message: string;
   confirmText?: string;
+  confirmLoadingText?: string;
   cancelText?: string;
   confirmVariant?: 'primary' | 'danger';
   loading: boolean;

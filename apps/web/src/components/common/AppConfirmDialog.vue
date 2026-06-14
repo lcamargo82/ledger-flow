@@ -20,7 +20,7 @@
         @click="handleConfirm"
         :loading="loading"
       >
-        {{ confirmText || t('common.confirm') }}
+        {{ loading ? (confirmLoadingText || confirmText || t('common.confirm')) : (confirmText || t('common.confirm')) }}
       </AppButton>
     </template>
   </AppModal>
@@ -36,6 +36,7 @@ interface Props {
   title: string;
   message: string;
   confirmText?: string;
+  confirmLoadingText?: string;
   cancelText?: string;
   confirmVariant?: 'primary' | 'danger';
   loading?: boolean;

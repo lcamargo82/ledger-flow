@@ -5,7 +5,7 @@
       :description="t('dashboard.welcome', { name: authStore.userName })"
     >
       <template #actions>
-        <AppButton variant="primary">
+        <AppButton variant="primary" @click="handleNewPayment">
           {{ t('dashboard.newPayment') }}
         </AppButton>
       </template>
@@ -44,19 +44,6 @@
           </p>
         </div>
       </AppCard>
-      
-      <!-- Example usage of confirm dialog and toast -->
-      <AppCard>
-        <h3>Interactive UI Demo</h3>
-        <div class="lf-flex" style="gap: 0.5rem; margin-top: 1rem;">
-          <AppButton variant="secondary" @click="showToastDemo">
-            Test Toast
-          </AppButton>
-          <AppButton variant="danger" @click="showConfirmDemo">
-            Test Confirm
-          </AppButton>
-        </div>
-      </AppCard>
     </div>
   </div>
 </template>
@@ -65,7 +52,6 @@
 import { useAuthStore } from '../stores/auth.store';
 import { useI18n } from '../composables/useI18n';
 import { useToastStore } from '../stores/toast.store';
-import { useConfirmDialogStore } from '../stores/confirm-dialog.store';
 
 import AppCard from '../components/common/AppCard.vue';
 import AppPageHeader from '../components/common/AppPageHeader.vue';
@@ -74,27 +60,9 @@ import AppButton from '../components/common/AppButton.vue';
 
 const authStore = useAuthStore();
 const toastStore = useToastStore();
-const confirmDialogStore = useConfirmDialogStore();
 const { t } = useI18n();
 
-const showToastDemo = () => {
-  toastStore.info('This is a test notification from the Dashboard.', 'Hello World');
-};
-
-const showConfirmDemo = () => {
-  confirmDialogStore.open({
-    title: 'Delete Item',
-    message: 'Are you sure you want to delete this item? This action cannot be undone.',
-    confirmText: 'Delete',
-    confirmVariant: 'danger',
-    onConfirm: async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toastStore.success('Item deleted successfully.');
-    },
-    onCancel: () => {
-      toastStore.info('Action cancelled.');
-    }
-  });
+const handleNewPayment = () => {
+  toastStore.info(t('toast.actionNotImplemented'));
 };
 </script>

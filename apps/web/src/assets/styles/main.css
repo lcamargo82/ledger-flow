@@ -184,7 +184,7 @@ body {
 }
 .lf-error-message {
   margin-top: var(--lf-space-2);
-  font-size: 0.8125rem; /* 13px */
+  font-size: 0.875rem; /* 14px */
   color: var(--lf-danger);
 }
 
@@ -249,7 +249,7 @@ body {
   margin-top: var(--lf-space-6);
   padding-top: var(--lf-space-4);
   border-top: 1px dashed var(--lf-border);
-  font-size: 0.8125rem; /* 13px min */
+  font-size: 0.875rem; /* 14px min */
   color: var(--lf-text-muted);
   text-align: center;
   line-height: 1.5;
@@ -336,7 +336,7 @@ body {
   font-weight: 500;
 }
 .lf-header__email {
-  font-size: 0.8125rem; /* 13px */
+  font-size: 0.875rem; /* 14px */
   color: var(--lf-text-secondary);
 }
 
@@ -383,7 +383,7 @@ body {
   align-items: center;
   padding: 0.125rem 0.5rem;
   border-radius: var(--lf-radius);
-  font-size: 0.75rem; /* 12px for badges is acceptable, but 13px preferred */
+  font-size: 0.8125rem; /* 13px */
   font-weight: 500;
   line-height: 1.5;
 }

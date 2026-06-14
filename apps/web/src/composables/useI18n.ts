@@ -57,7 +57,10 @@ export function useI18n() {
     }
 
     if (result === undefined) {
-      return key; // return the key itself if no translation is found
+      if (import.meta.env.DEV) {
+        console.warn(`[i18n] Missing translation key: ${key}`);
+      }
+      return `[${key}]`; // Fallback visual
     }
 
     let translatedString = String(result);
