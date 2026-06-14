@@ -133,12 +133,19 @@ Cada fase deve entregar:
 
 ## Fase 2E — UX Foundation
 
-* Toasts globais
-* Modais de confirmação
-* Tratamento global de erros
-* Estados de loading
-* Empty states
-* Componentes base definitivos
+**Status:** Concluída
+
+**Itens:**
+* Toasts globais (AppToast, AppToastContainer, toast.store)
+* Modais de confirmação (AppModal, AppConfirmDialog, confirm-dialog.store)
+* Tratamento global de erros (http-error.ts)
+* Estados de loading (AppLoading)
+* Empty states & Error states (AppEmptyState, AppErrorState)
+* Componentes base definitivos (AppButton, AppInput, AppPasswordInput, AppCard, AppAlert, AppBadge, LanguageSwitcher, AppPageHeader)
+* i18n implementado
+* Global CSS atualizado (Legibilidade, UI "Corporate Dark")
+* Telas e Layouts padronizados
+* Rota de forgot-password adicionada
 
 ---
 

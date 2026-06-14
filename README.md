@@ -1007,21 +1007,36 @@ Ferramentas planejadas:
 * Controle de acesso baseado em Roles.
 * Permissões granulares.
 
-## Fase 2C — Frontend Authentication Foundation (Em andamento)
+## Fase 2C — Frontend Authentication Foundation (Concluída)
 
 * Integração de login no Vue 3.
 * Axios interceptor para refresh token automático.
 * Auth Store no Pinia.
 * Router guards.
 
-## Próxima Fase: UX Foundation
+## Fase 2D — API Documentation Foundation (Concluída)
+
+* Swagger UI.
+* Redoc.
+* OpenAPI JSON.
+* Documentação de endpoints auth e health.
+
+## Fase 2E — UX Foundation (Concluída)
 
 * Tratamento global de erros.
 * Toasts.
 * Modais.
 * i18n.
 * Estados de loading, erro e vazio.
-* Início dos módulos reais.
+* Rota de forgot-password adicionada.
+* Componentes base definitivos (AppButton, AppInput, etc).
+
+## Próxima Fase: Fase 3 — Users, Roles & Tenants Management
+
+* CRUD de usuários.
+* Gestão de roles e permissões.
+* Tela de perfil.
+* Gestão de tenant.
 
 ## Fase 3 — Payments MVP
 
@@ -1109,9 +1124,9 @@ Uma funcionalidade só será considerada pronta quando:
 # 27. Status do Projeto
 
 ```text
-Status atual: Fundação de autenticação backend/frontend implementada.
-Fase atual: Frontend Authentication Foundation.
-Próximo passo: UX Foundation, tratamento global de erros, toasts, modais e início dos módulos reais.
+Status atual: Fundação de autenticação e UX implementada.
+Fase atual: UX Foundation concluída.
+Próximo passo: Users, Roles & Tenants Management.
 
 ```
 

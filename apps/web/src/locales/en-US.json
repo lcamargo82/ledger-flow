@@ -1,0 +1,104 @@
+{
+  "auth": {
+    "login": {
+      "title": "Access Platform",
+      "subtitle": "Enter your credentials to continue",
+      "emailLabel": "Corporate Email",
+      "emailPlaceholder": "your.name@company.com",
+      "passwordLabel": "Access Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot my password",
+      "submitButton": "Sign in",
+      "loading": "Signing in...",
+      "demoHintTitle": "Demo credentials",
+      "demoAdmin": "Admin: admin@ledgerflow.com / admin123",
+      "demoUser": "User: user@ledgerflow.com / user123",
+      "invalidCredentials": "The provided credentials are invalid.",
+      "networkError": "Could not connect to the server. Check your connection.",
+      "unexpectedError": "An unexpected error occurred. Try again later."
+    },
+    "forgotPassword": {
+      "title": "Recover Password",
+      "subtitle": "Regain access to your account",
+      "emailLabel": "Registered Email",
+      "emailPlaceholder": "your.name@company.com",
+      "submit": "Send Instructions",
+      "backToLogin": "Back to login",
+      "placeholderMessage": "Password recovery will be implemented in a future phase. For now, use the demo credentials to access the local environment."
+    }
+  },
+  "dashboard": {
+    "title": "Overview",
+    "welcome": "Welcome to LedgerFlow",
+    "subtitle": "Real-time insights for your business",
+    "newPayment": "New Payment",
+    "role": "Access Role",
+    "permissions": "Active Permissions",
+    "sessionStatus": "Session Status",
+    "active": "Active",
+    "userId": "User ID",
+    "interactiveDemo": "Interactive Demo",
+    "authenticatedSession": "Authenticated Session",
+    "activeTenant": "Selected Tenant",
+    "rbacReady": "Permissions Synchronized",
+    "apiConnected": "API Connected"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "payments": "Payments",
+    "customers": "Customers",
+    "reconciliation": "Reconciliation",
+    "reports": "Reports",
+    "webhooks": "Webhooks",
+    "settings": "Settings",
+    "comingSoon": "Coming Soon"
+  },
+  "common": {
+    "logout": "Logout",
+    "loggingOut": "Logging out...",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "processing": "Processing...",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Go Back",
+    "goToDashboard": "Go to Dashboard",
+    "tryAgain": "Try Again",
+    "noData": "No data found",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "actionCancelled": "Action cancelled"
+  },
+  "errors": {
+    "forbiddenTitle": "Access Denied",
+    "forbiddenMessage": "You do not have the required permissions to access this resource.",
+    "notFoundTitle": "Page not found",
+    "notFoundMessage": "The resource you are looking for does not exist or has been moved.",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "network": "Connection error. Check your internet.",
+    "unexpected": "An unexpected error occurred."
+  },
+  "modal": {
+    "confirmLogoutTitle": "Logout",
+    "confirmLogoutMessage": "Are you sure you want to end your session?",
+    "confirmDeleteTitle": "Delete Item",
+    "confirmDeleteMessage": "Are you sure you want to delete this item? This action cannot be undone."
+  },
+  "toast": {
+    "actionCancelled": "Action cancelled.",
+    "sessionExpired": "Your session has been terminated for security.",
+    "logoutSuccess": "You have successfully signed out.",
+    "loginSuccess": "Welcome back!",
+    "actionNotImplemented": "This functionality is not yet implemented.",
+    "logoutConfirmTitle": "Sign out",
+    "logoutConfirmMessage": "Are you sure you want to end your current session?"
+  },
+  "permissions": {
+    "missing": "Permission denied"
+  }
+}

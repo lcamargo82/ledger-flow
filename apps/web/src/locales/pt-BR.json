@@ -1,0 +1,104 @@
+{
+  "auth": {
+    "login": {
+      "title": "Acessar Plataforma",
+      "subtitle": "Insira suas credenciais para continuar",
+      "emailLabel": "E-mail Corporativo",
+      "emailPlaceholder": "seu.nome@empresa.com",
+      "passwordLabel": "Senha de Acesso",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Esqueci minha senha",
+      "submitButton": "Entrar",
+      "loading": "Entrando...",
+      "demoHintTitle": "Credenciais demo",
+      "demoAdmin": "Admin: admin@ledgerflow.com / admin123",
+      "demoUser": "User: user@ledgerflow.com / user123",
+      "invalidCredentials": "As credenciais fornecidas são inválidas.",
+      "networkError": "Não foi possível conectar ao servidor. Verifique sua conexão.",
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente mais tarde."
+    },
+    "forgotPassword": {
+      "title": "Recuperar Senha",
+      "subtitle": "Recupere seu acesso à plataforma",
+      "emailLabel": "E-mail Registrado",
+      "emailPlaceholder": "seu.nome@empresa.com",
+      "submit": "Enviar Instruções",
+      "backToLogin": "Voltar para o login",
+      "placeholderMessage": "A recuperação de senha será implementada em uma próxima fase. Por enquanto, utilize as credenciais demo para acessar o ambiente local."
+    }
+  },
+  "dashboard": {
+    "title": "Visão Geral",
+    "welcome": "Bem-vindo ao LedgerFlow",
+    "subtitle": "Informações em tempo real do seu negócio",
+    "newPayment": "Novo Pagamento",
+    "role": "Perfil de Acesso",
+    "permissions": "Permissões Ativas",
+    "sessionStatus": "Status da Sessão",
+    "active": "Ativa",
+    "userId": "ID do Usuário",
+    "interactiveDemo": "Demonstração Interativa",
+    "authenticatedSession": "Sessão Autenticada",
+    "activeTenant": "Tenant Selecionado",
+    "rbacReady": "Permissões Sincronizadas",
+    "apiConnected": "API Conectada"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "payments": "Pagamentos",
+    "customers": "Clientes",
+    "reconciliation": "Conciliação",
+    "reports": "Relatórios",
+    "webhooks": "Webhooks",
+    "settings": "Configurações",
+    "comingSoon": "Em breve"
+  },
+  "common": {
+    "logout": "Sair",
+    "loggingOut": "Saindo...",
+    "loading": "Carregando...",
+    "saving": "Salvando...",
+    "processing": "Processando...",
+    "save": "Salvar Alterações",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "delete": "Excluir",
+    "close": "Fechar",
+    "back": "Voltar",
+    "goToDashboard": "Ir para o Dashboard",
+    "tryAgain": "Tentar Novamente",
+    "noData": "Nenhum dado encontrado",
+    "error": "Erro",
+    "success": "Sucesso",
+    "warning": "Aviso",
+    "info": "Informação",
+    "actionCancelled": "Ação cancelada"
+  },
+  "errors": {
+    "forbiddenTitle": "Acesso Negado",
+    "forbiddenMessage": "Você não tem as permissões necessárias para acessar este recurso.",
+    "notFoundTitle": "Página não encontrada",
+    "notFoundMessage": "O recurso que você está tentando acessar não existe ou foi movido.",
+    "sessionExpired": "Sua sessão expirou. Faça login novamente.",
+    "network": "Erro de conexão. Verifique sua internet.",
+    "unexpected": "Um erro inesperado aconteceu."
+  },
+  "modal": {
+    "confirmLogoutTitle": "Sair da conta",
+    "confirmLogoutMessage": "Tem certeza de que deseja encerrar sua sessão?",
+    "confirmDeleteTitle": "Excluir item",
+    "confirmDeleteMessage": "Tem certeza de que deseja excluir este item? Esta ação não pode ser desfeita."
+  },
+  "toast": {
+    "actionCancelled": "Ação cancelada.",
+    "sessionExpired": "Sua sessão foi encerrada por segurança.",
+    "logoutSuccess": "Você saiu com sucesso.",
+    "loginSuccess": "Bem-vindo de volta!",
+    "actionNotImplemented": "Esta funcionalidade ainda não está implementada.",
+    "logoutConfirmTitle": "Sair da plataforma",
+    "logoutConfirmMessage": "Você tem certeza que deseja encerrar a sua sessão atual?"
+  },
+  "permissions": {
+    "missing": "Sem permissão"
+  }
+}
