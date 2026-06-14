@@ -1,42 +1,50 @@
-<script setup lang="ts">
-import { computed } from 'vue'
-
-const props = defineProps<{
-  type?: 'button' | 'submit' | 'reset'
-  variant?: 'primary' | 'secondary' | 'danger'
-  disabled?: boolean
-  loading?: boolean
-}>()
-
-const emit = defineEmits<{
-  (e: 'click', event: MouseEvent): void
-}>()
-
-const buttonClass = computed(() => {
-  return [
-    'lf-button',
-    `lf-button--${props.variant || 'primary'}`,
-    { 'lf-button--loading': props.loading }
-  ]
-})
-
-function handleClick(event: MouseEvent) {
-  if (!props.disabled && !props.loading) {
-    emit('click', event)
-  }
-}
-</script>
-
 <template>
   <button
-    :type="type || 'button'"
-    :class="buttonClass"
+    :class="[
+      'lf-button',
+      `lf-button--${variant}`,
+      { 'lf-button--small': size === 'small' },
+      { 'lf-w-full': block }
+    ]"
     :disabled="disabled || loading"
-    @click="handleClick"
+    :type="type"
+    v-bind="$attrs"
   >
-    <span v-if="loading" class="lf-button__spinner"></span>
-    <span class="lf-button__content">
-      <slot></slot>
+    <span v-if="loading" class="lf-button__spinner" aria-hidden="true"></span>
+    <span v-if="$slots.icon" class="lf-button__icon" :class="{'lf-mr-2': $slots.default}">
+      <slot name="icon" />
     </span>
+    <slot />
   </button>
 </template>
+
+<script setup lang="ts">
+interface Props {
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'default' | 'small';
+  disabled?: boolean;
+  loading?: boolean;
+  block?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+}
+
+withDefaults(defineProps<Props>(), {
+  variant: 'primary',
+  size: 'default',
+  disabled: false,
+  loading: false,
+  block: false,
+  type: 'button',
+});
+</script>
+
+<style scoped>
+.lf-button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.lf-mr-2 {
+  margin-right: 0.5rem;
+}
+</style>

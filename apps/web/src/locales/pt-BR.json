@@ -1,0 +1,84 @@
+{
+  "auth": {
+    "login": {
+      "title": "Acessar Plataforma",
+      "subtitle": "Insira suas credenciais para continuar",
+      "emailLabel": "E-mail Corporativo",
+      "emailPlaceholder": "seu.nome@empresa.com",
+      "passwordLabel": "Senha de Acesso",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Esqueci minha senha",
+      "submit": "Entrar no LedgerFlow",
+      "demoTitle": "Acesso de Demonstração Local",
+      "invalidCredentials": "As credenciais fornecidas são inválidas.",
+      "networkError": "Não foi possível conectar ao servidor. Verifique sua conexão.",
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente mais tarde."
+    },
+    "forgotPassword": {
+      "title": "Recuperar Senha",
+      "subtitle": "Recupere seu acesso à plataforma",
+      "emailLabel": "E-mail Registrado",
+      "emailPlaceholder": "seu.nome@empresa.com",
+      "submit": "Enviar Instruções",
+      "backToLogin": "Voltar para o login",
+      "placeholderMessage": "A recuperação de senha será implementada em uma próxima fase. Por enquanto, utilize as credenciais demo para acessar o ambiente local."
+    }
+  },
+  "dashboard": {
+    "title": "Visão Geral",
+    "welcome": "Bem-vindo ao LedgerFlow",
+    "activeSession": "Sessão Ativa",
+    "activeTenant": "Tenant Selecionado",
+    "rbacReady": "Permissões Sincronizadas",
+    "apiConnected": "API Conectada"
+  },
+  "layout": {
+    "logout": "Sair da conta",
+    "navigation": {
+      "dashboard": "Dashboard",
+      "payments": "Pagamentos",
+      "customers": "Clientes",
+      "reports": "Relatórios",
+      "webhooks": "Webhooks",
+      "settings": "Configurações"
+    },
+    "userMenu": {
+      "signedInAs": "Logado como"
+    }
+  },
+  "common": {
+    "loading": "Carregando...",
+    "save": "Salvar Alterações",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "back": "Voltar",
+    "goToDashboard": "Ir para o Dashboard",
+    "tryAgain": "Tentar Novamente",
+    "noData": "Nenhum dado encontrado",
+    "error": "Erro",
+    "success": "Sucesso",
+    "warning": "Aviso",
+    "info": "Informação"
+  },
+  "errors": {
+    "forbiddenTitle": "Acesso Negado",
+    "forbiddenMessage": "Você não tem as permissões necessárias para acessar este recurso.",
+    "notFoundTitle": "Página não encontrada",
+    "notFoundMessage": "O recurso que você está tentando acessar não existe ou foi movido.",
+    "sessionExpired": "Sua sessão expirou. Faça login novamente.",
+    "network": "Erro de conexão. Verifique sua internet.",
+    "unexpected": "Um erro inesperado aconteceu."
+  },
+  "toast": {
+    "sessionExpired": "Sua sessão foi encerrada por segurança.",
+    "logoutSuccess": "Você saiu com sucesso.",
+    "loginSuccess": "Bem-vindo de volta!",
+    "actionNotImplemented": "Esta funcionalidade ainda não está implementada.",
+    "logoutConfirmTitle": "Sair da plataforma",
+    "logoutConfirmMessage": "Você tem certeza que deseja encerrar a sua sessão atual?"
+  },
+  "permissions": {
+    "missing": "Sem permissão"
+  }
+}

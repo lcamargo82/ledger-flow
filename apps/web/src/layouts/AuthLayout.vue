@@ -1,7 +1,10 @@
 <template>
   <div class="lf-layout-auth">
-    <main class="lf-layout-auth__content">
-      <router-view></router-view>
-    </main>
+    <div class="lf-login-card">
+      <router-view />
+    </div>
   </div>
 </template>
+
+<script setup lang="ts">
+</script>

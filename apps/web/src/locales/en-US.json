@@ -1,0 +1,84 @@
+{
+  "auth": {
+    "login": {
+      "title": "Access Platform",
+      "subtitle": "Enter your credentials to continue",
+      "emailLabel": "Corporate Email",
+      "emailPlaceholder": "your.name@company.com",
+      "passwordLabel": "Access Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot my password",
+      "submit": "Sign in to LedgerFlow",
+      "demoTitle": "Local Demo Access",
+      "invalidCredentials": "The provided credentials are invalid.",
+      "networkError": "Could not connect to the server. Check your connection.",
+      "unexpectedError": "An unexpected error occurred. Try again later."
+    },
+    "forgotPassword": {
+      "title": "Recover Password",
+      "subtitle": "Regain access to your account",
+      "emailLabel": "Registered Email",
+      "emailPlaceholder": "your.name@company.com",
+      "submit": "Send Instructions",
+      "backToLogin": "Back to login",
+      "placeholderMessage": "Password recovery will be implemented in a future phase. For now, use the demo credentials to access the local environment."
+    }
+  },
+  "dashboard": {
+    "title": "Overview",
+    "welcome": "Welcome to LedgerFlow",
+    "activeSession": "Active Session",
+    "activeTenant": "Selected Tenant",
+    "rbacReady": "Permissions Synchronized",
+    "apiConnected": "API Connected"
+  },
+  "layout": {
+    "logout": "Sign out",
+    "navigation": {
+      "dashboard": "Dashboard",
+      "payments": "Payments",
+      "customers": "Customers",
+      "reports": "Reports",
+      "webhooks": "Webhooks",
+      "settings": "Settings"
+    },
+    "userMenu": {
+      "signedInAs": "Signed in as"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Go Back",
+    "goToDashboard": "Go to Dashboard",
+    "tryAgain": "Try Again",
+    "noData": "No data found",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
+  },
+  "errors": {
+    "forbiddenTitle": "Access Denied",
+    "forbiddenMessage": "You do not have the required permissions to access this resource.",
+    "notFoundTitle": "Page not found",
+    "notFoundMessage": "The resource you are looking for does not exist or has been moved.",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "network": "Connection error. Check your internet.",
+    "unexpected": "An unexpected error occurred."
+  },
+  "toast": {
+    "sessionExpired": "Your session has been terminated for security.",
+    "logoutSuccess": "You have successfully signed out.",
+    "loginSuccess": "Welcome back!",
+    "actionNotImplemented": "This functionality is not yet implemented.",
+    "logoutConfirmTitle": "Sign out",
+    "logoutConfirmMessage": "Are you sure you want to end your current session?"
+  },
+  "permissions": {
+    "missing": "Permission denied"
+  }
+}

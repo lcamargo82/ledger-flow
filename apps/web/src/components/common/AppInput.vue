@@ -1,34 +1,54 @@
-<script setup lang="ts">
-defineProps<{
-  modelValue: string
-  label?: string
-  type?: string
-  placeholder?: string
-  error?: string
-  autocomplete?: string
-  id?: string
-  disabled?: boolean
-}>()
-
-defineEmits<{
-  (e: 'update:modelValue', value: string): void
-}>()
-</script>
-
 <template>
   <div class="lf-input-group">
-    <label v-if="label" :for="id" class="lf-label">{{ label }}</label>
+    <label v-if="label" :for="id" class="lf-label">
+      {{ label }} <span v-if="required" class="text-danger" aria-hidden="true">*</span>
+    </label>
     <input
       :id="id"
-      :type="type || 'text'"
+      :type="type"
       :value="modelValue"
-      @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
+      @input="handleInput"
+      :class="['lf-input', { 'lf-input--error': !!error }]"
       :placeholder="placeholder"
-      :autocomplete="autocomplete"
       :disabled="disabled"
-      class="lf-input"
-      :class="{ 'lf-input--error': !!error }"
+      :required="required"
+      :aria-invalid="!!error"
+      :aria-describedby="error ? `${id}-error` : undefined"
+      v-bind="$attrs"
     />
-    <span v-if="error" class="lf-error-message">{{ error }}</span>
+    <span v-if="error" :id="`${id}-error`" class="lf-error-message" role="alert">
+      {{ error }}
+    </span>
   </div>
 </template>
+
+<script setup lang="ts">
+import { useId } from 'vue';
+
+interface Props {
+  modelValue: string | number;
+  label?: string;
+  type?: string;
+  placeholder?: string;
+  error?: string;
+  disabled?: boolean;
+  required?: boolean;
+}
+
+withDefaults(defineProps<Props>(), {
+  type: 'text',
+  disabled: false,
+  required: false,
+});
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void;
+}>();
+
+const id = useId();
+
+const handleInput = (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  emit('update:modelValue', target.value);
+};
+</script>

@@ -9,6 +9,9 @@ import {
 } from '../utils/token-storage'
 import { hasPermission, hasAnyPermission, hasAllPermissions } from '../utils/permissions'
 import type { AuthState, LoginRequest } from '../types/auth.types'
+import { useToastStore } from './toast.store'
+import { getHttpErrorMessage } from '../utils/http-error'
+import { useI18n } from '../composables/useI18n'
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
@@ -33,6 +36,9 @@ export const useAuthStore = defineStore('auth', {
       this.isLoading = true
       this.error = null
       
+      const toast = useToastStore()
+      const { t } = useI18n()
+      
       try {
         const payload: LoginRequest = { email, password }
         const response = await authService.login(payload)
@@ -46,13 +52,13 @@ export const useAuthStore = defineStore('auth', {
         // Set user
         this.user = response.user
         this.isAuthenticated = true
+        
+        toast.success(t('toast.loginSuccess'))
       } catch (err: any) {
         if (err.response?.status === 401 || err.response?.status === 400) {
-          this.error = "E-mail ou senha inválidos."
-        } else if (!err.response) {
-          this.error = "Não foi possível conectar à API."
+          this.error = t('auth.login.invalidCredentials')
         } else {
-          this.error = "Ocorreu um erro inesperado."
+          this.error = t(getHttpErrorMessage(err, 'auth.login.unexpectedError'))
         }
         throw err
       } finally {
@@ -95,7 +101,10 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async logout() {
+    async logout(showToast = true) {
+      const toast = useToastStore()
+      const { t } = useI18n()
+      
       try {
         if (this.refreshToken) {
           await authService.logout(this.refreshToken)
@@ -104,6 +113,9 @@ export const useAuthStore = defineStore('auth', {
         // Ignore errors on logout
       } finally {
         this.clearAuth()
+        if (showToast) {
+          toast.success(t('toast.logoutSuccess'))
+        }
       }
     },
 
