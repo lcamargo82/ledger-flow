@@ -11,16 +11,16 @@ export class AppController {
   @Public()
   @Get()
   @ApiOperation({ summary: 'Retorna status básico da API LedgerFlow' })
-  @ApiOkResponse({ 
+  @ApiOkResponse({
     description: 'Status da API',
     schema: {
       example: {
         name: 'LedgerFlow API',
         status: 'running',
         environment: 'development',
-        timestamp: '2026-06-13T00:00:00.000Z'
-      }
-    }
+        timestamp: '2026-06-13T00:00:00.000Z',
+      },
+    },
   })
   getRoot() {
     return this.appService.getRoot();

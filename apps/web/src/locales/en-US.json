@@ -45,6 +45,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "users": "Users",
     "payments": "Payments",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
@@ -52,6 +53,60 @@
     "webhooks": "Webhooks",
     "settings": "Settings",
     "comingSoon": "Coming Soon"
+  },
+  "users": {
+    "title": "Users",
+    "description": "Manage users linked to the current tenant.",
+    "newUser": "New User",
+    "newUserSoon": "Coming soon",
+    "searchLabel": "Search User",
+    "searchPlaceholder": "Name or email...",
+    "statusLabel": "Status",
+    "statusAll": "All status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "roleLabel": "Role",
+    "roleAll": "All roles",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "roles": "Roles",
+      "status": "Status",
+      "lastLogin": "Last Login",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDetails": "View Details"
+    },
+    "emptyTitle": "No users found",
+    "emptyDescription": "There are no users matching the current filters.",
+    "errorTitle": "Error loading",
+    "errorDescription": "Could not load the users list.",
+    "details": {
+      "title": "User Details",
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "roles": "Roles",
+      "lastLoginAt": "Last login",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at",
+      "tenantId": "Tenant ID"
+    },
+    "pagination": {
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next",
+      "perPage": "Items per page"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "toast": {
+      "newUserSoon": "User creation will be available soon."
+    }
   },
   "common": {
     "logout": "Logout",

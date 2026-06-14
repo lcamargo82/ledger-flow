@@ -45,6 +45,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "users": "Usuários",
     "payments": "Pagamentos",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
@@ -52,6 +53,60 @@
     "webhooks": "Webhooks",
     "settings": "Configurações",
     "comingSoon": "Em breve"
+  },
+  "users": {
+    "title": "Usuários",
+    "description": "Gerencie os usuários vinculados ao tenant atual.",
+    "newUser": "Novo Usuário",
+    "newUserSoon": "Em breve",
+    "searchLabel": "Buscar Usuário",
+    "searchPlaceholder": "Nome ou e-mail...",
+    "statusLabel": "Status",
+    "statusAll": "Todos os status",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo",
+    "roleLabel": "Role",
+    "roleAll": "Todas as roles",
+    "table": {
+      "name": "Nome",
+      "email": "E-mail",
+      "roles": "Roles",
+      "status": "Status",
+      "lastLogin": "Último Login",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "actions": {
+      "viewDetails": "Ver Detalhes"
+    },
+    "emptyTitle": "Nenhum usuário encontrado",
+    "emptyDescription": "Não há usuários correspondentes aos filtros atuais.",
+    "errorTitle": "Erro ao carregar",
+    "errorDescription": "Não foi possível carregar a lista de usuários.",
+    "details": {
+      "title": "Detalhes do Usuário",
+      "name": "Nome",
+      "email": "E-mail",
+      "status": "Status",
+      "roles": "Roles",
+      "lastLoginAt": "Último login",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "tenantId": "ID do Tenant"
+    },
+    "pagination": {
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "perPage": "Itens por página"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "toast": {
+      "newUserSoon": "A criação de usuários será liberada em breve."
+    }
   },
   "common": {
     "logout": "Sair",

@@ -7,6 +7,7 @@ import AppLayout from '../layouts/AppLayout.vue'
 import LoginView from '../views/LoginView.vue'
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import UsersView from '../views/UsersView.vue'
 import ForbiddenView from '../views/ForbiddenView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 
@@ -42,6 +43,16 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true
+      }
+    },
+    {
+      path: '/users',
+      name: 'users',
+      component: UsersView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['users:read']
       }
     },
     {

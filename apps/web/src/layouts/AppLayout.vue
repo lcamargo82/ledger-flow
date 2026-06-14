@@ -9,6 +9,14 @@
         <router-link to="/dashboard" class="lf-nav-item">
           {{ t('nav.dashboard') }}
         </router-link>
+        <router-link 
+          v-if="authStore.checkAllPermissions(['users:read'])" 
+          to="/users" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          {{ t('nav.users') }}
+        </router-link>
         <!-- Mock Nav Items -->
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
           {{ t('nav.payments') }}

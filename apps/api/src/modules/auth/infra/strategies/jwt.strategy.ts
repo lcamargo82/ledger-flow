@@ -50,10 +50,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
 
       // Update lastSeenAt
-      this.prisma.userSession.update({
-        where: { id: payload.sessionId },
-        data: { lastSeenAt: new Date() },
-      }).catch(console.error);
+      this.prisma.userSession
+        .update({
+          where: { id: payload.sessionId },
+          data: { lastSeenAt: new Date() },
+        })
+        .catch(console.error);
     }
 
     return {

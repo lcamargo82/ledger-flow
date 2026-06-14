@@ -149,13 +149,25 @@ Cada fase deve entregar:
 
 ---
 
-## Fase 3 — Users, Roles & Tenants Management
+## Fase 3A — Users Management Foundation
 
-* CRUD de usuários
-* Gestão de roles
-* Gestão de permissões
+**Status:** Concluída
+
+**Itens:**
+* Backend: CRUD de usuários (Listagem paginada e detalhe)
+* RBAC: Proteção de rotas e menus (`users:read`)
+* Frontend: Tela de listagem de usuários e detalhes
+* Frontend: AppTable componente base
+* Documentação OpenAPI e Swagger
+
+---
+
+## Fase 3B — Roles & Tenants Management
+
+* Gestão de roles e permissões customizadas
+* Criação de novos usuários e convites
 * Tela de perfil
-* Gestão de tenant
+* Gestão do tenant
 
 ---
 

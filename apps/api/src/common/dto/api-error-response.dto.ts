@@ -10,7 +10,10 @@ export class ApiErrorResponseDto {
   @ApiPropertyOptional({ description: 'Error name or type', example: 'Bad Request' })
   error?: string;
 
-  @ApiPropertyOptional({ description: 'Timestamp of the error', example: '2026-06-13T00:00:00.000Z' })
+  @ApiPropertyOptional({
+    description: 'Timestamp of the error',
+    example: '2026-06-13T00:00:00.000Z',
+  })
   timestamp?: string;
 
   @ApiPropertyOptional({ description: 'Request path where error occurred', example: '/auth/login' })
