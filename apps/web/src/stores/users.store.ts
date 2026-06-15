@@ -9,9 +9,7 @@ import type {
   PaginatedMeta, 
   ListUsersParams,
   CreateUserRequest,
-  UpdateUserRequest,
-  UpdateUserStatusRequest,
-  UpdateUserRolesRequest
+  UpdateUserRequest
 } from '../types/users.types'
 
 export const useUsersStore = defineStore('users', () => {

@@ -486,3 +486,6 @@ Além disso, ferramentas como Helmet, CORS rigoroso, Rate Limiting, RequestId/Tr
 
 ### Phase 3B
 - A criação de usuários ("Create User") agora exige uma `temporaryPassword`. Essa senha é hasheada via bcrypt do mesmo modo que a senha principal. Em uma fase posterior, será implementado um fluxo que força a alteração dessa senha temporária no primeiro acesso.
+
+### Phase 3C
+- As configurações de Tenant (Tenant Settings) foram implementadas com proteção para expor e atualizar apenas configurações públicas seguras (nome, timezone), e não expõem campos estruturais ou identificadores (`slug`, `active` como readonly).

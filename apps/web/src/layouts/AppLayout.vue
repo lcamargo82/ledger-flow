@@ -17,6 +17,30 @@
         >
           {{ t('nav.users') }}
         </router-link>
+        <router-link 
+          v-if="authStore.checkAllPermissions(['roles:manage'])" 
+          to="/roles" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          {{ t('nav.roles') }}
+        </router-link>
+        <router-link 
+          v-if="authStore.checkAllPermissions(['permissions:read'])" 
+          to="/permissions" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          {{ t('nav.permissions') }}
+        </router-link>
+        <router-link 
+          v-if="authStore.checkAllPermissions(['tenant:update'])" 
+          to="/settings/tenant" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          {{ t('nav.tenantSettings') }}
+        </router-link>
         <!-- Mock Nav Items -->
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
           {{ t('nav.payments') }}

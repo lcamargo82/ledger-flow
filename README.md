@@ -1047,6 +1047,15 @@ Ferramentas planejadas:
 * Atribuição de roles.
 * Formulário e modais de confirmação no frontend.
 
+## Fase 3C — Roles, Permissions & Tenant Settings Foundation (Concluída)
+
+* Leitura de roles do tenant atual.
+* Visualização detalhada de permissões associadas a roles.
+* Leitura de permissions globais.
+* Configurações básicas de tenant (name, timezone).
+* Telas administrativas protegidas por RBAC.
+* Atualização de Swagger/Redoc/OpenAPI.
+
 ## Fase 3 — Payments MVP
 
 * Clientes.

@@ -8,6 +8,9 @@ import LoginView from '../views/LoginView.vue'
 import ForgotPasswordView from '../views/ForgotPasswordView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import UsersView from '../views/UsersView.vue'
+import RolesView from '../views/RolesView.vue'
+import PermissionsView from '../views/PermissionsView.vue'
+import TenantSettingsView from '../views/TenantSettingsView.vue'
 import ForbiddenView from '../views/ForbiddenView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 
@@ -53,6 +56,36 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         permissions: ['users:read']
+      }
+    },
+    {
+      path: '/roles',
+      name: 'roles',
+      component: RolesView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['roles:manage']
+      }
+    },
+    {
+      path: '/permissions',
+      name: 'permissions',
+      component: PermissionsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['permissions:read']
+      }
+    },
+    {
+      path: '/settings/tenant',
+      name: 'tenant-settings',
+      component: TenantSettingsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['tenant:update']
       }
     },
     {
@@ -105,7 +138,6 @@ router.beforeEach(async (to, from, next) => {
 
   const isAuth = authStore.isAuthenticated
   const requiresAuth = to.meta.requiresAuth
-  const isPublic = to.meta.public
 
   if (requiresAuth && !isAuth) {
     return next({ path: '/login', query: { redirect: to.fullPath } })

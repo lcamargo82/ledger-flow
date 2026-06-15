@@ -1861,3 +1861,16 @@ This included:
 * **Controllers**: Organizados e agrupados usando `@ApiTags`.
 * **Proteção**: Rotas protegidas documentadas adequadamente com `@ApiBearerAuth`.
 * **Atualização**: Documentação atualizada lado a lado com cada nova feature.
+
+## 5.10 Roles & Permissions Design
+O sistema utiliza permissões globais do sistema (`Permission`) atreladas aos perfis (`Role`), permitindo controle granular baseado em RBAC.
+A leitura de Roles é isolada pelo Tenant (`roles:manage`).
+A leitura de Permissões requer `permissions:read`.
+O frontend espelha as permissões ocultando itens de menu, mas o backend continua validando cada requisição com o `PermissionGuard`.
+Na Fase 3C, foi introduzido o endpoint `GET /roles` para listar roles do tenant logado e `GET /roles/:id` para detalhar suas permissões associadas. As permissões são acessíveis publicamente via `GET /permissions`.
+
+## 5.11 Tenant Settings Design
+O sistema permite customizações e configurações básicas em nível de Tenant sem expor dados estruturais como `slug` e `active`.
+Endpoint introduzidos na Fase 3C:
+* `GET /tenants/current`: Busca a configuração atual de um tenant ativo a partir do `tenantId` contido no contexto seguro da sessão.
+* `PATCH /tenants/current`: Atualiza nome (`name`) e `timezone`. Exige permissão `tenant:update`.

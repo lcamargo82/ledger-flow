@@ -43,6 +43,7 @@ async function main() {
     { key: 'gateways:manage', description: 'Gerenciar gateways' },
     { key: 'notifications:read', description: 'Visualizar notificações' },
     { key: 'audit:read', description: 'Visualizar trilha de auditoria' },
+    { key: 'tenant:update', description: 'Atualizar configurações do tenant' },
   ];
 
   const permissions: Permission[] = [];

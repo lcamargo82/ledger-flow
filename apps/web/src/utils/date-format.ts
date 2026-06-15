@@ -18,7 +18,7 @@ export function formatDateTime(value?: string | null, locale: string = 'pt-BR'):
       hour: '2-digit',
       minute: '2-digit'
     }).format(date)
-  } catch (e) {
+  } catch {
     return '-'
   }
 }

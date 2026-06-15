@@ -93,7 +93,7 @@ export const useAuthStore = defineStore('auth', {
         this.refreshToken = refresh
         
         await this.fetchMe()
-      } catch (err) {
+      } catch {
         // Interceptor might have cleared tokens already, or will do so
         this.clearAuth()
       } finally {
@@ -109,7 +109,7 @@ export const useAuthStore = defineStore('auth', {
         if (this.refreshToken) {
           await authService.logout(this.refreshToken)
         }
-      } catch (err) {
+      } catch {
         // Ignore errors on logout
       } finally {
         this.clearAuth()

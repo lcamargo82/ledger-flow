@@ -177,7 +177,17 @@ Cada fase deve entregar:
 
 ---
 
-## Fase 3C — Roles & Tenants Management
+## Fase 3C — Roles, Permissions & Tenant Settings Foundation (Concluída)
+
+- Roles backend
+- Permissions backend
+- Tenant settings backend
+- Roles frontend
+- Permissions frontend
+- Tenant settings frontend
+- OpenAPI
+- i18n
+- documentação
 
 * Gestão de roles e permissões customizadas
 * Tela de perfil

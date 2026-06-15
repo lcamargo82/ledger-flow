@@ -547,6 +547,41 @@ Permitir criação de um tenant com usuário owner inicial.
 
 ---
 
+## LF-018 — Roles, Permissions e Tenant Settings (Fase 3C)
+
+**Prioridade:** P0
+**Tipo:** Backend / Frontend
+**Milestone:** M1
+**Status:** DONE
+
+### Subtasks
+
+* [x] List roles
+* [x] Role details
+* [x] List permissions
+* [x] Current tenant settings
+* [x] Update tenant name/timezone
+* [x] Frontend roles view
+* [x] Frontend permissions view
+* [x] Frontend tenant settings view
+* [ ] Create role
+* [ ] Update role
+* [ ] Delete/deactivate role
+* [ ] Manage role permissions
+* [ ] Last OWNER protection
+* [ ] Tenant branding settings
+* [ ] Tenant audit logs
+
+### Critérios de aceite
+
+* Listagem de permissões deve retornar todas do sistema.
+* Listagem de roles deve filtrar por tenantId.
+* Atualização de tenant deve aceitar apenas name e timezone.
+* Backend deve proteger essas rotas com RBAC apropriado.
+* Frontend deve ocultar opções do menu caso sem permissão.
+
+---
+
 # EPIC LF-E02 — UX Foundation, Erros, Toasts, Modais e i18n
 
 ## Objetivo
