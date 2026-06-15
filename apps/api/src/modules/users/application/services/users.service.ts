@@ -147,7 +147,6 @@ export class UsersService {
           data: roles.map((role) => ({
             userId: newUser.id,
             roleId: role.id,
-            tenantId,
           })),
         });
       }
@@ -307,7 +306,6 @@ export class UsersService {
           data: roles.map((role) => ({
             userId: id,
             roleId: role.id,
-            tenantId,
           })),
         });
       }

@@ -115,7 +115,7 @@ function toggleRole(roleKey: string) {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-6">
+  <form @submit.prevent="handleSubmit" class="space-y-6" novalidate>
     <div class="space-y-4">
       <AppInput
         id="user-name"

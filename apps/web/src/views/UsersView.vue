@@ -395,7 +395,7 @@ const getRoleBadgeVariant = (role: string) => {
       v-model="isConfirmStatusOpen"
       :title="targetUser?.active ? t('users.confirmDeactivate.title') : t('users.confirmActivate.title')"
       :message="targetUser?.active ? t('users.confirmDeactivate.message') : t('users.confirmActivate.message')"
-      :confirm-label="t('common.confirm')"
+      :confirm-text="t('common.confirm')"
       :confirm-variant="targetUser?.active ? 'danger' : 'primary'"
       :loading="usersStore.isSaving"
       @confirm="handleStatusChange"
