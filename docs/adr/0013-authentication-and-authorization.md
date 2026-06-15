@@ -483,3 +483,7 @@ This included:
 - Visualização de Roles do tenant e permissões globais protegidas.
 - Atualizações restritas em configurações do tenant (apenas nome e timezone) via permissão `tenant:update`.
 - Interface gráfica reflete dinamicamente a presença de permissões (ocultando menus não autorizados).
+
+
+### Atualização (Fase 3D)
+Reforço sobre o modelo RBAC: todas as operações de escrita em entidades administrativas (Users, Roles, Permissions, Tenant Settings) devem validar a role no backend via `@RequirePermissions` (ex: `users:create`, `roles:manage`). O frontend apenas reflete a UX através do `PermissionGate` ou validação do store, sem substituir a checagem no backend.

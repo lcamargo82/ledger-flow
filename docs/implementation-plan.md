@@ -177,21 +177,35 @@ Cada fase deve entregar:
 
 ---
 
-## Fase 3C — Roles, Permissions & Tenant Settings Foundation (Concluída)
+## Fase 3C — Roles, Permissions & Tenant Settings Foundation
 
-- Roles backend
-- Permissions backend
-- Tenant settings backend
-- Roles frontend
-- Permissions frontend
-- Tenant settings frontend
-- OpenAPI
-- i18n
-- documentação
+**Status:** Concluída
 
+**Itens:**
+* Roles backend
+* Permissions backend
+* Tenant settings backend
+* Roles frontend
+* Permissions frontend
+* Tenant settings frontend
+* OpenAPI
+* i18n
+* documentação
 * Gestão de roles e permissões customizadas
 * Tela de perfil
 * Gestão do tenant
+
+---
+
+## Fase 3D — Conclusão de Users e Admin i18n
+
+**Status:** Concluída
+
+**Itens:**
+* Correção de tradução flat/aninhada no frontend.
+* Ajustes finais no botão "Novo Usuário".
+* Script de validação de i18n adicionado.
+* Atualização final do plano de desenvolvimento.
 
 ---
 

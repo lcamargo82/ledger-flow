@@ -442,3 +442,7 @@ Possíveis evoluções futuras:
 * Exemplos interativos.
 * Mock server OpenAPI.
 * Developer Portal.
+
+
+### Atualização (Fase 3D)
+Fica estritamente estabelecido que **todos os endpoints administrativos** (Users, Roles, Permissions, Tenants) devem possuir documentação OpenAPI com os devidos decorators de autenticação, resposta e sumário, evitando exposição de dados sensíveis em DTOs.

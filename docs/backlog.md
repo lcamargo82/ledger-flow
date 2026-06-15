@@ -524,6 +524,17 @@ Permitir criação de um tenant com usuário owner inicial.
 
 ## LF-017 — Gestão de Usuários (Fase 3)
 
+### Subtasks Adicionais (Fase 3D)
+* [x] create user
+* [x] update user
+* [x] activate/deactivate user
+* [x] update user roles
+* [x] list roles
+* [x] list permissions
+* [x] tenant settings
+* [x] i18n admin fixes
+
+
 **Prioridade:** P0
 **Tipo:** Backend / Frontend
 **Milestone:** M1

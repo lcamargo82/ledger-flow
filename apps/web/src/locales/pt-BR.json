@@ -181,7 +181,12 @@
     "success": "Sucesso",
     "warning": "Aviso",
     "info": "Informação",
-    "actionCancelled": "Ação cancelada"
+    "actionCancelled": "Ação cancelada",
+    "readonly": "Apenas leitura",
+    "yes": "Sim",
+    "no": "Não",
+    "enabled": "Ativo",
+    "disabled": "Inativo"
   },
   "errors": {
     "forbiddenTitle": "Acesso Negado",
@@ -208,53 +213,72 @@
     "logoutConfirmMessage": "Você tem certeza que deseja encerrar a sua sessão atual?"
   },
   "permissions": {
-    "missing": "Sem permissão"
+    "missing": "Sem permissão",
+    "title": "Permissões do Sistema",
+    "description": "Lista de todas as permissões globais disponíveis no sistema.",
+    "searchPlaceholder": "Buscar permissões...",
+    "table": {
+      "key": "Chave",
+      "description": "Descrição",
+      "createdAt": "Criado em"
+    },
+    "emptyTitle": "Nenhuma permissão encontrada",
+    "emptyDescription": "A busca não retornou resultados.",
+    "errorTitle": "Erro ao carregar permissões",
+    "errorDescription": "Ocorreu um erro ao buscar as permissões."
   },
-  "roles.title": "Gerenciamento de Roles",
-  "roles.description": "Visualize os papéis de acesso do seu tenant.",
-  "roles.table.name": "Nome",
-  "roles.table.key": "Chave",
-  "roles.table.description": "Descrição",
-  "roles.table.system": "Sistema",
-  "roles.table.permissionsCount": "Permissões",
-  "roles.table.actions": "Ações",
-  "roles.actions.viewDetails": "Ver detalhes",
-  "roles.details.title": "Detalhes da Role",
-  "roles.details.permissions": "Permissões associadas",
-  "roles.details.noPermissions": "Nenhuma permissão associada.",
-  "roles.emptyTitle": "Nenhuma role encontrada",
-  "roles.emptyDescription": "Não há roles cadastradas para este tenant.",
-  "roles.errorTitle": "Erro ao carregar roles",
-  "roles.errorDescription": "Ocorreu um erro ao buscar as roles.",
-  "roles.system.yes": "Sim",
-  "roles.system.no": "Não",
-  "permissions.title": "Permissões do Sistema",
-  "permissions.description": "Lista de todas as permissões globais disponíveis no sistema.",
-  "permissions.searchPlaceholder": "Buscar permissões...",
-  "permissions.table.key": "Chave",
-  "permissions.table.description": "Descrição",
-  "permissions.table.createdAt": "Criado em",
-  "permissions.emptyTitle": "Nenhuma permissão encontrada",
-  "permissions.emptyDescription": "A busca não retornou resultados.",
-  "permissions.errorTitle": "Erro ao carregar permissões",
-  "permissions.errorDescription": "Ocorreu um erro ao buscar as permissões.",
-  "tenantSettings.title": "Configurações do Tenant",
-  "tenantSettings.description": "Gerencie as configurações básicas do seu ambiente.",
-  "tenantSettings.form.nameLabel": "Nome da Empresa",
-  "tenantSettings.form.namePlaceholder": "Ex: Minha Empresa",
-  "tenantSettings.form.timezoneLabel": "Fuso Horário",
-  "tenantSettings.form.timezonePlaceholder": "Ex: America/Sao_Paulo",
-  "tenantSettings.form.slugLabel": "Slug (Identificador Único)",
-  "tenantSettings.form.activeLabel": "Status da Conta",
-  "tenantSettings.actions.save": "Salvar Alterações",
-  "tenantSettings.toast.updated": "Configurações do tenant atualizadas com sucesso.",
-  "tenantSettings.errors.loadFailed": "Erro ao carregar configurações do tenant.",
-  "tenantSettings.errors.updateFailed": "Erro ao atualizar configurações.",
-  "tenantSettings.validation.nameRequired": "O nome do tenant é obrigatório.",
-  "tenantSettings.validation.timezoneRequired": "O fuso horário é obrigatório.",
-  "common.readonly": "Apenas leitura",
-  "common.yes": "Sim",
-  "common.no": "Não",
-  "common.enabled": "Ativo",
-  "common.disabled": "Inativo"
+  "roles": {
+    "title": "Gerenciamento de Roles",
+    "description": "Visualize os papéis de acesso do seu tenant.",
+    "table": {
+      "name": "Nome",
+      "key": "Chave",
+      "description": "Descrição",
+      "system": "Sistema",
+      "permissionsCount": "Permissões",
+      "actions": "Ações"
+    },
+    "actions": {
+      "viewDetails": "Ver detalhes"
+    },
+    "details": {
+      "title": "Detalhes da Role",
+      "permissions": "Permissões associadas",
+      "noPermissions": "Nenhuma permissão associada."
+    },
+    "emptyTitle": "Nenhuma role encontrada",
+    "emptyDescription": "Não há roles cadastradas para este tenant.",
+    "errorTitle": "Erro ao carregar roles",
+    "errorDescription": "Ocorreu um erro ao buscar as roles.",
+    "system": {
+      "yes": "Sim",
+      "no": "Não"
+    }
+  },
+  "tenantSettings": {
+    "title": "Configurações do Tenant",
+    "description": "Gerencie as configurações básicas do seu ambiente.",
+    "form": {
+      "nameLabel": "Nome da Empresa",
+      "namePlaceholder": "Ex: Minha Empresa",
+      "timezoneLabel": "Fuso Horário",
+      "timezonePlaceholder": "Ex: America/Sao_Paulo",
+      "slugLabel": "Slug (Identificador Único)",
+      "activeLabel": "Status da Conta"
+    },
+    "actions": {
+      "save": "Salvar Alterações"
+    },
+    "toast": {
+      "updated": "Configurações do tenant atualizadas com sucesso."
+    },
+    "errors": {
+      "loadFailed": "Erro ao carregar configurações do tenant.",
+      "updateFailed": "Erro ao atualizar configurações."
+    },
+    "validation": {
+      "nameRequired": "O nome do tenant é obrigatório.",
+      "timezoneRequired": "O fuso horário é obrigatório."
+    }
+  }
 }

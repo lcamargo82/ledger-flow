@@ -580,3 +580,7 @@ This included:
 - Criação das views `RolesView`, `PermissionsView` e `TenantSettingsView`.
 - Refatoração do `AppLayout` para exibir menus dinâmicos com base em `authStore.checkAllPermissions`.
 - Serviços e Pinia stores associados para lidar com a paginação, buscas em tela (Permissions), e modais de detalhamento.
+
+
+### Atualização (Fase 3D)
+Reforçada a obrigatoriedade de uso do sistema i18n com objetos aninhados e reaproveitamento de componentes base (como AppModal, AppTable, UserForm) para todas as telas administrativas.

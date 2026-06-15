@@ -489,3 +489,7 @@ Além disso, ferramentas como Helmet, CORS rigoroso, Rate Limiting, RequestId/Tr
 
 ### Phase 3C
 - As configurações de Tenant (Tenant Settings) foram implementadas com proteção para expor e atualizar apenas configurações públicas seguras (nome, timezone), e não expõem campos estruturais ou identificadores (`slug`, `active` como readonly).
+
+
+### Atualização (Fase 3D)
+É terminantemente proibido retornar senhas temporárias (`temporaryPassword`), `passwordHash`, `tokenHash` ou chaves inteiras em listagens ou detalhes de usuários/tenants. Todos os DTOs administrativos (ex: `UserDetailsResponseDto`) devem omitir e sanitizar essas propriedades rigorosamente.
