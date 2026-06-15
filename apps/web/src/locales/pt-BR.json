@@ -77,7 +77,40 @@
       "actions": "Ações"
     },
     "actions": {
-      "viewDetails": "Ver Detalhes"
+      "viewDetails": "Ver Detalhes",
+      "create": "Criar Usuário",
+      "edit": "Editar",
+      "activate": "Ativar",
+      "deactivate": "Desativar",
+      "save": "Salvar",
+      "updateRoles": "Atualizar Roles"
+    },
+    "form": {
+      "createTitle": "Novo Usuário",
+      "editTitle": "Editar Usuário",
+      "nameLabel": "Nome Completo",
+      "namePlaceholder": "Ex: João da Silva",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "Ex: joao@empresa.com",
+      "temporaryPasswordLabel": "Senha Temporária",
+      "temporaryPasswordPlaceholder": "Mínimo 8 caracteres",
+      "rolesLabel": "Roles de Acesso",
+      "activeLabel": "Ativar usuário imediatamente",
+      "validation": {
+        "nameRequired": "O nome é obrigatório",
+        "emailRequired": "O e-mail é obrigatório e deve ser válido",
+        "passwordRequired": "A senha temporária é obrigatória",
+        "passwordMin": "A senha deve ter no mínimo 8 caracteres",
+        "roleRequired": "Selecione pelo menos uma role"
+      }
+    },
+    "confirmDeactivate": {
+      "title": "Desativar Usuário",
+      "message": "Tem certeza que deseja desativar este usuário? Suas sessões ativas serão encerradas."
+    },
+    "confirmActivate": {
+      "title": "Ativar Usuário",
+      "message": "Tem certeza que deseja reativar este usuário?"
     },
     "emptyTitle": "Nenhum usuário encontrado",
     "emptyDescription": "Não há usuários correspondentes aos filtros atuais.",
@@ -105,7 +138,25 @@
       "inactive": "Inativo"
     },
     "toast": {
-      "newUserSoon": "A criação de usuários será liberada em breve."
+      "newUserSoon": "A criação de usuários será liberada em breve.",
+      "created": "Usuário criado com sucesso.",
+      "updated": "Usuário atualizado com sucesso.",
+      "activated": "Usuário ativado com sucesso.",
+      "deactivated": "Usuário desativado com sucesso.",
+      "rolesUpdated": "Roles do usuário atualizadas."
+    },
+    "errors": {
+      "createFailed": "Não foi possível criar o usuário.",
+      "updateFailed": "Não foi possível atualizar o usuário.",
+      "statusFailed": "Não foi possível alterar o status do usuário.",
+      "rolesFailed": "Não foi possível atualizar as roles.",
+      "emailAlreadyExists": "Já existe um usuário com este e-mail."
+    },
+    "roles": {
+      "OWNER": "Owner",
+      "FINANCE_OPERATOR": "Financeiro",
+      "SUPPORT_VIEWER": "Suporte",
+      "DEVELOPER": "Desenvolvedor"
     }
   },
   "common": {

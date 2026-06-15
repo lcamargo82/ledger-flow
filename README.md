@@ -1031,12 +1031,21 @@ Ferramentas planejadas:
 * Rota de forgot-password adicionada.
 * Componentes base definitivos (AppButton, AppInput, etc).
 
-## Próxima Fase: Fase 3 — Users, Roles & Tenants Management
+## Fase 3A — Users Listing Foundation (Concluída)
 
-* CRUD de usuários.
-* Gestão de roles e permissões.
-* Tela de perfil.
-* Gestão de tenant.
+* Listagem paginada de usuários.
+* Busca por nome/e-mail, filtro por status e role.
+* Service e Store integrados.
+* Componentes de UI atualizados.
+* Visualização detalhada (User Details).
+
+## Fase 3B — User Create/Update/Deactivate Foundation (Concluída)
+
+* Criação de usuário.
+* Atualização de dados básicos.
+* Ativação e desativação (soft delete).
+* Atribuição de roles.
+* Formulário e modais de confirmação no frontend.
 
 ## Fase 3 — Payments MVP
 
@@ -1124,9 +1133,9 @@ Uma funcionalidade só será considerada pronta quando:
 # 27. Status do Projeto
 
 ```text
-Status atual: Fundação de autenticação e UX implementada.
-Fase atual: UX Foundation concluída.
-Próximo passo: Users, Roles & Tenants Management.
+Status atual: User Management Foundation (CRUD de usuários e roles) implementado e testado.
+Fase atual: Fase 3B concluída.
+Próximo passo: Gestão de tenant e Payments MVP.
 
 ```
 

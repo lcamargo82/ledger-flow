@@ -5,6 +5,7 @@ import { useUsersStore } from '../stores/users.store'
 import { formatDateTime } from '../utils/date-format'
 import { useDebounceFn } from '../composables/useDebounce'
 
+import { useAuthStore } from '../stores/auth.store'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppCard from '../components/common/AppCard.vue'
 import AppInput from '../components/common/AppInput.vue'
@@ -13,15 +14,25 @@ import AppBadge from '../components/common/AppBadge.vue'
 import AppTable from '../components/common/AppTable.vue'
 import AppModal from '../components/common/AppModal.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
+import AppConfirmDialog from '../components/common/AppConfirmDialog.vue'
+import UserForm from '../components/users/UserForm.vue'
 
 // Import toast if available
 import { useToastStore } from '../stores/toast.store'
 
 const { t, currentLocale } = useI18n()
 const usersStore = useUsersStore()
+const authStore = useAuthStore()
 const toast = useToastStore()
 
 const searchInput = ref(usersStore.filters.search || '')
+
+const availableRoles = computed(() => [
+  { key: 'OWNER', label: t('users.roles.OWNER') },
+  { key: 'FINANCE_OPERATOR', label: t('users.roles.FINANCE_OPERATOR') },
+  { key: 'SUPPORT_VIEWER', label: t('users.roles.SUPPORT_VIEWER') },
+  { key: 'DEVELOPER', label: t('users.roles.DEVELOPER') }
+])
 
 // Table columns
 const columns = computed(() => [
@@ -43,6 +54,10 @@ const handleSearch = useDebounceFn(() => {
 }, 500)
 
 const isModalOpen = ref(false)
+const isCreateModalOpen = ref(false)
+const isEditModalOpen = ref(false)
+const isConfirmStatusOpen = ref(false)
+const targetUser = ref<any>(null)
 
 const openUserDetails = async (id: string) => {
   await usersStore.fetchUserById(id)
@@ -52,7 +67,64 @@ const openUserDetails = async (id: string) => {
 }
 
 const handleNewUser = () => {
-  toast.info(t('users.toast.newUserSoon'))
+  isCreateModalOpen.value = true
+}
+
+const handleCreateUser = async (payload: any) => {
+  try {
+    await usersStore.createUser(payload)
+    isCreateModalOpen.value = false
+  } catch (err) {
+    // error is handled in store
+  }
+}
+
+const openEditModal = async (id: string) => {
+  await usersStore.fetchUserById(id)
+  if (!usersStore.error && usersStore.selectedUser) {
+    targetUser.value = { ...usersStore.selectedUser }
+    isEditModalOpen.value = true
+  }
+}
+
+const handleEditUser = async (payload: any) => {
+  if (!targetUser.value) return
+  
+  try {
+    await usersStore.updateUser(targetUser.value.id, {
+      name: payload.name,
+      email: payload.email
+    })
+    
+    const oldRoles = targetUser.value.roles || []
+    const newRoles = payload.roleKeys || []
+    
+    const rolesChanged = oldRoles.length !== newRoles.length || 
+                         oldRoles.some((r: string) => !newRoles.includes(r))
+                         
+    if (rolesChanged) {
+      await usersStore.updateUserRoles(targetUser.value.id, newRoles)
+    }
+    
+    isEditModalOpen.value = false
+  } catch (err) {
+    // error is handled in store
+  }
+}
+
+const openStatusModal = (user: any) => {
+  targetUser.value = user
+  isConfirmStatusOpen.value = true
+}
+
+const handleStatusChange = async () => {
+  if (!targetUser.value) return
+  try {
+    await usersStore.updateUserStatus(targetUser.value.id, !targetUser.value.active)
+    isConfirmStatusOpen.value = false
+  } catch (err) {
+    // error is handled in store
+  }
 }
 
 const getRoleBadgeVariant = (role: string) => {
@@ -73,6 +145,7 @@ const getRoleBadgeVariant = (role: string) => {
     >
       <template #actions>
         <AppButton 
+          v-if="authStore.checkPermission('users:create')"
           variant="primary" 
           @click="handleNewUser"
         >
@@ -178,13 +251,31 @@ const getRoleBadgeVariant = (role: string) => {
         </template>
 
         <template #actions="{ item }">
-          <AppButton 
-            variant="secondary" 
-            size="small"
-            @click="openUserDetails(item.id)"
-          >
-            {{ t('users.actions.viewDetails') }}
-          </AppButton>
+          <div class="flex justify-end gap-2">
+            <AppButton 
+              variant="secondary" 
+              size="small"
+              @click="openUserDetails(item.id)"
+            >
+              {{ t('users.actions.viewDetails') }}
+            </AppButton>
+            <AppButton 
+              v-if="authStore.checkPermission('users:update')"
+              variant="secondary" 
+              size="small"
+              @click="openEditModal(item.id)"
+            >
+              {{ t('users.actions.edit') }}
+            </AppButton>
+            <AppButton 
+              v-if="authStore.checkPermission('users:update')"
+              :variant="item.active ? 'danger' : 'primary'"
+              size="small"
+              @click="openStatusModal(item)"
+            >
+              {{ item.active ? t('users.actions.deactivate') : t('users.actions.activate') }}
+            </AppButton>
+          </div>
         </template>
       </AppTable>
 
@@ -263,5 +354,51 @@ const getRoleBadgeVariant = (role: string) => {
         </div>
       </div>
     </AppModal>
+
+    <!-- Create Modal -->
+    <AppModal 
+      v-model="isCreateModalOpen" 
+      :title="t('users.form.createTitle')" 
+      size="md"
+    >
+      <UserForm
+        mode="create"
+        :available-roles="availableRoles"
+        :loading="usersStore.isSaving"
+        @submit="handleCreateUser"
+        @cancel="isCreateModalOpen = false"
+      />
+    </AppModal>
+
+    <!-- Edit Modal -->
+    <AppModal 
+      v-model="isEditModalOpen" 
+      :title="t('users.form.editTitle')" 
+      size="md"
+    >
+      <div v-if="usersStore.isLoadingDetails" class="py-8 flex justify-center">
+        <span class="text-gray-500">{{ t('common.loading') }}</span>
+      </div>
+      <UserForm
+        v-else-if="targetUser"
+        mode="edit"
+        :initial-value="targetUser"
+        :available-roles="availableRoles"
+        :loading="usersStore.isSaving"
+        @submit="handleEditUser"
+        @cancel="isEditModalOpen = false"
+      />
+    </AppModal>
+
+    <!-- Confirm Status Change -->
+    <AppConfirmDialog
+      v-model="isConfirmStatusOpen"
+      :title="targetUser?.active ? t('users.confirmDeactivate.title') : t('users.confirmActivate.title')"
+      :message="targetUser?.active ? t('users.confirmDeactivate.message') : t('users.confirmActivate.message')"
+      :confirm-label="t('common.confirm')"
+      :confirm-variant="targetUser?.active ? 'danger' : 'primary'"
+      :loading="usersStore.isSaving"
+      @confirm="handleStatusChange"
+    />
   </div>
 </template>

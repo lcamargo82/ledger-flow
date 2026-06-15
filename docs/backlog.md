@@ -522,6 +522,31 @@ Permitir criação de um tenant com usuário owner inicial.
 
 ---
 
+## LF-017 — Gestão de Usuários (Fase 3)
+
+**Prioridade:** P0
+**Tipo:** Backend / Frontend
+**Milestone:** M1
+**Status:** DONE
+
+### Subtasks
+
+* Backend: CRUD de usuários (Listagem paginada, detalhe, criação, edição).
+* Backend: Soft delete (Status Active/Inactive) e revogação de sessão em cascata.
+* Backend: Atribuição de roles a usuários protegida.
+* Frontend: Tela de listagem com componentes base AppTable, AppModal.
+* Frontend: Modais de criação, edição e status com formulários.
+* Integração de Vue i18n, Pinia stores e Axios services.
+
+### Critérios de aceite
+
+* Owner deve poder criar e editar usuários.
+* Ao desativar, sessões do usuário devem cair.
+* Interface responsiva e validada.
+* Paginação funcionando perfeitamente via API.
+
+---
+
 # EPIC LF-E02 — UX Foundation, Erros, Toasts, Modais e i18n
 
 ## Objetivo

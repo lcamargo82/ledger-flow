@@ -33,3 +33,28 @@ export interface ListUsersParams {
   status?: 'active' | 'inactive' | 'all'
   role?: string
 }
+
+export interface CreateUserRequest {
+  name: string
+  email: string
+  temporaryPassword: string
+  roleKeys: string[]
+  active?: boolean
+}
+
+export interface UpdateUserRequest {
+  name?: string
+  email?: string
+}
+
+export interface UpdateUserStatusRequest {
+  active: boolean
+}
+
+export interface UpdateUserRolesRequest {
+  roleKeys: string[]
+}
+
+export interface UserMutationResponse {
+  user: UserListItem
+}

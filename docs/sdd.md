@@ -429,6 +429,27 @@ ledgerflow.dlx.exchange
 
 ---
 
+# 5.9 User Management Write Operations
+
+## Regras de Negócio e Segurança
+
+A gestão de usuários (CRUD) possui regras restritas para garantir a estabilidade e o isolamento dos tenants:
+
+* **Multitenancy**: Todas as queries e mutations filtram obrigatoriamente pelo `tenantId` do usuário logado (`@CurrentUser()`).
+* **Senhas Temporárias**: Na criação (Fase 3B), o usuário recebe uma `temporaryPassword` obrigatória (mínimo de 8 caracteres). Essa senha deve ser hasheada com bcrypt da mesma forma que senhas normais. Futuramente, pode haver um flag para forçar a troca no primeiro login.
+* **Proteção do Owner**: Nenhum usuário pode remover a role `OWNER` do próprio usuário logado caso seja um admin alterando a si mesmo (previne bloqueio do sistema).
+* **Soft Delete**: Não existem exclusões físicas (`DELETE`) para usuários. Operações de remoção alteram o status `active` para `false`.
+* **Revogação de Sessão em Cascata**: Ao desativar um usuário (`active: false`), o sistema revoga proativamente todos os seus `RefreshTokens` e `UserSessions` ativos no banco de dados.
+
+## Operações Suportadas
+
+* `POST /users`: Criação (requer `users:create`).
+* `PATCH /users/:id`: Edição de dados básicos como nome e e-mail (requer `users:update`).
+* `PATCH /users/:id/status`: Ativação/Desativação (requer `users:update`).
+* `PATCH /users/:id/roles`: Substituição das roles associadas (requer `users:update`).
+
+---
+
 # 6. Pagamentos — Strategy + Factory
 
 # 6.1 Objetivo

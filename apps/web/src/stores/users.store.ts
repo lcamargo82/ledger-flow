@@ -2,7 +2,17 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { usersService } from '../services/users.service'
 import { getHttpErrorMessage } from '../utils/http-error'
-import type { UserListItem, PaginatedMeta, ListUsersParams } from '../types/users.types'
+import { useToastStore } from './toast.store'
+import { useI18n } from '../composables/useI18n'
+import type { 
+  UserListItem, 
+  PaginatedMeta, 
+  ListUsersParams,
+  CreateUserRequest,
+  UpdateUserRequest,
+  UpdateUserStatusRequest,
+  UpdateUserRolesRequest
+} from '../types/users.types'
 
 export const useUsersStore = defineStore('users', () => {
   const users = ref<UserListItem[]>([])
@@ -17,7 +27,9 @@ export const useUsersStore = defineStore('users', () => {
   })
   const isLoading = ref(false)
   const isLoadingDetails = ref(false)
+  const isSaving = ref(false)
   const error = ref<string | null>(null)
+  const mutationError = ref<string | null>(null)
 
   const hasUsers = computed(() => users.value.length > 0)
   const totalUsers = computed(() => meta.value.total)
@@ -66,6 +78,83 @@ export const useUsersStore = defineStore('users', () => {
       selectedUser.value = null
     } finally {
       isLoadingDetails.value = false
+    }
+  }
+
+  async function createUser(payload: CreateUserRequest) {
+    isSaving.value = true
+    mutationError.value = null
+    
+    const toast = useToastStore()
+    const { t } = useI18n()
+    
+    try {
+      await usersService.createUser(payload)
+      toast.success(t('users.toast.created'))
+      fetchUsers()
+    } catch (err) {
+      mutationError.value = getHttpErrorMessage(err, 'users.errors.createFailed')
+      throw err
+    } finally {
+      isSaving.value = false
+    }
+  }
+
+  async function updateUser(id: string, payload: UpdateUserRequest) {
+    isSaving.value = true
+    mutationError.value = null
+    
+    const toast = useToastStore()
+    const { t } = useI18n()
+    
+    try {
+      await usersService.updateUser(id, payload)
+      toast.success(t('users.toast.updated'))
+      fetchUsers()
+    } catch (err) {
+      mutationError.value = getHttpErrorMessage(err, 'users.errors.updateFailed')
+      throw err
+    } finally {
+      isSaving.value = false
+    }
+  }
+
+  async function updateUserStatus(id: string, active: boolean) {
+    isSaving.value = true
+    mutationError.value = null
+    
+    const toast = useToastStore()
+    const { t } = useI18n()
+    
+    try {
+      await usersService.updateUserStatus(id, { active })
+      const messageKey = active ? 'users.toast.activated' : 'users.toast.deactivated'
+      toast.success(t(messageKey))
+      fetchUsers()
+    } catch (err) {
+      mutationError.value = getHttpErrorMessage(err, 'users.errors.statusFailed')
+      throw err
+    } finally {
+      isSaving.value = false
+    }
+  }
+
+  async function updateUserRoles(id: string, roleKeys: string[]) {
+    isSaving.value = true
+    mutationError.value = null
+    
+    const toast = useToastStore()
+    const { t } = useI18n()
+    
+    try {
+      await usersService.updateUserRoles(id, { roleKeys })
+      toast.success(t('users.toast.rolesUpdated'))
+      fetchUsers()
+    } catch (err) {
+      mutationError.value = getHttpErrorMessage(err, 'users.errors.rolesFailed')
+      throw err
+    } finally {
+      isSaving.value = false
     }
   }
 
@@ -120,13 +209,19 @@ export const useUsersStore = defineStore('users', () => {
     filters,
     isLoading,
     isLoadingDetails,
+    isSaving,
     error,
+    mutationError,
     hasUsers,
     totalUsers,
     currentPage,
     totalPages,
     fetchUsers,
     fetchUserById,
+    createUser,
+    updateUser,
+    updateUserStatus,
+    updateUserRoles,
     setPage,
     setPerPage,
     setSearch,

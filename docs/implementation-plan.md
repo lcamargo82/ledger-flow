@@ -162,10 +162,24 @@ Cada fase deve entregar:
 
 ---
 
-## Fase 3B — Roles & Tenants Management
+## Fase 3B — User Create/Update/Deactivate Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Backend: Endpoints de criação (POST) e atualização (PATCH) de usuários.
+* Backend: Troca de status de usuário (active/inactive) gerenciando revogação de tokens.
+* Backend: Atribuição de roles a usuários protegida pelo tenant e OWNER.
+* Frontend: Modais de criação e edição.
+* Frontend: Formulário integrado com o users store.
+* Frontend: Toast e I18N.
+* Funcionalidade testada localmente.
+
+---
+
+## Fase 3C — Roles & Tenants Management
 
 * Gestão de roles e permissões customizadas
-* Criação de novos usuários e convites
 * Tela de perfil
 * Gestão do tenant
 

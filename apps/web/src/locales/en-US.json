@@ -77,7 +77,40 @@
       "actions": "Actions"
     },
     "actions": {
-      "viewDetails": "View Details"
+      "viewDetails": "View Details",
+      "create": "Create User",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "save": "Save",
+      "updateRoles": "Update Roles"
+    },
+    "form": {
+      "createTitle": "New User",
+      "editTitle": "Edit User",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "E.g. John Doe",
+      "emailLabel": "Email",
+      "emailPlaceholder": "E.g. john@company.com",
+      "temporaryPasswordLabel": "Temporary Password",
+      "temporaryPasswordPlaceholder": "Min 8 characters",
+      "rolesLabel": "Access Roles",
+      "activeLabel": "Activate user immediately",
+      "validation": {
+        "nameRequired": "Name is required",
+        "emailRequired": "Valid email is required",
+        "passwordRequired": "Temporary password is required",
+        "passwordMin": "Password must be at least 8 characters",
+        "roleRequired": "Select at least one role"
+      }
+    },
+    "confirmDeactivate": {
+      "title": "Deactivate User",
+      "message": "Are you sure you want to deactivate this user? Active sessions will be terminated."
+    },
+    "confirmActivate": {
+      "title": "Activate User",
+      "message": "Are you sure you want to reactivate this user?"
     },
     "emptyTitle": "No users found",
     "emptyDescription": "There are no users matching the current filters.",
@@ -105,7 +138,25 @@
       "inactive": "Inactive"
     },
     "toast": {
-      "newUserSoon": "User creation will be available soon."
+      "newUserSoon": "User creation will be available soon.",
+      "created": "User created successfully.",
+      "updated": "User updated successfully.",
+      "activated": "User activated successfully.",
+      "deactivated": "User deactivated successfully.",
+      "rolesUpdated": "User roles updated."
+    },
+    "errors": {
+      "createFailed": "Failed to create user.",
+      "updateFailed": "Failed to update user.",
+      "statusFailed": "Failed to change user status.",
+      "rolesFailed": "Failed to update roles.",
+      "emailAlreadyExists": "A user with this email already exists."
+    },
+    "roles": {
+      "OWNER": "Owner",
+      "FINANCE_OPERATOR": "Finance",
+      "SUPPORT_VIEWER": "Support",
+      "DEVELOPER": "Developer"
     }
   },
   "common": {

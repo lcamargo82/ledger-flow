@@ -469,3 +469,10 @@ This included:
 
 *Known Limitation*: Currently, tokens are stored in `localStorage` to simplify the local environment and portfolio setup. In a production environment, this should be evaluated and moved to HttpOnly, Secure, and SameSite cookies for refresh tokens.
 
+### Phase 3B
+Phase 3B — User Create/Update/Deactivate Foundation has been implemented.
+This included:
+- Requisito de permissões `users:create` e `users:update` para proteger operações administrativas sobre usuários.
+- Proteção da role `OWNER`: Usuários (mesmo administradores) não podem remover a role `OWNER` do próprio perfil, garantindo que o tenant não fique sem dono.
+- Operações de remoção substituídas por soft delete (`active: false`).
+- Desativação de um usuário revoga automaticamente as sessões e refresh tokens vinculados (Ação em cascata).

@@ -483,3 +483,6 @@ Possíveis evoluções futuras:
 Nesta fase inicial e em ambiente local/portfólio, o frontend utiliza `localStorage` para armazenar access tokens e refresh tokens por simplicidade. 
 Em produção, deve-se avaliar obrigatoriamente a transição para armazenamento de tokens em cookies `HttpOnly`, `Secure` e `SameSite` para mitigar ataques XSS.
 Além disso, ferramentas como Helmet, CORS rigoroso, Rate Limiting, RequestId/TraceId middlewares e sanitização profunda de logs já estão planejados no backlog futuro.
+
+### Phase 3B
+- A criação de usuários ("Create User") agora exige uma `temporaryPassword`. Essa senha é hasheada via bcrypt do mesmo modo que a senha principal. Em uma fase posterior, será implementado um fluxo que força a alteração dessa senha temporária no primeiro acesso.
