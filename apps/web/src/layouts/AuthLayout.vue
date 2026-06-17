@@ -33,15 +33,28 @@ import { brandAssets } from '../config/brand';
 .lf-auth-hero {
   display: none;
   width: 50%;
-  background-color: var(--lf-surface-primary);
+  background-color: var(--lf-bg-primary);
   position: relative;
   overflow: hidden;
+}
+
+.lf-auth-hero::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to right, transparent 50%, var(--lf-bg-primary) 100%);
+  pointer-events: none;
 }
 
 .lf-hero-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center left;
+  padding: 40px;
 }
 
 .lf-auth-content {
@@ -50,12 +63,26 @@ import { brandAssets } from '../config/brand';
   align-items: center;
   justify-content: center;
   padding: var(--lf-space-4);
-  background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, var(--lf-bg-primary) 50%);
+  background: var(--lf-bg-primary);
+  position: relative;
+}
+
+.lf-auth-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, var(--lf-bg-primary) 70%);
+  pointer-events: none;
 }
 
 .lf-login-card {
   width: 100%;
   max-width: 420px;
+  position: relative;
+  z-index: 10;
 }
 
 @media (min-width: 1024px) {

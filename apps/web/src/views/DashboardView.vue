@@ -76,12 +76,13 @@ const handleNewPayment = () => {
   border-radius: var(--lf-radius);
   overflow: hidden;
   border: 1px solid var(--lf-border-primary);
-  max-height: 180px;
+  height: 180px;
+  background-color: var(--lf-bg-primary);
 }
 
 .lf-dashboard-hero-img {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   object-fit: cover;
   object-position: center;
