@@ -53,8 +53,8 @@ import { brandAssets } from '../config/brand';
   width: 100%;
   height: 100%;
   object-fit: contain;
-  object-position: center left;
-  padding: 40px;
+  object-position: center;
+  /* Removido o padding para permitir que a imagem ocupe mais espaço */
 }
 
 .lf-auth-content {
