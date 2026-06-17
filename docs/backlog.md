@@ -1960,3 +1960,17 @@ Uma issue só pode ser marcada como `DONE` quando:
 * [ ] Logs sanitizados
 * [ ] AuditLog para ações sensíveis
 * [ ] Cookies HttpOnly para refresh token em produção
+
+## Brand Identity
+
+- [x] Brand assets added
+- [x] Favicon added
+- [x] README banner added
+- [x] Brand documentation added
+- [x] Frontend logo applied
+
+### Futuro
+- [ ] Converter logo oficial para SVG vetorial limpo
+- [ ] Criar pacote de ícones internos
+- [ ] Criar brand kit exportável
+- [ ] Criar tela pública/landing page

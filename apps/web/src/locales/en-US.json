@@ -1,4 +1,9 @@
 {
+  "brand": {
+    "name": "LedgerFlow",
+    "tagline": "Connect. Reconcile. Comply.",
+    "description": "Enterprise Payment & Reconciliation Platform"
+  },
   "auth": {
     "login": {
       "title": "Access Platform",

@@ -101,7 +101,7 @@ onUnmounted(() => {
 
 .lf-modal-container {
   background-color: var(--lf-bg-card);
-  border: 1px solid var(--lf-border);
+  border: 1px solid var(--lf-border-primary);
   border-radius: var(--lf-radius);
   width: 100%;
   max-width: 500px;
@@ -113,7 +113,7 @@ onUnmounted(() => {
 
 .lf-modal-header {
   padding: var(--lf-space-4) var(--lf-space-6);
-  border-bottom: 1px solid var(--lf-border);
+  border-bottom: 1px solid var(--lf-border-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -150,7 +150,7 @@ onUnmounted(() => {
 
 .lf-modal-footer {
   padding: var(--lf-space-4) var(--lf-space-6);
-  border-top: 1px solid var(--lf-border);
+  border-top: 1px solid var(--lf-border-primary);
   display: flex;
   justify-content: flex-end;
   gap: var(--lf-space-3);

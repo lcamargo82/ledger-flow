@@ -1874,3 +1874,11 @@ O sistema permite customizações e configurações básicas em nível de Tenant
 Endpoint introduzidos na Fase 3C:
 * `GET /tenants/current`: Busca a configuração atual de um tenant ativo a partir do `tenantId` contido no contexto seguro da sessão.
 * `PATCH /tenants/current`: Atualiza nome (`name`) e `timezone`. Exige permissão `tenant:update`.
+
+## Brand Identity / UI System
+
+* assets oficiais em images/
+* assets públicos do frontend em apps/web/public/brand/
+* tokens visuais em main.css
+* README usa images/
+* frontend usa /brand/*

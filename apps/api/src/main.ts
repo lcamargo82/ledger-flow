@@ -19,7 +19,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
 
   // Swagger UI
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    customSiteTitle: 'LedgerFlow API',
+  });
 
   const httpAdapter = app.getHttpAdapter();
   // OpenAPI JSON

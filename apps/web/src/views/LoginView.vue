@@ -1,7 +1,7 @@
 <template>
   <AppCard>
     <div class="lf-login-header">
-      <h1>LedgerFlow</h1>
+      <img :src="brandAssets.logoDark" alt="LedgerFlow Logo" class="lf-brand-logo lf-mb-4" />
       <p>{{ t('auth.login.title') }}</p>
     </div>
 
@@ -65,6 +65,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth.store';
 import { useI18n } from '../composables/useI18n';
+import { brandAssets } from '../config/brand';
 import AppCard from '../components/common/AppCard.vue';
 import AppInput from '../components/common/AppInput.vue';
 import AppPasswordInput from '../components/common/AppPasswordInput.vue';
@@ -93,7 +94,7 @@ const onSubmit = async () => {
     // Redirect to intended page or dashboard
     const redirectPath = route.query.redirect as string;
     router.push(redirectPath || '/dashboard');
-  } catch (error) {
+  } catch {
     // Error is handled in the store
   }
 };

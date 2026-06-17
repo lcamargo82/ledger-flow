@@ -3,7 +3,7 @@
     <!-- Sidebar -->
     <aside class="lf-sidebar" aria-label="Sidebar">
       <div class="lf-sidebar__brand">
-        <h2>LedgerFlow</h2>
+        <img :src="brandAssets.logoDark" alt="LedgerFlow Logo" class="lf-sidebar-logo" />
       </div>
       <nav class="lf-sidebar__nav">
         <router-link to="/dashboard" class="lf-nav-item">
@@ -78,6 +78,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.store';
 import { useConfirmDialogStore } from '../stores/confirm-dialog.store';
 import { useI18n } from '../composables/useI18n';
+import { brandAssets } from '../config/brand';
 import AppButton from '../components/common/AppButton.vue';
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
 
@@ -102,3 +103,10 @@ const handleLogout = () => {
   });
 };
 </script>
+
+<style scoped>
+.lf-sidebar-logo {
+  max-width: 180px;
+  height: auto;
+}
+</style>

@@ -226,3 +226,15 @@ Cada fase deve entregar:
 ---
 
 ## Fase 8 — Observability
+
+### Brand Identity Application
+
+Status: Concluído
+
+Itens:
+
+* aplicar logo no frontend
+* aplicar favicon
+* aplicar README banner
+* criar docs/brand.md
+* aplicar tokens visuais

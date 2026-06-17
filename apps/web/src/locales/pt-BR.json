@@ -1,4 +1,9 @@
 {
+  "brand": {
+    "name": "LedgerFlow",
+    "tagline": "Conecte. Reconcilie. Cumpra.",
+    "description": "Plataforma enterprise de pagamentos e conciliação"
+  },
   "auth": {
     "login": {
       "title": "Acessar Plataforma",

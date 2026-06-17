@@ -1,12 +1,22 @@
+![LedgerFlow](./images/ledgerflow-readme-banner.png)
+
 # LedgerFlow
 
-## Enterprise Payment, Reconciliation & Observability Platform
+## Enterprise Payment & Reconciliation Platform
 
 **LedgerFlow** é uma plataforma B2B multitenant para gestão de pagamentos, conciliação financeira, auditoria, exportação de relatórios, webhooks, notificações e observabilidade.
 
 O projeto simula um sistema corporativo de grande escala, inspirado em plataformas como Stripe, Asaas, Mercado Pago e gateways financeiros B2B, com foco em arquitetura, segurança, resiliência, rastreabilidade e experiência de usuário.
 
 > Projeto desenvolvido para estudo avançado, portfólio técnico e simulação de ambiente enterprise.
+
+## Brand Identity
+
+![LedgerFlow Brand Board](./images/ledgerflow-brand-board.png)
+
+LedgerFlow uses a dark enterprise fintech identity focused on trust, security, auditability and operational clarity. The visual system is based on a deep slate/zinc palette with indigo, blue, cyan and emerald accents.
+
+* [Brand Identity](./docs/brand.md)
 
 ---
 # 1. Visão Geral

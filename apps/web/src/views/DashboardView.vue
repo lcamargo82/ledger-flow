@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div class="lf-dashboard-container">
+    <div class="lf-dashboard-hero lf-mb-8">
+      <img :src="brandAssets.appHeader" alt="LedgerFlow Dashboard" class="lf-dashboard-hero-img" />
+    </div>
     <AppPageHeader
       :title="t('nav.dashboard')"
       :description="t('dashboard.welcome', { name: authStore.userName })"
@@ -52,6 +55,7 @@
 import { useAuthStore } from '../stores/auth.store';
 import { useI18n } from '../composables/useI18n';
 import { useToastStore } from '../stores/toast.store';
+import { brandAssets } from '../config/brand';
 
 import AppCard from '../components/common/AppCard.vue';
 import AppPageHeader from '../components/common/AppPageHeader.vue';
@@ -66,3 +70,20 @@ const handleNewPayment = () => {
   toastStore.info(t('toast.actionNotImplemented'));
 };
 </script>
+
+<style scoped>
+.lf-dashboard-hero {
+  border-radius: var(--lf-radius);
+  overflow: hidden;
+  border: 1px solid var(--lf-border-primary);
+  max-height: 180px;
+}
+
+.lf-dashboard-hero-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+</style>
