@@ -1,8 +1,5 @@
 <template>
   <div class="lf-dashboard-container">
-    <div class="lf-dashboard-hero lf-mb-8">
-      <img :src="brandAssets.appHeader" alt="LedgerFlow Dashboard" class="lf-dashboard-hero-img" />
-    </div>
     <AppPageHeader
       :title="t('nav.dashboard')"
       :description="t('dashboard.welcome', { name: authStore.userName })"
@@ -14,10 +11,14 @@
       </template>
     </AppPageHeader>
 
+    <div class="lf-dashboard-hero">
+      <img :src="brandAssets.appHeader" alt="LedgerFlow Dashboard" class="lf-dashboard-hero-img" />
+    </div>
+
     <div class="lf-dashboard-grid">
-      <AppCard>
+      <AppCard class="lf-dashboard-card">
         <h3>{{ t('dashboard.role') }}</h3>
-        <div class="lf-card-data lf-mb-4">
+        <div class="lf-card-data lf-mb-5">
           <ul class="lf-tag-list">
             <li v-for="role in authStore.roles" :key="role">
               <AppBadge variant="info">{{ role }}</AppBadge>
@@ -27,24 +28,27 @@
         
         <h3>{{ t('dashboard.permissions') }}</h3>
         <div class="lf-card-data">
-          <ul class="lf-tag-list">
+          <ul class="lf-tag-list lf-tag-list--compact">
+            <!-- Limitar a quantidade visual de permissões ou mostrar todas mas compactadas -->
             <li v-for="perm in authStore.permissions" :key="perm">
-              <AppBadge variant="default">{{ perm }}</AppBadge>
+              <AppBadge variant="default" class="lf-badge--small">{{ perm }}</AppBadge>
             </li>
           </ul>
         </div>
       </AppCard>
 
-      <AppCard>
+      <AppCard class="lf-dashboard-card">
         <h3>{{ t('dashboard.sessionStatus') }}</h3>
         <div class="lf-card-data">
           <p class="lf-flex lf-items-center">
             <span class="lf-status-indicator lf-status-active"></span>
-            {{ t('dashboard.active') }}
+            <strong>{{ t('dashboard.active') }}</strong>
           </p>
-          <p class="lf-text-secondary lf-mt-4" style="font-size: 0.875rem;">
-            User ID: {{ authStore.user?.id }}
-          </p>
+          <div class="lf-session-details lf-mt-5">
+            <p class="lf-text-secondary">
+              <small>User ID: <br />{{ authStore.user?.id }}</small>
+            </p>
+          </div>
         </div>
       </AppCard>
     </div>
@@ -76,8 +80,12 @@ const handleNewPayment = () => {
   border-radius: var(--lf-radius);
   overflow: hidden;
   border: 1px solid var(--lf-border-primary);
-  height: 180px;
+  height: 220px;
   background-color: var(--lf-bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--lf-space-12);
 }
 
 .lf-dashboard-hero-img {
@@ -86,5 +94,27 @@ const handleNewPayment = () => {
   display: block;
   object-fit: cover;
   object-position: center;
+}
+
+.lf-dashboard-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.lf-tag-list--compact {
+  gap: 0.25rem 0.5rem;
+}
+.lf-badge--small {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  opacity: 0.8;
+}
+
+.lf-session-details {
+  background: rgba(255,255,255,0.02);
+  padding: 1rem;
+  border-radius: var(--lf-radius);
+  border: 1px solid var(--lf-border-primary);
 }
 </style>

@@ -298,34 +298,75 @@ body {
   cursor: not-allowed;
 }
 
+.lf-sidebar__footer {
+  padding: var(--lf-space-4) var(--lf-space-6);
+  border-top: 1px solid var(--lf-border-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--lf-space-4);
+}
+.lf-sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--lf-space-3);
+}
+.lf-sidebar__avatar {
+  width: 32px;
+  height: 32px;
+  background-color: var(--lf-surface-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--lf-primary);
+}
+.lf-sidebar__user-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lf-sidebar__user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lf-sidebar__user-email {
+  font-size: 0.75rem;
+  color: var(--lf-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lf-sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: var(--lf-space-2);
+  background: transparent;
+  border: none;
+  color: var(--lf-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: var(--lf-space-2) 0;
+  transition: color 0.2s;
+}
+.lf-sidebar__logout:hover {
+  color: var(--lf-text-primary);
+}
+.lf-sidebar__logout .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .lf-layout-app__main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-}
-.lf-header {
-  height: 64px;
-  background-color: var(--lf-bg-primary);
-  border-bottom: 1px solid var(--lf-border-primary);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 var(--lf-space-6);
-  gap: var(--lf-space-6);
-}
-.lf-header__user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-.lf-header__name {
-  font-size: 0.9375rem; /* 15px */
-  font-weight: 500;
-}
-.lf-header__email {
-  font-size: 0.875rem; /* 14px */
-  color: var(--lf-text-secondary);
 }
 
 .lf-layout-app__content {

@@ -249,3 +249,13 @@ Itens:
 * A tela de login mantém textos isolados no código, internacionalizados via i18n (pt-BR e en-US).
 * A linha de hero foi ajustada para "Auditoria" na UI em vez de "Auditabilidade".
 * O card está sem credenciais demo embutidas (segurança).
+
+### Layout Interno & Dashboard UX
+
+Status: Concluído
+
+Itens:
+* Extinção do Header Topo global, estabelecendo o uso de `AppPageHeader` por tela (Títulos e ações independentes em cada vista).
+* Reestruturação da Sidebar (`AppLayout`), incorporando um rodapé funcional com idioma, dados do usuário e botão "Sair" consolidado.
+* Reposicionamento do sistema de Toasts (`AppToastContainer`) para o canto inferior direito (bottom-right), preservando a visibilidade dos cards superiores.
+* Reorganização do Dashboard: banner (`ledgerflow-app-header2.png`) centralizado logo abaixo do cabeçalho da página, sem aparência de "botão/seta" fantasma; Cards do dashboard realinhados com tags de permissões mais compactas e controle de altura consistentes.

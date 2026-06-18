@@ -49,21 +49,27 @@
           {{ t('nav.reconciliation') }}
         </a>
       </nav>
+
+      <div class="lf-sidebar__footer">
+        <LanguageSwitcher />
+        <div class="lf-sidebar__user">
+          <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
+          <div class="lf-sidebar__user-info">
+            <span class="lf-sidebar__user-name">{{ authStore.userName }}</span>
+            <span class="lf-sidebar__user-email">{{ authStore.userEmail }}</span>
+          </div>
+        </div>
+        <button class="lf-sidebar__logout" @click="handleLogout" :aria-label="t('common.logout')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+          </svg>
+          {{ t('common.logout') }}
+        </button>
+      </div>
     </aside>
 
     <!-- Main Content -->
     <main class="lf-layout-app__main">
-      <!-- Header -->
-      <header class="lf-header">
-        <LanguageSwitcher />
-        <div class="lf-header__user-info">
-          <span class="lf-header__name">{{ authStore.userName }}</span>
-          <span class="lf-header__email">{{ authStore.userEmail }}</span>
-        </div>
-        <AppButton variant="secondary" size="small" @click="handleLogout">
-          {{ t('common.logout') }}
-        </AppButton>
-      </header>
 
       <!-- Page Content -->
       <div class="lf-layout-app__content">
