@@ -180,16 +180,17 @@ body {
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
 }
 .lf-input--error {
-  border-color: var(--lf-danger);
+  border-color: rgba(248, 113, 113, 0.65);
 }
 .lf-input--error:focus {
-  box-shadow: 0 0 0 1px var(--lf-danger);
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.65);
 }
 .lf-error-message {
   display: block;
-  margin-top: var(--lf-space-2);
-  font-size: 0.875rem; /* 14px */
-  color: var(--lf-danger);
+  margin-top: var(--lf-space-1);
+  font-size: 0.8125rem; /* 13px */
+  color: #f87171;
+  line-height: 1.4;
 }
 
 /* Alert */
@@ -236,6 +237,13 @@ body {
   margin: 0;
   color: var(--lf-text-secondary);
   font-size: 1rem; /* 16px */
+}
+.lf-secure-note {
+  margin: var(--lf-space-4) 0 0 0;
+  font-size: 0.8125rem; /* 13px */
+  color: var(--lf-text-muted);
+  text-align: center;
+  line-height: 1.4;
 }
 
 /* App Layout & Dashboard */

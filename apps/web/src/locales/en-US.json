@@ -6,21 +6,21 @@
   },
   "auth": {
     "hero": {
-      "titleLine1": "Secure financial",
-      "titleHighlight": "operations",
-      "subtitle": "Payments • Reconciliation • Auditability",
+      "titleLine1": "Enterprise",
+      "titleHighlight": "Financial Operations",
+      "subtitle": "Payments • Reconciliation • Audit",
       "features": {
         "secure": {
-          "title": "Secure",
-          "description": "Enterprise-grade security"
+          "title": "Bank-Grade Security",
+          "description": "End-to-end encryption and compliance."
         },
         "compliant": {
-          "title": "Compliant",
-          "description": "Built for auditability and trust"
+          "title": "Automated Compliance",
+          "description": "Rules-based matching and reporting."
         },
         "scalable": {
-          "title": "Scalable",
-          "description": "Infrastructure ready to grow"
+          "title": "High Throughput",
+          "description": "Process millions of transactions."
         }
       }
     },
@@ -30,10 +30,11 @@
       "emailLabel": "Corporate Email",
       "emailPlaceholder": "your.name@company.com",
       "passwordLabel": "Access Password",
-      "passwordPlaceholder": "••••••••",
+      "passwordPlaceholder": "Enter your password",
       "forgotPassword": "Forgot my password",
-      "submitButton": "Sign in",
+      "submitButton": "Sign In",
       "loading": "Signing in...",
+      "secureAccessNote": "Access protected by secure authentication and controlled session.",
       "demoHintTitle": "Demo credentials",
       "demoAdmin": "Admin: admin@ledgerflow.com / admin123",
       "demoUser": "User: user@ledgerflow.com / user123",
@@ -41,7 +42,8 @@
       "networkError": "Could not connect to the server. Check your connection.",
       "unexpectedError": "An unexpected error occurred. Try again later.",
       "validation": {
-        "emailRequired": "Valid email is required.",
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Please enter a valid email address.",
         "passwordRequired": "Password is required."
       }
     },

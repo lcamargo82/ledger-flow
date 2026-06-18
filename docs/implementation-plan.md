@@ -238,3 +238,14 @@ Itens:
 * aplicar README banner
 * criar docs/brand.md
 * aplicar tokens visuais
+
+### Login UI Refinement
+
+Status: Concluído
+
+Itens:
+* O card de login foi refinado (proporção mais compacta, glassmorphism suavizado).
+* Os estados de erro foram suavizados (cores menos agressivas, espaçamento melhorado).
+* A tela de login mantém textos isolados no código, internacionalizados via i18n (pt-BR e en-US).
+* A linha de hero foi ajustada para "Auditoria" na UI em vez de "Auditabilidade".
+* O card está sem credenciais demo embutidas (segurança).

@@ -57,6 +57,8 @@
       >
         {{ authStore.isLoading ? t('auth.login.loading') : t('auth.login.submitButton') }}
       </AppButton>
+      
+      <p class="lf-secure-note">{{ t('auth.login.secureAccessNote') }}</p>
     </form>
   </AppCard>
 </template>

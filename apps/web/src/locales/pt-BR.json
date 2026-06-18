@@ -8,7 +8,7 @@
     "hero": {
       "titleLine1": "Operações financeiras",
       "titleHighlight": "seguras",
-      "subtitle": "Pagamentos • Conciliação • Auditabilidade",
+      "subtitle": "Pagamentos • Conciliação • Auditoria",
       "features": {
         "secure": {
           "title": "Seguro",
@@ -34,6 +34,7 @@
       "forgotPassword": "Esqueci minha senha",
       "submitButton": "Entrar",
       "loading": "Entrando...",
+      "secureAccessNote": "Acesso protegido por autenticação segura e sessão controlada.",
       "demoHintTitle": "Credenciais demo",
       "demoAdmin": "Admin: admin@ledgerflow.com / admin123",
       "demoUser": "User: user@ledgerflow.com / user123",

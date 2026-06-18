@@ -73,7 +73,7 @@ import AuthHero from '../components/auth/AuthHero.vue';
 
 .lf-login-card {
   width: 100%;
-  max-width: 480px; /* Comfortably wide */
+  max-width: 440px; /* Mais compacto */
   position: relative;
 }
 
@@ -92,18 +92,17 @@ import AuthHero from '../components/auth/AuthHero.vue';
   pointer-events: none;
 }
 
-/* Glassmorphism corporativo premium */
+/* Glassmorphism corporativo premium refinado */
 .lf-login-card :deep(.lf-card) {
-  padding: 2.5rem; /* ~40px */
-  background-color: rgba(15, 23, 42, 0.52);
+  padding: 2rem; /* 32px - mais proporcional */
+  background-color: rgba(15, 23, 42, 0.50);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: 18px;
   box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(79, 70, 229, 0.08),
-    0 0 80px rgba(6, 182, 212, 0.08);
+    0 24px 72px rgba(0, 0, 0, 0.42),
+    0 0 60px rgba(6, 182, 212, 0.06);
 }
 
 @media (min-width: 1024px) {
