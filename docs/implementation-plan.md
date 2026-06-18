@@ -209,9 +209,17 @@ Cada fase deve entregar:
 
 ---
 
-## Fase 4 — Customers Foundation
+## Fase 4A — Customers Backend Foundation + Password Recovery Email
 
----
+**Status:** Concluída
+
+**Itens:**
+* Backend: Módulo Customers com isolamento por Tenant e proteção RBAC.
+* Backend: CRUD básico implementado com paginação, busca e filtros.
+* Backend: Integração do Mailpit para envio de e-mails locais.
+* Backend: Implementação do fluxo seguro de redefinição de senha (`forgot-password` e `reset-password`).
+* Banco de Dados: Tabelas `Customer`, `PasswordResetToken` e `AuditLog`.
+* Swagger/OpenAPI: Endpoints documentados.
 
 ## Fase 5 — Payments MVP
 

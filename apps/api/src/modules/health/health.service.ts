@@ -30,7 +30,7 @@ export class HealthService {
         database: 'ok',
         timestamp: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch {
       throw new ServiceUnavailableException({
         status: 'error',
         check: 'readiness',

@@ -29,8 +29,12 @@ export class RolesController {
   @ApiOperation({ summary: 'List roles for the current tenant' })
   @ApiOkResponse({ type: RolesResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden - requires roles:manage permission' })
-  async listRoles(@CurrentUser() user: AuthenticatedUser): Promise<RolesResponseDto> {
+  @ApiForbiddenResponse({
+    description: 'Forbidden - requires roles:manage permission',
+  })
+  async listRoles(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<RolesResponseDto> {
     return this.rolesService.listRoles(user.tenantId);
   }
 
@@ -40,7 +44,9 @@ export class RolesController {
   @ApiOkResponse({ type: RoleResponseDto })
   @ApiNotFoundResponse({ description: 'Role not found' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden - requires roles:manage permission' })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - requires roles:manage permission',
+  })
   async getRoleById(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,

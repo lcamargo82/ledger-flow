@@ -25,7 +25,9 @@ export class PermissionsController {
   @ApiOperation({ summary: 'List all global permissions' })
   @ApiOkResponse({ type: PermissionsResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden - requires permissions:read permission' })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - requires permissions:read permission',
+  })
   async listPermissions(): Promise<PermissionsResponseDto> {
     return this.permissionsService.listPermissions();
   }

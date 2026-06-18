@@ -1066,6 +1066,14 @@ Ferramentas planejadas:
 * Telas administrativas protegidas por RBAC.
 * Atualização de Swagger/Redoc/OpenAPI.
 
+## Fase 4A — Customers Backend Foundation + Password Recovery Email (Concluída)
+
+* Customers backend com Tenant Isolation e RBAC.
+* Uso do Repository Pattern.
+* Swagger/Redoc documentado.
+* Recuperação de senha segura.
+* Integração com Mailpit local para e-mails (acesso em http://localhost:8026).
+
 ## Fase 3 — Payments MVP
 
 * Clientes.
@@ -1153,7 +1161,7 @@ Uma funcionalidade só será considerada pronta quando:
 
 ```text
 Status atual: User Management Foundation (CRUD de usuários e roles) implementado e testado.
-Fase atual: Fase 3B concluída.
+Fase atual: Fase 4A concluída.
 Próximo passo: Gestão de tenant e Payments MVP.
 
 ```

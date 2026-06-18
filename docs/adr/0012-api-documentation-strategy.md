@@ -446,3 +446,6 @@ Possíveis evoluções futuras:
 
 ### Atualização (Fase 3D)
 Fica estritamente estabelecido que **todos os endpoints administrativos** (Users, Roles, Permissions, Tenants) devem possuir documentação OpenAPI com os devidos decorators de autenticação, resposta e sumário, evitando exposição de dados sensíveis em DTOs.
+
+### API Consumers e Auth Docs (Fase 4A)
+- Os novos endpoints de `Customers` e as rotas públicas de `Auth` (forgot-password, reset-password) foram devidamente documentados no Swagger com seus respectivos DTOs, assegurando que não vaze informações sensíveis (usando valores em "example").

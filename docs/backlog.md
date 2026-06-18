@@ -1974,3 +1974,20 @@ Uma issue só pode ser marcada como `DONE` quando:
 - [ ] Criar pacote de ícones internos
 - [ ] Criar brand kit exportável
 - [ ] Criar tela pública/landing page
+
+### Fase 4A — Customers Backend Foundation + Password Recovery Email (Concluída)
+- [x] Customer model
+- [x] Customers repository
+- [x] Customers service
+- [x] GET /customers
+- [x] GET /customers/:id
+- [x] POST /customers
+- [x] PATCH /customers/:id
+- [x] PATCH /customers/:id/status
+- [x] Customers Swagger/Redoc
+- [x] Customers audit logs
+- [x] PasswordResetToken model
+- [x] POST /auth/forgot-password
+- [x] POST /auth/reset-password
+- [x] Password recovery email via Mailpit
+- [x] Revoke sessions after password reset

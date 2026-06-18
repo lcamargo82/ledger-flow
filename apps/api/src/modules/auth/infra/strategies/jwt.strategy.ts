@@ -15,7 +15,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_ACCESS_SECRET') || 'change-me-access-secret',
+      secretOrKey:
+        configService.get<string>('JWT_ACCESS_SECRET') ||
+        'change-me-access-secret',
     });
   }
 
@@ -45,7 +47,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         where: { id: payload.sessionId },
       });
 
-      if (!session || !session.active || (session.expiresAt && session.expiresAt < new Date())) {
+      if (
+        !session ||
+        !session.active ||
+        (session.expiresAt && session.expiresAt < new Date())
+      ) {
         throw new UnauthorizedException('Session is inactive or expired');
       }
 

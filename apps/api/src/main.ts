@@ -4,6 +4,7 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { getSwaggerConfig } from './config/docs/swagger.config';
 import { getRedocHtml } from './config/docs/redoc.html';
+import type { Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -25,15 +26,17 @@ async function bootstrap() {
 
   const httpAdapter = app.getHttpAdapter();
   // OpenAPI JSON
-  httpAdapter.get('/api/openapi.json', (req, res) => {
+  httpAdapter.get('/api/openapi.json', (req: Request, res: Response) => {
     res.json(document);
   });
 
   // Redoc HTML
-  httpAdapter.get('/api/reference', (req, res) => {
+  httpAdapter.get('/api/reference', (req: Request, res: Response) => {
     res.type('text/html').send(getRedocHtml());
   });
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Error starting server', err);
+});
