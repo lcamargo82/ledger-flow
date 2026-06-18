@@ -76,7 +76,7 @@ const handleSave = async () => {
 
     <div v-else-if="tenantStore.tenant" class="max-w-2xl">
       <AppCard>
-        <form @submit.prevent="handleSave" class="space-y-6">
+        <form @submit.prevent="handleSave" class="space-y-6" novalidate>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div class="sm:col-span-2">
               <AppInput 
@@ -86,6 +86,7 @@ const handleSave = async () => {
                 :placeholder="t('tenantSettings.form.namePlaceholder')"
                 :error="errors.name"
                 :disabled="tenantStore.isSaving"
+                @input="errors.name = ''"
                 required
               />
             </div>
@@ -109,6 +110,7 @@ const handleSave = async () => {
                 :placeholder="t('tenantSettings.form.timezonePlaceholder')"
                 :error="errors.timezone"
                 :disabled="tenantStore.isSaving"
+                @input="errors.timezone = ''"
                 required
               />
             </div>
