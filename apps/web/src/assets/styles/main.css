@@ -68,6 +68,7 @@ body {
 /* Utils */
 .lf-mb-2 { margin-bottom: var(--lf-space-2); }
 .lf-mb-4 { margin-bottom: var(--lf-space-4); }
+.lf-mb-5 { margin-bottom: var(--lf-space-5); }
 .lf-mb-6 { margin-bottom: var(--lf-space-6); }
 .lf-mt-4 { margin-top: var(--lf-space-4); }
 .lf-w-full { width: 100%; }
@@ -111,11 +112,12 @@ body {
 }
 
 .lf-button--primary {
-  background-color: var(--lf-primary);
+  background: linear-gradient(135deg, #4f46e5, #2563eb);
   color: white;
+  border: 1px solid transparent;
 }
 .lf-button--primary:hover:not(:disabled) {
-  background-color: var(--lf-primary-hover);
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
 }
 
 .lf-button--secondary {
@@ -163,19 +165,19 @@ body {
   color: var(--lf-text-secondary);
 }
 .lf-input {
-  background-color: var(--lf-bg-primary);
-  border: 1px solid var(--lf-border-primary);
+  background-color: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   color: var(--lf-text-primary);
   border-radius: var(--lf-radius);
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   font-size: 1rem; /* 16px */
   transition: all 0.2s ease;
   width: 100%;
 }
 .lf-input:focus {
   outline: none;
-  border-color: var(--lf-border-focus);
-  box-shadow: 0 0 0 1px var(--lf-border-focus);
+  border-color: rgba(6, 182, 212, 0.65);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
 }
 .lf-input--error {
   border-color: var(--lf-danger);
@@ -184,6 +186,7 @@ body {
   box-shadow: 0 0 0 1px var(--lf-danger);
 }
 .lf-error-message {
+  display: block;
   margin-top: var(--lf-space-2);
   font-size: 0.875rem; /* 14px */
   color: var(--lf-danger);
@@ -233,18 +236,6 @@ body {
   margin: 0;
   color: var(--lf-text-secondary);
   font-size: 1rem; /* 16px */
-}
-.lf-demo-hint {
-  margin-top: var(--lf-space-6);
-  padding-top: var(--lf-space-4);
-  border-top: 1px dashed var(--lf-border-primary);
-  font-size: 0.875rem; /* 14px min */
-  color: var(--lf-text-muted);
-  text-align: center;
-  line-height: 1.5;
-}
-.lf-demo-hint p {
-  margin: 0 0 0.5rem 0;
 }
 
 /* App Layout & Dashboard */

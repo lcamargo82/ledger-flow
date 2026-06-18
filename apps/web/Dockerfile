@@ -15,6 +15,7 @@ COPY apps/web/package*.json ./
 FROM base AS development
 
 ENV NODE_ENV=development
+ENV CYPRESS_INSTALL_BINARY=0
 
 RUN npm install
 
@@ -32,6 +33,7 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 FROM base AS build
 
 ENV NODE_ENV=production
+ENV CYPRESS_INSTALL_BINARY=0
 
 RUN npm ci
 

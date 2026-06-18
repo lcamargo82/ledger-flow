@@ -1,13 +1,32 @@
 {
   "brand": {
     "name": "LedgerFlow",
-    "tagline": "Connect. Reconcile. Comply.",
+    "tagline": "Connect. Reconcile. Comply. With confidence.",
     "description": "Enterprise Payment & Reconciliation Platform"
   },
   "auth": {
+    "hero": {
+      "titleLine1": "Secure financial",
+      "titleHighlight": "operations",
+      "subtitle": "Payments • Reconciliation • Auditability",
+      "features": {
+        "secure": {
+          "title": "Secure",
+          "description": "Enterprise-grade security"
+        },
+        "compliant": {
+          "title": "Compliant",
+          "description": "Built for auditability and trust"
+        },
+        "scalable": {
+          "title": "Scalable",
+          "description": "Infrastructure ready to grow"
+        }
+      }
+    },
     "login": {
-      "title": "Access Platform",
-      "subtitle": "Enter your credentials to continue",
+      "title": "Access platform",
+      "subtitle": "Enter your corporate credentials to continue.",
       "emailLabel": "Corporate Email",
       "emailPlaceholder": "your.name@company.com",
       "passwordLabel": "Access Password",
@@ -20,7 +39,11 @@
       "demoUser": "User: user@ledgerflow.com / user123",
       "invalidCredentials": "The provided credentials are invalid.",
       "networkError": "Could not connect to the server. Check your connection.",
-      "unexpectedError": "An unexpected error occurred. Try again later."
+      "unexpectedError": "An unexpected error occurred. Try again later.",
+      "validation": {
+        "emailRequired": "Valid email is required.",
+        "passwordRequired": "Password is required."
+      }
     },
     "forgotPassword": {
       "title": "Recover Password",

@@ -1,8 +1,11 @@
 <template>
   <AppCard>
     <div class="lf-login-header">
-      <img :src="brandAssets.logoDark" alt="LedgerFlow Logo" class="lf-brand-logo lf-mb-4" />
-      <p>{{ t('auth.login.title') }}</p>
+      <img :src="brandAssets.logoDark" alt="LedgerFlow Logo" class="lf-mobile-logo" />
+      <div class="lf-login-header-text">
+        <h2 class="lf-login-title">{{ t('auth.login.title') }}</h2>
+        <p class="lf-login-subtitle">{{ t('auth.login.subtitle') }}</p>
+      </div>
     </div>
 
     <AppAlert
@@ -12,29 +15,33 @@
       class="lf-mb-6"
     />
 
-    <form @submit.prevent="onSubmit">
-      <AppInput
-        id="email"
-        type="email"
-        v-model="email"
-        :label="t('auth.login.emailLabel')"
-        :placeholder="t('auth.login.emailPlaceholder')"
-        required
-        :disabled="authStore.isLoading"
-        class="lf-mb-4"
-        autocomplete="username"
-      />
+    <form @submit.prevent="onSubmit" class="lf-mb-6" novalidate>
+      <div class="lf-mb-5">
+        <AppInput
+          id="email"
+          type="email"
+          v-model="email"
+          :label="t('auth.login.emailLabel')"
+          :placeholder="t('auth.login.emailPlaceholder')"
+          :error="emailError"
+          :disabled="authStore.isLoading"
+          autocomplete="username"
+          @input="emailError = ''"
+        />
+      </div>
 
-      <AppPasswordInput
-        id="password"
-        v-model="password"
-        :label="t('auth.login.passwordLabel')"
-        :placeholder="t('auth.login.passwordPlaceholder')"
-        required
-        :disabled="authStore.isLoading"
-        class="lf-mb-2"
-        autocomplete="current-password"
-      />
+      <div class="lf-mb-4">
+        <AppPasswordInput
+          id="password"
+          v-model="password"
+          :label="t('auth.login.passwordLabel')"
+          :placeholder="t('auth.login.passwordPlaceholder')"
+          :error="passwordError"
+          :disabled="authStore.isLoading"
+          autocomplete="current-password"
+          @input="passwordError = ''"
+        />
+      </div>
       
       <div class="lf-flex lf-justify-between lf-items-center lf-mb-6">
         <router-link to="/forgot-password" class="lf-auth-link" :class="{ 'lf-pointer-events-none': authStore.isLoading }">
@@ -51,12 +58,6 @@
         {{ authStore.isLoading ? t('auth.login.loading') : t('auth.login.submitButton') }}
       </AppButton>
     </form>
-
-    <div class="lf-demo-hint">
-      <p><strong>{{ t('auth.login.demoHintTitle') }}</strong></p>
-      <p>{{ t('auth.login.demoAdmin') }}</p>
-      <p>{{ t('auth.login.demoUser') }}</p>
-    </div>
   </AppCard>
 </template>
 
@@ -74,6 +75,8 @@ import AppAlert from '../components/common/AppAlert.vue';
 
 const email = ref('');
 const password = ref('');
+const emailError = ref('');
+const passwordError = ref('');
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -86,7 +89,17 @@ onMounted(() => {
 });
 
 const onSubmit = async () => {
-  if (!email.value || !password.value) return;
+  emailError.value = '';
+  passwordError.value = '';
+  
+  if (!email.value) {
+    emailError.value = t('auth.login.validation.emailRequired');
+  }
+  if (!password.value) {
+    passwordError.value = t('auth.login.validation.passwordRequired');
+  }
+  
+  if (emailError.value || passwordError.value) return;
 
   try {
     await authStore.login(email.value, password.value);
@@ -99,3 +112,35 @@ const onSubmit = async () => {
   }
 };
 </script>
+
+<style scoped>
+.lf-login-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.lf-mobile-logo {
+  display: block;
+  height: 28px;
+  width: auto;
+  margin: 0 auto 1.5rem auto;
+}
+
+@media (min-width: 1024px) {
+  .lf-mobile-logo {
+    display: none;
+  }
+}
+
+.lf-login-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--lf-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.lf-login-subtitle {
+  font-size: 0.95rem;
+  color: var(--lf-text-secondary);
+}
+</style>

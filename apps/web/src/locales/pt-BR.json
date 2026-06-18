@@ -1,13 +1,32 @@
 {
   "brand": {
     "name": "LedgerFlow",
-    "tagline": "Conecte. Reconcilie. Cumpra.",
+    "tagline": "Conecte. Reconcilie. Cumpra. Com confiança.",
     "description": "Plataforma enterprise de pagamentos e conciliação"
   },
   "auth": {
+    "hero": {
+      "titleLine1": "Operações financeiras",
+      "titleHighlight": "seguras",
+      "subtitle": "Pagamentos • Conciliação • Auditabilidade",
+      "features": {
+        "secure": {
+          "title": "Seguro",
+          "description": "Segurança de nível corporativo"
+        },
+        "compliant": {
+          "title": "Em conformidade",
+          "description": "Feito para auditabilidade e confiança"
+        },
+        "scalable": {
+          "title": "Escalável",
+          "description": "Infraestrutura pronta para crescer"
+        }
+      }
+    },
     "login": {
-      "title": "Acessar Plataforma",
-      "subtitle": "Insira suas credenciais para continuar",
+      "title": "Acessar plataforma",
+      "subtitle": "Entre com suas credenciais corporativas para continuar.",
       "emailLabel": "E-mail Corporativo",
       "emailPlaceholder": "seu.nome@empresa.com",
       "passwordLabel": "Senha de Acesso",
@@ -20,7 +39,11 @@
       "demoUser": "User: user@ledgerflow.com / user123",
       "invalidCredentials": "As credenciais fornecidas são inválidas.",
       "networkError": "Não foi possível conectar ao servidor. Verifique sua conexão.",
-      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente mais tarde."
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente mais tarde.",
+      "validation": {
+        "emailRequired": "O e-mail é obrigatório.",
+        "passwordRequired": "A senha é obrigatória."
+      }
     },
     "forgotPassword": {
       "title": "Recuperar Senha",

@@ -35,4 +35,5 @@ LedgerFlow uses a dark enterprise fintech identity focused on trust, security, a
 * Usar logo dark em superfícies escuras.
 * Usar logo light em superfícies claras.
 * Usar app icon para favicon, loading e estados compactos.
-* Não recriar o logo em texto puro quando a imagem oficial estiver disponível.
+* Não recriar o logo em texto puro quando a imagem oficial estiver disponível (exceto na composição `BrandMark` que utiliza ícone + texto).
+* Para painéis e áreas "Hero", utilizar imagens de fundo puramente decorativas, renderizando tipografia e componentes (títulos, ícones e subtítulos) sempre via código (Vue/HTML + i18n), evitando textos embutidos nas imagens.
