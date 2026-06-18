@@ -1,7 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthService } from './health.service';
 import { Public } from '../auth/presentation/decorators/public.decorator';
-import { ApiTags, ApiOperation, ApiOkResponse, ApiServiceUnavailableResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiServiceUnavailableResponse,
+} from '@nestjs/swagger';
 
 @ApiTags('Health')
 @Controller('health')
@@ -16,9 +21,9 @@ export class HealthController {
       example: {
         status: 'ok',
         service: 'ledgerflow-api',
-        timestamp: '2026-06-13T00:00:00.000Z'
-      }
-    }
+        timestamp: '2026-06-13T00:00:00.000Z',
+      },
+    },
   })
   getHealth() {
     return this.healthService.getHealth();
@@ -32,9 +37,9 @@ export class HealthController {
       example: {
         status: 'ok',
         check: 'liveness',
-        timestamp: '2026-06-13T00:00:00.000Z'
-      }
-    }
+        timestamp: '2026-06-13T00:00:00.000Z',
+      },
+    },
   })
   getLiveness() {
     return this.healthService.getLiveness();
@@ -42,16 +47,19 @@ export class HealthController {
 
   @Public()
   @Get('readiness')
-  @ApiOperation({ summary: 'Valida se a API está pronta para receber tráfego, incluindo conexão com banco de dados' })
+  @ApiOperation({
+    summary:
+      'Valida se a API está pronta para receber tráfego, incluindo conexão com banco de dados',
+  })
   @ApiOkResponse({
     schema: {
       example: {
         status: 'ok',
         check: 'readiness',
         database: 'ok',
-        timestamp: '2026-06-13T00:00:00.000Z'
-      }
-    }
+        timestamp: '2026-06-13T00:00:00.000Z',
+      },
+    },
   })
   @ApiServiceUnavailableResponse({
     schema: {
@@ -59,9 +67,9 @@ export class HealthController {
         status: 'error',
         check: 'readiness',
         database: 'error',
-        timestamp: '2026-06-13T00:00:00.000Z'
-      }
-    }
+        timestamp: '2026-06-13T00:00:00.000Z',
+      },
+    },
   })
   async getReadiness() {
     return this.healthService.getReadiness();

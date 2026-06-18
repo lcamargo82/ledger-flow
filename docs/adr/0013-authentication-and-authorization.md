@@ -469,3 +469,21 @@ This included:
 
 *Known Limitation*: Currently, tokens are stored in `localStorage` to simplify the local environment and portfolio setup. In a production environment, this should be evaluated and moved to HttpOnly, Secure, and SameSite cookies for refresh tokens.
 
+### Phase 3B
+Phase 3B — User Create/Update/Deactivate Foundation has been implemented.
+This included:
+- Requisito de permissões `users:create` e `users:update` para proteger operações administrativas sobre usuários.
+- Proteção da role `OWNER`: Usuários (mesmo administradores) não podem remover a role `OWNER` do próprio perfil, garantindo que o tenant não fique sem dono.
+- Operações de remoção substituídas por soft delete (`active: false`).
+- Desativação de um usuário revoga automaticamente as sessões e refresh tokens vinculados (Ação em cascata).
+
+### Phase 3C
+Phase 3C — Roles, Permissions & Tenant Settings Foundation has been implemented.
+This included:
+- Visualização de Roles do tenant e permissões globais protegidas.
+- Atualizações restritas em configurações do tenant (apenas nome e timezone) via permissão `tenant:update`.
+- Interface gráfica reflete dinamicamente a presença de permissões (ocultando menus não autorizados).
+
+
+### Atualização (Fase 3D)
+Reforço sobre o modelo RBAC: todas as operações de escrita em entidades administrativas (Users, Roles, Permissions, Tenant Settings) devem validar a role no backend via `@RequirePermissions` (ex: `users:create`, `roles:manage`). O frontend apenas reflete a UX através do `PermissionGate` ou validação do store, sem substituir a checagem no backend.

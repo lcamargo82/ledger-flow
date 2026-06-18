@@ -5,11 +5,23 @@ import { AppService } from './app.service';
 import { HealthModule } from './modules/health/health.module';
 import { PrismaModule } from './database/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { RolesModule } from './modules/roles/roles.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
 import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard';
 import { PermissionGuard } from './modules/auth/presentation/guards/permission.guard';
 
 @Module({
-  imports: [HealthModule, PrismaModule, AuthModule],
+  imports: [
+    HealthModule,
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    RolesModule,
+    PermissionsModule,
+    TenantsModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,

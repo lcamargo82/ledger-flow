@@ -574,3 +574,13 @@ This included:
 
 *Known Limitation*: Currently, tokens are stored in `localStorage` to simplify the local environment and portfolio setup. In a production environment, this should be evaluated and moved to HttpOnly, Secure, and SameSite cookies for refresh tokens.
 
+### Phase 3C
+Phase 3C — Roles, Permissions & Tenant Settings Foundation has been implemented.
+This included:
+- Criação das views `RolesView`, `PermissionsView` e `TenantSettingsView`.
+- Refatoração do `AppLayout` para exibir menus dinâmicos com base em `authStore.checkAllPermissions`.
+- Serviços e Pinia stores associados para lidar com a paginação, buscas em tela (Permissions), e modais de detalhamento.
+
+
+### Atualização (Fase 3D)
+Reforçada a obrigatoriedade de uso do sistema i18n com objetos aninhados e reaproveitamento de componentes base (como AppModal, AppTable, UserForm) para todas as telas administrativas.

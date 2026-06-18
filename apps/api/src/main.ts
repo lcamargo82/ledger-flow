@@ -8,16 +8,20 @@ import { getRedocHtml } from './config/docs/redoc.html';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
 
   const swaggerConfig = getSwaggerConfig();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  
+
   // Swagger UI
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api/docs', app, document, {
+    customSiteTitle: 'LedgerFlow API',
+  });
 
   const httpAdapter = app.getHttpAdapter();
   // OpenAPI JSON

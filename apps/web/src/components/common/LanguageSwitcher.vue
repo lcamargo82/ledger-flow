@@ -33,7 +33,7 @@ const { currentLocale, setLocale } = useI18n();
   background: rgba(255, 255, 255, 0.05);
   padding: 0.25rem 0.5rem;
   border-radius: var(--lf-radius);
-  border: 1px solid var(--lf-border);
+  border: 1px solid var(--lf-border-primary);
 }
 .lf-lang-btn {
   background: transparent;
@@ -54,7 +54,7 @@ const { currentLocale, setLocale } = useI18n();
   background: var(--lf-primary-light);
 }
 .lf-lang-divider {
-  color: var(--lf-border);
+  color: var(--lf-border-primary);
   margin: 0 0.125rem;
   font-size: 0.75rem;
   user-select: none;

@@ -522,6 +522,77 @@ Permitir criação de um tenant com usuário owner inicial.
 
 ---
 
+## LF-017 — Gestão de Usuários (Fase 3)
+
+### Subtasks Adicionais (Fase 3D)
+* [x] create user
+* [x] update user
+* [x] activate/deactivate user
+* [x] update user roles
+* [x] list roles
+* [x] list permissions
+* [x] tenant settings
+* [x] i18n admin fixes
+
+
+**Prioridade:** P0
+**Tipo:** Backend / Frontend
+**Milestone:** M1
+**Status:** DONE
+
+### Subtasks
+
+* Backend: CRUD de usuários (Listagem paginada, detalhe, criação, edição).
+* Backend: Soft delete (Status Active/Inactive) e revogação de sessão em cascata.
+* Backend: Atribuição de roles a usuários protegida.
+* Frontend: Tela de listagem com componentes base AppTable, AppModal.
+* Frontend: Modais de criação, edição e status com formulários.
+* Integração de Vue i18n, Pinia stores e Axios services.
+
+### Critérios de aceite
+
+* Owner deve poder criar e editar usuários.
+* Ao desativar, sessões do usuário devem cair.
+* Interface responsiva e validada.
+* Paginação funcionando perfeitamente via API.
+
+---
+
+## LF-018 — Roles, Permissions e Tenant Settings (Fase 3C)
+
+**Prioridade:** P0
+**Tipo:** Backend / Frontend
+**Milestone:** M1
+**Status:** DONE
+
+### Subtasks
+
+* [x] List roles
+* [x] Role details
+* [x] List permissions
+* [x] Current tenant settings
+* [x] Update tenant name/timezone
+* [x] Frontend roles view
+* [x] Frontend permissions view
+* [x] Frontend tenant settings view
+* [ ] Create role
+* [ ] Update role
+* [ ] Delete/deactivate role
+* [ ] Manage role permissions
+* [ ] Last OWNER protection
+* [ ] Tenant branding settings
+* [ ] Tenant audit logs
+
+### Critérios de aceite
+
+* Listagem de permissões deve retornar todas do sistema.
+* Listagem de roles deve filtrar por tenantId.
+* Atualização de tenant deve aceitar apenas name e timezone.
+* Backend deve proteger essas rotas com RBAC apropriado.
+* Frontend deve ocultar opções do menu caso sem permissão.
+
+---
+
 # EPIC LF-E02 — UX Foundation, Erros, Toasts, Modais e i18n
 
 ## Objetivo
@@ -1889,3 +1960,17 @@ Uma issue só pode ser marcada como `DONE` quando:
 * [ ] Logs sanitizados
 * [ ] AuditLog para ações sensíveis
 * [ ] Cookies HttpOnly para refresh token em produção
+
+## Brand Identity
+
+- [x] Brand assets added
+- [x] Favicon added
+- [x] README banner added
+- [x] Brand documentation added
+- [x] Frontend logo applied
+
+### Futuro
+- [ ] Converter logo oficial para SVG vetorial limpo
+- [ ] Criar pacote de ícones internos
+- [ ] Criar brand kit exportável
+- [ ] Criar tela pública/landing page

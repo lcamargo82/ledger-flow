@@ -23,11 +23,11 @@ const toastStore = useToastStore();
 <style scoped>
 .lf-toast-container {
   position: fixed;
-  top: 1.5rem;
+  bottom: 1.5rem;
   right: 1.5rem;
   z-index: 9999;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 0.75rem;
   width: 100%;
   max-width: 380px;
@@ -36,7 +36,7 @@ const toastStore = useToastStore();
 
 @media (max-width: 640px) {
   .lf-toast-container {
-    top: 1rem;
+    bottom: 1rem;
     right: 1rem;
     left: 1rem;
     max-width: calc(100% - 2rem);

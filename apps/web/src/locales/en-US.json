@@ -1,21 +1,51 @@
 {
+  "brand": {
+    "name": "LedgerFlow",
+    "tagline": "Connect. Reconcile. Comply. With confidence.",
+    "description": "Enterprise Payment & Reconciliation Platform"
+  },
   "auth": {
+    "hero": {
+      "titleLine1": "Enterprise",
+      "titleHighlight": "Financial Operations",
+      "subtitle": "Payments • Reconciliation • Audit",
+      "features": {
+        "secure": {
+          "title": "Bank-Grade Security",
+          "description": "End-to-end encryption and compliance."
+        },
+        "compliant": {
+          "title": "Automated Compliance",
+          "description": "Rules-based matching and reporting."
+        },
+        "scalable": {
+          "title": "High Throughput",
+          "description": "Process millions of transactions."
+        }
+      }
+    },
     "login": {
-      "title": "Access Platform",
-      "subtitle": "Enter your credentials to continue",
+      "title": "Access platform",
+      "subtitle": "Enter your corporate credentials to continue.",
       "emailLabel": "Corporate Email",
       "emailPlaceholder": "your.name@company.com",
       "passwordLabel": "Access Password",
-      "passwordPlaceholder": "••••••••",
+      "passwordPlaceholder": "Enter your password",
       "forgotPassword": "Forgot my password",
-      "submitButton": "Sign in",
+      "submitButton": "Sign In",
       "loading": "Signing in...",
+      "secureAccessNote": "Access protected by secure authentication and controlled session.",
       "demoHintTitle": "Demo credentials",
       "demoAdmin": "Admin: admin@ledgerflow.com / admin123",
       "demoUser": "User: user@ledgerflow.com / user123",
       "invalidCredentials": "The provided credentials are invalid.",
       "networkError": "Could not connect to the server. Check your connection.",
-      "unexpectedError": "An unexpected error occurred. Try again later."
+      "unexpectedError": "An unexpected error occurred. Try again later.",
+      "validation": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Please enter a valid email address.",
+        "passwordRequired": "Password is required."
+      }
     },
     "forgotPassword": {
       "title": "Recover Password",
@@ -45,13 +75,122 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "users": "Users",
     "payments": "Payments",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
     "reports": "Reports",
     "webhooks": "Webhooks",
     "settings": "Settings",
-    "comingSoon": "Coming Soon"
+    "comingSoon": "Coming Soon",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "tenantSettings": "Tenant Settings"
+  },
+  "users": {
+    "title": "Users",
+    "description": "Manage users linked to the current tenant.",
+    "newUser": "New User",
+    "newUserSoon": "Coming soon",
+    "searchLabel": "Search User",
+    "searchPlaceholder": "Name or email...",
+    "statusLabel": "Status",
+    "statusAll": "All status",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "roleLabel": "Role",
+    "roleAll": "All roles",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "roles": "Roles",
+      "status": "Status",
+      "lastLogin": "Last Login",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDetails": "View Details",
+      "create": "Create User",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "save": "Save",
+      "updateRoles": "Update Roles"
+    },
+    "form": {
+      "createTitle": "New User",
+      "editTitle": "Edit User",
+      "nameLabel": "Full Name",
+      "namePlaceholder": "E.g. John Doe",
+      "emailLabel": "Email",
+      "emailPlaceholder": "E.g. john@company.com",
+      "temporaryPasswordLabel": "Temporary Password",
+      "temporaryPasswordPlaceholder": "Min 8 characters",
+      "rolesLabel": "Access Roles",
+      "activeLabel": "Activate user immediately",
+      "validation": {
+        "nameRequired": "Name is required",
+        "emailRequired": "Valid email is required",
+        "passwordRequired": "Temporary password is required",
+        "passwordMin": "Password must be at least 8 characters",
+        "roleRequired": "Select at least one role"
+      }
+    },
+    "confirmDeactivate": {
+      "title": "Deactivate User",
+      "message": "Are you sure you want to deactivate this user? Active sessions will be terminated."
+    },
+    "confirmActivate": {
+      "title": "Activate User",
+      "message": "Are you sure you want to reactivate this user?"
+    },
+    "emptyTitle": "No users found",
+    "emptyDescription": "There are no users matching the current filters.",
+    "errorTitle": "Error loading",
+    "errorDescription": "Could not load the users list.",
+    "details": {
+      "title": "User Details",
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "roles": "Roles",
+      "lastLoginAt": "Last login",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at",
+      "tenantId": "Tenant ID"
+    },
+    "pagination": {
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next",
+      "perPage": "Items per page"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "toast": {
+      "newUserSoon": "User creation will be available soon.",
+      "created": "User created successfully.",
+      "updated": "User updated successfully.",
+      "activated": "User activated successfully.",
+      "deactivated": "User deactivated successfully.",
+      "rolesUpdated": "User roles updated."
+    },
+    "errors": {
+      "createFailed": "Failed to create user.",
+      "updateFailed": "Failed to update user.",
+      "statusFailed": "Failed to change user status.",
+      "rolesFailed": "Failed to update roles.",
+      "emailAlreadyExists": "A user with this email already exists."
+    },
+    "roles": {
+      "OWNER": "Owner",
+      "FINANCE_OPERATOR": "Finance",
+      "SUPPORT_VIEWER": "Support",
+      "DEVELOPER": "Developer"
+    }
   },
   "common": {
     "logout": "Logout",
@@ -72,7 +211,12 @@
     "success": "Success",
     "warning": "Warning",
     "info": "Information",
-    "actionCancelled": "Action cancelled"
+    "actionCancelled": "Action cancelled",
+    "readonly": "Read-only",
+    "yes": "Yes",
+    "no": "No",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
   },
   "errors": {
     "forbiddenTitle": "Access Denied",
@@ -99,6 +243,72 @@
     "logoutConfirmMessage": "Are you sure you want to end your current session?"
   },
   "permissions": {
-    "missing": "Permission denied"
+    "missing": "Permission denied",
+    "title": "System Permissions",
+    "description": "List of all available global permissions in the system.",
+    "searchPlaceholder": "Search permissions...",
+    "table": {
+      "key": "Key",
+      "description": "Description",
+      "createdAt": "Created at"
+    },
+    "emptyTitle": "No permissions found",
+    "emptyDescription": "The search returned no results.",
+    "errorTitle": "Error loading permissions",
+    "errorDescription": "An error occurred while fetching permissions."
+  },
+  "roles": {
+    "title": "Roles Management",
+    "description": "View the access roles for your tenant.",
+    "table": {
+      "name": "Name",
+      "key": "Key",
+      "description": "Description",
+      "system": "System",
+      "permissionsCount": "Permissions",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDetails": "View details"
+    },
+    "details": {
+      "title": "Role Details",
+      "permissions": "Associated permissions",
+      "noPermissions": "No associated permissions."
+    },
+    "emptyTitle": "No roles found",
+    "emptyDescription": "There are no roles registered for this tenant.",
+    "errorTitle": "Error loading roles",
+    "errorDescription": "An error occurred while fetching roles.",
+    "system": {
+      "yes": "Yes",
+      "no": "No"
+    }
+  },
+  "tenantSettings": {
+    "title": "Tenant Settings",
+    "description": "Manage your environment basic settings.",
+    "form": {
+      "nameLabel": "Company Name",
+      "namePlaceholder": "Ex: My Company",
+      "timezoneLabel": "Timezone",
+      "timezonePlaceholder": "Ex: America/New_York",
+      "slugLabel": "Slug (Unique Identifier)",
+      "activeLabel": "Account Status"
+    },
+    "actions": {
+      "save": "Save Changes"
+    },
+    "toast": {
+      "updated": "Tenant settings successfully updated."
+    },
+    "errors": {
+      "loadFailed": "Error loading tenant settings.",
+      "updateFailed": "Error updating settings."
+    },
+    "validation": {
+      "nameRequired": "Tenant name is required.",
+      "timezoneRequired": "Timezone is required."
+    }
   }
 }

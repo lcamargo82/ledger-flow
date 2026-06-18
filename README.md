@@ -1,12 +1,22 @@
+![LedgerFlow](./images/ledgerflow-readme-banner.png)
+
 # LedgerFlow
 
-## Enterprise Payment, Reconciliation & Observability Platform
+## Enterprise Payment & Reconciliation Platform
 
 **LedgerFlow** é uma plataforma B2B multitenant para gestão de pagamentos, conciliação financeira, auditoria, exportação de relatórios, webhooks, notificações e observabilidade.
 
 O projeto simula um sistema corporativo de grande escala, inspirado em plataformas como Stripe, Asaas, Mercado Pago e gateways financeiros B2B, com foco em arquitetura, segurança, resiliência, rastreabilidade e experiência de usuário.
 
 > Projeto desenvolvido para estudo avançado, portfólio técnico e simulação de ambiente enterprise.
+
+## Brand Identity
+
+![LedgerFlow Brand Board](./images/ledgerflow-brand-board.png)
+
+LedgerFlow uses a dark enterprise fintech identity focused on trust, security, auditability and operational clarity. The visual system is based on a deep slate/zinc palette with indigo, blue, cyan and emerald accents.
+
+* [Brand Identity](./docs/brand.md)
 
 ---
 # 1. Visão Geral
@@ -1031,12 +1041,30 @@ Ferramentas planejadas:
 * Rota de forgot-password adicionada.
 * Componentes base definitivos (AppButton, AppInput, etc).
 
-## Próxima Fase: Fase 3 — Users, Roles & Tenants Management
+## Fase 3A — Users Listing Foundation (Concluída)
 
-* CRUD de usuários.
-* Gestão de roles e permissões.
-* Tela de perfil.
-* Gestão de tenant.
+* Listagem paginada de usuários.
+* Busca por nome/e-mail, filtro por status e role.
+* Service e Store integrados.
+* Componentes de UI atualizados.
+* Visualização detalhada (User Details).
+
+## Fase 3B — User Create/Update/Deactivate Foundation (Concluída)
+
+* Criação de usuário.
+* Atualização de dados básicos.
+* Ativação e desativação (soft delete).
+* Atribuição de roles.
+* Formulário e modais de confirmação no frontend.
+
+## Fase 3C — Roles, Permissions & Tenant Settings Foundation (Concluída)
+
+* Leitura de roles do tenant atual.
+* Visualização detalhada de permissões associadas a roles.
+* Leitura de permissions globais.
+* Configurações básicas de tenant (name, timezone).
+* Telas administrativas protegidas por RBAC.
+* Atualização de Swagger/Redoc/OpenAPI.
 
 ## Fase 3 — Payments MVP
 
@@ -1124,9 +1152,9 @@ Uma funcionalidade só será considerada pronta quando:
 # 27. Status do Projeto
 
 ```text
-Status atual: Fundação de autenticação e UX implementada.
-Fase atual: UX Foundation concluída.
-Próximo passo: Users, Roles & Tenants Management.
+Status atual: User Management Foundation (CRUD de usuários e roles) implementado e testado.
+Fase atual: Fase 3B concluída.
+Próximo passo: Gestão de tenant e Payments MVP.
 
 ```
 

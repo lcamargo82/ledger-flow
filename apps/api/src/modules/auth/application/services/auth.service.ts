@@ -261,7 +261,7 @@ export class AuthService {
             data: { revokedAt: new Date() },
           });
         }
-        
+
         if (storedToken.session && storedToken.session.active) {
           await tx.userSession.update({
             where: { id: storedToken.session.id },

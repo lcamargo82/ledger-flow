@@ -114,7 +114,7 @@ onUnmounted(() => {
   width: 100%;
   padding: 1rem;
   background-color: var(--lf-bg-card);
-  border: 1px solid var(--lf-border);
+  border: 1px solid var(--lf-border-primary);
   border-radius: var(--lf-radius);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
   overflow: hidden;

@@ -4,7 +4,10 @@ export class AuthenticatedUserResponseDto {
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'ID do usuário' })
   id: string;
 
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174001', description: 'ID do tenant do usuário' })
+  @ApiProperty({
+    example: '123e4567-e89b-12d3-a456-426614174001',
+    description: 'ID do tenant do usuário',
+  })
   tenantId: string;
 
   @ApiProperty({ example: 'John Doe', description: 'Nome do usuário' })
@@ -30,7 +33,10 @@ export class LoginResponseDto {
   @ApiProperty({ description: 'Refresh token opaco para renovar a sessão' })
   refreshToken: string;
 
-  @ApiProperty({ type: AuthenticatedUserResponseDto, description: 'Dados básicos do usuário logado' })
+  @ApiProperty({
+    type: AuthenticatedUserResponseDto,
+    description: 'Dados básicos do usuário logado',
+  })
   user: AuthenticatedUserResponseDto;
 }
 
@@ -45,6 +51,9 @@ export class LogoutResponseDto {
 }
 
 export class MeResponseDto {
-  @ApiProperty({ type: AuthenticatedUserResponseDto, description: 'Dados básicos do usuário autenticado' })
+  @ApiProperty({
+    type: AuthenticatedUserResponseDto,
+    description: 'Dados básicos do usuário autenticado',
+  })
   user: AuthenticatedUserResponseDto;
 }

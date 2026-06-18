@@ -429,6 +429,27 @@ ledgerflow.dlx.exchange
 
 ---
 
+# 5.9 User Management Write Operations
+
+## Regras de Negócio e Segurança
+
+A gestão de usuários (CRUD) possui regras restritas para garantir a estabilidade e o isolamento dos tenants:
+
+* **Multitenancy**: Todas as queries e mutations filtram obrigatoriamente pelo `tenantId` do usuário logado (`@CurrentUser()`).
+* **Senhas Temporárias**: Na criação (Fase 3B), o usuário recebe uma `temporaryPassword` obrigatória (mínimo de 8 caracteres). Essa senha deve ser hasheada com bcrypt da mesma forma que senhas normais. Futuramente, pode haver um flag para forçar a troca no primeiro login.
+* **Proteção do Owner**: Nenhum usuário pode remover a role `OWNER` do próprio usuário logado caso seja um admin alterando a si mesmo (previne bloqueio do sistema).
+* **Soft Delete**: Não existem exclusões físicas (`DELETE`) para usuários. Operações de remoção alteram o status `active` para `false`.
+* **Revogação de Sessão em Cascata**: Ao desativar um usuário (`active: false`), o sistema revoga proativamente todos os seus `RefreshTokens` e `UserSessions` ativos no banco de dados.
+
+## Operações Suportadas
+
+* `POST /users`: Criação (requer `users:create`).
+* `PATCH /users/:id`: Edição de dados básicos como nome e e-mail (requer `users:update`).
+* `PATCH /users/:id/status`: Ativação/Desativação (requer `users:update`).
+* `PATCH /users/:id/roles`: Substituição das roles associadas (requer `users:update`).
+
+---
+
 # 6. Pagamentos — Strategy + Factory
 
 # 6.1 Objetivo
@@ -1840,3 +1861,24 @@ This included:
 * **Controllers**: Organizados e agrupados usando `@ApiTags`.
 * **Proteção**: Rotas protegidas documentadas adequadamente com `@ApiBearerAuth`.
 * **Atualização**: Documentação atualizada lado a lado com cada nova feature.
+
+## 5.10 Roles & Permissions Design
+O sistema utiliza permissões globais do sistema (`Permission`) atreladas aos perfis (`Role`), permitindo controle granular baseado em RBAC.
+A leitura de Roles é isolada pelo Tenant (`roles:manage`).
+A leitura de Permissões requer `permissions:read`.
+O frontend espelha as permissões ocultando itens de menu, mas o backend continua validando cada requisição com o `PermissionGuard`.
+Na Fase 3C, foi introduzido o endpoint `GET /roles` para listar roles do tenant logado e `GET /roles/:id` para detalhar suas permissões associadas. As permissões são acessíveis publicamente via `GET /permissions`.
+
+## 5.11 Tenant Settings Design
+O sistema permite customizações e configurações básicas em nível de Tenant sem expor dados estruturais como `slug` e `active`.
+Endpoint introduzidos na Fase 3C:
+* `GET /tenants/current`: Busca a configuração atual de um tenant ativo a partir do `tenantId` contido no contexto seguro da sessão.
+* `PATCH /tenants/current`: Atualiza nome (`name`) e `timezone`. Exige permissão `tenant:update`.
+
+## Brand Identity / UI System
+
+* assets oficiais em images/
+* assets públicos do frontend em apps/web/public/brand/
+* tokens visuais em main.css
+* README usa images/
+* frontend usa /brand/*

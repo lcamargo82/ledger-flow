@@ -1,8 +1,32 @@
 {
+  "brand": {
+    "name": "LedgerFlow",
+    "tagline": "Conecte. Reconcilie. Cumpra. Com confiança.",
+    "description": "Plataforma enterprise de pagamentos e conciliação"
+  },
   "auth": {
+    "hero": {
+      "titleLine1": "Operações financeiras",
+      "titleHighlight": "seguras",
+      "subtitle": "Pagamentos • Conciliação • Auditoria",
+      "features": {
+        "secure": {
+          "title": "Seguro",
+          "description": "Segurança de nível corporativo"
+        },
+        "compliant": {
+          "title": "Em conformidade",
+          "description": "Feito para auditabilidade e confiança"
+        },
+        "scalable": {
+          "title": "Escalável",
+          "description": "Infraestrutura pronta para crescer"
+        }
+      }
+    },
     "login": {
-      "title": "Acessar Plataforma",
-      "subtitle": "Insira suas credenciais para continuar",
+      "title": "Acessar plataforma",
+      "subtitle": "Entre com suas credenciais corporativas para continuar.",
       "emailLabel": "E-mail Corporativo",
       "emailPlaceholder": "seu.nome@empresa.com",
       "passwordLabel": "Senha de Acesso",
@@ -10,12 +34,17 @@
       "forgotPassword": "Esqueci minha senha",
       "submitButton": "Entrar",
       "loading": "Entrando...",
+      "secureAccessNote": "Acesso protegido por autenticação segura e sessão controlada.",
       "demoHintTitle": "Credenciais demo",
       "demoAdmin": "Admin: admin@ledgerflow.com / admin123",
       "demoUser": "User: user@ledgerflow.com / user123",
       "invalidCredentials": "As credenciais fornecidas são inválidas.",
       "networkError": "Não foi possível conectar ao servidor. Verifique sua conexão.",
-      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente mais tarde."
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente mais tarde.",
+      "validation": {
+        "emailRequired": "O e-mail é obrigatório.",
+        "passwordRequired": "A senha é obrigatória."
+      }
     },
     "forgotPassword": {
       "title": "Recuperar Senha",
@@ -45,13 +74,122 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "users": "Usuários",
     "payments": "Pagamentos",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
     "reports": "Relatórios",
     "webhooks": "Webhooks",
     "settings": "Configurações",
-    "comingSoon": "Em breve"
+    "comingSoon": "Em breve",
+    "roles": "Roles",
+    "permissions": "Permissões",
+    "tenantSettings": "Configurações do Tenant"
+  },
+  "users": {
+    "title": "Usuários",
+    "description": "Gerencie os usuários vinculados ao tenant atual.",
+    "newUser": "Novo Usuário",
+    "newUserSoon": "Em breve",
+    "searchLabel": "Buscar Usuário",
+    "searchPlaceholder": "Nome ou e-mail...",
+    "statusLabel": "Status",
+    "statusAll": "Todos os status",
+    "statusActive": "Ativo",
+    "statusInactive": "Inativo",
+    "roleLabel": "Role",
+    "roleAll": "Todas as roles",
+    "table": {
+      "name": "Nome",
+      "email": "E-mail",
+      "roles": "Roles",
+      "status": "Status",
+      "lastLogin": "Último Login",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "actions": {
+      "viewDetails": "Ver Detalhes",
+      "create": "Criar Usuário",
+      "edit": "Editar",
+      "activate": "Ativar",
+      "deactivate": "Desativar",
+      "save": "Salvar",
+      "updateRoles": "Atualizar Roles"
+    },
+    "form": {
+      "createTitle": "Novo Usuário",
+      "editTitle": "Editar Usuário",
+      "nameLabel": "Nome Completo",
+      "namePlaceholder": "Ex: João da Silva",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "Ex: joao@empresa.com",
+      "temporaryPasswordLabel": "Senha Temporária",
+      "temporaryPasswordPlaceholder": "Mínimo 8 caracteres",
+      "rolesLabel": "Roles de Acesso",
+      "activeLabel": "Ativar usuário imediatamente",
+      "validation": {
+        "nameRequired": "O nome é obrigatório",
+        "emailRequired": "O e-mail é obrigatório e deve ser válido",
+        "passwordRequired": "A senha temporária é obrigatória",
+        "passwordMin": "A senha deve ter no mínimo 8 caracteres",
+        "roleRequired": "Selecione pelo menos uma role"
+      }
+    },
+    "confirmDeactivate": {
+      "title": "Desativar Usuário",
+      "message": "Tem certeza que deseja desativar este usuário? Suas sessões ativas serão encerradas."
+    },
+    "confirmActivate": {
+      "title": "Ativar Usuário",
+      "message": "Tem certeza que deseja reativar este usuário?"
+    },
+    "emptyTitle": "Nenhum usuário encontrado",
+    "emptyDescription": "Não há usuários correspondentes aos filtros atuais.",
+    "errorTitle": "Erro ao carregar",
+    "errorDescription": "Não foi possível carregar a lista de usuários.",
+    "details": {
+      "title": "Detalhes do Usuário",
+      "name": "Nome",
+      "email": "E-mail",
+      "status": "Status",
+      "roles": "Roles",
+      "lastLoginAt": "Último login",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "tenantId": "ID do Tenant"
+    },
+    "pagination": {
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "perPage": "Itens por página"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "toast": {
+      "newUserSoon": "A criação de usuários será liberada em breve.",
+      "created": "Usuário criado com sucesso.",
+      "updated": "Usuário atualizado com sucesso.",
+      "activated": "Usuário ativado com sucesso.",
+      "deactivated": "Usuário desativado com sucesso.",
+      "rolesUpdated": "Roles do usuário atualizadas."
+    },
+    "errors": {
+      "createFailed": "Não foi possível criar o usuário.",
+      "updateFailed": "Não foi possível atualizar o usuário.",
+      "statusFailed": "Não foi possível alterar o status do usuário.",
+      "rolesFailed": "Não foi possível atualizar as roles.",
+      "emailAlreadyExists": "Já existe um usuário com este e-mail."
+    },
+    "roles": {
+      "OWNER": "Owner",
+      "FINANCE_OPERATOR": "Financeiro",
+      "SUPPORT_VIEWER": "Suporte",
+      "DEVELOPER": "Desenvolvedor"
+    }
   },
   "common": {
     "logout": "Sair",
@@ -72,7 +210,12 @@
     "success": "Sucesso",
     "warning": "Aviso",
     "info": "Informação",
-    "actionCancelled": "Ação cancelada"
+    "actionCancelled": "Ação cancelada",
+    "readonly": "Apenas leitura",
+    "yes": "Sim",
+    "no": "Não",
+    "enabled": "Ativo",
+    "disabled": "Inativo"
   },
   "errors": {
     "forbiddenTitle": "Acesso Negado",
@@ -99,6 +242,72 @@
     "logoutConfirmMessage": "Você tem certeza que deseja encerrar a sua sessão atual?"
   },
   "permissions": {
-    "missing": "Sem permissão"
+    "missing": "Sem permissão",
+    "title": "Permissões do Sistema",
+    "description": "Lista de todas as permissões globais disponíveis no sistema.",
+    "searchPlaceholder": "Buscar permissões...",
+    "table": {
+      "key": "Chave",
+      "description": "Descrição",
+      "createdAt": "Criado em"
+    },
+    "emptyTitle": "Nenhuma permissão encontrada",
+    "emptyDescription": "A busca não retornou resultados.",
+    "errorTitle": "Erro ao carregar permissões",
+    "errorDescription": "Ocorreu um erro ao buscar as permissões."
+  },
+  "roles": {
+    "title": "Gerenciamento de Roles",
+    "description": "Visualize os papéis de acesso do seu tenant.",
+    "table": {
+      "name": "Nome",
+      "key": "Chave",
+      "description": "Descrição",
+      "system": "Sistema",
+      "permissionsCount": "Permissões",
+      "actions": "Ações"
+    },
+    "actions": {
+      "viewDetails": "Ver detalhes"
+    },
+    "details": {
+      "title": "Detalhes da Role",
+      "permissions": "Permissões associadas",
+      "noPermissions": "Nenhuma permissão associada."
+    },
+    "emptyTitle": "Nenhuma role encontrada",
+    "emptyDescription": "Não há roles cadastradas para este tenant.",
+    "errorTitle": "Erro ao carregar roles",
+    "errorDescription": "Ocorreu um erro ao buscar as roles.",
+    "system": {
+      "yes": "Sim",
+      "no": "Não"
+    }
+  },
+  "tenantSettings": {
+    "title": "Configurações do Tenant",
+    "description": "Gerencie as configurações básicas do seu ambiente.",
+    "form": {
+      "nameLabel": "Nome da Empresa",
+      "namePlaceholder": "Ex: Minha Empresa",
+      "timezoneLabel": "Fuso Horário",
+      "timezonePlaceholder": "Ex: America/Sao_Paulo",
+      "slugLabel": "Slug (Identificador Único)",
+      "activeLabel": "Status da Conta"
+    },
+    "actions": {
+      "save": "Salvar Alterações"
+    },
+    "toast": {
+      "updated": "Configurações do tenant atualizadas com sucesso."
+    },
+    "errors": {
+      "loadFailed": "Erro ao carregar configurações do tenant.",
+      "updateFailed": "Erro ao atualizar configurações."
+    },
+    "validation": {
+      "nameRequired": "O nome do tenant é obrigatório.",
+      "timezoneRequired": "O fuso horário é obrigatório."
+    }
   }
 }

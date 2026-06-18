@@ -149,13 +149,63 @@ Cada fase deve entregar:
 
 ---
 
-## Fase 3 — Users, Roles & Tenants Management
+## Fase 3A — Users Management Foundation
 
-* CRUD de usuários
-* Gestão de roles
-* Gestão de permissões
+**Status:** Concluída
+
+**Itens:**
+* Backend: CRUD de usuários (Listagem paginada e detalhe)
+* RBAC: Proteção de rotas e menus (`users:read`)
+* Frontend: Tela de listagem de usuários e detalhes
+* Frontend: AppTable componente base
+* Documentação OpenAPI e Swagger
+
+---
+
+## Fase 3B — User Create/Update/Deactivate Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Backend: Endpoints de criação (POST) e atualização (PATCH) de usuários.
+* Backend: Troca de status de usuário (active/inactive) gerenciando revogação de tokens.
+* Backend: Atribuição de roles a usuários protegida pelo tenant e OWNER.
+* Frontend: Modais de criação e edição.
+* Frontend: Formulário integrado com o users store.
+* Frontend: Toast e I18N.
+* Funcionalidade testada localmente.
+
+---
+
+## Fase 3C — Roles, Permissions & Tenant Settings Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Roles backend
+* Permissions backend
+* Tenant settings backend
+* Roles frontend
+* Permissions frontend
+* Tenant settings frontend
+* OpenAPI
+* i18n
+* documentação
+* Gestão de roles e permissões customizadas
 * Tela de perfil
-* Gestão de tenant
+* Gestão do tenant
+
+---
+
+## Fase 3D — Conclusão de Users e Admin i18n
+
+**Status:** Concluída
+
+**Itens:**
+* Correção de tradução flat/aninhada no frontend.
+* Ajustes finais no botão "Novo Usuário".
+* Script de validação de i18n adicionado.
+* Atualização final do plano de desenvolvimento.
 
 ---
 
@@ -176,3 +226,36 @@ Cada fase deve entregar:
 ---
 
 ## Fase 8 — Observability
+
+### Brand Identity Application
+
+Status: Concluído
+
+Itens:
+
+* aplicar logo no frontend
+* aplicar favicon
+* aplicar README banner
+* criar docs/brand.md
+* aplicar tokens visuais
+
+### Login UI Refinement
+
+Status: Concluído
+
+Itens:
+* O card de login foi refinado (proporção mais compacta, glassmorphism suavizado).
+* Os estados de erro foram suavizados (cores menos agressivas, espaçamento melhorado).
+* A tela de login mantém textos isolados no código, internacionalizados via i18n (pt-BR e en-US).
+* A linha de hero foi ajustada para "Auditoria" na UI em vez de "Auditabilidade".
+* O card está sem credenciais demo embutidas (segurança).
+
+### Layout Interno & Dashboard UX
+
+Status: Concluído
+
+Itens:
+* Extinção do Header Topo global, estabelecendo o uso de `AppPageHeader` por tela (Títulos e ações independentes em cada vista).
+* Reestruturação da Sidebar (`AppLayout`), incorporando um rodapé funcional com idioma, dados do usuário e botão "Sair" consolidado.
+* Reposicionamento do sistema de Toasts (`AppToastContainer`) para o canto inferior direito (bottom-right), preservando a visibilidade dos cards superiores.
+* Reorganização do Dashboard: banner (`ledgerflow-app-header2.png`) centralizado logo abaixo do cabeçalho da página, sem aparência de "botão/seta" fantasma; Cards do dashboard realinhados com tags de permissões mais compactas e controle de altura consistentes.
