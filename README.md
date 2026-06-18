@@ -307,6 +307,15 @@ Os diagramas estão disponíveis em `docs/diagrams`.
 * [Implementation Plan](docs/implementation-plan.md)
 * [Technical Backlog](docs/backlog.md)
 
+## Design e UI (Frontend)
+
+* [UI Flow & Navigation](docs/ui-flow.md)
+* [UI Screens Specification](docs/ui-screens.md)
+* [UI Component Library](docs/ui-components.md)
+* [UI Design System](docs/ui-design-system.md)
+* [UI Refactor Plan](docs/ui-refactor-plan.md)
+* [UI Reference Index](docs/reference/ui/README.md)
+
 ## ADRs — Architecture Decision Records
 
 * [ADR-0001 — Architecture Style](docs/adr/0001-architecture-style.md)

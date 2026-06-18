@@ -834,6 +834,11 @@ O frontend será desenvolvido com:
 * Menus ocultos não devem renderizar componentes.
 * Tabelas usam paginação backend.
 * Estilos devem ser centralizados.
+* **UI Blueprint:** Todo o desenvolvimento visual deve se guiar pelo `docs/ui-design-system.md` e referências base.
+* **Componentização:** Nova interface deve ser baseada em componentes reutilizáveis (`AppButton`, `AppInput`, etc).
+* **Layout:** Adoção do `AppLayout` sem header global, utilizando a Sidebar como principal meio de navegação e controle da sessão.
+* **i18n:** Internacionalização obrigatória. Todo texto de interface deve possuir chaves de idioma.
+* **RBAC:** A restrição de acesso e renderização condicional (ex: `<PermissionGate>`) no frontend atua primariamente como melhoria de UX. O backend permanece sendo a **autoridade final**.
 
 ---
 

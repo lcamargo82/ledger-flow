@@ -267,3 +267,47 @@ Itens:
 * Reestruturação da Sidebar (`AppLayout`), incorporando um rodapé funcional com idioma, dados do usuário e botão "Sair" consolidado.
 * Reposicionamento do sistema de Toasts (`AppToastContainer`) para o canto inferior direito (bottom-right), preservando a visibilidade dos cards superiores.
 * Reorganização do Dashboard: banner (`ledgerflow-app-header2.png`) centralizado logo abaixo do cabeçalho da página, sem aparência de "botão/seta" fantasma; Cards do dashboard realinhados com tags de permissões mais compactas e controle de altura consistentes.
+
+---
+
+## Fase UI-1 — LedgerFlow UI Blueprint & Screen Flow
+
+**Status:** Concluída
+
+**Itens:**
+* Fluxo de navegação mapeado.
+* Especificação de telas.
+* Componentes mapeados.
+* Plano de refatoração estruturado.
+
+---
+
+## Fase UI-2 — Refatoração das Telas Existentes
+
+**Status:** Pendente
+
+**Itens:**
+* Refatorar telas conforme UI Blueprint (AppLayout, Sidebar, Login, Dashboard, Users, Roles, Permissions, Settings, etc).
+* Implementar Component Library.
+
+---
+
+## Fase 4A.1 — Password Recovery Frontend
+
+**Status:** Pendente
+
+**Itens:**
+* Fluxo Forgot Password e Reset Password.
+* Integração backend.
+* Segurança de UI e mensagens genéricas.
+
+---
+
+## Fase 4B — Customers Frontend
+
+**Status:** Pendente
+
+**Itens:**
+* Listagem de clientes com tabela e filtros.
+* Cadastro, edição e detalhes.
+* Integração de RBAC (customers:read, create, update).
