@@ -493,3 +493,7 @@ Além disso, ferramentas como Helmet, CORS rigoroso, Rate Limiting, RequestId/Tr
 
 ### Atualização (Fase 3D)
 É terminantemente proibido retornar senhas temporárias (`temporaryPassword`), `passwordHash`, `tokenHash` ou chaves inteiras em listagens ou detalhes de usuários/tenants. Todos os DTOs administrativos (ex: `UserDetailsResponseDto`) devem omitir e sanitizar essas propriedades rigorosamente.
+
+### Password Recovery Tokens (Fase 4A)
+- Tokens de recuperação de senha NUNCA são armazenados ou logados em sua forma pura.
+- E-mails de recuperação são enviados via SMTP contendo um link para que o frontend consuma o token, e a resposta do endpoint de requisição nunca indica a existência do usuário, prevenindo a enumeração.

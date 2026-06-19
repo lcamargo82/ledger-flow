@@ -1,13 +1,19 @@
 <template>
-  <div class="lf-layout-app">
+  <div class="lf-layout-app" :class="{ 'lf-layout-app--collapsed': isCollapsed }">
     <!-- Sidebar -->
-    <aside class="lf-sidebar" aria-label="Sidebar">
+    <aside class="lf-sidebar" :class="{ 'lf-sidebar--collapsed': isCollapsed }" aria-label="Sidebar">
+      <button class="lf-sidebar-toggle" @click="toggleSidebar" :aria-label="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+        <span class="material-symbols-outlined">{{ isCollapsed ? 'chevron_right' : 'chevron_left' }}</span>
+      </button>
+
       <div class="lf-sidebar__brand">
-        <img :src="brandAssets.logoDark" alt="LedgerFlow Logo" class="lf-sidebar-logo" />
+        <img v-if="!isCollapsed" :src="brandAssets.logoDark" alt="LedgerFlow Logo" class="lf-sidebar-logo" />
+        <img v-else :src="brandAssets.appIcon" alt="LF Icon" class="lf-sidebar-logo-icon-img" />
       </div>
       <nav class="lf-sidebar__nav">
-        <router-link to="/dashboard" class="lf-nav-item">
-          {{ t('nav.dashboard') }}
+        <router-link to="/dashboard" class="lf-nav-item" active-class="lf-nav-item--active">
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.dashboard') }}</span>
         </router-link>
         <router-link 
           v-if="authStore.checkAllPermissions(['users:read'])" 
@@ -15,7 +21,17 @@
           class="lf-nav-item"
           active-class="lf-nav-item--active"
         >
-          {{ t('nav.users') }}
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">group</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.users') }}</span>
+        </router-link>
+        <router-link 
+          v-if="authStore.checkAllPermissions(['customers:read'])" 
+          to="/customers" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">person</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.customers') }}</span>
         </router-link>
         <router-link 
           v-if="authStore.checkAllPermissions(['roles:manage'])" 
@@ -23,7 +39,8 @@
           class="lf-nav-item"
           active-class="lf-nav-item--active"
         >
-          {{ t('nav.roles') }}
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">verified_user</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.roles') }}</span>
         </router-link>
         <router-link 
           v-if="authStore.checkAllPermissions(['permissions:read'])" 
@@ -31,7 +48,8 @@
           class="lf-nav-item"
           active-class="lf-nav-item--active"
         >
-          {{ t('nav.permissions') }}
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">key</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.permissions') }}</span>
         </router-link>
         <router-link 
           v-if="authStore.checkAllPermissions(['tenant:update'])" 
@@ -39,31 +57,32 @@
           class="lf-nav-item"
           active-class="lf-nav-item--active"
         >
-          {{ t('nav.tenantSettings') }}
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_balance</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.tenantSettings') }}</span>
         </router-link>
         <!-- Mock Nav Items -->
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
-          {{ t('nav.payments') }}
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">payments</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
         </a>
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
-          {{ t('nav.reconciliation') }}
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_tree</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>
         </a>
       </nav>
 
       <div class="lf-sidebar__footer">
-        <LanguageSwitcher />
-        <div class="lf-sidebar__user">
+        <LanguageSwitcher v-show="!isCollapsed" />
+        <div class="lf-sidebar__user" :class="{ 'lf-sidebar__user--collapsed': isCollapsed }">
           <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
-          <div class="lf-sidebar__user-info">
+          <div class="lf-sidebar__user-info" v-show="!isCollapsed">
             <span class="lf-sidebar__user-name">{{ authStore.userName }}</span>
             <span class="lf-sidebar__user-email">{{ authStore.userEmail }}</span>
           </div>
         </div>
-        <button class="lf-sidebar__logout" @click="handleLogout" :aria-label="t('common.logout')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-          </svg>
-          {{ t('common.logout') }}
+        <button class="lf-sidebar__logout" @click="handleLogout" :aria-label="t('common.logout')" :class="{ 'lf-sidebar__logout--collapsed': isCollapsed }">
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">logout</span>
+          <span class="text" v-show="!isCollapsed">{{ t('common.logout') }}</span>
         </button>
       </div>
     </aside>
@@ -80,6 +99,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.store';
 import { useConfirmDialogStore } from '../stores/confirm-dialog.store';
@@ -87,6 +107,11 @@ import { useI18n } from '../composables/useI18n';
 import { brandAssets } from '../config/brand';
 import AppButton from '../components/common/AppButton.vue';
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue';
+
+const isCollapsed = ref(false);
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value;
+};
 
 const authStore = useAuthStore();
 const confirmDialogStore = useConfirmDialogStore();

@@ -1,14 +1,22 @@
-import { Injectable, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { LoginDto } from '../dto/login.dto';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { LogoutDto } from '../dto/logout.dto';
+import { ForgotPasswordDto } from '../dto/forgot-password.dto';
+import { ResetPasswordDto } from '../dto/reset-password.dto';
 import { AuthResponse } from '../types/auth-response.type';
 import { AuthTokenPayload } from '../types/auth-token-payload.type';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { EmailService } from '../../../email/application/services/email.service';
 
 @Injectable()
 export class AuthService {
@@ -16,12 +24,19 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
-  async login(loginDto: LoginDto, ipAddress?: string, userAgent?: string): Promise<AuthResponse> {
+  async login(
+    loginDto: LoginDto,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<AuthResponse> {
     const email = loginDto.email.trim().toLowerCase();
-    const maxAttempts = this.configService.get<number>('AUTH_MAX_FAILED_ATTEMPTS') || 5;
-    const lockMinutes = this.configService.get<number>('AUTH_LOCK_MINUTES') || 15;
+    const maxAttempts =
+      this.configService.get<number>('AUTH_MAX_FAILED_ATTEMPTS') || 5;
+    const lockMinutes =
+      this.configService.get<number>('AUTH_LOCK_MINUTES') || 15;
 
     let userTenantId: string | null = null;
     let authAttemptStatus = false;
@@ -32,7 +47,11 @@ export class AuthService {
         where: { email },
         include: {
           roles: {
-            include: { role: { include: { permissions: { include: { permission: true } } } } },
+            include: {
+              role: {
+                include: { permissions: { include: { permission: true } } },
+              },
+            },
           },
         },
       });
@@ -51,10 +70,16 @@ export class AuthService {
 
       if (user.lockedUntil && user.lockedUntil > new Date()) {
         failureReason = 'USER_LOCKED';
-        throw new HttpException('Account temporarily locked', HttpStatus.LOCKED); // 423
+        throw new HttpException(
+          'Account temporarily locked',
+          HttpStatus.LOCKED,
+        ); // 423
       }
 
-      const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
+      const isPasswordValid = await bcrypt.compare(
+        loginDto.password,
+        user.passwordHash,
+      );
 
       if (!isPasswordValid) {
         failureReason = 'INVALID_PASSWORD';
@@ -88,8 +113,12 @@ export class AuthService {
       const permissions = Array.from(permissionsSet);
 
       const refreshTokenString = crypto.randomBytes(64).toString('hex');
-      const refreshTokenHash = crypto.createHash('sha256').update(refreshTokenString).digest('hex');
-      const expiresInStr = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
+      const refreshTokenHash = crypto
+        .createHash('sha256')
+        .update(refreshTokenString)
+        .digest('hex');
+      const expiresInStr =
+        this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
       const expiresAt = this.parseExpiresIn(expiresInStr);
 
       // Single session logic: Revoke previous active sessions and refresh tokens
@@ -176,9 +205,14 @@ export class AuthService {
     }
   }
 
-  async refresh(refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string }> {
+  async refresh(
+    refreshTokenDto: RefreshTokenDto,
+  ): Promise<{ accessToken: string }> {
     const { refreshToken } = refreshTokenDto;
-    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
 
     const storedToken = await this.prisma.refreshToken.findFirst({
       where: { tokenHash },
@@ -186,7 +220,11 @@ export class AuthService {
         user: {
           include: {
             roles: {
-              include: { role: { include: { permissions: { include: { permission: true } } } } },
+              include: {
+                role: {
+                  include: { permissions: { include: { permission: true } } },
+                },
+              },
             },
           },
         },
@@ -246,7 +284,10 @@ export class AuthService {
 
   async logout(logoutDto: LogoutDto): Promise<{ message: string }> {
     const { refreshToken } = logoutDto;
-    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
 
     const storedToken = await this.prisma.refreshToken.findFirst({
       where: { tokenHash },
@@ -272,6 +313,158 @@ export class AuthService {
     }
 
     return { message: 'Logged out successfully' };
+  }
+
+  async forgotPassword(
+    forgotPasswordDto: ForgotPasswordDto,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<{ message: string }> {
+    const email = forgotPasswordDto.email.trim().toLowerCase();
+
+    const user = await this.prisma.user.findFirst({
+      where: { email, active: true },
+    });
+
+    if (user) {
+      // Invalidate previous tokens
+      await this.prisma.passwordResetToken.updateMany({
+        where: { userId: user.id, usedAt: null },
+        data: { usedAt: new Date() }, // Or delete them, or set some revoked flag. We just set usedAt to now to invalidate.
+      });
+
+      const token = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+      const expiresAt = new Date();
+      expiresAt.setMinutes(expiresAt.getMinutes() + 30); // 30 minutes
+
+      await this.prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash,
+          expiresAt,
+        },
+      });
+
+      const webUrl =
+        this.configService.get<string>('WEB_URL') || 'http://localhost:5180';
+      const resetLink = `${webUrl}/reset-password?token=${token}`;
+
+      await this.emailService.sendPasswordResetEmail(user.email, resetLink);
+
+      // Audit log
+      await this.prisma.auditLog.create({
+        data: {
+          tenantId: user.tenantId,
+          actorUserId: user.id,
+          action: 'auth.password_recovery_requested',
+          entityType: 'User',
+          entityId: user.id,
+          metadata: { ipAddress, userAgent },
+          ipAddress,
+          userAgent,
+        },
+      });
+    } else {
+      // Log failed attempt safely if user doesn't exist (no actorUserId/tenantId)
+      await this.prisma.auditLog.create({
+        data: {
+          action: 'auth.password_recovery_requested_invalid_user',
+          metadata: {
+            emailMasked: this.maskEmail(email),
+            ipAddress,
+            userAgent,
+          },
+          ipAddress,
+          userAgent,
+        },
+      });
+    }
+
+    return {
+      message:
+        'Se o e-mail existir, as instruções de recuperação serão enviadas.',
+    };
+  }
+
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<{ message: string }> {
+    const { token, password } = resetPasswordDto;
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const resetTokenRecord = await this.prisma.passwordResetToken.findFirst({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      include: { user: true },
+    });
+
+    if (!resetTokenRecord || !resetTokenRecord.user.active) {
+      throw new HttpException(
+        'Invalid or expired password reset token.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await this.prisma.$transaction(async (tx) => {
+      // Update user password and reset lock/failures
+      await tx.user.update({
+        where: { id: resetTokenRecord.user.id },
+        data: {
+          passwordHash,
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
+      });
+
+      // Mark token as used
+      await tx.passwordResetToken.update({
+        where: { id: resetTokenRecord.id },
+        data: { usedAt: new Date() },
+      });
+
+      // Revoke all sessions and refresh tokens
+      await tx.userSession.updateMany({
+        where: { userId: resetTokenRecord.user.id, active: true },
+        data: { active: false, revokedAt: new Date() },
+      });
+
+      await tx.refreshToken.updateMany({
+        where: { userId: resetTokenRecord.user.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+
+      // Audit log
+      await tx.auditLog.create({
+        data: {
+          tenantId: resetTokenRecord.user.tenantId,
+          actorUserId: resetTokenRecord.user.id,
+          action: 'auth.password_reset_completed',
+          entityType: 'User',
+          entityId: resetTokenRecord.user.id,
+          ipAddress,
+          userAgent,
+        },
+      });
+    });
+
+    return { message: 'Password has been reset successfully.' };
+  }
+
+  private maskEmail(email: string): string {
+    const [name, domain] = email.split('@');
+    if (!domain) return email;
+    const maskedName =
+      name.length > 2 ? `${name[0]}***${name[name.length - 1]}` : '***';
+    return `${maskedName}@${domain}`;
   }
 
   private parseExpiresIn(expiresIn: string): Date {

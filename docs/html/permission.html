@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LedgerFlow - Permissões do Sistema</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#4f46e5",
+                        "on-primary-container": "#dad7ff",
+                        "primary": "#c3c0ff",
+                        "surface-container-low": "#1b1b24",
+                        "secondary": "#bec6e0",
+                        "error": "#ffb4ab",
+                        "surface-container": "#1f1f28",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "secondary-fixed": "#dae2fd",
+                        "on-tertiary-fixed": "#351000",
+                        "background": "#09090B",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-fixed": "#e2dfff",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "inverse-primary": "#4d44e3",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-tertiary-container": "#ffd2be",
+                        "surface-container-lowest": "#0e0d16",
+                        "inverse-on-surface": "#302f39",
+                        "on-secondary": "#283044",
+                        "on-surface": "#e4e1ee",
+                        "surface-variant": "#35343e",
+                        "tertiary": "#ffb695",
+                        "secondary-container": "#3f465c",
+                        "surface-tint": "#c3c0ff",
+                        "on-tertiary": "#571f00",
+                        "outline": "#27272A",
+                        "outline-variant": "#27272A",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-dim": "#13121b",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-secondary-container": "#adb4ce",
+                        "tertiary-container": "#a44100",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface": "#18181B",
+                        "surface-bright": "#393842",
+                        "inverse-surface": "#e4e1ee",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "on-surface-variant": "#A1A1AA",
+                        "on-primary": "#1d00a5",
+                        "surface-container-high": "#27272A",
+                        "surface-container-highest": "#3F3F46",
+                        "on-background": "#FAFAFA"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar_width": "260px",
+                        "margin_mobile": "16px",
+                        "gutter": "24px",
+                        "margin_desktop": "32px",
+                        "unit": "4px",
+                        "header_height": "64px",
+                        "card_padding": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Geist"],
+                        "headline-sm": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "label-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #09090B; color: #FAFAFA; }
+        .glass-panel { background: rgba(24, 24, 27, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="min-h-screen flex font-sans antialiased overflow-x-hidden">
+<!-- SideNavBar -->
+<aside class="w-[260px] h-screen fixed left-0 top-0 border-r border-outline-variant bg-background flex flex-col py-margin_desktop z-50 md:flex hidden">
+<div class="px-margin_desktop mb-8">
+<img alt="LedgerFlow Logo" class="h-10 w-auto object-cover object-left" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcnwlEGF248ZDKwvrIdcchVFHtnhBQFqghjHvbViDwLc4VFBpkuhURGMerpSjtqmxC0MAQNsXZGChn73yZtH1SypDC53EaMa8AYEhdlGhIaJ8CPWfxKleCK9twZNc7qb4TPO8ZdLAcgSZFJbtHbrgNkiB1Zet2ddr8R3dENJ9UD41S0SW88OCjDLs42PCoiLL_VBvHU_Pf53OMTy_NGqaar4WHxuQtOjBlJzTuyvCgY2x2-9Xchii_6sdtak9FWnPYxzeAr2cRn78"/>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-2 tracking-widest uppercase">Enterprise SaaS</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-4 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="layout-dashboard"></i>
+<span class="text-label-md font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="users"></i>
+<span class="text-label-md font-label-md">Usuários</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="shield"></i>
+<span class="text-label-md font-label-md">Roles</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#06B6D4] font-bold border-l-2 border-[#4F46E5] bg-gradient-to-r from-[#4F46E5]/10 to-transparent transition-all" href="#">
+<i class="w-5 h-5" data-lucide="key"></i>
+<span class="text-label-md font-label-md">Permissões</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="building"></i>
+<span class="text-label-md font-label-md">Configurações do Tenant</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="credit-card"></i>
+<span class="text-label-md font-label-md">Pagamentos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="landmark"></i>
+<span class="text-label-md font-label-md">Conciliação</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="user"></i>
+<span class="text-label-md font-label-md">Clientes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="bar-chart-2"></i>
+<span class="text-label-md font-label-md">Relatórios</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="webhook"></i>
+<span class="text-label-md font-label-md">Webhooks</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98] mt-auto" href="#">
+<i class="w-5 h-5" data-lucide="settings"></i>
+<span class="text-label-md font-label-md">Configurações</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 md:ml-[260px] flex flex-col min-h-screen relative">
+<!-- TopAppBar -->
+<header class="h-header_height sticky top-0 z-40 bg-background/80 backdrop-blur-md flex justify-end items-center px-margin_desktop gap-gutter w-full border-b border-outline-variant shadow-sm transition-all duration-300">
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant">
+<button class="px-3 py-1 text-label-sm font-label-sm rounded bg-surface-variant text-on-surface shadow-sm">PT</button>
+<button class="px-3 py-1 text-label-sm font-label-sm rounded text-on-surface-variant hover:text-on-surface transition-colors">EN</button>
+</div>
+<div class="flex flex-col text-right mr-4 hidden sm:flex">
+<span class="text-label-md font-label-md text-on-surface font-semibold">Demo Owner</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">owner@ledgerflow.local</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center overflow-hidden">
+<i class="w-5 h-5 text-on-surface-variant" data-lucide="user"></i>
+</div>
+<button class="px-4 py-2 text-label-md font-label-md bg-transparent border border-outline-variant text-on-surface-variant rounded-lg hover:bg-surface-container hover:text-on-surface transition-all ml-2">
+                Sair
+            </button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-margin_mobile md:p-margin_desktop overflow-y-auto">
+<!-- Page Header -->
+<div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+<div>
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface">Permissões do Sistema</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-2 max-w-2xl">Lista de todas as permissões globais disponíveis no sistema.</p>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex flex-col gap-6">
+<!-- Filter/Search -->
+<div class="w-full">
+<div class="relative w-full max-w-md">
+<i class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-on-surface-variant" data-lucide="search"></i>
+<input class="w-full pl-10 pr-4 py-3 bg-[#18181B] border border-outline-variant rounded-lg text-body-sm font-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-[#4F46E5] focus:ring-1 focus:ring-[#4F46E5] transition-colors" placeholder="Buscar permissões..." type="text"/>
+</div>
+</div>
+<!-- Table Card -->
+<div class="glass-panel rounded-xl overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-[#09090B]/50">
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium uppercase tracking-wider">Chave</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium uppercase tracking-wider">Descrição</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium uppercase tracking-wider">Criado em</th>
+</tr>
+</thead>
+<tbody class="text-body-sm font-body-sm divide-y divide-outline-variant/50">
+<!-- Rows -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">api-keys:manage</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Gerenciar chaves de API</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">audit:read</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Visualizar trilha de auditoria</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">auth:login</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Realizar login</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">customers:create</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Criar clientes</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">customers:delete</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Excluir clientes</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">customers:read</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Visualizar clientes</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">customers:update</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Atualizar clientes</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">gateways:manage</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Gerenciar gateways</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">notifications:read</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Visualizar notificações</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">payments:create</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Criar pagamentos</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">payments:read</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Visualizar pagamentos</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">payments:refund</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Reembolsar pagamentos</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">permissions:read</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Visualizar permissões</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">reports:export</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Exportar relatórios</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">roles:manage</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Gerenciar papéis e permissões</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">tenant:update</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Atualizar configurações do tenant</td>
+<td class="py-4 px-6 text-[#A1A1AA]">14/06/2026, 21:11</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="py-4 px-6 font-mono text-[#06B6D4]">users:create</td>
+<td class="py-4 px-6 text-[#A1A1AA]">Criar usuários</td>
+<td class="py-4 px-6 text-[#A1A1AA]">12/06/2026, 23:01</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    lucide.createIcons();
+</script>
+</body></html>

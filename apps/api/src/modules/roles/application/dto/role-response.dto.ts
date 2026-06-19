@@ -13,7 +13,10 @@ export class RoleResponseDto {
   @ApiProperty({ example: 'OWNER' })
   key: string;
 
-  @ApiProperty({ example: 'Proprietário da conta com acesso total', required: false })
+  @ApiProperty({
+    example: 'Proprietário da conta com acesso total',
+    required: false,
+  })
   description?: string;
 
   @ApiProperty({ example: true })

@@ -307,6 +307,15 @@ Os diagramas estão disponíveis em `docs/diagrams`.
 * [Implementation Plan](docs/implementation-plan.md)
 * [Technical Backlog](docs/backlog.md)
 
+## Design e UI (Frontend)
+
+* [UI Flow & Navigation](docs/ui-flow.md)
+* [UI Screens Specification](docs/ui-screens.md)
+* [UI Component Library](docs/ui-components.md)
+* [UI Design System](docs/ui-design-system.md)
+* [UI Refactor Plan](docs/ui-refactor-plan.md)
+* [UI Reference Index](docs/reference/ui/README.md)
+
 ## ADRs — Architecture Decision Records
 
 * [ADR-0001 — Architecture Style](docs/adr/0001-architecture-style.md)
@@ -1066,6 +1075,14 @@ Ferramentas planejadas:
 * Telas administrativas protegidas por RBAC.
 * Atualização de Swagger/Redoc/OpenAPI.
 
+## Fase 4A — Customers Backend Foundation + Password Recovery Email (Concluída)
+
+* Customers backend com Tenant Isolation e RBAC.
+* Uso do Repository Pattern.
+* Swagger/Redoc documentado.
+* Recuperação de senha segura.
+* Integração com Mailpit local para e-mails (acesso em http://localhost:8026).
+
 ## Fase 3 — Payments MVP
 
 * Clientes.
@@ -1153,7 +1170,7 @@ Uma funcionalidade só será considerada pronta quando:
 
 ```text
 Status atual: User Management Foundation (CRUD de usuários e roles) implementado e testado.
-Fase atual: Fase 3B concluída.
+Fase atual: Fase 4A concluída.
 Próximo passo: Gestão de tenant e Payments MVP.
 
 ```

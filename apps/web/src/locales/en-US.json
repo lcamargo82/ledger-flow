@@ -85,7 +85,7 @@
     "comingSoon": "Coming Soon",
     "roles": "Roles",
     "permissions": "Permissions",
-    "tenantSettings": "Tenant Settings"
+    "tenantSettings": "Organization"
   },
   "users": {
     "title": "Users",
@@ -286,7 +286,7 @@
     }
   },
   "tenantSettings": {
-    "title": "Tenant Settings",
+    "title": "Organization",
     "description": "Manage your environment basic settings.",
     "form": {
       "nameLabel": "Company Name",
@@ -309,6 +309,117 @@
     "validation": {
       "nameRequired": "Tenant name is required.",
       "timezoneRequired": "Timezone is required."
+    }
+  },
+  "customers": {
+    "title": "Customers",
+    "description": "Manage customers linked to the current organization.",
+    "actions": {
+      "create": "New customer",
+      "edit": "Edit",
+      "viewDetails": "View details",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "search": "Search",
+      "clearFilters": "Clear",
+      "save": "Save changes",
+      "cancel": "Cancel"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Name, email, document...",
+      "statusLabel": "Status",
+      "statusAll": "All",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "typeLabel": "Type",
+      "typeAll": "All",
+      "typeIndividual": "Individual",
+      "typeCompany": "Company"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "document": "Document",
+      "phone": "Phone",
+      "type": "Type",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "New customer",
+      "editTitle": "Edit customer",
+      "nameLabel": "Name",
+      "namePlaceholder": "Customer name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "customer@company.com",
+      "documentLabel": "Document",
+      "documentPlaceholder": "ID or document",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "+1 555 555 5555",
+      "typeLabel": "Type",
+      "activeLabel": "Status",
+      "validation": {
+        "nameRequired": "Name is required",
+        "nameMin": "Name must be at least 2 characters",
+        "emailInvalid": "Invalid email",
+        "typeRequired": "Type is required"
+      }
+    },
+    "details": {
+      "title": "Customer details",
+      "name": "Name",
+      "email": "Email",
+      "document": "Document",
+      "phone": "Phone",
+      "type": "Type",
+      "status": "Status",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "type": {
+      "INDIVIDUAL": "Individual",
+      "COMPANY": "Company"
+    },
+    "empty": {
+      "title": "No customers found",
+      "description": "Create your first customer or adjust the search filters."
+    },
+    "error": {
+      "title": "Could not load customers",
+      "description": "Please try again in a few moments.",
+      "createFailed": "Could not create customer.",
+      "updateFailed": "Could not update customer.",
+      "statusFailed": "Could not change customer status.",
+      "emailAlreadyExists": "Email already registered for this organization.",
+      "documentAlreadyExists": "Document already registered for this organization."
+    },
+    "toast": {
+      "created": "Customer created successfully.",
+      "updated": "Customer updated successfully.",
+      "activated": "Customer activated successfully.",
+      "deactivated": "Customer deactivated successfully."
+    },
+    "confirmActivate": {
+      "title": "Activate customer",
+      "message": "Are you sure you want to activate this customer?",
+      "confirm": "Activate"
+    },
+    "confirmDeactivate": {
+      "title": "Deactivate customer",
+      "message": "Are you sure you want to deactivate this customer?",
+      "confirm": "Deactivate"
+    },
+    "pagination": {
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next",
+      "perPage": "Items per page"
     }
   }
 }

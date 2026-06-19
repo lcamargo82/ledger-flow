@@ -16,7 +16,10 @@ export class ListUsersQueryDto {
   @Min(1)
   page?: number = 1;
 
-  @ApiPropertyOptional({ example: 10, description: 'Itens por página (default: 10, max: 100)' })
+  @ApiPropertyOptional({
+    example: 10,
+    description: 'Itens por página (default: 10, max: 100)',
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -24,12 +27,19 @@ export class ListUsersQueryDto {
   @Max(100)
   perPage?: number = 10;
 
-  @ApiPropertyOptional({ example: 'owner', description: 'Busca por nome ou e-mail' })
+  @ApiPropertyOptional({
+    example: 'owner',
+    description: 'Busca por nome ou e-mail',
+  })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional({ enum: UserStatusFilter, example: 'all', description: 'Filtro de status' })
+  @ApiPropertyOptional({
+    enum: UserStatusFilter,
+    example: 'all',
+    description: 'Filtro de status',
+  })
   @IsOptional()
   @IsEnum(UserStatusFilter)
   status?: UserStatusFilter = UserStatusFilter.ALL;

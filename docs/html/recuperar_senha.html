@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Recuperar Senha - LedgerFlow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#4f46e5",
+                    "on-primary-container": "#dad7ff",
+                    "primary": "#c3c0ff",
+                    "surface-container-low": "#1b1b24",
+                    "secondary": "#bec6e0",
+                    "error": "#ffb4ab",
+                    "surface-container": "#1f1f28",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "secondary-fixed": "#dae2fd",
+                    "on-tertiary-fixed": "#351000",
+                    "background": "#13121b",
+                    "on-primary-fixed": "#0f0069",
+                    "primary-fixed": "#e2dfff",
+                    "on-error-container": "#ffdad6",
+                    "on-error": "#690005",
+                    "inverse-primary": "#4d44e3",
+                    "on-secondary-fixed": "#131b2e",
+                    "on-tertiary-container": "#ffd2be",
+                    "surface-container-lowest": "#0e0d16",
+                    "inverse-on-surface": "#302f39",
+                    "on-secondary": "#283044",
+                    "on-surface": "#e4e1ee",
+                    "surface-variant": "#35343e",
+                    "tertiary": "#ffb695",
+                    "secondary-container": "#3f465c",
+                    "surface-tint": "#c3c0ff",
+                    "on-tertiary": "#571f00",
+                    "outline": "#918fa1",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "on-tertiary-fixed-variant": "#7b2f00",
+                    "surface-dim": "#13121b",
+                    "error-container": "#93000a",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-secondary-container": "#adb4ce",
+                    "tertiary-container": "#a44100",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "surface": "#13121b",
+                    "outline-variant": "#464555",
+                    "surface-bright": "#393842",
+                    "inverse-surface": "#e4e1ee",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "on-surface-variant": "#c7c4d8",
+                    "on-primary": "#1d00a5",
+                    "surface-container-high": "#2a2933",
+                    "surface-container-highest": "#35343e",
+                    "on-background": "#e4e1ee"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "sidebar_width": "260px",
+                    "margin_mobile": "16px",
+                    "gutter": "24px",
+                    "margin_desktop": "32px",
+                    "unit": "4px",
+                    "header_height": "64px",
+                    "card_padding": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": [
+                            "Geist"
+                    ],
+                    "label-sm": [
+                            "Geist"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "headline-lg-mobile": [
+                            "Geist"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "display-lg": [
+                            "Geist"
+                    ],
+                    "headline-sm": [
+                            "Geist"
+                    ],
+                    "headline-lg": [
+                            "Geist"
+                    ],
+                    "label-md": [
+                            "Geist"
+                    ]
+            },
+            "fontSize": {
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-sm": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "display-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-sm": [
+                            "20px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #09090B; /* Strict adherence to level 0 base */
+            color: #F8FAFC;
+        }
+        .glass-card {
+            background-color: #18181B; /* Level 1 Surface */
+            border: 1px solid #27272A;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .input-field {
+            background-color: #09090B;
+            border: 1px solid #27272A;
+            color: #F8FAFC;
+            transition: all 0.2s ease;
+        }
+        .input-field:focus {
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+            outline: none;
+        }
+        .input-field::placeholder {
+            color: #64748B;
+        }
+        
+        .btn-primary {
+            background-color: #4F46E5;
+            color: #FFFFFF;
+            transition: background-color 0.2s ease;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #4338ca;
+        }
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .link-ghost {
+            color: #94A3B8;
+            transition: color 0.2s ease;
+        }
+        .link-ghost:hover {
+            color: #6366F1; /* Muted Indigo transition */
+        }
+        
+        /* Subtle background glow effect */
+        .bg-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.05) 0%, rgba(9, 9, 11, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center relative overflow-hidden font-body-md text-body-md">
+<!-- Atmospheric Background Glow -->
+<div class="bg-glow"></div>
+<main class="w-full max-w-md px-margin_mobile md:px-0 z-10">
+<!-- Logo Area -->
+<div class="flex justify-center mb-8">
+<h1 class="font-headline-lg text-headline-lg text-on-background font-extrabold tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1; font-size: 32px; color: #4F46E5;">business</span>
+                LedgerFlow
+            </h1>
+</div>
+<!-- Forgot Password Card -->
+<div class="glass-card rounded-xl p-card_padding md:p-8">
+<div class="mb-8 text-center">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Recuperar senha</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                    Insira seu e-mail para receber as instruções de recuperação.
+                </p>
+</div>
+<form class="space-y-6">
+<!-- Email Input -->
+<div class="space-y-2">
+<label class="font-label-sm text-label-sm text-on-surface-variant block" for="email">E-mail</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[#64748B] text-lg">mail</span>
+</div>
+<input class="input-field w-full rounded-lg pl-10 py-2.5 font-body-sm text-body-sm" id="email" name="email" placeholder="seu@email.corporativo.com" required="" type="email"/>
+</div>
+</div>
+<!-- Submit Button (Disabled/Loading State) -->
+<button class="btn-primary w-full rounded-lg py-2.5 font-label-md text-label-md flex justify-center items-center gap-2" disabled="" type="button">
+<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                    Solicitar recuperação
+                </button>
+</form>
+<!-- Back to Login Link -->
+<div class="mt-6 text-center">
+<a class="link-ghost font-label-sm text-label-sm inline-flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+                    Voltar ao login
+                </a>
+</div>
+</div>
+<!-- Footer / Legal -->
+<div class="mt-8 text-center">
+<p class="font-label-sm text-label-sm text-outline-variant">
+                © 2024 LedgerFlow Enterprise SaaS.
+            </p>
+</div>
+</main>
+</body></html>

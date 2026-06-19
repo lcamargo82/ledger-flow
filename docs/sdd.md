@@ -834,6 +834,11 @@ O frontend será desenvolvido com:
 * Menus ocultos não devem renderizar componentes.
 * Tabelas usam paginação backend.
 * Estilos devem ser centralizados.
+* **UI Blueprint:** Todo o desenvolvimento visual deve se guiar pelo `docs/ui-design-system.md` e referências base.
+* **Componentização:** Nova interface deve ser baseada em componentes reutilizáveis (`AppButton`, `AppInput`, etc).
+* **Layout:** Adoção do `AppLayout` sem header global, utilizando a Sidebar como principal meio de navegação e controle da sessão.
+* **i18n:** Internacionalização obrigatória. Todo texto de interface deve possuir chaves de idioma.
+* **RBAC:** A restrição de acesso e renderização condicional (ex: `<PermissionGate>`) no frontend atua primariamente como melhoria de UX. O backend permanece sendo a **autoridade final**.
 
 ---
 
@@ -1882,3 +1887,18 @@ Endpoint introduzidos na Fase 3C:
 * tokens visuais em main.css
 * README usa images/
 * frontend usa /brand/*
+
+## 5.12 Customers Design
+O domínio de Customers é gerenciado com total tenant isolation e controle por RBAC (`customers:read`, `customers:create`, `customers:update`).
+Foi implementado o modelo `Customer`, além de usar o Repository Pattern para isolar as chamadas do Prisma.
+Endpoints incluem suporte nativo a paginação (`page`, `perPage`), busca (`search`) e filtros (`status`, `type`), todos sanitizados via DTOs.
+A deleção física de clientes não é permitida; a desativação se dá via *soft action* em `PATCH /customers/:id/status`.
+Todas as operações de Customers registram auditorias (`AuditLog`) para `customer.created`, `customer.updated`, `customer.activated`, e `customer.deactivated`.
+
+## 5.13 Password Recovery Design
+O sistema suporta a redefinição de senhas enviando um e-mail com link contendo um token único seguro.
+- O token puro NUNCA é salvo no banco nem nos logs; guarda-se apenas um hash SHA-256 no banco na tabela `PasswordResetToken`.
+- O endpoint `POST /auth/forgot-password` retorna mensagens genéricas para evitar a enumeração de usuários.
+- O endpoint `POST /auth/reset-password` exige o token original recebido por e-mail, revoga ativamente todos os `refresh tokens` e sessões (`UserSession`) do usuário logo após o reset bem-sucedido e zera bloqueios prévios.
+- A comunicação de e-mail é feita via Mailpit em desenvolvimento por meio de um `EmailService` e uma interface `EmailProvider`.
+- Auditorias registram os eventos `auth.password_recovery_requested` e `auth.password_reset_completed`.

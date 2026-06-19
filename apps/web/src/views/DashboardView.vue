@@ -28,12 +28,21 @@
         
         <h3>{{ t('dashboard.permissions') }}</h3>
         <div class="lf-card-data">
-          <ul class="lf-tag-list lf-tag-list--compact">
-            <!-- Limitar a quantidade visual de permissões ou mostrar todas mas compactadas -->
-            <li v-for="perm in authStore.permissions" :key="perm">
-              <AppBadge variant="default" class="lf-badge--small">{{ perm }}</AppBadge>
-            </li>
-          </ul>
+          <p class="lf-text-secondary">
+            {{ authStore.permissions.length }} permissões ativas.
+          </p>
+          <div v-if="authStore.permissions.length <= 5" class="lf-mt-2">
+            <ul class="lf-tag-list lf-tag-list--compact">
+              <li v-for="perm in authStore.permissions" :key="perm">
+                <AppBadge variant="default" class="lf-badge--small">{{ perm }}</AppBadge>
+              </li>
+            </ul>
+          </div>
+          <div v-else class="lf-mt-2">
+            <AppButton variant="secondary" size="small" @click="$router.push('/permissions')">
+              Ver todas as permissões
+            </AppButton>
+          </div>
         </div>
       </AppCard>
 

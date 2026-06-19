@@ -800,6 +800,7 @@ Implementar o fluxo principal de negócio com clientes e pagamentos usando Strip
 **Prioridade:** P0
 **Tipo:** Frontend
 **Milestone:** M3
+**Status:** DONE
 
 ### Telas
 
@@ -1974,3 +1975,53 @@ Uma issue só pode ser marcada como `DONE` quando:
 - [ ] Criar pacote de ícones internos
 - [ ] Criar brand kit exportável
 - [ ] Criar tela pública/landing page
+
+### Fase 4A — Customers Backend Foundation + Password Recovery Email (Concluída)
+- [x] Customer model
+- [x] Customers repository
+- [x] Customers service
+- [x] GET /customers
+- [x] GET /customers/:id
+- [x] POST /customers
+- [x] PATCH /customers/:id
+- [x] PATCH /customers/:id/status
+- [x] Customers Swagger/Redoc
+- [x] Customers audit logs
+- [x] PasswordResetToken model
+- [x] POST /auth/forgot-password
+- [x] POST /auth/reset-password
+- [x] Password recovery email via Mailpit
+- [x] Revoke sessions after password reset
+
+### Fase UI-1 — LedgerFlow UI Blueprint & Screen Flow (Concluída)
+- [x] Analisar referências visuais em HTML.
+- [x] Criar diretório de referências em `docs/reference/ui/`.
+- [x] Criar mapa de navegação (`docs/ui-flow.md`).
+- [x] Detalhar especificações por tela (`docs/ui-screens.md`).
+- [x] Documentar biblioteca de componentes (`docs/ui-components.md`).
+- [x] Documentar design system e cores (`docs/ui-design-system.md`).
+- [x] Criar plano de refatoração para frontend (`docs/ui-refactor-plan.md`).
+
+### Fase UI-2 — Refatoração das Telas Existentes
+- [ ] Refatorar AppLayout e Sidebar com base nas referências.
+- [ ] Refatorar componente Login (AuthHero e formulário).
+- [ ] Refatorar Dashboard (Ajustar cards e métricas provisórias).
+- [ ] Refatorar listagem de Users (Filtros, tabela, paginação, modais).
+- [ ] Refatorar listagem de Roles e detalhe de permissões.
+- [ ] Refatorar configurações de Tenant.
+- [ ] Criar/refatorar páginas Forbidden e Not Found.
+- [ ] Extrair componentes (AppCard, AppTable, AppBadge, etc).
+
+### Fase 4A.1 — Password Recovery Frontend
+- [ ] Criar tela `/forgot-password`.
+- [ ] Criar tela `/reset-password`.
+- [ ] Conectar `/forgot-password` na API com tratamento seguro.
+- [ ] Conectar `/reset-password` na API com tratamento seguro.
+- [ ] Internacionalização (i18n) para recuperação.
+
+### Fase 4B — Customers Frontend
+- [ ] Criar view `/customers`.
+- [ ] Configurar Store e Service de customers no Pinia/Axios.
+- [ ] Criar modal de criação e edição de cliente.
+- [ ] Implementar ativação e desativação via `AppConfirmDialog`.
+- [ ] Implementar bloqueio por Role/Permissions.

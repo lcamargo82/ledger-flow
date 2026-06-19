@@ -209,9 +209,17 @@ Cada fase deve entregar:
 
 ---
 
-## Fase 4 — Customers Foundation
+## Fase 4A — Customers Backend Foundation + Password Recovery Email
 
----
+**Status:** Concluída
+
+**Itens:**
+* Backend: Módulo Customers com isolamento por Tenant e proteção RBAC.
+* Backend: CRUD básico implementado com paginação, busca e filtros.
+* Backend: Integração do Mailpit para envio de e-mails locais.
+* Backend: Implementação do fluxo seguro de redefinição de senha (`forgot-password` e `reset-password`).
+* Banco de Dados: Tabelas `Customer`, `PasswordResetToken` e `AuditLog`.
+* Swagger/OpenAPI: Endpoints documentados.
 
 ## Fase 5 — Payments MVP
 
@@ -259,3 +267,47 @@ Itens:
 * Reestruturação da Sidebar (`AppLayout`), incorporando um rodapé funcional com idioma, dados do usuário e botão "Sair" consolidado.
 * Reposicionamento do sistema de Toasts (`AppToastContainer`) para o canto inferior direito (bottom-right), preservando a visibilidade dos cards superiores.
 * Reorganização do Dashboard: banner (`ledgerflow-app-header2.png`) centralizado logo abaixo do cabeçalho da página, sem aparência de "botão/seta" fantasma; Cards do dashboard realinhados com tags de permissões mais compactas e controle de altura consistentes.
+
+---
+
+## Fase UI-1 — LedgerFlow UI Blueprint & Screen Flow
+
+**Status:** Concluída
+
+**Itens:**
+* Fluxo de navegação mapeado.
+* Especificação de telas.
+* Componentes mapeados.
+* Plano de refatoração estruturado.
+
+---
+
+## Fase UI-2 — Refatoração das Telas Existentes
+
+**Status:** Pendente
+
+**Itens:**
+* Refatorar telas conforme UI Blueprint (AppLayout, Sidebar, Login, Dashboard, Users, Roles, Permissions, Settings, etc).
+* Implementar Component Library.
+
+---
+
+## Fase 4A.1 — Password Recovery Frontend
+
+**Status:** Pendente
+
+**Itens:**
+* Fluxo Forgot Password e Reset Password.
+* Integração backend.
+* Segurança de UI e mensagens genéricas.
+
+---
+
+## Fase 4B — Customers Frontend
+
+**Status:** Pendente
+
+**Itens:**
+* Listagem de clientes com tabela e filtros.
+* Cadastro, edição e detalhes.
+* Integração de RBAC (customers:read, create, update).

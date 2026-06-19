@@ -487,3 +487,7 @@ This included:
 
 ### Atualização (Fase 3D)
 Reforço sobre o modelo RBAC: todas as operações de escrita em entidades administrativas (Users, Roles, Permissions, Tenant Settings) devem validar a role no backend via `@RequirePermissions` (ex: `users:create`, `roles:manage`). O frontend apenas reflete a UX através do `PermissionGate` ou validação do store, sem substituir a checagem no backend.
+
+### Password Recovery Updates (Fase 4A)
+- Password recovery utiliza token de uso único com expiração curta, armazenando apenas o seu hash SHA-256 no banco de dados.
+- O reset de senha de um usuário **revoga imediatamente** todas as sessões e refresh tokens ativos, protegendo a conta no momento da redefinição.

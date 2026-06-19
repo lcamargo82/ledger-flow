@@ -11,6 +11,7 @@ import UsersView from '../views/UsersView.vue'
 import RolesView from '../views/RolesView.vue'
 import PermissionsView from '../views/PermissionsView.vue'
 import TenantSettingsView from '../views/TenantSettingsView.vue'
+import CustomersView from '../views/CustomersView.vue'
 import ForbiddenView from '../views/ForbiddenView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 
@@ -86,6 +87,16 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         permissions: ['tenant:update']
+      }
+    },
+    {
+      path: '/customers',
+      name: 'customers',
+      component: CustomersView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['customers:read']
       }
     },
     {

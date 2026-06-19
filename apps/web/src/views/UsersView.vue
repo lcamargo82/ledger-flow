@@ -9,6 +9,7 @@ import { useAuthStore } from '../stores/auth.store'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppCard from '../components/common/AppCard.vue'
 import AppInput from '../components/common/AppInput.vue'
+import AppSelect from '../components/common/AppSelect.vue'
 import AppButton from '../components/common/AppButton.vue'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppTable from '../components/common/AppTable.vue'
@@ -134,6 +135,16 @@ const getRoleBadgeVariant = (role: string) => {
   return 'default'
 }
 
+const statusOptions = computed(() => [
+  { value: 'all', label: t('users.statusAll') },
+  { value: 'active', label: t('users.statusActive') },
+  { value: 'inactive', label: t('users.statusInactive') }
+])
+
+const filterRoleOptions = computed(() => [
+  { value: '', label: t('users.roleAll') },
+  ...availableRoles.value.map(r => ({ value: r.key, label: r.label }))
+])
 </script>
 
 <template>
@@ -165,8 +176,8 @@ const getRoleBadgeVariant = (role: string) => {
     <template v-else>
       <!-- Filters -->
       <AppCard class="mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div>
+        <div class="filters-row">
+          <div class="filter-item filter-item--large">
             <AppInput 
               id="search"
               v-model="searchInput"
@@ -175,35 +186,23 @@ const getRoleBadgeVariant = (role: string) => {
               @input="handleSearch"
             />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {{ t('users.statusLabel') }}
-            </label>
-            <select 
-              v-model="usersStore.filters.status" 
+          <div class="filter-item">
+            <AppSelect
+              id="status"
+              v-model="usersStore.filters.status"
+              :label="t('users.statusLabel')"
+              :options="statusOptions"
               @change="usersStore.setStatus(usersStore.filters.status as 'active' | 'inactive' | 'all')"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            >
-              <option value="all">{{ t('users.statusAll') }}</option>
-              <option value="active">{{ t('users.statusActive') }}</option>
-              <option value="inactive">{{ t('users.statusInactive') }}</option>
-            </select>
+            />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {{ t('users.roleLabel') }}
-            </label>
-            <select 
-              v-model="usersStore.filters.role" 
+          <div class="filter-item">
+            <AppSelect
+              id="role"
+              v-model="usersStore.filters.role"
+              :label="t('users.roleLabel')"
+              :options="filterRoleOptions"
               @change="usersStore.setRole(usersStore.filters.role || '')"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            >
-              <option value="">{{ t('users.roleAll') }}</option>
-              <option value="OWNER">Owner</option>
-              <option value="FINANCE_OPERATOR">Finance Operator</option>
-              <option value="SUPPORT_VIEWER">Support Viewer</option>
-              <option value="DEVELOPER">Developer</option>
-            </select>
+            />
           </div>
         </div>
       </AppCard>
@@ -402,3 +401,32 @@ const getRoleBadgeVariant = (role: string) => {
     />
   </div>
 </template>
+
+<style scoped>
+.mb-6 {
+  margin-bottom: var(--lf-space-6);
+}
+
+.filters-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--lf-space-4);
+  align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+  .filters-row {
+    flex-wrap: nowrap;
+  }
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-item--large {
+  min-width: 200px;
+}
+</style>

@@ -8,6 +8,7 @@ import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppTable from '../components/common/AppTable.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
+import AppCard from '../components/common/AppCard.vue'
 
 const { t, currentLocale } = useI18n()
 const permissionsStore = usePermissionsStore()
@@ -53,7 +54,7 @@ const filteredPermissions = computed(() => {
     />
 
     <template v-else>
-      <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <AppCard class="lf-mb-6">
         <div class="w-full max-w-md">
           <AppInput 
             id="search"
@@ -61,7 +62,7 @@ const filteredPermissions = computed(() => {
             :placeholder="t('permissions.searchPlaceholder')"
           />
         </div>
-      </div>
+      </AppCard>
 
       <AppTable 
         :columns="columns" 

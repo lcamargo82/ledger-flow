@@ -28,7 +28,9 @@ export class TenantsController {
   @ApiOperation({ summary: 'Get current tenant details' })
   @ApiOkResponse({ type: TenantResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  async getCurrentTenant(@CurrentUser() user: AuthenticatedUser): Promise<TenantResponseDto> {
+  async getCurrentTenant(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<TenantResponseDto> {
     // Basic endpoint that doesn't strictly need extra permissions
     return this.tenantsService.getCurrentTenant(user.tenantId);
   }
@@ -39,7 +41,9 @@ export class TenantsController {
   @ApiOkResponse({ type: TenantResponseDto })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Forbidden - requires tenant:update permission' })
+  @ApiForbiddenResponse({
+    description: 'Forbidden - requires tenant:update permission',
+  })
   async updateCurrentTenant(
     @CurrentUser() user: AuthenticatedUser,
     @Body() updateDto: UpdateCurrentTenantDto,

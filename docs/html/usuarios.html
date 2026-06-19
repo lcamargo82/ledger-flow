@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Usuários - LedgerFlow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+        /* Custom Scrollbar for modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09090B;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272A;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3F3F46;
+        }
+
+        body { background-color: #09090B; color: #FAFAFA; }
+        .glass-panel { background: rgba(24, 24, 27, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .input-focus-ring:focus-within {
+            border-color: #06B6D4;
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#4f46e5",
+                        "on-primary-container": "#dad7ff",
+                        "primary": "#c3c0ff",
+                        "surface-container-low": "#1b1b24",
+                        "secondary": "#bec6e0",
+                        "error": "#ffb4ab",
+                        "surface-container": "#1f1f28",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "secondary-fixed": "#dae2fd",
+                        "on-tertiary-fixed": "#351000",
+                        "background": "#09090B",
+                        "on-primary-fixed": "#0f0069",
+                        "primary-fixed": "#e2dfff",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "inverse-primary": "#4d44e3",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-tertiary-container": "#ffd2be",
+                        "surface-container-lowest": "#0e0d16",
+                        "inverse-on-surface": "#302f39",
+                        "on-secondary": "#283044",
+                        "on-surface": "#e4e1ee",
+                        "surface-variant": "#35343e",
+                        "tertiary": "#ffb695",
+                        "secondary-container": "#3f465c",
+                        "surface-tint": "#c3c0ff",
+                        "on-tertiary": "#571f00",
+                        "outline": "#27272A",
+                        "outline-variant": "#27272A",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "surface-dim": "#13121b",
+                        "error-container": "#93000a",
+                        "tertiary-fixed": "#ffdbcc",
+                        "on-secondary-container": "#adb4ce",
+                        "tertiary-container": "#a44100",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface": "#18181B",
+                        "surface-bright": "#393842",
+                        "inverse-surface": "#e4e1ee",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "on-surface-variant": "#A1A1AA",
+                        "on-primary": "#1d00a5",
+                        "surface-container-high": "#27272A",
+                        "surface-container-highest": "#3F3F46",
+                        "on-background": "#FAFAFA"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sidebar_width": "260px",
+                        "margin_mobile": "16px",
+                        "gutter": "24px",
+                        "margin_desktop": "32px",
+                        "unit": "4px",
+                        "header_height": "64px",
+                        "card_padding": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Geist"],
+                        "label-sm": ["Geist"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "display-lg": ["Geist"],
+                        "headline-sm": ["Geist"],
+                        "headline-lg": ["Geist"],
+                        "label-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen flex font-sans antialiased overflow-x-hidden">
+<!-- SideNavBar -->
+<aside class="w-[260px] h-screen fixed left-0 top-0 border-r border-outline-variant bg-background dark:bg-background flex flex-col py-margin_desktop z-50 md:flex hidden">
+<div class="px-margin_desktop mb-8">
+<img alt="LedgerFlow Logo" class="h-10 w-auto object-cover object-left" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcnwlEGF248ZDKwvrIdcchVFHtnhBQFqghjHvbViDwLc4VFBpkuhURGMerpSjtqmxC0MAQNsXZGChn73yZtH1SypDC53EaMa8AYEhdlGhIaJ8CPWfxKleCK9twZNc7qb4TPO8ZdLAcgSZFJbtHbrgNkiB1Zet2ddr8R3dENJ9UD41S0SW88OCjDLs42PCoiLL_VBvHU_Pf53OMTy_NGqaar4WHxuQtOjBlJzTuyvCgY2x2-9Xchii_6sdtak9FWnPYxzeAr2cRn78"/>
+<p class="text-label-sm font-label-sm text-on-surface-variant mt-2 tracking-widest uppercase">Enterprise SaaS</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-4 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="layout-dashboard"></i>
+<span class="text-label-md font-label-md">Dashboard</span>
+</a>
+<!-- Active Tab: Usuários -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#06B6D4] font-bold border-l-2 border-[#4F46E5] bg-gradient-to-r from-[#4F46E5]/10 to-transparent transition-all" href="#">
+<i class="w-5 h-5" data-lucide="users"></i>
+<span class="text-label-md font-label-md">Usuários</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="shield"></i>
+<span class="text-label-md font-label-md">Roles</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="key"></i>
+<span class="text-label-md font-label-md">Permissões</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="building"></i>
+<span class="text-label-md font-label-md">Configurações do Tenant</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="credit-card"></i>
+<span class="text-label-md font-label-md">Pagamentos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="landmark"></i>
+<span class="text-label-md font-label-md">Conciliação</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="user"></i>
+<span class="text-label-md font-label-md">Clientes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="bar-chart-2"></i>
+<span class="text-label-md font-label-md">Relatórios</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98]" href="#">
+<i class="w-5 h-5" data-lucide="webhook"></i>
+<span class="text-label-md font-label-md">Webhooks</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-white dark:text-on-surface-variant dark:hover:text-white hover:bg-surface-container-highest/50 dark:hover:bg-surface-container-highest/50 transition-colors hover:scale-[0.98] mt-auto" href="#">
+<i class="w-5 h-5" data-lucide="settings"></i>
+<span class="text-label-md font-label-md">Configurações</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col md:ml-[260px] min-h-screen relative">
+<!-- TopAppBar -->
+<header class="h-header_height sticky top-0 z-40 bg-background/80 backdrop-blur-md flex justify-end items-center px-margin_desktop gap-gutter w-full border-b border-outline-variant shadow-sm transition-all duration-300">
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center bg-surface-container-low rounded-lg p-1 border border-outline-variant">
+<button class="px-3 py-1 text-label-sm font-label-sm rounded bg-surface-variant text-on-surface shadow-sm">PT</button>
+<button class="px-3 py-1 text-label-sm font-label-sm rounded text-on-surface-variant hover:text-on-surface transition-colors">EN</button>
+</div>
+<div class="flex flex-col text-right mr-4 hidden sm:flex">
+<span class="text-label-md font-label-md text-on-surface font-semibold">Demo Owner</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">owner@ledgerflow.local</span>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center overflow-hidden">
+<i class="w-5 h-5 text-on-surface-variant" data-lucide="user"></i>
+</div>
+<button class="px-4 py-2 text-label-md font-label-md bg-transparent border border-outline-variant text-on-surface-variant rounded-lg hover:bg-surface-container hover:text-on-surface transition-all ml-2">
+                    Sair
+                </button>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 p-margin_mobile md:p-margin_desktop pt-8 pb-16 max-w-7xl w-full mx-auto">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
+<div>
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-2">Usuários</h2>
+<p class="text-body-md font-body-md text-on-surface-variant">Gerencie os usuários vinculados ao tenant atual.</p>
+</div>
+<button class="flex items-center justify-center gap-2 py-2.5 px-5 rounded-lg shadow-sm text-body-md font-body-md font-medium text-white bg-gradient-to-r from-[#4F46E5] to-[#10B981] hover:from-[#3B82F6] hover:to-[#06B6D4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#06B6D4] focus:ring-offset-[#09090B] transition-all duration-200">
+<i class="w-5 h-5" data-lucide="plus"></i>
+                    Novo Usuário
+                </button>
+</div>
+<!-- Filter Section Card -->
+<div class="glass-panel rounded-xl p-card_padding mb-8">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+<div class="md:col-span-5">
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-2">Buscar Usuário</label>
+<div class="relative input-focus-ring rounded-lg transition-shadow duration-200">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<i class="w-4 h-4 text-on-surface-variant" data-lucide="search"></i>
+</div>
+<input class="block w-full pl-10 pr-3 py-2.5 bg-background border border-surface-variant rounded-lg text-body-md font-body-md text-on-surface placeholder:text-[#64748B] focus:outline-none focus:ring-0 focus:border-transparent transition-colors" placeholder="Nome ou e-mail..." type="text"/>
+</div>
+</div>
+<div class="md:col-span-3">
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-2">Status</label>
+<div class="relative input-focus-ring rounded-lg transition-shadow duration-200">
+<select class="block w-full pl-4 pr-10 py-2.5 bg-background border border-surface-variant rounded-lg text-body-md font-body-md text-on-surface focus:outline-none focus:ring-0 focus:border-transparent transition-colors appearance-none">
+<option>Todos os status</option>
+<option>Ativo</option>
+<option>Inativo</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<i class="w-4 h-4 text-on-surface-variant" data-lucide="chevron-down"></i>
+</div>
+</div>
+</div>
+<div class="md:col-span-3">
+<label class="block text-label-sm font-label-sm text-on-surface-variant mb-2">Role</label>
+<div class="relative input-focus-ring rounded-lg transition-shadow duration-200">
+<select class="block w-full pl-4 pr-10 py-2.5 bg-background border border-surface-variant rounded-lg text-body-md font-body-md text-on-surface focus:outline-none focus:ring-0 focus:border-transparent transition-colors appearance-none">
+<option>Todas as roles</option>
+<option>OWNER</option>
+<option>FINANCE_OPERATOR</option>
+<option>SUPPORT_VIEWER</option>
+<option>DEVELOPER</option>
+</select>
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+<i class="w-4 h-4 text-on-surface-variant" data-lucide="chevron-down"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Users Table Card -->
+<div class="glass-panel rounded-xl overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-[#18181B] border-b border-outline-variant">
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium tracking-wider uppercase">Nome</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium tracking-wider uppercase">E-mail</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium tracking-wider uppercase">Roles</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium tracking-wider uppercase">Status</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium tracking-wider uppercase">Último Login</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium tracking-wider uppercase">Criado em</th>
+<th class="py-4 px-6 text-label-sm font-label-sm text-on-surface-variant font-medium tracking-wider uppercase text-right">Ações</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50">
+<!-- Row 1 -->
+<tr class="hover:bg-[#18181B]/50 transition-colors group">
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface">Leandro</td>
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface-variant">leandro.camargo.dev@gmail.com</td>
+<td class="py-4 px-6">
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center gap-1 py-1 px-2 rounded-md text-xs font-medium bg-[#18181B] text-[#FAFAFA] border border-[#4F46E5]/30">
+                                            OWNER
+                                        </span>
+<span class="inline-flex items-center gap-1 py-1 px-2 rounded-md text-xs font-medium bg-[#18181B] text-[#FAFAFA] border border-[#3B82F6]/30">
+                                            FINANCE_OPERATOR
+                                        </span>
+<span class="inline-flex items-center gap-1 py-1 px-2 rounded-md text-xs font-medium bg-[#18181B] text-[#FAFAFA] border border-outline-variant">
+                                            SUPPORT_VIEWER
+                                        </span>
+<span class="inline-flex items-center gap-1 py-1 px-2 rounded-md text-xs font-medium bg-[#18181B] text-[#FAFAFA] border border-[#06B6D4]/30">
+                                            DEVELOPER
+                                        </span>
+</div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+                                        Ativo
+                                    </span>
+</td>
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface-variant">-</td>
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface-variant">15/06/2026, 12:20</td>
+<td class="py-4 px-6 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded transition-colors" title="Ver Detalhes">
+<i class="w-4 h-4" data-lucide="eye"></i>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded transition-colors" title="Editar">
+<i class="w-4 h-4" data-lucide="pencil"></i>
+</button>
+<button class="p-1.5 text-error hover:bg-error/10 rounded transition-colors" title="Desativar">
+<i class="w-4 h-4" data-lucide="slash"></i>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-[#18181B]/50 transition-colors group">
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface">Demo Owner</td>
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface-variant">owner@ledgerflow.local</td>
+<td class="py-4 px-6">
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center gap-1 py-1 px-2 rounded-md text-xs font-medium bg-[#18181B] text-[#FAFAFA] border border-[#4F46E5]/30">
+                                            OWNER
+                                        </span>
+</div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-medium bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20">
+<span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
+                                        Ativo
+                                    </span>
+</td>
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface-variant">16/06/2026, 21:02</td>
+<td class="py-4 px-6 text-body-sm font-body-sm text-on-surface-variant">12/06/2026, 23:01</td>
+<td class="py-4 px-6 text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded transition-colors" title="Ver Detalhes">
+<i class="w-4 h-4" data-lucide="eye"></i>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded transition-colors" title="Editar">
+<i class="w-4 h-4" data-lucide="pencil"></i>
+</button>
+<button class="p-1.5 text-error hover:bg-error/10 rounded transition-colors" title="Desativar">
+<i class="w-4 h-4" data-lucide="slash"></i>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="bg-[#18181B]/50 px-6 py-4 border-t border-outline-variant/50 flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Mostrando 1 a 2 de 2 resultados</span>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+<i class="w-4 h-4" data-lucide="chevron-left"></i>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-[#4F46E5]/20 text-[#4F46E5] border border-[#4F46E5]/30">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest disabled:opacity-50 disabled:cursor-not-allowed" disabled="">
+<i class="w-4 h-4" data-lucide="chevron-right"></i>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+        lucide.createIcons();
+    </script>
+</body></html>

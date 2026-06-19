@@ -19,6 +19,7 @@ model Tenant {
   users        User[]
   roles        Role[]
   authAttempts AuthAttempt[]
+  customers    Customer[]
 
   @@map("tenants")
 }
@@ -37,10 +38,11 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  tenant        Tenant         @relation(fields: [tenantId], references: [id])
-  roles         UserRole[]
-  refreshTokens RefreshToken[]
-  sessions      UserSession[]
+  tenant              Tenant               @relation(fields: [tenantId], references: [id])
+  roles               UserRole[]
+  refreshTokens       RefreshToken[]
+  sessions            UserSession[]
+  passwordResetTokens PasswordResetToken[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -110,13 +112,13 @@ model RolePermission {
 }
 
 model RefreshToken {
-  id         String    @id @default(uuid())
-  userId     String
-  tokenHash  String
-  revokedAt  DateTime?
-  expiresAt  DateTime
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  revokedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   session UserSession?
@@ -128,21 +130,21 @@ model RefreshToken {
 }
 
 model UserSession {
-  id               String    @id @default(uuid())
-  userId           String
-  refreshTokenId   String?   @unique
-  ipAddress        String?
-  userAgent        String?
-  deviceName       String?
-  deviceType       String?
-  browser          String?
-  operatingSystem  String?
-  active           Boolean   @default(true)
-  revokedAt        DateTime?
-  expiresAt        DateTime
-  lastSeenAt       DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  id              String    @id @default(uuid())
+  userId          String
+  refreshTokenId  String?   @unique
+  ipAddress       String?
+  userAgent       String?
+  deviceName      String?
+  deviceType      String?
+  browser         String?
+  operatingSystem String?
+  active          Boolean   @default(true)
+  revokedAt       DateTime?
+  expiresAt       DateTime
+  lastSeenAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   refreshToken RefreshToken? @relation(fields: [refreshTokenId], references: [id], onDelete: SetNull)
@@ -174,4 +176,74 @@ model AuthAttempt {
   @@index([success])
   @@index([createdAt])
   @@map("auth_attempts")
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  COMPANY
+}
+
+model Customer {
+  id        String       @id @default(uuid())
+  tenantId  String
+  name      String
+  email     String?
+  document  String?
+  phone     String?
+  type      CustomerType @default(INDIVIDUAL)
+  active    Boolean      @default(true)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, email])
+  @@unique([tenantId, document])
+  @@index([tenantId])
+  @@index([tenantId, active])
+  @@index([tenantId, type])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, name])
+  @@index([tenantId, email])
+  @@index([tenantId, document])
+  @@map("customers")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String
+  usedAt    DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@index([usedAt])
+  @@index([createdAt])
+  @@map("password_reset_tokens")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  tenantId    String?
+  actorUserId String?
+  action      String
+  entityType  String?
+  entityId    String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([actorUserId])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

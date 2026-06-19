@@ -49,7 +49,9 @@ export class UsersController {
     description: 'Retorna a lista paginada de usuários sanitizados',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
-  @ApiForbiddenResponse({ description: 'Usuário não tem permissão de "users:read"' })
+  @ApiForbiddenResponse({
+    description: 'Usuário não tem permissão de "users:read"',
+  })
   async listUsers(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: ListUsersQueryDto,
@@ -60,19 +62,26 @@ export class UsersController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @RequirePermissions('users:read')
-  @ApiOperation({ summary: 'Obter detalhes de um usuário específico do tenant' })
+  @ApiOperation({
+    summary: 'Obter detalhes de um usuário específico do tenant',
+  })
   @ApiOkResponse({
     type: UserDetailsResponseDto,
     description: 'Retorna os detalhes sanitizados do usuário',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
-  @ApiForbiddenResponse({ description: 'Usuário não tem permissão de "users:read"' })
+  @ApiForbiddenResponse({
+    description: 'Usuário não tem permissão de "users:read"',
+  })
   @ApiNotFoundResponse({ description: 'Usuário não encontrado no tenant' })
   async getUserById(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') userId: string,
   ): Promise<UserDetailsResponseDto> {
-    const userDetails = await this.usersService.getUserById(user.tenantId, userId);
+    const userDetails = await this.usersService.getUserById(
+      user.tenantId,
+      userId,
+    );
     return { user: userDetails };
   }
 
@@ -85,9 +94,13 @@ export class UsersController {
     description: 'Retorna o usuário criado',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
-  @ApiForbiddenResponse({ description: 'Usuário não tem permissão de "users:create"' })
+  @ApiForbiddenResponse({
+    description: 'Usuário não tem permissão de "users:create"',
+  })
   @ApiConflictResponse({ description: 'Email já cadastrado no tenant' })
-  @ApiBadRequestResponse({ description: 'Dados inválidos ou roles inexistentes' })
+  @ApiBadRequestResponse({
+    description: 'Dados inválidos ou roles inexistentes',
+  })
   async createUser(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateUserDto,
@@ -106,7 +119,9 @@ export class UsersController {
     description: 'Retorna o usuário atualizado',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
-  @ApiForbiddenResponse({ description: 'Usuário não tem permissão de "users:update"' })
+  @ApiForbiddenResponse({
+    description: 'Usuário não tem permissão de "users:update"',
+  })
   @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
   @ApiConflictResponse({ description: 'Email já em uso' })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
@@ -129,9 +144,13 @@ export class UsersController {
     description: 'Retorna o usuário atualizado',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
-  @ApiForbiddenResponse({ description: 'Usuário não tem permissão de "users:update"' })
+  @ApiForbiddenResponse({
+    description: 'Usuário não tem permissão de "users:update"',
+  })
   @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
-  @ApiBadRequestResponse({ description: 'Não é possível desativar o próprio usuário' })
+  @ApiBadRequestResponse({
+    description: 'Não é possível desativar o próprio usuário',
+  })
   async updateUserStatus(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -151,7 +170,9 @@ export class UsersController {
     description: 'Retorna o usuário atualizado',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
-  @ApiForbiddenResponse({ description: 'Usuário não tem permissão de "users:update"' })
+  @ApiForbiddenResponse({
+    description: 'Usuário não tem permissão de "users:update"',
+  })
   @ApiNotFoundResponse({ description: 'Usuário não encontrado' })
   @ApiBadRequestResponse({ description: 'Roles inválidas para o tenant' })
   async updateUserRoles(

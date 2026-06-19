@@ -1,9 +1,19 @@
-import { Controller, Post, Body, Req, HttpCode, HttpStatus, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Req,
+  HttpCode,
+  HttpStatus,
+  Get,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthService } from '../../application/services/auth.service';
 import { LoginDto } from '../../application/dto/login.dto';
 import { RefreshTokenDto } from '../../application/dto/refresh-token.dto';
 import { LogoutDto } from '../../application/dto/logout.dto';
+import { ForgotPasswordDto } from '../../application/dto/forgot-password.dto';
+import { ResetPasswordDto } from '../../application/dto/reset-password.dto';
 import { AuthResponse } from '../../application/types/auth-response.type';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -15,6 +25,7 @@ import {
   ApiUnauthorizedResponse,
   ApiBody,
   ApiBearerAuth,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import {
   LoginResponseDto,
@@ -38,7 +49,10 @@ export class AuthController {
     description: 'Autentica o usuário e retorna o access e refresh tokens',
   })
   @ApiUnauthorizedResponse({ description: 'Credenciais inválidas' })
-  async login(@Body() loginDto: LoginDto, @Req() req: Request): Promise<AuthResponse> {
+  async login(
+    @Body() loginDto: LoginDto,
+    @Req() req: Request,
+  ): Promise<AuthResponse> {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
 
@@ -55,7 +69,9 @@ export class AuthController {
     description: 'Gera um novo access token a partir de um refresh token',
   })
   @ApiUnauthorizedResponse({ description: 'Token inválido ou revogado' })
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string }> {
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<{ accessToken: string }> {
     return this.authService.refresh(refreshTokenDto);
   }
 
@@ -77,11 +93,58 @@ export class AuthController {
   @ApiOperation({ summary: 'Get authenticated user profile' })
   @ApiOkResponse({
     type: MeResponseDto,
-    description: 'Retorna o usuário autenticado com roles, permissões, tenantId e sessionId',
+    description:
+      'Retorna o usuário autenticado com roles, permissões, tenantId e sessionId',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
   getProfile(@CurrentUser() user: AuthenticatedUser) {
     return { user };
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password recovery' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiOkResponse({
+    description:
+      'Se o e-mail existir, as instruções de recuperação serão enviadas.',
+  })
+  @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  // @ApiTooManyRequestsResponse({ description: 'Muitas requisições (TODO: rate limit)' }) // TODO: Implement rate limiting
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+    @Req() req: Request,
+  ): Promise<{ message: string }> {
+    const ipAddress = this.extractIpAddress(req);
+    const userAgent = this.extractUserAgent(req);
+
+    return this.authService.forgotPassword(
+      forgotPasswordDto,
+      ipAddress,
+      userAgent,
+    );
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password using token' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiOkResponse({ description: 'Senha redefinida com sucesso' })
+  @ApiBadRequestResponse({ description: 'Token inválido ou expirado' })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+    @Req() req: Request,
+  ): Promise<{ message: string }> {
+    const ipAddress = this.extractIpAddress(req);
+    const userAgent = this.extractUserAgent(req);
+
+    return this.authService.resetPassword(
+      resetPasswordDto,
+      ipAddress,
+      userAgent,
+    );
   }
 
   private extractIpAddress(req: Request): string | undefined {
