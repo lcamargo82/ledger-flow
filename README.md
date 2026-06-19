@@ -1207,3 +1207,14 @@ A licença será definida futuramente.
 * Cancelamento
 * Gateway real ainda futuro.
 
+## Fase 7A - Asaas Inbound Webhooks
+
+O LedgerFlow recebe atualizações síncronas de pagamentos emitidos pelo gateway Asaas Sandbox. O webhook está exposto em `/webhooks/asaas`.
+
+- Autenticação por token no header (`asaas-access-token` configurável via `.env`).
+- Resposta a eventos segue o **Inbox Pattern**, salvando o histórico da recepção em banco local.
+- Sincronização segura atualiza os pagamentos do LedgerFlow baseado no `providerPaymentId`.
+- Para receber webhooks do Sandbox num ambiente local, crie um túnel reverso, como `ngrok` ou `cloudflare tunnel`, e cadastre a URL HTTPS no painel de Webhooks do Asaas Sandbox.
+- O sistema não utiliza **Polling contínuo**, economizando rate-limits do Asaas e priorizando conexões assíncronas.
+
+

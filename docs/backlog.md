@@ -2028,3 +2028,16 @@ Uma issue só pode ser marcada como `DONE` quando:
 - [ ] Criar modal de criação e edição de cliente.
 - [ ] Implementar ativação e desativação via `AppConfirmDialog`.
 - [ ] Implementar bloqueio por Role/Permissions.
+
+### Fase 7A — Asaas Inbound Webhooks
+- [x] Asaas inbound webhook
+- [x] Webhook inbox pattern
+- [x] Webhook idempotency
+- [x] Webhook event normalization
+- [x] Asaas webhook authentication
+- [ ] Stripe webhook adapter
+- [ ] Mercado Pago webhook adapter
+- [ ] webhook worker/RabbitMQ
+- [ ] webhook monitoring UI
+- [ ] retry queue
+- [ ] dead-letter queue

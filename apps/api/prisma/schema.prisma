@@ -24,6 +24,7 @@ model Tenant {
   paymentEvents         PaymentEvent[]
   gatewayConfigurations GatewayConfiguration[]
   gatewayReferences     GatewayCustomerReference[]
+  webhookInboxEvents    WebhookInboxEvent[]
 
   @@map("tenants")
 }
@@ -301,6 +302,7 @@ model GatewayConfiguration {
   tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   payments          Payment[]
   gatewayReferences GatewayCustomerReference[]
+  webhookInboxEvents WebhookInboxEvent[]
 
   @@unique([tenantId, provider, environment])
   @@index([tenantId])
@@ -357,6 +359,7 @@ model Payment {
   customer             Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
   gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
   events               PaymentEvent[]
+  webhookInboxEvents   WebhookInboxEvent[]
 
   @@unique([tenantId, reference])
   @@unique([tenantId, idempotencyKeyHash])
@@ -413,4 +416,50 @@ model GatewayCustomerReference {
   @@index([gatewayConfigurationId])
   @@index([provider, providerCustomerId])
   @@map("gateway_customer_references")
+}
+
+enum WebhookProvider {
+  ASAAS
+}
+
+enum WebhookProcessingStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  IGNORED
+  FAILED
+}
+
+model WebhookInboxEvent {
+  id                     String                  @id @default(uuid())
+  provider               WebhookProvider
+  providerEventId        String
+  eventType              String
+  tenantId               String?
+  paymentId              String?
+  gatewayConfigurationId String?
+  status                 WebhookProcessingStatus @default(RECEIVED)
+  payloadHash            String
+  payloadSummary         Json?
+  receivedAt             DateTime                @default(now())
+  processedAt            DateTime?
+  failedAt               DateTime?
+  failureReason          String?
+  attemptCount           Int                     @default(0)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  tenant               Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  payment              Payment?              @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([provider])
+  @@index([eventType])
+  @@index([status])
+  @@index([tenantId])
+  @@index([paymentId])
+  @@index([gatewayConfigurationId])
+  @@index([receivedAt])
+  @@map("webhook_inbox_events")
 }

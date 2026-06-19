@@ -1437,7 +1437,17 @@ Criar:
 
 ---
 
-# 19. Banco de Dados — Modelo Inicial
+### Webhook Inbox Pattern — Asaas
+
+O sistema utiliza a arquitetura de *Inbox Pattern* com a entidade `WebhookInboxEvent` para gerenciar as notificações do Asaas Sandbox com segurança e idempotência.
+
+- **Idempotência:** A chave única engloba `provider` + `providerEventId`. Mensagens retransmitidas pelo Asaas geram `HTTP 200` automático caso a chave já exista, prevenindo atualizações duplas.
+- **Autenticação:** Ocorre comparando (em *timing-safe*) a chave secreta global do `asaas-access-token`.
+- **Status Mapping:** Baseado no evento original, o LedgerFlow atualiza os status internos da engine (`PENDING`, `APPROVED`, `CANCELED`, etc).
+- **Audit e Eventos:** Transições significativas de status disparam `PaymentEvent` (Timeline do front-end) e registros imutáveis de `AuditLog`.
+- **Evolução:** Atualizações atualmente processadas de forma síncrona. O Inbox foi modelado de maneira a facilitar migração futura para infraestrutura com RabbitMQ e *Outbox Pattern*.
+
+## 4. Banco de Dados — Modelo Inicial
 
 # 19.1 Entidades principais
 
