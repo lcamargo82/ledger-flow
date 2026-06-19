@@ -82,6 +82,18 @@ export class PaymentsController {
     return { payment: PaymentMapper.toPublicWithEvents(payment) };
   }
 
+  @Get(':id/instructions')
+  @RequirePermissions('payments:read')
+  @ApiOperation({ summary: 'Obter instruções de pagamento (PIX Copia e Cola, Boleto)' })
+  @ApiOkResponse({ description: 'Instruções retornadas.' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado.' })
+  @ApiForbiddenResponse({ description: 'Sem permissão.' })
+  @ApiNotFoundResponse({ description: 'Pagamento não encontrado.' })
+  async getInstructions(@CurrentUser() user: any, @Param('id') id: string) {
+    const instructions = await this.paymentsService.getPaymentInstructions(id, user.tenantId);
+    return { instructions };
+  }
+
   @Post(':id/cancel')
   @RequirePermissions('payments:cancel')
   @ApiOperation({

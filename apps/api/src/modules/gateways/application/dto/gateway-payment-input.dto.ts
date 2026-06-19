@@ -29,3 +29,12 @@ export class GetGatewayPaymentInput {
   gatewayConfigurationId: string;
   environment: GatewayEnvironment;
 }
+
+export class GetGatewayPaymentInstructionsInput {
+  tenantId: string;
+  paymentId: string;
+  providerPaymentId: string;
+  method: PaymentMethod;
+  credentials?: Record<string, string>;
+  environment: GatewayEnvironment;
+}

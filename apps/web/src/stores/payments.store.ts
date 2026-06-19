@@ -8,6 +8,7 @@ import type {
   PaymentStatus,
   PaymentMethod,
   CreatePaymentRequest,
+  PaymentInstructions,
 } from '../types/payments.types';
 import axios from 'axios';
 import { createIdempotencyKey } from '../utils/idempotency';
@@ -16,6 +17,7 @@ export const usePaymentsStore = defineStore('payments', () => {
   // State
   const payments = ref<PaymentListItem[]>([]);
   const selectedPayment = ref<PaymentDetails | null>(null);
+  const paymentInstructions = ref<PaymentInstructions | null>(null);
 
   const meta = ref<PaginatedPaymentsMeta>({
     page: 1,
@@ -37,6 +39,7 @@ export const usePaymentsStore = defineStore('payments', () => {
 
   const isLoading = ref(false);
   const isLoadingDetails = ref(false);
+  const isLoadingInstructions = ref(false);
   const isCreating = ref(false);
   const isCanceling = ref(false);
 
@@ -105,6 +108,21 @@ export const usePaymentsStore = defineStore('payments', () => {
       throw err;
     } finally {
       isLoadingDetails.value = false;
+    }
+  };
+
+  const fetchPaymentInstructions = async (id: string) => {
+    isLoadingInstructions.value = true;
+    error.value = null;
+    try {
+      const response = await paymentsService.getPaymentInstructions(id);
+      paymentInstructions.value = response.instructions;
+      return response.instructions;
+    } catch (err) {
+      error.value = extractErrorMessage(err);
+      throw err;
+    } finally {
+      isLoadingInstructions.value = false;
     }
   };
 
@@ -200,16 +218,23 @@ export const usePaymentsStore = defineStore('payments', () => {
 
   const clearSelectedPayment = () => {
     selectedPayment.value = null;
+    paymentInstructions.value = null;
+  };
+
+  const clearPaymentInstructions = () => {
+    paymentInstructions.value = null;
   };
 
   return {
     // State
     payments,
     selectedPayment,
+    paymentInstructions,
     meta,
     filters,
     isLoading,
     isLoadingDetails,
+    isLoadingInstructions,
     isCreating,
     isCanceling,
     error,
@@ -221,6 +246,7 @@ export const usePaymentsStore = defineStore('payments', () => {
     // Actions
     fetchPayments,
     fetchPaymentById,
+    fetchPaymentInstructions,
     createPayment,
     cancelPayment,
     setPage,
@@ -232,5 +258,6 @@ export const usePaymentsStore = defineStore('payments', () => {
     setDateRange,
     resetFilters,
     clearSelectedPayment,
+    clearPaymentInstructions,
   };
 });

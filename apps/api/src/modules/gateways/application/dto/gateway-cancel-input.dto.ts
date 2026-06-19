@@ -6,5 +6,6 @@ export class CancelGatewayPaymentInput {
   providerPaymentId: string;
   gatewayConfigurationId: string;
   environment: GatewayEnvironment;
+  credentials?: Record<string, string>;
   reason?: string;
 }

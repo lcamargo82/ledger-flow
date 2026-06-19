@@ -62,6 +62,30 @@ export interface PaymentDetailsResponse {
   payment: PaymentDetails;
 }
 
+export interface PaymentInstructions {
+  provider: string;
+  paymentId: string;
+  providerPaymentId: string;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  providerStatus?: string | null;
+  dueDate?: string | null;
+  expiresAt?: string | null;
+  invoiceUrl?: string | null;
+  bankSlipUrl?: string | null;
+  pixCopyPaste?: string | null;
+  pixQrCodeBase64?: string | null;
+  paymentUrl?: string | null;
+  isExpired: boolean;
+  canCancel: boolean;
+  canRefresh: boolean;
+}
+
+export interface PaymentInstructionsResponse {
+  instructions: PaymentInstructions;
+}
+
+
 export interface ListPaymentsParams {
   page?: number;
   perPage?: number;

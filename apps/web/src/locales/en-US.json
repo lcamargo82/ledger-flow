@@ -521,7 +521,19 @@
       "updatedAt": "Updated At",
       "canceledAt": "Canceled At",
       "refundedAt": "Refunded At",
-      "notAvailable": "Not available"
+      "notAvailable": "Not available",
+      "howToPay": "How to pay",
+      "refreshInstructions": "Refresh instructions",
+      "pixCopyPaste": "Pix Copy and Paste",
+      "expiresAt": "Expires at",
+      "expiredWarning": "Expired. Please create a new payment.",
+      "bankSlip": "Bank Slip",
+      "bankSlipDescription": "Click the button below to open your secure bank slip.",
+      "openBankSlip": "Open Bank Slip",
+      "dueDate": "Due Date",
+      "noInstructions": "Payment instructions are not available yet.",
+      "copied": "Copied to clipboard!",
+      "copyError": "Failed to copy."
     },
     "status": {
       "PENDING": "Pending",

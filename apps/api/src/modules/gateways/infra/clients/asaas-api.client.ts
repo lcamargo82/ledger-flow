@@ -20,6 +20,22 @@ export class AsaasApiClient implements IGatewayApiClient {
     return this.request('GET', fullEndpoint, undefined, headers);
   }
 
+  async delete(endpoint: string, headers?: Record<string, string>): Promise<any> {
+    return this.request('DELETE', endpoint, undefined, headers);
+  }
+
+  async getPixQrCode(providerPaymentId: string, apiKey: string): Promise<any> {
+    return this.get(`/payments/${providerPaymentId}/pixQrCode`, undefined, { access_token: apiKey });
+  }
+
+  async getPayment(providerPaymentId: string, apiKey: string): Promise<any> {
+    return this.get(`/payments/${providerPaymentId}`, undefined, { access_token: apiKey });
+  }
+
+  async cancelPayment(providerPaymentId: string, apiKey: string): Promise<any> {
+    return this.delete(`/payments/${providerPaymentId}`, { access_token: apiKey });
+  }
+
   private async request(
     method: string,
     endpoint: string,

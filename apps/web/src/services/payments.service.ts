@@ -6,6 +6,7 @@ import type {
   CreatePaymentRequest,
   CreatePaymentResponse,
   CancelPaymentResponse,
+  PaymentInstructionsResponse,
 } from '../types/payments.types';
 
 export class PaymentsService {
@@ -18,6 +19,11 @@ export class PaymentsService {
 
   async getPaymentById(id: string): Promise<PaymentDetailsResponse> {
     const { data } = await httpClient.get<PaymentDetailsResponse>(`${this.baseUrl}/${id}`);
+    return data;
+  }
+
+  async getPaymentInstructions(id: string): Promise<PaymentInstructionsResponse> {
+    const { data } = await httpClient.get<PaymentInstructionsResponse>(`${this.baseUrl}/${id}/instructions`);
     return data;
   }
 

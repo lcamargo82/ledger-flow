@@ -6,7 +6,9 @@ import { GatewayCapabilities } from '../../domain/interfaces/gateway-capabilitie
 import {
   CreateGatewayPaymentInput,
   GetGatewayPaymentInput,
+  GetGatewayPaymentInstructionsInput,
 } from '../../application/dto/gateway-payment-input.dto';
+import { GatewayPaymentInstructions } from '../../application/dto/gateway-payment-instructions.dto';
 import { CancelGatewayPaymentInput } from '../../application/dto/gateway-cancel-input.dto';
 import { RefundGatewayPaymentInput } from '../../application/dto/gateway-refund-input.dto';
 import { GatewayPaymentResult } from '../../application/dto/gateway-payment-result.dto';
@@ -45,6 +47,10 @@ export class PagBankPaymentGatewayAdapter implements IPaymentGateway {
   }
 
   async getPayment(input: GetGatewayPaymentInput): Promise<GatewayPaymentResult> {
+    throw new GatewayNotImplementedError(this.provider);
+  }
+
+  async getPaymentInstructions(input: GetGatewayPaymentInstructionsInput): Promise<GatewayPaymentInstructions> {
     throw new GatewayNotImplementedError(this.provider);
   }
 }

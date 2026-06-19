@@ -1,12 +1,14 @@
 /* eslint-disable */
 import { Injectable } from '@nestjs/common';
-import { PaymentProvider, PaymentMethod, GatewayEnvironment } from '@prisma/client';
+import { PaymentProvider, PaymentMethod, GatewayEnvironment, PaymentStatus } from '@prisma/client';
 import { IPaymentGateway } from '../../domain/interfaces/payment-gateway.interface';
 import { GatewayCapabilities } from '../../domain/interfaces/gateway-capabilities.interface';
 import {
   CreateGatewayPaymentInput,
   GetGatewayPaymentInput,
+  GetGatewayPaymentInstructionsInput,
 } from '../../application/dto/gateway-payment-input.dto';
+import { GatewayPaymentInstructions } from '../../application/dto/gateway-payment-instructions.dto';
 import { CancelGatewayPaymentInput } from '../../application/dto/gateway-cancel-input.dto';
 import { RefundGatewayPaymentInput } from '../../application/dto/gateway-refund-input.dto';
 import { GatewayPaymentResult } from '../../application/dto/gateway-payment-result.dto';
@@ -111,7 +113,26 @@ export class AsaasPaymentGatewayAdapter implements IPaymentGateway {
 
    
   async cancelPayment(input: CancelGatewayPaymentInput): Promise<GatewayPaymentResult> {
-    throw new GatewayNotImplementedError(this.provider);
+    if (!input.providerPaymentId) {
+      throw new Error('[AsaasAdapter] providerPaymentId is required to cancel payment');
+    }
+    if (!input.credentials || !input.credentials['apiKey']) {
+      throw new Error('[AsaasAdapter] API key missing in credentials');
+    }
+
+    const apiKey = input.credentials['apiKey'];
+    const response = await this.asaasApiClient.cancelPayment(input.providerPaymentId, apiKey);
+
+    if (!response || !response.deleted) {
+      throw new Error('[AsaasAdapter] Gateway refused to cancel or response is invalid.');
+    }
+
+    return {
+      provider: this.provider,
+      providerPaymentId: input.providerPaymentId,
+      providerStatus: 'DELETED',
+      normalizedStatus: PaymentStatus.CANCELED,
+    };
   }
 
    
@@ -122,6 +143,51 @@ export class AsaasPaymentGatewayAdapter implements IPaymentGateway {
    
   async getPayment(input: GetGatewayPaymentInput): Promise<GatewayPaymentResult> {
     throw new GatewayNotImplementedError(this.provider);
+  }
+
+  async getPaymentInstructions(input: GetGatewayPaymentInstructionsInput): Promise<GatewayPaymentInstructions> {
+    if (!input.providerPaymentId) {
+      throw new Error('[AsaasAdapter] providerPaymentId is required to fetch instructions');
+    }
+    if (!input.credentials || !input.credentials['apiKey']) {
+      throw new Error('[AsaasAdapter] API key missing in credentials');
+    }
+
+    const apiKey = input.credentials['apiKey'];
+    const asaasPayment = await this.asaasApiClient.getPayment(input.providerPaymentId, apiKey);
+
+    const instructions = new GatewayPaymentInstructions();
+    instructions.provider = this.provider;
+    instructions.paymentId = input.paymentId;
+    instructions.providerPaymentId = input.providerPaymentId;
+    instructions.method = input.method;
+    instructions.status = AsaasStatusMapper.toLedgerFlowStatus(asaasPayment.status);
+    instructions.providerStatus = asaasPayment.status;
+    instructions.dueDate = asaasPayment.dueDate ? new Date(asaasPayment.dueDate) : null;
+    instructions.invoiceUrl = asaasPayment.invoiceUrl || null;
+    instructions.bankSlipUrl = asaasPayment.bankSlipUrl || null;
+    instructions.paymentUrl = asaasPayment.invoiceUrl || null;
+    instructions.isExpired = instructions.status === PaymentStatus.FAILED || instructions.status === PaymentStatus.CANCELED || instructions.status === PaymentStatus.REFUNDED;
+    instructions.canCancel = instructions.status === PaymentStatus.PENDING || instructions.status === PaymentStatus.PROCESSING;
+    instructions.canRefresh = !instructions.isExpired;
+
+    if (input.method === PaymentMethod.PIX && instructions.canRefresh) {
+      try {
+        const qrCodeData = await this.asaasApiClient.getPixQrCode(input.providerPaymentId, apiKey);
+        if (qrCodeData) {
+          instructions.pixCopyPaste = qrCodeData.payload || null;
+          instructions.pixQrCodeBase64 = qrCodeData.encodedImage || null;
+          instructions.expiresAt = qrCodeData.expirationDate ? new Date(qrCodeData.expirationDate) : null;
+          if (instructions.expiresAt && instructions.expiresAt < new Date()) {
+            instructions.isExpired = true;
+          }
+        }
+      } catch (error) {
+        // Ignoring if Pix is unavailable for some reason
+      }
+    }
+
+    return instructions;
   }
 
   private centsToAsaasDecimal(amountInCents: number): string {

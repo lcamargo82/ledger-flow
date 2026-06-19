@@ -125,6 +125,66 @@ export class GatewayPaymentOrchestrationService {
     }
   }
 
+  async getPaymentInstructions(tenantId: string, payment: Payment) {
+    if (!payment.gatewayConfigurationId || !payment.providerPaymentId) {
+      throw new Error('Payment is not linked to a gateway yet.');
+    }
+
+    const configuration = await this.prisma.gatewayConfiguration.findUnique({
+      where: { id: payment.gatewayConfigurationId },
+    });
+
+    if (!configuration || !configuration.encryptedCredentials) {
+      throw new Error('Gateway configuration not found or missing credentials.');
+    }
+
+    const resolved = await this.gatewayResolver.resolve(tenantId);
+    const adapter = resolved.adapter;
+
+    const credentials = this.credentialsEncryptionService.decrypt(configuration.encryptedCredentials);
+
+    const instructions = await adapter.getPaymentInstructions({
+      tenantId,
+      paymentId: payment.id,
+      providerPaymentId: payment.providerPaymentId,
+      method: payment.method,
+      credentials,
+      environment: configuration.environment,
+    });
+
+    return instructions;
+  }
+
+  async cancelPayment(tenantId: string, payment: Payment) {
+    if (!payment.gatewayConfigurationId || !payment.providerPaymentId) {
+      return true;
+    }
+
+    const configuration = await this.prisma.gatewayConfiguration.findUnique({
+      where: { id: payment.gatewayConfigurationId },
+    });
+
+    if (!configuration || !configuration.encryptedCredentials) {
+      throw new Error('Gateway configuration not found or missing credentials.');
+    }
+
+    const resolved = await this.gatewayResolver.resolve(tenantId);
+    const adapter = resolved.adapter;
+
+    const credentials = this.credentialsEncryptionService.decrypt(configuration.encryptedCredentials);
+
+    await adapter.cancelPayment({
+      tenantId,
+      paymentId: payment.id,
+      providerPaymentId: payment.providerPaymentId,
+      gatewayConfigurationId: configuration.id,
+      credentials,
+      environment: configuration.environment,
+    });
+
+    return true;
+  }
+
   private async createAuditAndEvent(
     tenantId: string,
     paymentId: string,

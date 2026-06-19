@@ -520,7 +520,19 @@
       "updatedAt": "Atualizado em",
       "canceledAt": "Cancelado em",
       "refundedAt": "Estornado em",
-      "notAvailable": "Não disponível"
+      "notAvailable": "Não disponível",
+      "howToPay": "Como pagar",
+      "refreshInstructions": "Atualizar instruções",
+      "pixCopyPaste": "Pix Copia e Cola",
+      "expiresAt": "Expira em",
+      "expiredWarning": "Expirado. Crie um novo pagamento.",
+      "bankSlip": "Boleto bancário",
+      "bankSlipDescription": "Clique no botão abaixo para abrir seu boleto seguro.",
+      "openBankSlip": "Abrir Boleto",
+      "dueDate": "Vencimento",
+      "noInstructions": "As instruções de pagamento ainda não estão disponíveis.",
+      "copied": "Copiado para a área de transferência!",
+      "copyError": "Não foi possível copiar."
     },
     "status": {
       "PENDING": "Pendente",

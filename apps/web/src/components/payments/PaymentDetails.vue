@@ -1,16 +1,49 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from '../../composables/useI18n';
 import type { PaymentDetails } from '../../types/payments.types';
 import { formatDateTime } from '../../utils/date-format';
 import { formatMoneyFromCents } from '../../utils/money-format';
 import AppBadge from '../common/AppBadge.vue';
+import AppButton from '../common/AppButton.vue';
+import { usePaymentsStore } from '../../stores/payments.store';
+import { useToastStore } from '../../stores/toast.store';
 
 const props = defineProps<{
   payment: PaymentDetails;
 }>();
 
 const { t, currentLocale } = useI18n();
+const paymentsStore = usePaymentsStore();
+const toastStore = useToastStore();
+
+const isPendingOrProcessing = computed(() => {
+  return props.payment.status === 'PENDING' || props.payment.status === 'PROCESSING';
+});
+
+onMounted(async () => {
+  if (isPendingOrProcessing.value) {
+    await paymentsStore.fetchPaymentInstructions(props.payment.id);
+  }
+});
+
+onUnmounted(() => {
+  paymentsStore.clearPaymentInstructions();
+});
+
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    toastStore.success(t('payments.details.copied'));
+  } catch (err) {
+    toastStore.error(t('payments.details.copyError'));
+  }
+};
+
+const refreshInstructions = async () => {
+  await paymentsStore.fetchPaymentInstructions(props.payment.id);
+};
+
 
 const statusVariant = computed(() => {
   switch (props.payment.status) {
@@ -82,6 +115,85 @@ const getEventTranslation = (type: string) => {
         <div v-if="payment.refundedAt">
           <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ t('payments.details.refundedAt') }}</h4>
           <p class="text-gray-900 dark:text-white text-sm">{{ formatDateTime(payment.refundedAt, currentLocale) }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instructions Section -->
+    <section v-if="isPendingOrProcessing">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('payments.details.howToPay') }}</h3>
+        <AppButton 
+          v-if="paymentsStore.paymentInstructions?.canRefresh" 
+          variant="secondary" 
+          size="small" 
+          :loading="paymentsStore.isLoadingInstructions"
+          @click="refreshInstructions"
+        >
+          {{ t('payments.details.refreshInstructions') }}
+        </AppButton>
+      </div>
+
+      <div v-if="paymentsStore.isLoadingInstructions" class="py-4 flex justify-center">
+        <span class="text-sm text-gray-500">{{ t('common.loading') }}</span>
+      </div>
+      <div v-else-if="paymentsStore.paymentInstructions" class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg border border-gray-100 dark:border-gray-700">
+        <!-- PIX -->
+        <div v-if="paymentsStore.paymentInstructions.method === 'PIX'" class="flex flex-col md:flex-row items-center gap-8">
+          <div v-if="paymentsStore.paymentInstructions.pixQrCodeBase64" class="flex-shrink-0 bg-white p-2 rounded-xl shadow-sm">
+            <img :src="`data:image/jpeg;base64,${paymentsStore.paymentInstructions.pixQrCodeBase64}`" alt="QR Code PIX" class="w-48 h-48" />
+          </div>
+          <div class="flex-1 w-full space-y-4">
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">{{ t('payments.details.pixCopyPaste') }}</p>
+              <div class="flex gap-2">
+                <input 
+                  type="text" 
+                  readonly 
+                  :value="paymentsStore.paymentInstructions.pixCopyPaste" 
+                  class="flex-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm focus:border-primary-500 focus:ring-primary-500 text-gray-900 dark:text-white px-3 py-2"
+                />
+                <AppButton 
+                  variant="primary" 
+                  @click="copyToClipboard(paymentsStore.paymentInstructions.pixCopyPaste || '')"
+                  :disabled="!paymentsStore.paymentInstructions.pixCopyPaste"
+                >
+                  {{ t('common.copy') }}
+                </AppButton>
+              </div>
+            </div>
+            <div v-if="paymentsStore.paymentInstructions.expiresAt" class="text-sm text-gray-500 dark:text-gray-400">
+              {{ t('payments.details.expiresAt') }}: <span class="font-medium">{{ formatDateTime(paymentsStore.paymentInstructions.expiresAt, currentLocale) }}</span>
+            </div>
+            <div v-if="paymentsStore.paymentInstructions.isExpired" class="text-sm text-red-600 dark:text-red-400 font-medium">
+              {{ t('payments.details.expiredWarning') }}
+            </div>
+          </div>
+        </div>
+        
+        <!-- BOLETO -->
+        <div v-else-if="paymentsStore.paymentInstructions.method === 'BOLETO'" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('payments.details.bankSlip') }}</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('payments.details.bankSlipDescription') }}</p>
+            </div>
+            <a 
+              v-if="paymentsStore.paymentInstructions.bankSlipUrl" 
+              :href="paymentsStore.paymentInstructions.bankSlipUrl" 
+              target="_blank"
+              class="inline-flex items-center justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:w-auto"
+            >
+              {{ t('payments.details.openBankSlip') }}
+            </a>
+          </div>
+          <div v-if="paymentsStore.paymentInstructions.dueDate" class="text-sm text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-700">
+            {{ t('payments.details.dueDate') }}: <span class="font-medium">{{ formatDateTime(paymentsStore.paymentInstructions.dueDate, currentLocale) }}</span>
+          </div>
+        </div>
+        
+        <div v-else class="text-sm text-gray-500 dark:text-gray-400">
+          {{ t('payments.details.noInstructions') }}
         </div>
       </div>
     </section>

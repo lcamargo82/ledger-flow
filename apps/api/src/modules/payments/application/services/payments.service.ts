@@ -127,6 +127,22 @@ export class PaymentsService {
     return payment;
   }
 
+  async getPaymentInstructions(id: string, tenantId: string) {
+    const payment = await this.paymentsRepository.findByIdAndTenant(id, tenantId);
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found.');
+    }
+
+    if (!payment.providerPaymentId) {
+      throw new BadRequestException('Payment does not have a provider payment id yet.');
+    }
+
+    const instructions = await this.gatewayOrchestrator.getPaymentInstructions(tenantId, payment);
+
+    return instructions;
+  }
+
   async cancelPayment(id: string, tenantId: string, actorUserId: string) {
     const payment = await this.paymentsRepository.findByIdAndTenant(id, tenantId);
 
@@ -136,6 +152,12 @@ export class PaymentsService {
 
     if (!canTransitionPaymentStatus(payment.status, PaymentStatus.CANCELED)) {
       throw new ConflictException('Payment cannot be canceled in its current status.');
+    }
+
+    try {
+      await this.gatewayOrchestrator.cancelPayment(tenantId, payment);
+    } catch (err: any) {
+      throw new BadRequestException(`Falha ao cancelar pagamento no gateway: ${err.message}`);
     }
 
     const updatedPayment = await this.paymentsRepository.cancel(id, tenantId, {
