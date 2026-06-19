@@ -32,7 +32,9 @@ export class RolesController {
   @ApiForbiddenResponse({
     description: 'Forbidden - requires roles:manage permission',
   })
-  async listRoles(@CurrentUser() user: AuthenticatedUser): Promise<RolesResponseDto> {
+  async listRoles(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<RolesResponseDto> {
     return this.rolesService.listRoles(user.tenantId);
   }
 

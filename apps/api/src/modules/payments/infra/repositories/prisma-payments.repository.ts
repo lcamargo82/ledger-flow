@@ -12,7 +12,9 @@ import {
 export class PrismaPaymentsRepository implements IPaymentsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findPaginated(params: ListPaymentsParams): Promise<PaginatedResult<Payment>> {
+  async findPaginated(
+    params: ListPaymentsParams,
+  ): Promise<PaginatedResult<Payment>> {
     const {
       tenantId,
       page = 1,
@@ -76,7 +78,10 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
     };
   }
 
-  async findByIdAndTenant(id: string, tenantId: string): Promise<Payment | null> {
+  async findByIdAndTenant(
+    id: string,
+    tenantId: string,
+  ): Promise<Payment | null> {
     return this.prisma.payment
       .findUnique({
         where: { id },
@@ -204,7 +209,9 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
     });
   }
 
-  async createEvent(data: Prisma.PaymentEventUncheckedCreateInput): Promise<PaymentEvent> {
+  async createEvent(
+    data: Prisma.PaymentEventUncheckedCreateInput,
+  ): Promise<PaymentEvent> {
     return this.prisma.paymentEvent.create({ data });
   }
 }

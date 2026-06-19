@@ -23,6 +23,7 @@ model Tenant {
   payments              Payment[]
   paymentEvents         PaymentEvent[]
   gatewayConfigurations GatewayConfiguration[]
+  gatewayReferences     GatewayCustomerReference[]
 
   @@map("tenants")
 }
@@ -198,8 +199,9 @@ model Customer {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  payments Payment[]
+  tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+  gatewayReferences GatewayCustomerReference[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, document])
@@ -296,8 +298,9 @@ model GatewayConfiguration {
   createdAt              DateTime                   @default(now())
   updatedAt              DateTime                   @updatedAt
 
-  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  payments Payment[]
+  tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+  gatewayReferences GatewayCustomerReference[]
 
   @@unique([tenantId, provider, environment])
   @@index([tenantId])
@@ -336,11 +339,14 @@ model Payment {
   method                 PaymentMethod
   status                 PaymentStatus @default(PENDING)
   description            String?
+  dueDate                DateTime?
   metadata               Json?
   idempotencyKeyHash     String
   idempotencyRequestHash String
   provider               PaymentProvider?
   providerPaymentId      String?
+  providerStatus         String?
+  providerUpdatedAt      DateTime?
   gatewayConfigurationId String?
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
@@ -384,4 +390,27 @@ model PaymentEvent {
   @@index([type])
   @@index([createdAt])
   @@map("payment_events")
+}
+
+model GatewayCustomerReference {
+  id                     String               @id @default(uuid())
+  tenantId               String
+  customerId             String
+  gatewayConfigurationId String
+  provider               PaymentProvider
+  providerCustomerId     String
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer             Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  gatewayConfiguration GatewayConfiguration @relation(fields: [gatewayConfigurationId], references: [id], onDelete: Cascade)
+
+  @@unique([gatewayConfigurationId, customerId])
+  @@unique([gatewayConfigurationId, providerCustomerId])
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([gatewayConfigurationId])
+  @@index([provider, providerCustomerId])
+  @@map("gateway_customer_references")
 }

@@ -16,7 +16,10 @@ describe('Aes256GcmCredentialsEncryptionService', () => {
   });
 
   it('should encrypt and decrypt credentials successfully', () => {
-    const creds: GatewayCredentials = { apiKey: 'secret123', clientId: 'client456' };
+    const creds: GatewayCredentials = {
+      apiKey: 'secret123',
+      clientId: 'client456',
+    };
     const encrypted = service.encrypt(creds);
 
     expect(encrypted.encryptedData).toBeDefined();

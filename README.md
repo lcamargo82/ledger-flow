@@ -75,7 +75,7 @@ O LedgerFlow simula uma solução para esses problemas com uma arquitetura prepa
 * Gestão de permissões.
 * Gestão de clientes.
 * Gestão de pagamentos.
-* Integração inicial com Stripe.
+* Integração inicial com Asaas Sandbox (Fase 6.1).
 * Arquitetura desacoplada para múltiplos gateways.
 * Webhooks inbound.
 * Webhooks outbound.
@@ -759,9 +759,9 @@ IPaymentGateway
 
 ```
 
-O Stripe será o primeiro provider real.
+O Asaas (Sandbox) é o primeiro provider real implementado.
 
-O core de pagamento não deve importar SDK do Stripe diretamente. O SDK deve ficar isolado no adapter.
+O core de pagamento não importa SDKs externos diretamente. Eles ficam isolados no adapter.
 
 ---
 # 16. Outbox e Inbox

@@ -10,6 +10,11 @@ import { PagBankPaymentGatewayAdapter } from './infra/adapters/pagbank-payment-g
 import { PagarmePaymentGatewayAdapter } from './infra/adapters/pagarme-payment-gateway.adapter';
 import { GatewayCredentialsEncryptionService } from './application/services/gateway-credentials-encryption.service';
 import { Aes256GcmCredentialsEncryptionService } from './infra/crypto/aes-256-gcm-credentials-encryption.service';
+import { IProviderCustomerReferenceRepository } from './domain/interfaces/provider-customer-reference.repository';
+import { PrismaGatewayCustomerReferenceRepository } from './infra/repositories/prisma-gateway-customer-reference.repository';
+import { AsaasApiClient } from './infra/clients/asaas-api.client';
+import { GatewayCustomerSyncService } from './application/services/gateway-customer-sync.service';
+import { GatewayPaymentOrchestrationService } from './application/services/gateway-payment-orchestration.service';
 
 @Module({
   providers: [
@@ -21,6 +26,13 @@ import { Aes256GcmCredentialsEncryptionService } from './infra/crypto/aes-256-gc
       provide: GatewayCredentialsEncryptionService,
       useClass: Aes256GcmCredentialsEncryptionService,
     },
+    {
+      provide: IProviderCustomerReferenceRepository,
+      useClass: PrismaGatewayCustomerReferenceRepository,
+    },
+    AsaasApiClient,
+    GatewayCustomerSyncService,
+    GatewayPaymentOrchestrationService,
     PaymentGatewayFactoryService,
     PaymentGatewayResolverService,
     StripePaymentGatewayAdapter,
@@ -29,6 +41,10 @@ import { Aes256GcmCredentialsEncryptionService } from './infra/crypto/aes-256-gc
     PagBankPaymentGatewayAdapter,
     PagarmePaymentGatewayAdapter,
   ],
-  exports: [PaymentGatewayResolverService, GatewayCredentialsEncryptionService],
+  exports: [
+    PaymentGatewayResolverService,
+    GatewayCredentialsEncryptionService,
+    GatewayPaymentOrchestrationService,
+  ],
 })
 export class GatewaysModule {}

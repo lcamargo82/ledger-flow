@@ -14,8 +14,11 @@ export class CreateGatewayPaymentInput {
     document?: string | null;
   };
   description?: string | null;
+  dueDate?: Date | null;
   idempotencyKey?: string;
   gatewayConfigurationId: string;
+  providerCustomerId?: string;
+  credentials?: Record<string, string>;
   environment: GatewayEnvironment;
 }
 

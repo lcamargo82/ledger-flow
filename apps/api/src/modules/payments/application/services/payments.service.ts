@@ -14,7 +14,7 @@ import { canTransitionPaymentStatus } from '../../domain/payment-status-transiti
 import { CreatePaymentDto } from '../dto/create-payment.dto';
 import { ListPaymentsQueryDto } from '../dto/list-payments-query.dto';
 import { RefundPaymentDto } from '../dto/refund-payment.dto';
-import { PaymentGatewayResolverService } from '../../gateways/application/services/payment-gateway-resolver.service';
+import { GatewayPaymentOrchestrationService } from '../../../gateways/application/services/gateway-payment-orchestration.service';
 
 @Injectable()
 export class PaymentsService {
@@ -22,7 +22,7 @@ export class PaymentsService {
     private readonly paymentsRepository: PrismaPaymentsRepository,
     private readonly referenceService: PaymentReferenceService,
     private readonly prisma: PrismaService, // Needed for audit log outside the repository if not separated
-    private readonly gatewayResolver: PaymentGatewayResolverService,
+    private readonly gatewayOrchestrator: GatewayPaymentOrchestrationService,
   ) {}
 
   async createPayment(
@@ -68,10 +68,10 @@ export class PaymentsService {
       throw new NotFoundException('Customer not found or inactive.');
     }
 
-    // Gateway Extension Point (Phase 6.0 - Abstraction only, no actual calls)
-    await this.prepareGatewayRouting(tenantId);
+    // Determine dueDate
+    const dueDate = data.dueDate ? new Date(data.dueDate) : undefined;
 
-    // Create Payment
+    // Create Payment (starts as PENDING)
     const reference = this.referenceService.generateReference();
     const payment = await this.paymentsRepository.create({
       tenantId,
@@ -81,6 +81,7 @@ export class PaymentsService {
       currency: data.currency || 'BRL',
       method: data.method,
       description: data.description,
+      dueDate,
       metadata: data.metadata as any,
       idempotencyKeyHash,
       idempotencyRequestHash,
@@ -94,6 +95,9 @@ export class PaymentsService {
       },
     });
 
+    // Gateway Orchestration
+    const orchestratedPayment = await this.gatewayOrchestrator.orchestrate(tenantId, payment, customer, actorUserId);
+
     // Audit Log
     await this.auditLog(tenantId, actorUserId, 'payment.created', payment.id, {
       reference,
@@ -103,7 +107,7 @@ export class PaymentsService {
       status: payment.status,
     });
 
-    return payment;
+    return orchestratedPayment;
   }
 
   async listPayments(tenantId: string, query: ListPaymentsQueryDto) {
@@ -206,20 +210,4 @@ export class PaymentsService {
     }
   }
 
-  private async prepareGatewayRouting(tenantId: string) {
-    console.log(`[PaymentsService] Gateway resolver requested for tenant ${tenantId}`);
-    try {
-      const { configuration, adapter } = await this.gatewayResolver.resolve(tenantId);
-      console.log(
-        `[PaymentsService] Gateway configuration found. Provider: ${configuration.provider}`,
-      );
-      // Nenhuma chamada externa é feita nesta fase
-      return { configuration, adapter };
-    } catch (error: any) {
-      console.log(
-        `[PaymentsService] Gateway configuration missing or unsupported provider requested. Details: ${error.message}`,
-      );
-      return null;
-    }
-  }
 }

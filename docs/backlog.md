@@ -1499,6 +1499,7 @@ Expandir o sistema para mais de um gateway real.
 **Prioridade:** P3
 **Tipo:** Backend / Payments
 **Milestone:** M11
+**Status:** DONE
 
 ### Critérios de aceite
 

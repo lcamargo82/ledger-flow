@@ -542,6 +542,18 @@ export class PaymentGatewayFactory {
 
 ---
 
+# 6.5 Integração Asaas (Sandbox)
+
+A primeira integração real do sistema (implementada na Fase 6.1) foca exclusivamente no ambiente Sandbox do Asaas.
+
+## Características:
+* **Isolamento Total:** Credenciais criptografadas via AES-256-GCM (nunca injetadas globalmente, apenas decriptadas em memória).
+* **Mapeamento de Customer:** Uso da entidade intermediária `GatewayCustomerReference` para evitar duplicidade de clientes no provedor.
+* **Idempotência Externa:** Validação via GET `/payments?externalReference={ref}` antes do POST de criação, blindando falhas de concorrência ou timeouts de resposta do provider.
+* **Orquestração Assíncrona-Like:** Embora síncrono no primeiro momento, a criação da fatura interna sempre prevalece (estado `PENDING`) e não bloqueia a continuidade caso o asaas apresente instabilidade - registrando na auditoria a falha e o adapter apenas interrompe a chamada, delegando re-tentativas para fluxos futuros (Webhooks/Filas).
+
+---
+
 # 7. Segurança
 
 # 7.1 Autenticação

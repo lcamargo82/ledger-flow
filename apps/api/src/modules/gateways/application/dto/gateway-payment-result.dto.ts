@@ -8,6 +8,9 @@ export class GatewayPaymentResult {
   checkoutUrl?: string;
   pixQrCode?: string;
   pixCopyPaste?: string;
+  invoiceUrl?: string;
+  bankSlipUrl?: string;
+  dueDate?: Date;
   expiresAt?: Date;
   rawResponseReference?: string;
   metadata?: Record<string, any>;

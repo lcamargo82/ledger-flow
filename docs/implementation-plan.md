@@ -257,7 +257,24 @@ Fase 5A — Payments Core Backend Foundation
 
 ---
 
-## Fase 6.1 — Webhooks e Provider Integrations
+## Fase 6.1 — Asaas Adapter + Sandbox
+
+**Status:** Concluída
+
+**Itens:**
+* Cliente API base configurado com Base URL apontada exclusivamente para Sandbox.
+* Mapping customizado de status (AsaasStatusMapper).
+* Orquestrador assíncrono simulado via `GatewayPaymentOrchestrationService`.
+* `AsaasPaymentGatewayAdapter` injetando credenciais desencriptadas da API e lidando com PIX e Boleto.
+* Criação persistente de clientes espelhados no gateway (`PrismaGatewayCustomerReferenceRepository`).
+* Validação rigorosa de idempotência (através de `externalReference` + `GET` prévio no provedor).
+* Script seguro de injeção de API Key criptografada no banco para uso do adapter (`configure-asaas-sandbox.ts`).
+* Configuração blindada para isolar segredos (`AES-256-GCM`).
+
+---
+
+## Fase 6.2 — Stripe Adapter (Futuro)
+## Fase 6.3 — Webhooks Inbound (Futuro)
 
 ## Fase 7 — Reports
 

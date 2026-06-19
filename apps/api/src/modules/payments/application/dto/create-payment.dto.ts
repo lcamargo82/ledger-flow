@@ -12,6 +12,7 @@ import {
   Max,
   MaxLength,
   Min,
+  IsDateString,
 } from 'class-validator';
 
 export class CreatePaymentDto {
@@ -63,7 +64,14 @@ export class CreatePaymentDto {
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Metadados adicionais livres',
+    description: 'Data de vencimento do pagamento. Exigido para boletos.',
+  })
+  @IsOptional()
+  @IsDateString()
+  dueDate?: string;
+
+  @ApiPropertyOptional({
+    description: 'Metadados adicionais em formato JSON.',
     example: { origin: 'website', campaign: 'black-friday' },
   })
   @IsObject()

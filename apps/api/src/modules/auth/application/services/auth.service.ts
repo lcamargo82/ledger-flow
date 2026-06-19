@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
@@ -22,10 +27,16 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  async login(loginDto: LoginDto, ipAddress?: string, userAgent?: string): Promise<AuthResponse> {
+  async login(
+    loginDto: LoginDto,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<AuthResponse> {
     const email = loginDto.email.trim().toLowerCase();
-    const maxAttempts = this.configService.get<number>('AUTH_MAX_FAILED_ATTEMPTS') || 5;
-    const lockMinutes = this.configService.get<number>('AUTH_LOCK_MINUTES') || 15;
+    const maxAttempts =
+      this.configService.get<number>('AUTH_MAX_FAILED_ATTEMPTS') || 5;
+    const lockMinutes =
+      this.configService.get<number>('AUTH_LOCK_MINUTES') || 15;
 
     let userTenantId: string | null = null;
     let authAttemptStatus = false;
@@ -59,10 +70,16 @@ export class AuthService {
 
       if (user.lockedUntil && user.lockedUntil > new Date()) {
         failureReason = 'USER_LOCKED';
-        throw new HttpException('Account temporarily locked', HttpStatus.LOCKED); // 423
+        throw new HttpException(
+          'Account temporarily locked',
+          HttpStatus.LOCKED,
+        ); // 423
       }
 
-      const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
+      const isPasswordValid = await bcrypt.compare(
+        loginDto.password,
+        user.passwordHash,
+      );
 
       if (!isPasswordValid) {
         failureReason = 'INVALID_PASSWORD';
@@ -96,8 +113,12 @@ export class AuthService {
       const permissions = Array.from(permissionsSet);
 
       const refreshTokenString = crypto.randomBytes(64).toString('hex');
-      const refreshTokenHash = crypto.createHash('sha256').update(refreshTokenString).digest('hex');
-      const expiresInStr = this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
+      const refreshTokenHash = crypto
+        .createHash('sha256')
+        .update(refreshTokenString)
+        .digest('hex');
+      const expiresInStr =
+        this.configService.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d';
       const expiresAt = this.parseExpiresIn(expiresInStr);
 
       // Single session logic: Revoke previous active sessions and refresh tokens
@@ -184,9 +205,14 @@ export class AuthService {
     }
   }
 
-  async refresh(refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string }> {
+  async refresh(
+    refreshTokenDto: RefreshTokenDto,
+  ): Promise<{ accessToken: string }> {
     const { refreshToken } = refreshTokenDto;
-    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
 
     const storedToken = await this.prisma.refreshToken.findFirst({
       where: { tokenHash },
@@ -258,7 +284,10 @@ export class AuthService {
 
   async logout(logoutDto: LogoutDto): Promise<{ message: string }> {
     const { refreshToken } = logoutDto;
-    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(refreshToken)
+      .digest('hex');
 
     const storedToken = await this.prisma.refreshToken.findFirst({
       where: { tokenHash },
@@ -318,7 +347,8 @@ export class AuthService {
         },
       });
 
-      const webUrl = this.configService.get<string>('WEB_URL') || 'http://localhost:5180';
+      const webUrl =
+        this.configService.get<string>('WEB_URL') || 'http://localhost:5180';
       const resetLink = `${webUrl}/reset-password?token=${token}`;
 
       await this.emailService.sendPasswordResetEmail(user.email, resetLink);
@@ -353,7 +383,8 @@ export class AuthService {
     }
 
     return {
-      message: 'Se o e-mail existir, as instruções de recuperação serão enviadas.',
+      message:
+        'Se o e-mail existir, as instruções de recuperação serão enviadas.',
     };
   }
 
@@ -375,7 +406,10 @@ export class AuthService {
     });
 
     if (!resetTokenRecord || !resetTokenRecord.user.active) {
-      throw new HttpException('Invalid or expired password reset token.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Invalid or expired password reset token.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -428,7 +462,8 @@ export class AuthService {
   private maskEmail(email: string): string {
     const [name, domain] = email.split('@');
     if (!domain) return email;
-    const maskedName = name.length > 2 ? `${name[0]}***${name[name.length - 1]}` : '***';
+    const maskedName =
+      name.length > 2 ? `${name[0]}***${name[name.length - 1]}` : '***';
     return `${maskedName}@${domain}`;
   }
 
