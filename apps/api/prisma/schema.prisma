@@ -19,9 +19,10 @@ model Tenant {
   users         User[]
   roles         Role[]
   authAttempts  AuthAttempt[]
-  customers     Customer[]
-  payments      Payment[]
-  paymentEvents PaymentEvent[]
+  customers             Customer[]
+  payments              Payment[]
+  paymentEvents         PaymentEvent[]
+  gatewayConfigurations GatewayConfiguration[]
 
   @@map("tenants")
 }
@@ -251,6 +252,62 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+enum PaymentProvider {
+  STRIPE
+  ASAAS
+  MERCADO_PAGO
+  PAGBANK
+  PAGARME
+}
+
+enum GatewayEnvironment {
+  SANDBOX
+  TEST
+  LIVE
+}
+
+enum GatewayConfigurationStatus {
+  ACTIVE
+  INACTIVE
+  DISABLED
+}
+
+enum GatewayHealthStatus {
+  UNKNOWN
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+}
+
+model GatewayConfiguration {
+  id                     String                     @id @default(uuid())
+  tenantId               String
+  provider               PaymentProvider
+  environment            GatewayEnvironment
+  status                 GatewayConfigurationStatus @default(INACTIVE)
+  priority               Int                        @default(100)
+  displayName            String?
+  supportedMethods       Json?
+  encryptedCredentials   String?
+  credentialsFingerprint String?
+  healthStatus           GatewayHealthStatus        @default(UNKNOWN)
+  lastHealthCheckAt      DateTime?
+  lastHealthCheckMessage String?
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
+  @@unique([tenantId, provider, environment])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, provider])
+  @@index([tenantId, priority])
+  @@index([provider, environment])
+  @@map("gateway_configurations")
+}
+
 enum PaymentStatus {
   PENDING
   PROCESSING
@@ -282,16 +339,18 @@ model Payment {
   metadata               Json?
   idempotencyKeyHash     String
   idempotencyRequestHash String
-  provider               String?
+  provider               PaymentProvider?
   providerPaymentId      String?
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime      @updatedAt
+  gatewayConfigurationId String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
   canceledAt             DateTime?
   refundedAt             DateTime?
 
-  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customer Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  events   PaymentEvent[]
+  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer             Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+  events               PaymentEvent[]
 
   @@unique([tenantId, reference])
   @@unique([tenantId, idempotencyKeyHash])
@@ -302,6 +361,7 @@ model Payment {
   @@index([tenantId, reference])
   @@index([customerId])
   @@index([provider, providerPaymentId])
+  @@index([gatewayConfigurationId])
   @@map("payments")
 }
 

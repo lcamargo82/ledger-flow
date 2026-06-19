@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable */
 import {
   ConflictException,
   Injectable,
@@ -14,6 +14,7 @@ import { canTransitionPaymentStatus } from '../../domain/payment-status-transiti
 import { CreatePaymentDto } from '../dto/create-payment.dto';
 import { ListPaymentsQueryDto } from '../dto/list-payments-query.dto';
 import { RefundPaymentDto } from '../dto/refund-payment.dto';
+import { PaymentGatewayResolverService } from '../../gateways/application/services/payment-gateway-resolver.service';
 
 @Injectable()
 export class PaymentsService {
@@ -21,6 +22,7 @@ export class PaymentsService {
     private readonly paymentsRepository: PrismaPaymentsRepository,
     private readonly referenceService: PaymentReferenceService,
     private readonly prisma: PrismaService, // Needed for audit log outside the repository if not separated
+    private readonly gatewayResolver: PaymentGatewayResolverService,
   ) {}
 
   async createPayment(
@@ -34,30 +36,21 @@ export class PaymentsService {
     }
 
     // Generate secure hashes
-    const idempotencyKeyHash = crypto
-      .createHash('sha256')
-      .update(idempotencyKey)
-      .digest('hex');
+    const idempotencyKeyHash = crypto.createHash('sha256').update(idempotencyKey).digest('hex');
 
     const payloadString = JSON.stringify(data);
-    const idempotencyRequestHash = crypto
-      .createHash('sha256')
-      .update(payloadString)
-      .digest('hex');
+    const idempotencyRequestHash = crypto.createHash('sha256').update(payloadString).digest('hex');
 
     // Check idempotency
-    const existingPayment =
-      await this.paymentsRepository.findByIdempotencyKeyHash(
-        tenantId,
-        idempotencyKeyHash,
-      );
+    const existingPayment = await this.paymentsRepository.findByIdempotencyKeyHash(
+      tenantId,
+      idempotencyKeyHash,
+    );
 
     if (existingPayment) {
       if (existingPayment.idempotencyRequestHash === idempotencyRequestHash) {
         // Safe reuse, log internally
-        console.log(
-          `[Idempotency] Reused payment creation for key hash: ${idempotencyKeyHash}`,
-        );
+        console.log(`[Idempotency] Reused payment creation for key hash: ${idempotencyKeyHash}`);
         return existingPayment;
       } else {
         throw new ConflictException(
@@ -74,6 +67,9 @@ export class PaymentsService {
     if (!customer || customer.tenantId !== tenantId || !customer.active) {
       throw new NotFoundException('Customer not found or inactive.');
     }
+
+    // Gateway Extension Point (Phase 6.0 - Abstraction only, no actual calls)
+    await this.prepareGatewayRouting(tenantId);
 
     // Create Payment
     const reference = this.referenceService.generateReference();
@@ -118,10 +114,7 @@ export class PaymentsService {
   }
 
   async getPaymentDetails(id: string, tenantId: string) {
-    const payment = await this.paymentsRepository.findByIdAndTenantWithEvents(
-      id,
-      tenantId,
-    );
+    const payment = await this.paymentsRepository.findByIdAndTenantWithEvents(id, tenantId);
 
     if (!payment) {
       throw new NotFoundException('Payment not found.');
@@ -131,19 +124,14 @@ export class PaymentsService {
   }
 
   async cancelPayment(id: string, tenantId: string, actorUserId: string) {
-    const payment = await this.paymentsRepository.findByIdAndTenant(
-      id,
-      tenantId,
-    );
+    const payment = await this.paymentsRepository.findByIdAndTenant(id, tenantId);
 
     if (!payment) {
       throw new NotFoundException('Payment not found.');
     }
 
     if (!canTransitionPaymentStatus(payment.status, PaymentStatus.CANCELED)) {
-      throw new ConflictException(
-        'Payment cannot be canceled in its current status.',
-      );
+      throw new ConflictException('Payment cannot be canceled in its current status.');
     }
 
     const updatedPayment = await this.paymentsRepository.cancel(id, tenantId, {
@@ -162,38 +150,22 @@ export class PaymentsService {
     return updatedPayment;
   }
 
-  async refundPayment(
-    id: string,
-    tenantId: string,
-    actorUserId: string,
-    data: RefundPaymentDto,
-  ) {
-    const payment = await this.paymentsRepository.findByIdAndTenant(
-      id,
-      tenantId,
-    );
+  async refundPayment(id: string, tenantId: string, actorUserId: string, data: RefundPaymentDto) {
+    const payment = await this.paymentsRepository.findByIdAndTenant(id, tenantId);
 
     if (!payment) {
       throw new NotFoundException('Payment not found.');
     }
 
     if (!canTransitionPaymentStatus(payment.status, PaymentStatus.REFUNDED)) {
-      throw new ConflictException(
-        'Payment cannot be refunded in its current status.',
-      );
+      throw new ConflictException('Payment cannot be refunded in its current status.');
     }
 
     // Log the request first
-    await this.auditLog(
-      tenantId,
-      actorUserId,
-      'payment.refund_requested',
-      payment.id,
-      {
-        reference: payment.reference,
-        reason: data.reason,
-      },
-    );
+    await this.auditLog(tenantId, actorUserId, 'payment.refund_requested', payment.id, {
+      reference: payment.reference,
+      reason: data.reason,
+    });
 
     const updatedPayment = await this.paymentsRepository.refund(id, tenantId, {
       tenantId,
@@ -231,6 +203,23 @@ export class PaymentsService {
       });
     } catch (error) {
       console.error('Failed to create audit log', error);
+    }
+  }
+
+  private async prepareGatewayRouting(tenantId: string) {
+    console.log(`[PaymentsService] Gateway resolver requested for tenant ${tenantId}`);
+    try {
+      const { configuration, adapter } = await this.gatewayResolver.resolve(tenantId);
+      console.log(
+        `[PaymentsService] Gateway configuration found. Provider: ${configuration.provider}`,
+      );
+      // Nenhuma chamada externa é feita nesta fase
+      return { configuration, adapter };
+    } catch (error: any) {
+      console.log(
+        `[PaymentsService] Gateway configuration missing or unsupported provider requested. Details: ${error.message}`,
+      );
+      return null;
     }
   }
 }

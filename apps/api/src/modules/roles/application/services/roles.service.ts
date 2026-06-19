@@ -35,10 +35,7 @@ export class RolesService {
     };
   }
 
-  async getRoleById(
-    tenantId: string,
-    roleId: string,
-  ): Promise<RoleResponseDto> {
+  async getRoleById(tenantId: string, roleId: string): Promise<RoleResponseDto> {
     const role = await this.prisma.role.findFirst({
       where: {
         id: roleId,

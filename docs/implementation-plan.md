@@ -242,9 +242,22 @@ Fase 5A — Payments Core Backend Foundation
 
 ---
 
-## Fase 6 — Webhooks
+## Fase 6.0 — Multi-Gateway Abstraction Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Banco de Dados: `GatewayConfiguration` e enums associados.
+* Segurança: Implementação de AES-256-GCM para criptografia das credenciais dos gateways.
+* Arquitetura: Criação do `GatewaysModule` com `PaymentGatewayFactoryService` e `PaymentGatewayResolverService`.
+* Abstração: Interfaces base (`IPaymentGateway`, `GatewayCapabilities`, `GatewayCredentials`).
+* Adapters Iniciais: Esqueletos para Stripe, Asaas, Mercado Pago, PagBank e Pagar.me com exceção `GatewayNotImplementedError`.
+* Core: `PaymentsService` adaptado para preparar roteamento através do Gateway Resolver.
+* Documentação: ADR 0018 criado e atualizações no plano e security SDD.
 
 ---
+
+## Fase 6.1 — Webhooks e Provider Integrations
 
 ## Fase 7 — Reports
 

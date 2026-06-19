@@ -136,9 +136,9 @@ Logs, traces, métricas, Prometheus, Grafana e Datadog opcional.
 
 Webhooks enviados para clientes.
 
-## M11 — Multi-Gateway
+## M11 — Multi-Gateway Abstraction & Integration
 
-Asaas, Mercado Pago e configuração dinâmica por tenant.
+Fundação abstrata (Fase 6.0) já implementada com Stripe, Asaas, Mercado Pago, PagBank e Pagar.me como skeletons e AES-256-GCM para credenciais. Próximos passos: Sandbox e Go-Live dos providers.
 
 ## M12 — Tests, Security & Portfolio
 

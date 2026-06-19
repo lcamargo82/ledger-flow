@@ -1,0 +1,23 @@
+import { PaymentProvider } from '@prisma/client';
+import { GatewayCapabilities } from './gateway-capabilities.interface';
+import {
+  CreateGatewayPaymentInput,
+  GetGatewayPaymentInput,
+} from '../../application/dto/gateway-payment-input.dto';
+import { CancelGatewayPaymentInput } from '../../application/dto/gateway-cancel-input.dto';
+import { RefundGatewayPaymentInput } from '../../application/dto/gateway-refund-input.dto';
+import { GatewayPaymentResult } from '../../application/dto/gateway-payment-result.dto';
+
+export interface IPaymentGateway {
+  readonly provider: PaymentProvider;
+
+  getCapabilities(): GatewayCapabilities;
+
+  createPayment(input: CreateGatewayPaymentInput): Promise<GatewayPaymentResult>;
+
+  cancelPayment(input: CancelGatewayPaymentInput): Promise<GatewayPaymentResult>;
+
+  refundPayment(input: RefundGatewayPaymentInput): Promise<GatewayPaymentResult>;
+
+  getPayment(input: GetGatewayPaymentInput): Promise<GatewayPaymentResult>;
+}
