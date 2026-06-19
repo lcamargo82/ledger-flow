@@ -108,7 +108,7 @@ const handleSubmit = () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-4">
+  <form @submit.prevent="handleSubmit" class="space-y-4" novalidate>
     <AppSelect
       id="customerId"
       v-model="form.customerId"
@@ -116,7 +116,6 @@ const handleSubmit = () => {
       :options="[{ value: '', label: t('payments.form.customerPlaceholder') }, ...customerOptions]"
       :error="errors.customerId"
       :disabled="props.loading || customersStore.isLoading"
-      required
     />
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -127,7 +126,6 @@ const handleSubmit = () => {
         :placeholder="t('payments.form.amountPlaceholder')"
         :error="errors.amountInput"
         :disabled="props.loading"
-        required
       />
 
       <AppSelect
@@ -136,7 +134,6 @@ const handleSubmit = () => {
         :label="t('payments.form.currencyLabel')"
         :options="currencyOptions"
         :disabled="props.loading || true"
-        required
       />
     </div>
 
@@ -147,7 +144,6 @@ const handleSubmit = () => {
       :options="methodOptions"
       :error="errors.method"
       :disabled="props.loading"
-      required
     />
 
     <AppInput
