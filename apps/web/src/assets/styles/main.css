@@ -257,13 +257,55 @@ body {
   border-right: 1px solid var(--lf-border-primary);
   display: flex;
   flex-direction: column;
+  transition: width 0.3s ease;
+  overflow: visible;
+  position: relative;
+  z-index: 10;
+}
+.lf-sidebar--collapsed {
+  width: 80px;
 }
 .lf-sidebar__brand {
   height: 64px;
   display: flex;
   align-items: center;
-  padding: 0 var(--lf-space-6);
+  justify-content: space-between;
+  padding: 0 var(--lf-space-4);
   border-bottom: 1px solid var(--lf-border-primary);
+}
+.lf-sidebar--collapsed .lf-sidebar__brand {
+  justify-content: center;
+}
+.lf-sidebar-toggle {
+  position: absolute;
+  top: 16px;
+  right: -16px;
+  width: 32px;
+  height: 32px;
+  background-color: var(--lf-surface-primary);
+  border: 1px solid var(--lf-border-primary);
+  color: var(--lf-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  z-index: 20;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.lf-sidebar-toggle:hover {
+  background-color: var(--lf-surface-secondary);
+  color: var(--lf-text-primary);
+}
+.lf-sidebar-toggle .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+.lf-sidebar-logo-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 .lf-sidebar__brand h2 {
   margin: 0;
@@ -283,13 +325,29 @@ body {
   font-size: 0.9375rem; /* 15px */
   transition: all 0.2s;
   border-left: 2px solid transparent;
+  white-space: nowrap;
 }
-.lf-nav-item.router-link-active {
+.lf-nav-item .icon {
+  font-size: 1.25rem;
+  margin-right: var(--lf-space-3);
+  transition: margin 0.3s ease;
+}
+.lf-sidebar--collapsed .lf-nav-item {
+  padding: var(--lf-space-3) 0;
+  justify-content: center;
+}
+.lf-sidebar--collapsed .lf-nav-item .icon {
+  margin-right: 0;
+}
+.lf-nav-item.router-link-active, .lf-nav-item--active {
   background-color: var(--lf-primary-light);
-  color: var(--lf-text-primary);
+  color: var(--lf-primary);
   border-left-color: var(--lf-primary);
 }
-.lf-nav-item:hover:not(.lf-nav-item--disabled):not(.router-link-active) {
+.lf-nav-item.router-link-active .icon, .lf-nav-item--active .icon {
+  font-variation-settings: 'FILL' 1 !important;
+}
+.lf-nav-item:hover:not(.lf-nav-item--disabled):not(.router-link-active):not(.lf-nav-item--active) {
   background-color: rgba(255,255,255,0.03);
   color: var(--lf-text-primary);
 }
@@ -309,6 +367,9 @@ body {
   display: flex;
   align-items: center;
   gap: var(--lf-space-3);
+}
+.lf-sidebar__user--collapsed {
+  justify-content: center;
 }
 .lf-sidebar__avatar {
   width: 32px;
@@ -353,13 +414,20 @@ body {
   cursor: pointer;
   padding: var(--lf-space-2) 0;
   transition: color 0.2s;
+  white-space: nowrap;
+}
+.lf-sidebar--collapsed .lf-sidebar__logout {
+  justify-content: center;
+  padding: var(--lf-space-2);
+}
+.lf-sidebar--collapsed .lf-sidebar__logout .icon {
+  margin-right: 0;
 }
 .lf-sidebar__logout:hover {
   color: var(--lf-text-primary);
 }
 .lf-sidebar__logout .icon {
-  width: 1.25rem;
-  height: 1.25rem;
+  font-size: 1.25rem;
 }
 
 .lf-layout-app__main {

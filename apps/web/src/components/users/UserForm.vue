@@ -115,8 +115,8 @@ function toggleRole(roleKey: string) {
 </script>
 
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-6" novalidate>
-    <div class="space-y-4">
+  <form @submit.prevent="handleSubmit" class="lf-form" novalidate>
+    <div class="lf-form__row">
       <AppInput
         id="user-name"
         v-model="formData.name"
@@ -126,7 +126,9 @@ function toggleRole(roleKey: string) {
         :disabled="loading"
         required
       />
+    </div>
 
+    <div class="lf-form__row">
       <AppInput
         id="user-email"
         type="email"
@@ -137,9 +139,10 @@ function toggleRole(roleKey: string) {
         :disabled="loading"
         required
       />
+    </div>
 
+    <div class="lf-form__row" v-if="!isEditMode">
       <AppPasswordInput
-        v-if="!isEditMode"
         id="user-password"
         v-model="formData.temporaryPassword"
         :label="t('users.form.temporaryPasswordLabel')"
@@ -148,57 +151,53 @@ function toggleRole(roleKey: string) {
         :disabled="loading"
         required
       />
+    </div>
 
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          {{ t('users.form.rolesLabel') }}
+    <div class="lf-form__row flex flex-col gap-3 mt-2">
+      <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ t('users.form.rolesLabel') }}
+      </label>
+      <div class="roles-container">
+        <label 
+          v-for="role in availableRoles" 
+          :key="role.key"
+          class="role-item"
+        >
+          <input 
+            type="checkbox"
+            :value="role.key"
+            :checked="formData.roleKeys.includes(role.key)"
+            @change="toggleRole(role.key)"
+            :disabled="loading"
+            class="role-checkbox"
+          />
+          <span class="role-label">{{ role.label }}</span>
         </label>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <label 
-            v-for="role in availableRoles" 
-            :key="role.key"
-            class="flex items-start p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-            :class="[
-              formData.roleKeys.includes(role.key) 
-                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-400' 
-                : 'border-gray-200 dark:border-gray-700'
-            ]"
-          >
-            <div class="flex items-center h-5">
-              <input 
-                type="checkbox"
-                :value="role.key"
-                :checked="formData.roleKeys.includes(role.key)"
-                @change="toggleRole(role.key)"
-                :disabled="loading"
-                class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-              />
-            </div>
-            <div class="ml-3 text-sm">
-              <span class="font-medium text-gray-900 dark:text-white">{{ role.label }}</span>
-            </div>
-          </label>
-        </div>
-        <p v-if="errors.roleKeys" class="mt-1 text-sm text-red-600 dark:text-red-400">
-          {{ errors.roleKeys }}
-        </p>
       </div>
+      <span v-if="errors.roleKeys" class="text-sm text-red-600 dark:text-red-400">
+        {{ errors.roleKeys }}
+      </span>
+    </div>
 
-      <div v-if="!isEditMode" class="flex items-center mt-4">
+    <div v-if="!isEditMode" class="lf-form__row mt-4 pt-4 border-t">
+      <label class="lf-toggle" for="user-active">
         <input 
           id="user-active" 
           type="checkbox" 
           v-model="formData.active"
           :disabled="loading"
-          class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+          class="lf-toggle-input"
         />
-        <label for="user-active" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
+        <div class="lf-toggle-track">
+          <div class="lf-toggle-thumb"></div>
+        </div>
+        <span class="lf-toggle-label">
           {{ t('users.form.activeLabel') }}
-        </label>
-      </div>
+        </span>
+      </label>
     </div>
 
-    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+    <div class="lf-form__actions">
       <AppButton
         type="button"
         variant="secondary"
@@ -219,3 +218,117 @@ function toggleRole(roleKey: string) {
     </div>
   </form>
 </template>
+
+<style scoped>
+.lf-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4, 1rem);
+}
+
+.lf-form__row {
+  display: flex;
+  flex-direction: column;
+}
+
+.lf-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3, 0.75rem);
+  margin-top: var(--spacing-4, 1rem);
+}
+
+.mt-4 { margin-top: var(--lf-space-4); }
+.pt-4 { padding-top: var(--lf-space-4); }
+.border-t { border-top: 1px solid var(--lf-border-primary); }
+
+.roles-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--lf-space-4);
+}
+
+.role-item {
+  display: flex;
+  align-items: center;
+  gap: var(--lf-space-2);
+  cursor: pointer;
+}
+
+.role-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--lf-primary);
+}
+
+.role-label {
+  font-size: 0.875rem;
+  color: var(--lf-text-primary);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.role-item:hover .role-label {
+  color: var(--lf-primary);
+}
+
+/* Toggle Switch Styles */
+.lf-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: var(--lf-space-3);
+}
+
+.lf-toggle-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.lf-toggle-track {
+  width: 36px;
+  height: 20px;
+  background-color: var(--lf-surface-secondary);
+  border: 1px solid var(--lf-border-primary);
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.lf-toggle-thumb {
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: var(--lf-text-secondary);
+  border-radius: 50%;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.lf-toggle-input:checked + .lf-toggle-track {
+  background-color: var(--lf-primary);
+  border-color: var(--lf-primary);
+}
+
+.lf-toggle-input:checked + .lf-toggle-track .lf-toggle-thumb {
+  transform: translateX(14px);
+  background-color: #ffffff;
+}
+
+.lf-toggle-input:disabled + .lf-toggle-track {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lf-toggle-label {
+  font-size: 0.875rem;
+  color: var(--lf-text-primary);
+  font-weight: 500;
+  margin: 0;
+}
+</style>

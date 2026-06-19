@@ -176,8 +176,8 @@ const filterRoleOptions = computed(() => [
     <template v-else>
       <!-- Filters -->
       <AppCard class="mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-          <div>
+        <div class="filters-row">
+          <div class="filter-item filter-item--large">
             <AppInput 
               id="search"
               v-model="searchInput"
@@ -186,7 +186,7 @@ const filterRoleOptions = computed(() => [
               @input="handleSearch"
             />
           </div>
-          <div>
+          <div class="filter-item">
             <AppSelect
               id="status"
               v-model="usersStore.filters.status"
@@ -195,7 +195,7 @@ const filterRoleOptions = computed(() => [
               @change="usersStore.setStatus(usersStore.filters.status as 'active' | 'inactive' | 'all')"
             />
           </div>
-          <div>
+          <div class="filter-item">
             <AppSelect
               id="role"
               v-model="usersStore.filters.role"
@@ -401,3 +401,32 @@ const filterRoleOptions = computed(() => [
     />
   </div>
 </template>
+
+<style scoped>
+.mb-6 {
+  margin-bottom: var(--lf-space-6);
+}
+
+.filters-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--lf-space-4);
+  align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+  .filters-row {
+    flex-wrap: nowrap;
+  }
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-item--large {
+  min-width: 200px;
+}
+</style>

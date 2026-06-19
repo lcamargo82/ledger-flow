@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="lf-form">
+  <form @submit.prevent="handleSubmit" class="lf-form" novalidate>
     <div class="lf-form__row">
       <AppInput
         id="name"

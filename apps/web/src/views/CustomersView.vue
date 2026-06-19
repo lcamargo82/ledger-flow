@@ -68,7 +68,7 @@ const handleNewCustomer = () => {
 
 const handleCreateCustomer = async (payload: Record<string, unknown>) => {
   try {
-    await customersStore.createCustomer(payload)
+    await customersStore.createCustomer(payload as any)
     isCreateModalOpen.value = false
   } catch {
     // error is handled in store
@@ -151,8 +151,8 @@ const typeOptions = computed(() => [
     <template v-else>
       <!-- Filters -->
       <AppCard class="mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          <div>
+        <div class="filters-row">
+          <div class="filter-item filter-item--large">
             <AppInput 
               id="search"
               v-model="searchInput"
@@ -161,7 +161,7 @@ const typeOptions = computed(() => [
               @input="handleSearch"
             />
           </div>
-          <div>
+          <div class="filter-item">
             <AppSelect
               id="status"
               v-model="customersStore.filters.status"
@@ -170,7 +170,7 @@ const typeOptions = computed(() => [
               @change="customersStore.setStatus(customersStore.filters.status as any)"
             />
           </div>
-          <div>
+          <div class="filter-item">
             <AppSelect
               id="type"
               v-model="customersStore.filters.type"
@@ -179,7 +179,7 @@ const typeOptions = computed(() => [
               @change="customersStore.setType(customersStore.filters.type as any)"
             />
           </div>
-          <div class="flex gap-2">
+          <div class="filter-item-actions">
             <AppButton variant="secondary" @click="clearFilters">
               {{ t('customers.actions.clearFilters') }}
             </AppButton>
@@ -377,3 +377,36 @@ const typeOptions = computed(() => [
     />
   </div>
 </template>
+
+<style scoped>
+.mb-6 {
+  margin-bottom: var(--lf-space-6);
+}
+
+.filters-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--lf-space-4);
+  align-items: flex-end;
+}
+
+@media (min-width: 768px) {
+  .filters-row {
+    flex-wrap: nowrap;
+  }
+}
+
+.filter-item {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-item--large {
+  min-width: 200px;
+}
+
+.filter-item-actions {
+  flex: 0 0 auto;
+}
+</style>

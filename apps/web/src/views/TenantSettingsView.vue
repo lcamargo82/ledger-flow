@@ -87,7 +87,7 @@ const handleSave = async () => {
       <AppCard>
         <form @submit.prevent="handleSave" class="space-y-6" novalidate>
           <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-1">
               <AppInput 
                 id="tenant-name"
                 v-model="formData.name"
@@ -100,7 +100,7 @@ const handleSave = async () => {
               />
             </div>
 
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-1">
               <AppInput 
                 id="tenant-slug"
                 :model-value="tenantStore.tenant.slug"
@@ -111,7 +111,7 @@ const handleSave = async () => {
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ t('common.readonly') }}</p>
             </div>
 
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-1">
               <AppSelect 
                 id="tenant-timezone"
                 v-model="formData.timezone"
@@ -124,7 +124,7 @@ const handleSave = async () => {
               />
             </div>
 
-            <div class="sm:col-span-2">
+            <div class="sm:col-span-1">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {{ t('tenantSettings.form.activeLabel') }}
               </label>

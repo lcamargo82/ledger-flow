@@ -89,12 +89,15 @@ const togglePasswordVisibility = () => {
 }
 .lf-password-toggle {
   position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 0.75rem;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: none;
-  padding: 0.25rem;
+  padding: 0;
   margin: 0;
   cursor: pointer;
   color: var(--lf-text-muted);
