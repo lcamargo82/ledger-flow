@@ -11,20 +11,21 @@
     <AppAlert
       v-if="success"
       variant="success"
-      :message="success"
+      :message="t('auth.forgotPassword.successMessage')"
       class="lf-mb-6"
     />
+    <p v-if="success" class="lf-text-sm lf-text-center lf-mb-6" style="color: var(--lf-text-secondary)">
+      {{ t('auth.forgotPassword.successHelp') }}
+    </p>
 
     <AppAlert
-      v-if="authStore.error"
+      v-if="authStore.passwordRecoveryError"
       variant="error"
-      :message="authStore.error"
+      :message="authStore.passwordRecoveryError"
       class="lf-mb-6"
     />
 
     <form @submit.prevent="onSubmit" v-if="!success">
-
-
       <AppInput
         id="email"
         type="email"
@@ -32,6 +33,7 @@
         :label="t('auth.forgotPassword.emailLabel')"
         :placeholder="t('auth.forgotPassword.emailPlaceholder')"
         required
+        :disabled="authStore.isRequestingPasswordReset"
         class="lf-mb-6"
         autocomplete="username"
       />
@@ -40,13 +42,14 @@
         type="submit"
         variant="primary"
         block
-        :loading="authStore.isLoading"
+        :disabled="authStore.isRequestingPasswordReset || !email"
+        :loading="authStore.isRequestingPasswordReset"
       >
         {{ t('auth.forgotPassword.submit') }}
       </AppButton>
     </form>
 
-    <div class="lf-mt-4 text-center">
+    <div class="lf-mt-6 text-center">
       <router-link to="/login" class="lf-auth-link">
         &larr; {{ t('auth.forgotPassword.backToLogin') }}
       </router-link>
@@ -65,7 +68,7 @@ import AppAlert from '../components/common/AppAlert.vue';
 import { brandAssets } from '../config/brand';
 
 const email = ref('');
-const success = ref('');
+const success = ref(false);
 
 const authStore = useAuthStore();
 const { t } = useI18n();
@@ -73,14 +76,12 @@ const { t } = useI18n();
 const onSubmit = async () => {
   if (!email.value) return;
   
-  // Fake the loading and success since there's no endpoint yet
-  authStore.isLoading = true;
-  authStore.error = null;
-  
-  setTimeout(() => {
-    authStore.isLoading = false;
-    success.value = t('auth.forgotPassword.placeholderMessage');
-  }, 1000);
+  try {
+    await authStore.forgotPassword(email.value);
+    success.value = true;
+  } catch (err) {
+    // Error is handled and populated in authStore.passwordRecoveryError
+  }
 };
 </script>
 
@@ -113,5 +114,25 @@ const onSubmit = async () => {
 .lf-login-subtitle {
   font-size: 0.95rem;
   color: var(--lf-text-secondary);
+}
+
+.lf-auth-link {
+  color: var(--lf-text-secondary);
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.lf-auth-link:hover {
+  color: var(--lf-text-primary);
+  text-decoration: underline;
+}
+
+.lf-text-sm {
+  font-size: 0.875rem;
+}
+
+.lf-text-center {
+  text-align: center;
 }
 </style>

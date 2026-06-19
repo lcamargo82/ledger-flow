@@ -43,8 +43,8 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | Rota | Status | Layout | Permissão Necessária | Objetivo / Observações |
 | :--- | :--- | :--- | :--- | :--- |
 | `/login` | Implementada | `AuthLayout` | `public` | Autenticação no sistema |
-| `/forgot-password` | Pendente (Fase 4A.1) | `AuthLayout` | `public` | Solicitar recuperação de senha |
-| `/reset-password` | Pendente (Fase 4A.1) | `AuthLayout` | `public` | Criar nova senha |
+| `/forgot-password` | Implementada | `AuthLayout` | `public` | Solicitar recuperação de senha |
+| `/reset-password` | Implementada | `AuthLayout` | `public` | Criar nova senha |
 | `/dashboard` | Parcial | `AppLayout` | Qualquer | Visão geral, métricas de negócio |
 | `/users` | Implementada | `AppLayout` | `users:read` | Listagem de usuários |
 | `/roles` | Parcial | `AppLayout` | `roles:manage` | Listagem e gestão de roles |

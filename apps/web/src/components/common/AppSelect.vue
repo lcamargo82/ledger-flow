@@ -1,5 +1,5 @@
 <template>
-  <div class="lf-input-group">
+  <div class="lf-input-group" :class="$attrs.class" :style="$attrs.style">
     <label v-if="label" :for="id" class="lf-label">
       {{ label }} <span v-if="required" class="text-danger" aria-hidden="true">*</span>
     </label>
@@ -13,7 +13,7 @@
         :required="required"
         :aria-invalid="!!error"
         :aria-describedby="error ? `${id}-error` : undefined"
-        v-bind="$attrs"
+        v-bind="inputAttrs"
       >
         <option v-if="placeholder" value="" disabled selected class="lf-select-placeholder">
           {{ placeholder }}
@@ -35,6 +35,9 @@
 </template>
 
 <script setup lang="ts">
+import { useAttrs, computed } from 'vue';
+defineOptions({ inheritAttrs: false });
+
 import { useId } from 'vue';
 
 interface Option {
@@ -63,6 +66,11 @@ const emit = defineEmits<{
 }>();
 
 const id = useId();
+const attrs = useAttrs();
+const inputAttrs = computed(() => {
+  const { class: _, style: __, ...rest } = attrs;
+  return rest;
+});
 
 const handleChange = (event: Event) => {
   const target = event.target as HTMLSelectElement;

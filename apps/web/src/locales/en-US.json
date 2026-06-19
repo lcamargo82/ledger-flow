@@ -49,12 +49,43 @@
     },
     "forgotPassword": {
       "title": "Recover Password",
-      "subtitle": "Regain access to your account",
-      "emailLabel": "Registered Email",
+      "subtitle": "Enter your corporate email to receive recovery instructions.",
+      "emailLabel": "Corporate Email",
       "emailPlaceholder": "your.name@company.com",
       "submit": "Send Instructions",
+      "submitting": "Sending...",
+      "successTitle": "Email sent",
+      "successMessage": "If the email exists, we will send password recovery instructions.",
+      "successHelp": "Check your inbox and spam folder.",
       "backToLogin": "Back to login",
-      "placeholderMessage": "Password recovery will be implemented in a future phase. For now, use the demo credentials to access the local environment."
+      "errors": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Invalid email format.",
+        "requestFailed": "Could not request recovery at this time. Try again later."
+      }
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "subtitle": "Create a new password to securely access your account.",
+      "passwordLabel": "New password",
+      "passwordPlaceholder": "Enter your new password",
+      "confirmPasswordLabel": "Confirm new password",
+      "confirmPasswordPlaceholder": "Confirm your new password",
+      "submit": "Reset password",
+      "submitting": "Resetting...",
+      "successTitle": "Password reset",
+      "successMessage": "Your password has been successfully reset. You can now access the platform.",
+      "goToLogin": "Go to login",
+      "requestNewLink": "Request new recovery link",
+      "errors": {
+        "tokenMissing": "Recovery link is invalid or incomplete.",
+        "tokenInvalidOrExpired": "The recovery link is invalid or has expired. Please request a new recovery.",
+        "passwordRequired": "Password is required.",
+        "passwordMin": "Password must be at least 8 characters.",
+        "confirmPasswordRequired": "Password confirmation is required.",
+        "passwordsDoNotMatch": "Passwords do not match.",
+        "resetFailed": "Could not reset your password at this time. Please try again."
+      }
     }
   },
   "dashboard": {
