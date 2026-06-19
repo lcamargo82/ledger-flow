@@ -13,9 +13,7 @@ export interface IWebhookInboxRepository {
     provider: WebhookProvider,
     providerEventId: string,
   ): Promise<WebhookInboxEvent | null>;
-  createReceived(
-    data: CreateWebhookInboxEventInput,
-  ): Promise<WebhookInboxEvent>;
+  createReceived(data: CreateWebhookInboxEventInput): Promise<WebhookInboxEvent>;
   markProcessing(id: string): Promise<WebhookInboxEvent>;
   markProcessed(
     id: string,
@@ -32,4 +30,5 @@ export interface IWebhookInboxRepository {
   ): Promise<WebhookInboxEvent>;
   markFailed(id: string, reason: string): Promise<WebhookInboxEvent>;
   incrementAttempt(id: string): Promise<WebhookInboxEvent>;
+  findRecentByPaymentId(paymentId: string): Promise<WebhookInboxEvent[]>;
 }

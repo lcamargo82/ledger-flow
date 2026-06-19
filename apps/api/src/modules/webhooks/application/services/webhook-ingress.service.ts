@@ -1,56 +1,107 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
-import { WebhookAuthenticationError } from '../../domain/errors/webhook-errors';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { WebhookProvider } from '@prisma/client';
+import { WebhookAdapterRegistryService } from './webhook-adapter-registry.service';
+import { WebhookProcessorRegistryService } from './webhook-processor-registry.service';
+import type { IWebhookInboxRepository } from '../../domain/interfaces/webhook-inbox.repository';
+import {
+  ProviderWebhookAuthenticationInput,
+  ProviderWebhookPayloadInput,
+} from '../../domain/interfaces/provider-webhook-adapter.interface';
 
 @Injectable()
 export class WebhookIngressService {
   private readonly logger = new Logger(WebhookIngressService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly adapterRegistry: WebhookAdapterRegistryService,
+    private readonly processorRegistry: WebhookProcessorRegistryService,
+    @Inject('IWebhookInboxRepository')
+    private readonly inboxRepository: IWebhookInboxRepository,
+  ) {}
 
-  authenticateAsaas(token: string | undefined): void {
-    const expectedToken = this.configService.get<string>(
-      'ASAAS_WEBHOOK_AUTH_TOKEN',
+  async handleWebhook(
+    provider: WebhookProvider,
+    authInput: ProviderWebhookAuthenticationInput,
+    payloadInput: ProviderWebhookPayloadInput,
+  ): Promise<void> {
+    const adapter = this.adapterRegistry.getAdapter(provider);
+
+    await adapter.authenticate(authInput);
+    this.logger.log(`[WebhookIngressService] webhook.ingress.authenticated provider=${provider}`);
+
+    const normalizedEvent = await adapter.normalize(payloadInput);
+    this.logger.log(
+      `[WebhookIngressService] webhook.ingress.normalized provider=${provider} eventId=${normalizedEvent.providerEventId}`,
     );
 
-    if (!expectedToken) {
-      this.logger.error(
-        '[WebhookIngressService] ASAAS_WEBHOOK_AUTH_TOKEN is not configured.',
+    const existing = await this.inboxRepository.findByProviderEventId(
+      normalizedEvent.provider,
+      normalizedEvent.providerEventId,
+    );
+
+    if (existing) {
+      this.logger.log(
+        `[WebhookIngressService] webhook.ingress.duplicate provider=${normalizedEvent.provider} eventId=${normalizedEvent.providerEventId}`,
       );
-      throw new WebhookAuthenticationError();
+      return;
     }
 
-    if (!token) {
-      this.logger.warn(
-        '[WebhookIngressService] Missing asaas-access-token header in webhook request.',
+    const inboxEvent = await this.inboxRepository.createReceived({
+      provider: normalizedEvent.provider,
+      providerEventId: normalizedEvent.providerEventId,
+      eventType: normalizedEvent.rawProviderEventType,
+      payloadHash: normalizedEvent.payloadHash,
+      payloadSummary: normalizedEvent.payloadSummary,
+    });
+    this.logger.log(`[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`);
+
+    if (!adapter.supportsEvent(normalizedEvent.rawProviderEventType)) {
+      await this.inboxRepository.markIgnored(inboxEvent.id, 'Event type not supported');
+      this.logger.log(
+        `[WebhookIngressService] webhook.ingress.ignored eventId=${normalizedEvent.providerEventId} reason="Event type not supported"`,
       );
-      throw new WebhookAuthenticationError();
+      return;
     }
 
     try {
-      // Timing safe comparison to prevent timing attacks
-      const expectedBuffer = Buffer.from(expectedToken);
-      const tokenBuffer = Buffer.from(token);
-
-      if (
-        expectedBuffer.length !== tokenBuffer.length ||
-        !crypto.timingSafeEqual(expectedBuffer, tokenBuffer)
-      ) {
-        this.logger.warn(
-          '[WebhookIngressService] Invalid asaas-access-token in webhook request.',
-        );
-        throw new WebhookAuthenticationError();
-      }
-    } catch {
-      this.logger.warn(
-        '[WebhookIngressService] Error comparing tokens (likely length mismatch).',
+      await this.inboxRepository.markProcessing(inboxEvent.id);
+      this.logger.log(
+        `[WebhookIngressService] webhook.ingress.processing_started eventId=${normalizedEvent.providerEventId}`,
       );
-      throw new WebhookAuthenticationError();
-    }
 
-    this.logger.log(
-      '[WebhookIngressService] Asaas webhook authenticated successfully.',
-    );
+      const processor = this.processorRegistry.getProcessor(provider);
+
+      const result = await processor.process(normalizedEvent);
+
+      if (result.status === 'IGNORED') {
+        await this.inboxRepository.markIgnored(
+          inboxEvent.id,
+          result.reason,
+          result.paymentId,
+          normalizedEvent.gatewayConfigurationId,
+          result.tenantId,
+        );
+        this.logger.log(
+          `[WebhookIngressService] webhook.ingress.ignored eventId=${normalizedEvent.providerEventId} reason=${result.reason}`,
+        );
+      } else {
+        await this.inboxRepository.markProcessed(
+          inboxEvent.id,
+          result.paymentId,
+          normalizedEvent.gatewayConfigurationId,
+          result.tenantId,
+        );
+        this.logger.log(
+          `[WebhookIngressService] webhook.ingress.processed eventId=${normalizedEvent.providerEventId}`,
+        );
+      }
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(
+        `[WebhookIngressService] webhook.ingress.failed eventId=${normalizedEvent.providerEventId} error=${err.message}`,
+      );
+      await this.inboxRepository.markFailed(inboxEvent.id, err.message);
+      throw err;
+    }
   }
 }

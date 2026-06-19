@@ -18,3 +18,10 @@ export class WebhookProcessingError extends Error {
     this.name = 'WebhookProcessingError';
   }
 }
+
+export class WebhookProviderNotSupportedError extends Error {
+  constructor(message = 'Provedor de webhook não suportado.') {
+    super(message);
+    this.name = 'WebhookProviderNotSupportedError';
+  }
+}

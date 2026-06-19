@@ -6,10 +6,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
-import {
-  ListUsersQueryDto,
-  UserStatusFilter,
-} from '../dto/list-users-query.dto';
+import { ListUsersQueryDto, UserStatusFilter } from '../dto/list-users-query.dto';
 import { PaginatedUsersResponseDto } from '../dto/paginated-users-response.dto';
 import { UserResponseDto } from '../dto/user-response.dto';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -26,10 +23,7 @@ type UserWithRoles = User & { roles: (UserRole & { role: Role })[] };
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listUsers(
-    tenantId: string,
-    query: ListUsersQueryDto,
-  ): Promise<PaginatedUsersResponseDto> {
+  async listUsers(tenantId: string, query: ListUsersQueryDto): Promise<PaginatedUsersResponseDto> {
     const { page = 1, perPage = 10, search, status, role } = query;
 
     const skip = (page - 1) * perPage;
@@ -90,10 +84,7 @@ export class UsersService {
     };
   }
 
-  async getUserById(
-    tenantId: string,
-    userId: string,
-  ): Promise<UserResponseDto> {
+  async getUserById(tenantId: string, userId: string): Promise<UserResponseDto> {
     const user = await this.prisma.user.findFirst({
       where: {
         id: userId,
@@ -115,10 +106,7 @@ export class UsersService {
     return this.toUserResponse(user);
   }
 
-  async createUser(
-    currentUser: AuthenticatedUser,
-    dto: CreateUserDto,
-  ): Promise<UserResponseDto> {
+  async createUser(currentUser: AuthenticatedUser, dto: CreateUserDto): Promise<UserResponseDto> {
     const { tenantId } = currentUser;
     const email = dto.email.trim().toLowerCase();
 
@@ -138,9 +126,7 @@ export class UsersService {
     });
 
     if (roles.length !== dto.roleKeys.length) {
-      throw new BadRequestException(
-        'One or more roles are invalid for this tenant',
-      );
+      throw new BadRequestException('One or more roles are invalid for this tenant');
     }
 
     const passwordHash = await bcrypt.hash(dto.temporaryPassword, 10);
@@ -239,9 +225,7 @@ export class UsersService {
     }
 
     if (currentUser.id === id && !dto.active) {
-      throw new BadRequestException(
-        'You cannot deactivate your own user account',
-      );
+      throw new BadRequestException('You cannot deactivate your own user account');
     }
 
     const updatedUser = await this.prisma.$transaction(async (tx) => {
@@ -300,9 +284,7 @@ export class UsersService {
     });
 
     if (roles.length !== dto.roleKeys.length) {
-      throw new BadRequestException(
-        'One or more roles are invalid for this tenant',
-      );
+      throw new BadRequestException('One or more roles are invalid for this tenant');
     }
 
     if (currentUser.id === id) {
@@ -310,9 +292,7 @@ export class UsersService {
       const isRemovingOwner = !dto.roleKeys.includes('OWNER');
 
       if (isCurrentlyOwner && isRemovingOwner) {
-        throw new ForbiddenException(
-          'You cannot remove the OWNER role from your own account',
-        );
+        throw new ForbiddenException('You cannot remove the OWNER role from your own account');
       }
     }
 

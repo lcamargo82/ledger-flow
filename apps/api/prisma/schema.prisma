@@ -420,6 +420,10 @@ model GatewayCustomerReference {
 
 enum WebhookProvider {
   ASAAS
+  STRIPE
+  MERCADO_PAGO
+  PAGBANK
+  PAGARME
 }
 
 enum WebhookProcessingStatus {

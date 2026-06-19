@@ -35,9 +35,7 @@ export class GatewayPaymentOrchestrationService {
       adapter = resolved.adapter;
     } catch (error: unknown) {
       const err = error as Error;
-      this.logger.warn(
-        `[GatewayOrchestration] asaas.gateway_not_configured: ${err.message}`,
-      );
+      this.logger.warn(`[GatewayOrchestration] asaas.gateway_not_configured: ${err.message}`);
       return payment; // Fallback: no gateway configured
     }
 
@@ -57,9 +55,7 @@ export class GatewayPaymentOrchestrationService {
         configuration.encryptedCredentials,
       );
 
-      this.logger.log(
-        `[GatewayOrchestration] Calling adapter to create payment...`,
-      );
+      this.logger.log(`[GatewayOrchestration] Calling adapter to create payment...`);
       const result = await adapter.createPayment({
         tenantId,
         paymentId: payment.id,
@@ -82,9 +78,7 @@ export class GatewayPaymentOrchestrationService {
         credentials,
       });
 
-      this.logger.log(
-        `[GatewayOrchestration] asaas.payment_created: ${result.providerPaymentId}`,
-      );
+      this.logger.log(`[GatewayOrchestration] asaas.payment_created: ${result.providerPaymentId}`);
 
       // Update payment
       const updatedPayment = await this.prisma.payment.update({
@@ -116,9 +110,7 @@ export class GatewayPaymentOrchestrationService {
       return updatedPayment;
     } catch (error: unknown) {
       const err = error as Error;
-      this.logger.error(
-        `[GatewayOrchestration] asaas.payment_creation_failed: ${err.message}`,
-      );
+      this.logger.error(`[GatewayOrchestration] asaas.payment_creation_failed: ${err.message}`);
 
       await this.createAuditAndEvent(
         tenantId,
@@ -149,8 +141,7 @@ export class GatewayPaymentOrchestrationService {
             paymentId,
             type: action,
             currentStatus,
-            metadata:
-              metadata as import('@prisma/client').Prisma.InputJsonValue,
+            metadata: metadata as import('@prisma/client').Prisma.InputJsonValue,
           },
         }),
         this.prisma.auditLog.create({
@@ -160,15 +151,12 @@ export class GatewayPaymentOrchestrationService {
             action,
             entityType: 'PAYMENT',
             entityId: paymentId,
-            metadata:
-              metadata as import('@prisma/client').Prisma.InputJsonValue,
+            metadata: metadata as import('@prisma/client').Prisma.InputJsonValue,
           },
         }),
       ]);
     } catch (err) {
-      this.logger.error(
-        `[GatewayOrchestration] Failed to save audit logs: ${err}`,
-      );
+      this.logger.error(`[GatewayOrchestration] Failed to save audit logs: ${err}`);
     }
   }
 }

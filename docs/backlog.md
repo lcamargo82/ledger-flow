@@ -139,6 +139,7 @@ Webhooks enviados para clientes.
 ## M11 — Multi-Gateway Abstraction & Integration
 
 Fundação abstrata (Fase 6.0) já implementada com Stripe, Asaas, Mercado Pago, PagBank e Pagar.me como skeletons e AES-256-GCM para credenciais. Próximos passos: Sandbox e Go-Live dos providers.
+Unified Webhook Infrastructure (Fase 7B) finalizada para receber webhooks multitenant agnostic providers.
 
 ## M12 — Tests, Security & Portfolio
 

@@ -1,31 +1,31 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Post,
   Body,
   Headers,
+  Req,
   HttpCode,
   HttpStatus,
   UnauthorizedException,
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
+import { WebhookProvider } from '@prisma/client';
 import { Public } from '../../../auth/presentation/decorators/public.decorator';
 import { WebhookIngressService } from '../../application/services/webhook-ingress.service';
-import { AsaasWebhookProcessorService } from '../../application/services/asaas-webhook-processor.service';
-import { AsaasWebhookEventDto } from '../../application/dto/asaas-webhook-event.dto';
 import {
   WebhookAuthenticationError,
   WebhookPayloadInvalidError,
+  WebhookProviderNotSupportedError,
 } from '../../domain/errors/webhook-errors';
 
 @ApiTags('Webhooks')
 @Controller('webhooks/asaas')
 export class AsaasWebhooksController {
-  constructor(
-    private readonly ingressService: WebhookIngressService,
-    private readonly processorService: AsaasWebhookProcessorService,
-  ) {}
+  constructor(private readonly ingressService: WebhookIngressService) {}
 
   @Post()
   @Public()
@@ -49,22 +49,27 @@ export class AsaasWebhooksController {
     description: 'Não autorizado.',
   })
   async handleWebhook(
-    @Headers('asaas-access-token') token: string,
-    @Body() payload: AsaasWebhookEventDto,
+    @Headers() headers: Record<string, string>,
+    @Body() payload: any,
+    @Req() request: Request,
   ) {
     try {
-      // 1. Authenticate Request
-      this.ingressService.authenticateAsaas(token);
-
-      // 2. Validate basic structure
-      if (!payload || !payload.id || !payload.event) {
-        throw new WebhookPayloadInvalidError(
-          'O payload não contém as informações mínimas necessárias.',
-        );
-      }
-
-      // 3. Process
-      await this.processorService.processEvent(payload);
+      await this.ingressService.handleWebhook(
+        WebhookProvider.ASAAS,
+        {
+          headers,
+          payload,
+          requestMetadata: {
+            ipAddress: request.ip,
+            userAgent: request.headers['user-agent'],
+          },
+        },
+        {
+          headers,
+          payload,
+          receivedAt: new Date(),
+        },
+      );
 
       return { received: true };
     } catch (error) {
@@ -72,6 +77,9 @@ export class AsaasWebhooksController {
         throw new UnauthorizedException(); // No details revealed
       }
       if (error instanceof WebhookPayloadInvalidError) {
+        throw new BadRequestException(error.message);
+      }
+      if (error instanceof WebhookProviderNotSupportedError) {
         throw new BadRequestException(error.message);
       }
       throw new InternalServerErrorException();

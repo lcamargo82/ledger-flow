@@ -274,9 +274,36 @@ Fase 5A — Payments Core Backend Foundation
 ---
 
 ## Fase 6.2 — Stripe Adapter (Futuro)
-## Fase 6.3 — Webhooks Inbound (Futuro)
 
-## Fase 7 — Reports
+---
+
+## Fase 7A — Webhooks Inbound Asaas Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Criação de tabelas de Inbox para idempotência de webhooks.
+* Implementação do Webhook Inbox Repository.
+* Recebimento de eventos do Asaas.
+* Sincronização segura de status de pagamento e logs de auditoria.
+
+---
+
+## Fase 7B — Unified Webhook Infrastructure Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Refatoração da infraestrutura de webhooks para suportar múltiplos provedores (Stripe, Asaas, Mercado Pago, PagBank, Pagar.me).
+* Criação de `ProviderWebhookAdapter`, `ProviderWebhookAuthenticator` e `ProviderWebhookNormalizer`.
+* Implementação do Padrão Registry (`WebhookAdapterRegistryService` e `WebhookProcessorRegistryService`).
+* Refatoração do `WebhookIngressService` para orquestração genérica.
+* Adapters "esqueleto" para provedores não-Asaas preparados para Fase futura.
+
+---
+
+## Fase 7C — Reports
+
 
 ---
 

@@ -1,11 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
-import {
-  PaymentStatus,
-  PaymentProvider,
-  WebhookProcessingStatus,
-} from '@prisma/client';
-import { AsaasWebhookEventDto } from '../dto/asaas-webhook-event.dto';
+import { WebhookProcessingStatus, Payment, PaymentStatus, PaymentProvider } from '@prisma/client';
+import { NormalizedWebhookEvent } from '../../domain/interfaces/provider-webhook-adapter.interface';
 import { AsaasWebhookStatusMapper } from '../mappers/asaas-webhook-status.mapper';
 
 @Injectable()
@@ -14,30 +10,34 @@ export class PaymentWebhookSyncService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async syncAsaasPayment(event: AsaasWebhookEventDto): Promise<{
+  async syncAsaasPayment(event: NormalizedWebhookEvent): Promise<{
     status: WebhookProcessingStatus;
     paymentId?: string;
     gatewayConfigurationId?: string;
     tenantId?: string;
     reason?: string;
   }> {
-    if (!event.payment || !event.payment.id) {
+    if (!event.providerPaymentId && !event.paymentReference) {
       return {
         status: WebhookProcessingStatus.IGNORED,
-        reason: 'No payment object in payload',
+        reason: 'No providerPaymentId or paymentReference in normalized event',
       };
     }
 
-    const providerPaymentId = event.payment.id;
-    const externalReference = event.payment.externalReference;
+    const providerPaymentId = event.providerPaymentId;
+    const externalReference = event.paymentReference;
 
     // Localize Payment
-    let payment = await this.prisma.payment.findFirst({
-      where: {
-        provider: PaymentProvider.ASAAS,
-        providerPaymentId,
-      },
-    });
+    let payment: Payment | null = null;
+
+    if (providerPaymentId) {
+      payment = await this.prisma.payment.findFirst({
+        where: {
+          provider: PaymentProvider.ASAAS,
+          providerPaymentId,
+        },
+      });
+    }
 
     if (!payment && externalReference) {
       payment = await this.prisma.payment.findFirst({
@@ -49,7 +49,7 @@ export class PaymentWebhookSyncService {
 
     if (!payment) {
       this.logger.warn(
-        `[PaymentWebhookSyncService] Payment not found for Asaas Event ${event.id} (providerPaymentId: ${providerPaymentId}, ref: ${externalReference})`,
+        `[PaymentWebhookSyncService] Payment not found for Asaas Event ${event.providerEventId} (providerPaymentId: ${providerPaymentId}, ref: ${externalReference})`,
       );
       return {
         status: WebhookProcessingStatus.IGNORED,
@@ -57,16 +57,14 @@ export class PaymentWebhookSyncService {
       };
     }
 
-    const targetStatus = AsaasWebhookStatusMapper.toLedgerFlowStatus(
-      event.event,
-    );
+    const targetStatus = event.normalizedPaymentStatus as PaymentStatus | undefined;
 
     if (!targetStatus) {
       // Just update providerStatus
       await this.prisma.payment.update({
         where: { id: payment.id },
         data: {
-          providerStatus: event.payment.status,
+          providerStatus: event.providerStatus,
           providerUpdatedAt: new Date(),
         },
       });
@@ -109,16 +107,14 @@ export class PaymentWebhookSyncService {
     // Prepare dates
     const dataToUpdate: Record<string, any> = {
       status: targetStatus,
-      providerStatus: event.payment.status,
+      providerStatus: event.providerStatus,
       providerUpdatedAt: new Date(),
     };
 
-    if (targetStatus === PaymentStatus.REFUNDED)
-      dataToUpdate.refundedAt = new Date();
-    if (targetStatus === PaymentStatus.CANCELED)
-      dataToUpdate.canceledAt = new Date();
+    if (targetStatus === PaymentStatus.REFUNDED) dataToUpdate.refundedAt = new Date();
+    if (targetStatus === PaymentStatus.CANCELED) dataToUpdate.canceledAt = new Date();
 
-    const eventType = `payment.provider_${event.event.toLowerCase()}`;
+    const eventType = `payment.provider_${event.rawProviderEventType.toLowerCase()}`;
 
     // Transactional update
     await this.prisma.$transaction(async (tx) => {
@@ -134,8 +130,8 @@ export class PaymentWebhookSyncService {
           type: eventType,
           previousStatus: previousStatus,
           currentStatus: targetStatus,
-          message: `Status atualizado via Webhook do Asaas (${event.event})`,
-          metadata: { providerEventId: event.id, providerPaymentId },
+          message: `Status atualizado via Webhook do Asaas (${event.rawProviderEventType})`,
+          metadata: { providerEventId: event.providerEventId, providerPaymentId },
         },
       });
     });
@@ -148,13 +144,13 @@ export class PaymentWebhookSyncService {
         entityType: 'payment',
         entityId: payment.id,
         metadata: {
-          provider: 'ASAAS',
-          providerEventId: event.id,
+          provider: event.provider,
+          providerEventId: event.providerEventId,
           providerPaymentId,
           paymentReference: payment.reference,
           previousStatus,
           currentStatus: targetStatus,
-          providerStatus: event.payment.status,
+          providerStatus: event.providerStatus,
           gatewayConfigurationId: payment.gatewayConfigurationId,
         },
       },

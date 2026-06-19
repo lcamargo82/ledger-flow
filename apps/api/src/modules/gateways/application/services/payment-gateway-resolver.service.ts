@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  PaymentProvider,
-  GatewayEnvironment,
-  GatewayConfiguration,
-} from '@prisma/client';
+import { PaymentProvider, GatewayEnvironment, GatewayConfiguration } from '@prisma/client';
 import { GatewayConfigurationsRepository } from '../../domain/repositories/gateway-configurations.repository';
 import { PaymentGatewayFactoryService } from './payment-gateway-factory.service';
 import { IPaymentGateway } from '../../domain/interfaces/payment-gateway.interface';
@@ -33,10 +29,7 @@ export class PaymentGatewayResolverService {
         environment,
       );
     } else {
-      configuration = await this.repository.findDefaultActiveByTenant(
-        tenantId,
-        environment,
-      );
+      configuration = await this.repository.findDefaultActiveByTenant(tenantId, environment);
     }
 
     if (!configuration) {
