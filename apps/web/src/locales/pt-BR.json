@@ -84,7 +84,7 @@
     "comingSoon": "Em breve",
     "roles": "Roles",
     "permissions": "Permissões",
-    "tenantSettings": "Configurações do Tenant"
+    "tenantSettings": "Organização"
   },
   "users": {
     "title": "Usuários",
@@ -285,7 +285,7 @@
     }
   },
   "tenantSettings": {
-    "title": "Configurações do Tenant",
+    "title": "Organização",
     "description": "Gerencie as configurações básicas do seu ambiente.",
     "form": {
       "nameLabel": "Nome da Empresa",

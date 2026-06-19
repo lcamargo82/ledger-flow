@@ -3,12 +3,12 @@
     <div class="lf-error-card">
       <img :src="brandAssets.appIcon" alt="LedgerFlow" class="lf-error-icon" />
       <h1 class="lf-error-title">404</h1>
-      <h2 class="lf-mb-4" style="font-size: 1.5rem; font-weight: 600;">Página não encontrada</h2>
+      <h2 class="lf-mb-4" style="font-size: 1.5rem; font-weight: 600;">{{ t('errors.notFoundTitle') }}</h2>
       <p class="lf-error-description">
-        O recurso que você está procurando não existe ou foi movido.
+        {{ t('errors.notFoundMessage') }}
       </p>
       <router-link to="/">
-        <AppButton variant="primary">Voltar para Início</AppButton>
+        <AppButton variant="primary">{{ t('common.goToDashboard') }}</AppButton>
       </router-link>
     </div>
   </div>
@@ -17,6 +17,9 @@
 <script setup lang="ts">
 import AppButton from '../components/common/AppButton.vue';
 import { brandAssets } from '../config/brand';
+import { useI18n } from '../composables/useI18n';
+
+const { t } = useI18n();
 </script>
 
 <style scoped>

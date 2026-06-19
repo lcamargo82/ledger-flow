@@ -1,8 +1,11 @@
 <template>
   <AppCard>
     <div class="lf-login-header">
-      <h1>LedgerFlow</h1>
-      <p>{{ t('auth.forgotPassword.title') }}</p>
+      <img :src="brandAssets.logoDark" alt="LedgerFlow Logo" class="lf-mobile-logo" />
+      <div class="lf-login-header-text">
+        <h2 class="lf-login-title">{{ t('auth.forgotPassword.title') }}</h2>
+        <p class="lf-login-subtitle">{{ t('auth.forgotPassword.subtitle') }}</p>
+      </div>
     </div>
 
     <AppAlert
@@ -20,9 +23,7 @@
     />
 
     <form @submit.prevent="onSubmit" v-if="!success">
-      <p class="lf-text-secondary lf-mb-6 text-center text-sm">
-        {{ t('auth.forgotPassword.subtitle') }}
-      </p>
+
 
       <AppInput
         id="email"
@@ -61,6 +62,7 @@ import AppCard from '../components/common/AppCard.vue';
 import AppInput from '../components/common/AppInput.vue';
 import AppButton from '../components/common/AppButton.vue';
 import AppAlert from '../components/common/AppAlert.vue';
+import { brandAssets } from '../config/brand';
 
 const email = ref('');
 const success = ref('');
@@ -81,3 +83,35 @@ const onSubmit = async () => {
   }, 1000);
 };
 </script>
+
+<style scoped>
+.lf-login-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.lf-mobile-logo {
+  display: block;
+  height: 28px;
+  width: auto;
+  margin: 0 auto 1.5rem auto;
+}
+
+@media (min-width: 1024px) {
+  .lf-mobile-logo {
+    display: none;
+  }
+}
+
+.lf-login-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--lf-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.lf-login-subtitle {
+  font-size: 0.95rem;
+  color: var(--lf-text-secondary);
+}
+</style>

@@ -8,6 +8,7 @@ import AppCard from '../components/common/AppCard.vue'
 import AppInput from '../components/common/AppInput.vue'
 import AppButton from '../components/common/AppButton.vue'
 import AppBadge from '../components/common/AppBadge.vue'
+import AppSelect from '../components/common/AppSelect.vue'
 
 const { t } = useI18n()
 const tenantStore = useTenantStore()
@@ -18,6 +19,14 @@ const formData = ref({
   timezone: ''
 })
 const errors = ref<Record<string, string>>({})
+
+const timezoneOptions = ref([
+  { value: 'UTC', label: 'UTC' },
+  { value: 'America/Sao_Paulo', label: 'America/Sao_Paulo (BRT)' },
+  { value: 'America/New_York', label: 'America/New_York (EST)' },
+  { value: 'Europe/London', label: 'Europe/London (GMT)' },
+  { value: 'Europe/Lisbon', label: 'Europe/Lisbon (WET)' }
+])
 
 onMounted(async () => {
   if (authStore.checkPermission('tenant:update')) {
@@ -103,14 +112,14 @@ const handleSave = async () => {
             </div>
 
             <div class="sm:col-span-2">
-              <AppInput 
+              <AppSelect 
                 id="tenant-timezone"
                 v-model="formData.timezone"
                 :label="t('tenantSettings.form.timezoneLabel')"
-                :placeholder="t('tenantSettings.form.timezonePlaceholder')"
+                :options="timezoneOptions"
                 :error="errors.timezone"
                 :disabled="tenantStore.isSaving"
-                @input="errors.timezone = ''"
+                @change="errors.timezone = ''"
                 required
               />
             </div>

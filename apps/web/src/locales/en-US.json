@@ -85,7 +85,7 @@
     "comingSoon": "Coming Soon",
     "roles": "Roles",
     "permissions": "Permissions",
-    "tenantSettings": "Tenant Settings"
+    "tenantSettings": "Organization"
   },
   "users": {
     "title": "Users",
@@ -286,7 +286,7 @@
     }
   },
   "tenantSettings": {
-    "title": "Tenant Settings",
+    "title": "Organization",
     "description": "Manage your environment basic settings.",
     "form": {
       "nameLabel": "Company Name",
