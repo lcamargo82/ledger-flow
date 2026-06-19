@@ -29,7 +29,7 @@ Telas acessíveis após autenticação bem-sucedida, com verificação de roles/
 * **Permissions** (`/permissions`)
   * Permission list
 * **Organization / Tenant Settings** (`/settings/tenant`)
-* **Customers** (`/customers`) - *Futura tela da Fase 4B*
+* **Customers** (`/customers`)
 * **Payments** (`/payments`) - *Futura tela da Fase 5*
 * **Reconciliation** (`/reconciliation`) - *Futura tela*
 * **Reports** (`/reports`) - *Futura tela*
@@ -50,7 +50,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/roles` | Parcial | `AppLayout` | `roles:manage` | Listagem e gestão de roles |
 | `/permissions` | Parcial | `AppLayout` | `permissions:read` | Listagem de permissões do sistema |
 | `/settings/tenant` | Parcial | `AppLayout` | `tenant:update` | Configuração da organização atual |
-| `/customers` | Futura (Fase 4B) | `AppLayout` | `customers:read` | Gestão de clientes |
+| `/customers` | Implementada | `AppLayout` | `customers:read` | Gestão de clientes |
 | `/payments` | Futura (Fase 5) | `AppLayout` | `payments:read` | Visão de pagamentos |
 | `/reconciliation`| Futura | `AppLayout` | a definir | Conciliação financeira |
 | `/reports` | Futura | `AppLayout` | a definir | Relatórios de sistema |

@@ -800,6 +800,7 @@ Implementar o fluxo principal de negócio com clientes e pagamentos usando Strip
 **Prioridade:** P0
 **Tipo:** Frontend
 **Milestone:** M3
+**Status:** DONE
 
 ### Telas
 

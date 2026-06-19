@@ -309,5 +309,116 @@
       "nameRequired": "O nome do tenant é obrigatório.",
       "timezoneRequired": "O fuso horário é obrigatório."
     }
+  },
+  "customers": {
+    "title": "Clientes",
+    "description": "Gerencie os clientes vinculados à organização atual.",
+    "actions": {
+      "create": "Novo cliente",
+      "edit": "Editar",
+      "viewDetails": "Ver detalhes",
+      "activate": "Ativar",
+      "deactivate": "Desativar",
+      "search": "Buscar",
+      "clearFilters": "Limpar",
+      "save": "Salvar alterações",
+      "cancel": "Cancelar"
+    },
+    "filters": {
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Nome, e-mail, documento...",
+      "statusLabel": "Status",
+      "statusAll": "Todos",
+      "statusActive": "Ativos",
+      "statusInactive": "Inativos",
+      "typeLabel": "Tipo",
+      "typeAll": "Todos",
+      "typeIndividual": "Pessoa física",
+      "typeCompany": "Empresa"
+    },
+    "table": {
+      "name": "Nome",
+      "email": "E-mail",
+      "document": "Documento",
+      "phone": "Telefone",
+      "type": "Tipo",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "form": {
+      "createTitle": "Novo cliente",
+      "editTitle": "Editar cliente",
+      "nameLabel": "Nome",
+      "namePlaceholder": "Nome do cliente",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "cliente@empresa.com",
+      "documentLabel": "Documento",
+      "documentPlaceholder": "CPF/CNPJ ou documento",
+      "phoneLabel": "Telefone",
+      "phonePlaceholder": "+55 11 99999-9999",
+      "typeLabel": "Tipo",
+      "activeLabel": "Status",
+      "validation": {
+        "nameRequired": "O nome é obrigatório",
+        "nameMin": "O nome deve ter pelo menos 2 caracteres",
+        "emailInvalid": "E-mail inválido",
+        "typeRequired": "O tipo é obrigatório"
+      }
+    },
+    "details": {
+      "title": "Detalhes do cliente",
+      "name": "Nome",
+      "email": "E-mail",
+      "document": "Documento",
+      "phone": "Telefone",
+      "type": "Tipo",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "type": {
+      "INDIVIDUAL": "Pessoa física",
+      "COMPANY": "Empresa"
+    },
+    "empty": {
+      "title": "Nenhum cliente encontrado",
+      "description": "Crie seu primeiro cliente ou ajuste os filtros de busca."
+    },
+    "error": {
+      "title": "Não foi possível carregar os clientes",
+      "description": "Tente novamente em alguns instantes.",
+      "createFailed": "Não foi possível criar o cliente.",
+      "updateFailed": "Não foi possível atualizar o cliente.",
+      "statusFailed": "Não foi possível alterar o status do cliente.",
+      "emailAlreadyExists": "E-mail já cadastrado para esta organização.",
+      "documentAlreadyExists": "Documento já cadastrado para esta organização."
+    },
+    "toast": {
+      "created": "Cliente criado com sucesso.",
+      "updated": "Cliente atualizado com sucesso.",
+      "activated": "Cliente ativado com sucesso.",
+      "deactivated": "Cliente desativado com sucesso."
+    },
+    "confirmActivate": {
+      "title": "Ativar cliente",
+      "message": "Tem certeza de que deseja ativar este cliente?",
+      "confirm": "Ativar"
+    },
+    "confirmDeactivate": {
+      "title": "Desativar cliente",
+      "message": "Tem certeza de que deseja desativar este cliente?",
+      "confirm": "Desativar"
+    },
+    "pagination": {
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Anterior",
+      "next": "Próximo",
+      "perPage": "Itens por página"
+    }
   }
 }

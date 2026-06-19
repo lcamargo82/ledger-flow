@@ -18,6 +18,14 @@
           {{ t('nav.users') }}
         </router-link>
         <router-link 
+          v-if="authStore.checkAllPermissions(['customers:read'])" 
+          to="/customers" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          {{ t('nav.customers') }}
+        </router-link>
+        <router-link 
           v-if="authStore.checkAllPermissions(['roles:manage'])" 
           to="/roles" 
           class="lf-nav-item"

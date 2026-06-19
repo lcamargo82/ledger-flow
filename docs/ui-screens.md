@@ -98,10 +98,10 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 * **Status:** Implementada
 * **Objetivo:** Mostrar página não encontrada de forma alinhada ao design system.
 
-## 11. Customers (Futura Fase 4B)
+## 11. Customers
 
 * **Rota:** `/customers`
-* **Status:** Futura
+* **Status:** Implementada
 * **Estrutura Esperada:** Lista de clientes, filtros, busca, criação, edição, detalhes, ativar/desativar, paginação.
 * **Permissões:** `customers:read`, `customers:create`, `customers:update`
 

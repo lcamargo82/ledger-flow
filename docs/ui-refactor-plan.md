@@ -33,6 +33,8 @@ Integração do frontend com as rotas reais de redefinição de senha da API, co
 ## Fase 4B — Customers Frontend
 Nova funcionalidade do LedgerFlow voltada ao gerenciamento de clientes/empresas para a camada transacional.
 
+**Status:** Concluída
+
 **Escopo:**
 * `CustomersView`
 * `CustomersStore` e `CustomersService`
