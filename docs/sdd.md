@@ -552,6 +552,7 @@ export class PaymentGatewayFactory {
 * Expiração curta para access token.
 * Logout invalida refresh token.
 * Rate limiting no login.
+* Recuperação de senha segura: não informa existência de e-mail e não persiste token temporário no client.
 
 ---
 
