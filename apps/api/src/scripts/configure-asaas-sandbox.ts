@@ -12,9 +12,9 @@ dotenv.config();
 const prisma = new PrismaClient();
 
 const AES_ALGORITHM = 'aes-256-gcm';
-const IV_LENGTH = 12;
+const IV_LENGTH = 16;
 
-function encrypt(payload: string): string {
+function encrypt(credentials: Record<string, string>): string {
   const masterKeyBase64 = process.env.GATEWAY_CREDENTIALS_ENCRYPTION_KEY;
   if (!masterKeyBase64) {
     throw new Error('Missing GATEWAY_CREDENTIALS_ENCRYPTION_KEY in .env');
@@ -30,14 +30,14 @@ function encrypt(payload: string): string {
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv(AES_ALGORITHM, masterKey, iv);
 
-  const encryptedBuffer = Buffer.concat([
-    cipher.update(payload, 'utf8'),
-    cipher.final(),
-  ]);
-  const authTag = cipher.getAuthTag();
+  const plaintext = JSON.stringify(credentials);
+  let encrypted = cipher.update(plaintext, 'utf8', 'base64');
+  encrypted += cipher.final('base64');
 
-  const finalBuffer = Buffer.concat([iv, authTag, encryptedBuffer]);
-  return finalBuffer.toString('base64');
+  const authTag = cipher.getAuthTag().toString('base64');
+  const ivString = iv.toString('base64');
+
+  return `${ivString}:${authTag}:${encrypted}`;
 }
 
 function generateFingerprint(credentials: Record<string, string>): string {
@@ -70,8 +70,7 @@ async function configureAsaasSandbox() {
   }
 
   const credentials = { apiKey };
-  const payload = JSON.stringify(credentials);
-  const encryptedCredentials = encrypt(payload);
+  const encryptedCredentials = encrypt(credentials);
   const fingerprint = generateFingerprint(credentials);
 
   const existingConfig = await prisma.gatewayConfiguration.findUnique({
