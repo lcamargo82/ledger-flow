@@ -60,11 +60,15 @@
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_balance</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.tenantSettings') }}</span>
         </router-link>
-        <!-- Mock Nav Items -->
-        <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
+        <router-link 
+          v-if="authStore.checkAllPermissions(['payments:read'])" 
+          to="/payments" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">payments</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
-        </a>
+        </router-link>
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_tree</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>

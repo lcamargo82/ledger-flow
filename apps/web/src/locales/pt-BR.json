@@ -451,5 +451,126 @@
       "next": "Próximo",
       "perPage": "Itens por página"
     }
+  },
+  "payments": {
+    "title": "Pagamentos",
+    "description": "Acompanhe e gerencie os pagamentos da organização.",
+    "actions": {
+      "create": "Novo pagamento",
+      "viewDetails": "Ver detalhes",
+      "cancel": "Cancelar",
+      "search": "Buscar",
+      "clearFilters": "Limpar",
+      "tryAgain": "Tentar novamente",
+      "close": "Fechar"
+    },
+    "filters": {
+      "searchLabel": "Buscar por referência, cliente...",
+      "searchPlaceholder": "Digite a referência ou nome...",
+      "statusLabel": "Status",
+      "methodLabel": "Método",
+      "dateFromLabel": "Data inicial",
+      "dateToLabel": "Data final",
+      "statusAll": "Todos",
+      "methodAll": "Todos"
+    },
+    "table": {
+      "reference": "Referência",
+      "customer": "Cliente",
+      "amount": "Valor",
+      "method": "Método",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "form": {
+      "createTitle": "Novo pagamento",
+      "customerLabel": "Cliente",
+      "customerPlaceholder": "Selecione um cliente",
+      "amountLabel": "Valor",
+      "amountPlaceholder": "0,00",
+      "currencyLabel": "Moeda",
+      "methodLabel": "Método",
+      "methodPlaceholder": "Selecione um método",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Descrição opcional do pagamento",
+      "submit": "Criar pagamento",
+      "creating": "Criando pagamento...",
+      "cancel": "Cancelar",
+      "validation": {
+        "customerRequired": "Cliente é obrigatório.",
+        "amountRequired": "Valor é obrigatório.",
+        "amountInvalid": "Valor inválido.",
+        "methodRequired": "Método é obrigatório.",
+        "dateRangeInvalid": "Período inválido."
+      }
+    },
+    "details": {
+      "title": "Detalhes do Pagamento",
+      "summary": "Resumo",
+      "timeline": "Timeline",
+      "reference": "Referência",
+      "customer": "Cliente",
+      "amount": "Valor",
+      "currency": "Moeda",
+      "method": "Método",
+      "status": "Status",
+      "description": "Descrição",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "canceledAt": "Cancelado em",
+      "refundedAt": "Estornado em",
+      "notAvailable": "Não disponível"
+    },
+    "status": {
+      "PENDING": "Pendente",
+      "PROCESSING": "Processando",
+      "APPROVED": "Aprovado",
+      "FAILED": "Falhou",
+      "CANCELED": "Cancelado",
+      "REFUNDED": "Estornado"
+    },
+    "method": {
+      "PIX": "Pix",
+      "BOLETO": "Boleto",
+      "CARD": "Cartão",
+      "BANK_TRANSFER": "Transferência bancária",
+      "OTHER": "Outro"
+    },
+    "events": {
+      "paymentCreated": "Pagamento criado",
+      "paymentCanceled": "Pagamento cancelado",
+      "paymentRefundRequested": "Estorno solicitado",
+      "paymentRefunded": "Pagamento estornado",
+      "generic": "Evento de pagamento atualizado"
+    },
+    "empty": {
+      "title": "Nenhum pagamento encontrado",
+      "description": "Crie um novo pagamento ou ajuste os filtros para visualizar os resultados."
+    },
+    "error": {
+      "title": "Não foi possível carregar os pagamentos",
+      "description": "Tente novamente em alguns instantes.",
+      "createFailed": "Erro ao criar pagamento.",
+      "cancelFailed": "Erro ao cancelar pagamento.",
+      "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
+      "customerRequired": "Cliente obrigatório.",
+      "amountInvalid": "Valor inválido."
+    },
+    "toast": {
+      "created": "Pagamento criado com sucesso.",
+      "canceled": "Pagamento cancelado com sucesso."
+    },
+    "confirmCancel": {
+      "title": "Cancelar pagamento",
+      "message": "Tem certeza de que deseja cancelar este pagamento? Esta ação não poderá ser desfeita.",
+      "confirm": "Cancelar pagamento"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Próxima",
+      "pageOf": "Página {page} de {totalPages}",
+      "perPage": "Itens por página"
+    }
   }
 }

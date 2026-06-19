@@ -1196,3 +1196,14 @@ Projeto desenvolvido como estudo avançado de arquitetura backend/frontend, sist
 Este projeto é destinado a estudo e portfólio.
 
 A licença será definida futuramente.
+
+
+## Fase 5B - Payments Frontend
+* Listagem e filtros de pagamentos
+* Criação de pagamento interno
+* Conversão de valor para centavos
+* Geração de Idempotency-Key em memória
+* Detalhes e timeline
+* Cancelamento
+* Gateway real ainda futuro.
+

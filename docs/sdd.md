@@ -1903,3 +1903,13 @@ O sistema suporta a redefinição de senhas enviando um e-mail com link contendo
 - O endpoint `POST /auth/reset-password` exige o token original recebido por e-mail, revoga ativamente todos os `refresh tokens` e sessões (`UserSession`) do usuário logo após o reset bem-sucedido e zera bloqueios prévios.
 - A comunicação de e-mail é feita via Mailpit em desenvolvimento por meio de um `EmailService` e uma interface `EmailProvider`.
 - Auditorias registram os eventos `auth.password_recovery_requested` e `auth.password_reset_completed`.
+
+
+### Payments Notes
+* PaymentsView segue View -> Store -> Service -> HTTP Client.
+* Paginação vem do backend.
+* tenantId não é enviado pelo frontend.
+* amount é convertido para centavos antes do request.
+* Idempotency-Key é gerada somente em memória.
+* RBAC frontend é UX; backend é autoridade final.
+

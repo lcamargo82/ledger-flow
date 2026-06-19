@@ -452,5 +452,126 @@
       "next": "Next",
       "perPage": "Items per page"
     }
+  },
+  "payments": {
+    "title": "Payments",
+    "description": "Track and manage the organization's payments.",
+    "actions": {
+      "create": "New payment",
+      "viewDetails": "View details",
+      "cancel": "Cancel",
+      "search": "Search",
+      "clearFilters": "Clear",
+      "tryAgain": "Try again",
+      "close": "Close"
+    },
+    "filters": {
+      "searchLabel": "Search by reference, customer...",
+      "searchPlaceholder": "Type reference or name...",
+      "statusLabel": "Status",
+      "methodLabel": "Method",
+      "dateFromLabel": "Start Date",
+      "dateToLabel": "End Date",
+      "statusAll": "All",
+      "methodAll": "All"
+    },
+    "table": {
+      "reference": "Reference",
+      "customer": "Customer",
+      "amount": "Amount",
+      "method": "Method",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "New payment",
+      "customerLabel": "Customer",
+      "customerPlaceholder": "Select a customer",
+      "amountLabel": "Amount",
+      "amountPlaceholder": "0.00",
+      "currencyLabel": "Currency",
+      "methodLabel": "Method",
+      "methodPlaceholder": "Select a method",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional payment description",
+      "submit": "Create payment",
+      "creating": "Creating payment...",
+      "cancel": "Cancel",
+      "validation": {
+        "customerRequired": "Customer is required.",
+        "amountRequired": "Amount is required.",
+        "amountInvalid": "Invalid amount.",
+        "methodRequired": "Method is required.",
+        "dateRangeInvalid": "Invalid date range."
+      }
+    },
+    "details": {
+      "title": "Payment Details",
+      "summary": "Summary",
+      "timeline": "Timeline",
+      "reference": "Reference",
+      "customer": "Customer",
+      "amount": "Amount",
+      "currency": "Currency",
+      "method": "Method",
+      "status": "Status",
+      "description": "Description",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "canceledAt": "Canceled At",
+      "refundedAt": "Refunded At",
+      "notAvailable": "Not available"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "APPROVED": "Approved",
+      "FAILED": "Failed",
+      "CANCELED": "Canceled",
+      "REFUNDED": "Refunded"
+    },
+    "method": {
+      "PIX": "Pix",
+      "BOLETO": "Boleto",
+      "CARD": "Card",
+      "BANK_TRANSFER": "Bank Transfer",
+      "OTHER": "Other"
+    },
+    "events": {
+      "paymentCreated": "Payment created",
+      "paymentCanceled": "Payment canceled",
+      "paymentRefundRequested": "Refund requested",
+      "paymentRefunded": "Payment refunded",
+      "generic": "Payment event updated"
+    },
+    "empty": {
+      "title": "No payments found",
+      "description": "Create a new payment or adjust filters to view results."
+    },
+    "error": {
+      "title": "Could not load payments",
+      "description": "Please try again in a few moments.",
+      "createFailed": "Failed to create payment.",
+      "cancelFailed": "Failed to cancel payment.",
+      "invalidStatus": "This payment can no longer be canceled in its current status.",
+      "customerRequired": "Customer required.",
+      "amountInvalid": "Invalid amount."
+    },
+    "toast": {
+      "created": "Payment created successfully.",
+      "canceled": "Payment canceled successfully."
+    },
+    "confirmCancel": {
+      "title": "Cancel payment",
+      "message": "Are you sure you want to cancel this payment? This action cannot be undone.",
+      "confirm": "Cancel payment"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {totalPages}",
+      "perPage": "Items per page"
+    }
   }
 }

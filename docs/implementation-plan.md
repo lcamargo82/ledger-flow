@@ -225,7 +225,8 @@ Cada fase deve entregar:
 
 **Status:** Em andamento
 
-### Fase 5A — Payments Core Backend Foundation
+### Fase 5B — Payments Frontend
+Fase 5A — Payments Core Backend Foundation
 
 **Status:** Concluída
 
