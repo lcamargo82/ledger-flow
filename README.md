@@ -599,6 +599,14 @@ O projeto já possui fluxo inicial de autenticação com:
 * Pinia Auth Store.
 * Axios interceptor com refresh automático.
 
+## Password Recovery
+
+A plataforma suporta recuperação de senha segura:
+* Rotas públicas no frontend (`/forgot-password`, `/reset-password?token=`).
+* Interação segura: respostas amigáveis sem expor se o e-mail existe na base de dados.
+* Token temporário: Não é logado nem persistido no localStorage/sessionStorage.
+* E-mails em ambiente de desenvolvimento podem ser inspecionados via Mailpit (`http://localhost:8026`).
+
 **Credenciais demo:**
 
 ```text

@@ -2011,12 +2011,14 @@ Uma issue só pode ser marcada como `DONE` quando:
 - [ ] Criar/refatorar páginas Forbidden e Not Found.
 - [ ] Extrair componentes (AppCard, AppTable, AppBadge, etc).
 
-### Fase 4A.1 — Password Recovery Frontend
-- [ ] Criar tela `/forgot-password`.
-- [ ] Criar tela `/reset-password`.
-- [ ] Conectar `/forgot-password` na API com tratamento seguro.
-- [ ] Conectar `/reset-password` na API com tratamento seguro.
-- [ ] Internacionalização (i18n) para recuperação.
+### Fase 4A.1 — Password Recovery Frontend (Concluída)
+- [x] Criar tela `/forgot-password`.
+- [x] Criar tela `/reset-password`.
+- [x] Conectar `/forgot-password` na API com tratamento seguro.
+- [x] Conectar `/reset-password` na API com tratamento seguro.
+- [x] Internacionalização (i18n) para recuperação.
+- [x] Mailpit flow validated.
+- [x] Password reset error states.
 
 ### Fase 4B — Customers Frontend
 - [ ] Criar view `/customers`.

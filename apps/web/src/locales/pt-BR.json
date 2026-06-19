@@ -48,12 +48,43 @@
     },
     "forgotPassword": {
       "title": "Recuperar Senha",
-      "subtitle": "Recupere seu acesso à plataforma",
-      "emailLabel": "E-mail Registrado",
+      "subtitle": "Informe seu e-mail corporativo para receber as instruções de recuperação.",
+      "emailLabel": "E-mail Corporativo",
       "emailPlaceholder": "seu.nome@empresa.com",
-      "submit": "Enviar Instruções",
-      "backToLogin": "Voltar para o login",
-      "placeholderMessage": "A recuperação de senha será implementada em uma próxima fase. Por enquanto, utilize as credenciais demo para acessar o ambiente local."
+      "submit": "Enviar instruções",
+      "submitting": "Enviando...",
+      "successTitle": "E-mail enviado",
+      "successMessage": "Se o e-mail informado existir, enviaremos as instruções de recuperação.",
+      "successHelp": "Verifique sua caixa de entrada e também a pasta de spam.",
+      "backToLogin": "Voltar ao login",
+      "errors": {
+        "emailRequired": "O e-mail é obrigatório.",
+        "emailInvalid": "Formato de e-mail inválido.",
+        "requestFailed": "Não foi possível solicitar a recuperação agora. Tente novamente em instantes."
+      }
+    },
+    "resetPassword": {
+      "title": "Definir nova senha",
+      "subtitle": "Crie uma nova senha para acessar sua conta com segurança.",
+      "passwordLabel": "Nova senha",
+      "passwordPlaceholder": "Digite sua nova senha",
+      "confirmPasswordLabel": "Confirmar nova senha",
+      "confirmPasswordPlaceholder": "Confirme sua nova senha",
+      "submit": "Redefinir senha",
+      "submitting": "Redefinindo...",
+      "successTitle": "Senha redefinida",
+      "successMessage": "Sua senha foi redefinida com sucesso. Você já pode acessar a plataforma.",
+      "goToLogin": "Ir para login",
+      "requestNewLink": "Solicitar nova recuperação",
+      "errors": {
+        "tokenMissing": "Link de recuperação inválido ou incompleto.",
+        "tokenInvalidOrExpired": "O link de recuperação é inválido ou expirou. Solicite uma nova recuperação.",
+        "passwordRequired": "A senha é obrigatória.",
+        "passwordMin": "A senha deve ter no mínimo 8 caracteres.",
+        "confirmPasswordRequired": "A confirmação de senha é obrigatória.",
+        "passwordsDoNotMatch": "As senhas não coincidem.",
+        "resetFailed": "Não foi possível redefinir sua senha agora. Tente novamente."
+      }
     }
   },
   "dashboard": {

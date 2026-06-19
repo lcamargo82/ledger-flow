@@ -3,10 +3,24 @@ import type {
   LoginRequest, 
   LoginResponse, 
   MeResponse, 
-  RefreshTokenResponse 
+  RefreshTokenResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse
 } from '../types/auth.types'
 
 export const authService = {
+  async forgotPassword(payload: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
+    const response = await httpClient.post<ForgotPasswordResponse>('/auth/forgot-password', payload)
+    return response.data
+  },
+
+  async resetPassword(payload: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+    const response = await httpClient.post<ResetPasswordResponse>('/auth/reset-password', payload)
+    return response.data
+  },
+
   async login(payload: LoginRequest): Promise<LoginResponse> {
     const response = await httpClient.post<LoginResponse>('/auth/login', payload)
     return response.data

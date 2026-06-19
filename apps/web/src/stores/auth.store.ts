@@ -21,6 +21,9 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: false,
     isLoading: false,
     isBootstrapping: true,
+    isRequestingPasswordReset: false,
+    isResettingPassword: false,
+    passwordRecoveryError: null,
     error: null,
   }),
 
@@ -63,6 +66,42 @@ export const useAuthStore = defineStore('auth', {
         throw err
       } finally {
         this.isLoading = false
+      }
+    },
+
+    async forgotPassword(email: string) {
+      this.isRequestingPasswordReset = true
+      this.passwordRecoveryError = null
+      
+      const { t } = useI18n()
+      
+      try {
+        await authService.forgotPassword({ email })
+      } catch (err: any) {
+        this.passwordRecoveryError = t(getHttpErrorMessage(err, 'auth.forgotPassword.errors.requestFailed'))
+        throw err
+      } finally {
+        this.isRequestingPasswordReset = false
+      }
+    },
+
+    async resetPassword(token: string, password: string) {
+      this.isResettingPassword = true
+      this.passwordRecoveryError = null
+      
+      const { t } = useI18n()
+      
+      try {
+        await authService.resetPassword({ token, password })
+      } catch (err: any) {
+        if (err.response?.status === 400 || err.response?.status === 401) {
+          this.passwordRecoveryError = t('auth.resetPassword.errors.tokenInvalidOrExpired')
+        } else {
+          this.passwordRecoveryError = t(getHttpErrorMessage(err, 'auth.resetPassword.errors.resetFailed'))
+        }
+        throw err
+      } finally {
+        this.isResettingPassword = false
       }
     },
 

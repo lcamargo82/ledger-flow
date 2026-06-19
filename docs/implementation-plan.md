@@ -294,7 +294,7 @@ Itens:
 
 ## Fase 4A.1 — Password Recovery Frontend
 
-**Status:** Pendente
+**Status:** Concluída após validação
 
 **Itens:**
 * Fluxo Forgot Password e Reset Password.

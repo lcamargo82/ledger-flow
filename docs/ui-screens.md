@@ -21,28 +21,28 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 * **Regras de segurança:** Nunca expor access/refresh token ou dados sensíveis em UI ou logs de erro.
 * **i18n esperadas:** `auth.login.title`, `auth.login.email`, `auth.login.password`, `auth.login.submit`
 
-## 2. Forgot Password
+### [Auth] Forgot Password
+- **Route**: `/forgot-password`
+- **Layout**: `AuthLayout`
+- **Component**: `ForgotPasswordView`
+- **Status**: Implemented (Fase 4A.1)
+- **Description**: Solicitação de e-mail corporativo para envio de instruções de recuperação.
+- **Key States**:
+  - Formulário com campo de e-mail.
+  - Mensagem de sucesso genérica que não revela a existência do e-mail na base de dados.
+  - Alertas de validação.
 
-* **Rota:** `/forgot-password`
-* **Status:** Pendente
-* **Objetivo:** Solicitar envio de e-mail de recuperação.
-* **Layout:** `AuthLayout`
-* **Importante / Segurança:** Resposta genérica; não revelar se o e-mail existe na base de dados para evitar enumeração de usuários. Sucesso deve ser amigável informando que "se o email estiver cadastrado, um link foi enviado".
-* **Integração futura:** POST `/auth/forgot-password`
-
-## 3. Reset Password
-
-* **Rota:** `/reset-password?token=`
-* **Status:** Pendente
-* **Objetivo:** Criar nova senha usando token recebido por e-mail.
-* **Layout:** `AuthLayout`
-* **Estados:**
-  * token ausente (Redirecionar ou erro)
-  * token inválido/expirado
-  * senha inválida (validação de força)
-  * sucesso
-  * loading
-* **Integração futura:** POST `/auth/reset-password`
+### [Auth] Reset Password
+- **Route**: `/reset-password`
+- **Layout**: `AuthLayout`
+- **Component**: `ResetPasswordView`
+- **Status**: Implemented (Fase 4A.1)
+- **Description**: Criação de nova senha baseada no token enviado por e-mail.
+- **Key States**:
+  - Leitura de token seguro da URL via `route.query.token`.
+  - Formulário contendo nova senha e confirmar senha com regra de senhas consistentes.
+  - Ocultamento da UI e link de solicitação em caso de token inválido/ausente.
+  - Fluxo que obriga nova autenticação pelo formulário `/login` após o sucesso.
 
 ## 4. Dashboard
 

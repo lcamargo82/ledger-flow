@@ -21,6 +21,7 @@ O objetivo da Fase UI-2 é reconstruir e alinhar as páginas atuais usando as es
 * **Component Library:** Extração e implementação dos componentes de base.
 
 ## Fase 4A.1 — Password Recovery Frontend
+**Status:** Concluída (Implementado fluxo de envio de token e criação de nova senha).
 Integração do frontend com as rotas reais de redefinição de senha da API, com segurança.
 
 **Escopo:**
