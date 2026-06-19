@@ -16,10 +16,12 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users        User[]
-  roles        Role[]
-  authAttempts AuthAttempt[]
-  customers    Customer[]
+  users         User[]
+  roles         Role[]
+  authAttempts  AuthAttempt[]
+  customers     Customer[]
+  payments      Payment[]
+  paymentEvents PaymentEvent[]
 
   @@map("tenants")
 }
@@ -195,7 +197,8 @@ model Customer {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments Payment[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, document])
@@ -246,4 +249,79 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  APPROVED
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  PIX
+  BOLETO
+  CARD
+  BANK_TRANSFER
+  OTHER
+}
+
+model Payment {
+  id                     String        @id @default(uuid())
+  tenantId               String
+  customerId             String
+  reference              String
+  externalReference      String?
+  amount                 Int
+  currency               String        @default("BRL")
+  method                 PaymentMethod
+  status                 PaymentStatus @default(PENDING)
+  description            String?
+  metadata               Json?
+  idempotencyKeyHash     String
+  idempotencyRequestHash String
+  provider               String?
+  providerPaymentId      String?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  canceledAt             DateTime?
+  refundedAt             DateTime?
+
+  tenant   Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  events   PaymentEvent[]
+
+  @@unique([tenantId, reference])
+  @@unique([tenantId, idempotencyKeyHash])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, reference])
+  @@index([customerId])
+  @@index([provider, providerPaymentId])
+  @@map("payments")
+}
+
+model PaymentEvent {
+  id             String         @id @default(uuid())
+  tenantId       String
+  paymentId      String
+  type           String
+  previousStatus PaymentStatus?
+  currentStatus  PaymentStatus?
+  message        String?
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([paymentId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("payment_events")
 }

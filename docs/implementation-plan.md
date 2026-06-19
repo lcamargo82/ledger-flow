@@ -223,6 +223,22 @@ Cada fase deve entregar:
 
 ## Fase 5 — Payments MVP
 
+**Status:** Em andamento
+
+### Fase 5A — Payments Core Backend Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Modelos do banco de dados (Payment, PaymentEvent).
+* Seed de permissões (create, read, cancel, refund).
+* Módulo NestJS isolado.
+* Repository com interface abstrata e implementação Prisma.
+* Serviço core com lógica de criação, validação de transição, cancelamento, reembolso e log de auditoria.
+* Idempotência garantida via header `Idempotency-Key` e hashes criptografados (`idempotencyKeyHash`, `idempotencyRequestHash`).
+* Proteção contra alteração arbitrária de status via payload (APIs específicas e restritas).
+* Testes isolados com rotas.
+
 ---
 
 ## Fase 6 — Webhooks

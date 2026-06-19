@@ -36,6 +36,7 @@ async function main() {
     { key: 'customers:delete', description: 'Excluir clientes' },
     { key: 'payments:create', description: 'Criar pagamentos' },
     { key: 'payments:read', description: 'Visualizar pagamentos' },
+    { key: 'payments:cancel', description: 'Cancelar pagamentos' },
     { key: 'payments:refund', description: 'Reembolsar pagamentos' },
     { key: 'reports:export', description: 'Exportar relatórios' },
     { key: 'webhooks:manage', description: 'Gerenciar webhooks' },
@@ -154,6 +155,97 @@ async function main() {
     });
     console.log('Assigned OWNER role to Demo Owner user');
   }
+
+  // 7. Create Demo Customer
+  const customer = await prisma.customer.upsert({
+    where: {
+      tenantId_email: {
+        tenantId: tenant.id,
+        email: 'demo-customer@ledgerflow.local',
+      },
+    },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      name: 'Cliente Demonstrativo',
+      email: 'demo-customer@ledgerflow.local',
+      document: '00000000000',
+      phone: '11999999999',
+    },
+  });
+  console.log(`Demo Customer created/verified: ${customer.name}`);
+
+  // 8. Create Demo Payments
+  const paymentsData = [
+    {
+      reference: 'PAY-DEMO-001',
+      amount: 15000,
+      method: 'PIX' as any,
+      status: 'PENDING' as any,
+      description: 'Pagamento Pendente Demo',
+      idempotencyKeyHash: await bcrypt.hash('demo-key-1', 10),
+    },
+    {
+      reference: 'PAY-DEMO-002',
+      amount: 25050,
+      method: 'CARD' as any,
+      status: 'APPROVED' as any,
+      description: 'Pagamento Aprovado Demo',
+      idempotencyKeyHash: await bcrypt.hash('demo-key-2', 10),
+    },
+    {
+      reference: 'PAY-DEMO-003',
+      amount: 5000,
+      method: 'BOLETO' as any,
+      status: 'CANCELED' as any,
+      canceledAt: new Date(),
+      description: 'Pagamento Cancelado Demo',
+      idempotencyKeyHash: await bcrypt.hash('demo-key-3', 10),
+    },
+    {
+      reference: 'PAY-DEMO-004',
+      amount: 8990,
+      method: 'PIX' as any,
+      status: 'REFUNDED' as any,
+      refundedAt: new Date(),
+      description: 'Pagamento Reembolsado Demo',
+      idempotencyKeyHash: await bcrypt.hash('demo-key-4', 10),
+    },
+  ];
+
+  for (const p of paymentsData) {
+    const payment = await prisma.payment.upsert({
+      where: {
+        tenantId_reference: {
+          tenantId: tenant.id,
+          reference: p.reference,
+        },
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        customerId: customer.id,
+        reference: p.reference,
+        amount: p.amount,
+        method: p.method,
+        status: p.status,
+        description: p.description,
+        idempotencyKeyHash: p.idempotencyKeyHash,
+        idempotencyRequestHash: 'demo-request-hash',
+        canceledAt: p.canceledAt,
+        refundedAt: p.refundedAt,
+        events: {
+          create: {
+            tenantId: tenant.id,
+            type: `payment.${p.status.toLowerCase()}`,
+            currentStatus: p.status,
+            message: `Seed generated ${p.status} event`,
+          },
+        },
+      },
+    });
+  }
+  console.log(`Demo Payments created/verified`);
 
   console.log('Seeding completed successfully!');
 }

@@ -12,6 +12,7 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { EmailModule } from './modules/email/email.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard';
 import { PermissionGuard } from './modules/auth/presentation/guards/permission.guard';
 
@@ -27,6 +28,7 @@ import { PermissionGuard } from './modules/auth/presentation/guards/permission.g
     TenantsModule,
     CustomersModule,
     EmailModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [
