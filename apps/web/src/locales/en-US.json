@@ -788,7 +788,6 @@
     },
     "activity": {
       "empty": "No recent activity found."
->>>>>>> feature/platform-tenant-overview-health
     }
   }
 }

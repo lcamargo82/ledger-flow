@@ -747,8 +747,6 @@
         "next": "Próximo",
         "submit": "Provisionar Tenant"
       }
-=======
-      "view": "Visualizar"
     },
     "overview": {
       "backToTenants": "Voltar para Tenants",
@@ -789,7 +787,6 @@
     },
     "activity": {
       "empty": "Nenhuma atividade recente encontrada."
->>>>>>> feature/platform-tenant-overview-health
     }
   }
 }
