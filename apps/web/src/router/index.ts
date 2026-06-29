@@ -141,6 +141,28 @@ const router = createRouter({
       }
     },
     {
+      path: '/platform/tenants/:id',
+      name: 'platform-tenant-details',
+      component: () => import('../views/PlatformTenantDetailsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:tenants:read']
+      }
+    },
+    {
+      path: '/platform/audit',
+      name: 'platform-audit',
+      component: () => import('../views/PlatformAuditView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:audit:read']
+      }
+    },
+    {
       path: '/dev/ui-kit',
       name: 'ui-kit',
       component: () => import('../views/UIKitView.vue'),

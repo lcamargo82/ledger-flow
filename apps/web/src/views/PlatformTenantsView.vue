@@ -140,11 +140,12 @@ const handleSearch = () => {
           </span>
         </template>
 
-        <template #actions>
+        <template #actions="{ item }">
           <div class="flex justify-end gap-2">
             <AppButton 
               variant="secondary" 
               size="small"
+              @click="$router.push(`/platform/tenants/${item.id}`)"
             >
               {{ t('platformTenants.actions.view') }}
             </AppButton>

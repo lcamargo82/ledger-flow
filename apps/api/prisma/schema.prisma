@@ -251,22 +251,45 @@ model PasswordResetToken {
 
 model AuditLog {
   id          String   @id @default(uuid())
+  scope       PermissionScope?
+  severity    AuditSeverity?
   tenantId    String?
   actorUserId String?
-  action      String
+  actorType   AuditActorType?
+  source      String?
   entityType  String?
   entityId    String?
+  action      String
+  summary     String?
   metadata    Json?
   ipAddress   String?
   userAgent   String?
+  traceId     String?
   createdAt   DateTime @default(now())
 
   @@index([tenantId])
-  @@index([actorUserId])
   @@index([action])
+  @@index([severity])
+  @@index([actorType])
+  @@index([actorUserId])
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([tenantId, createdAt])
   @@map("audit_logs")
+}
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum AuditActorType {
+  USER
+  PLATFORM_ADMIN
+  SYSTEM
+  WEBHOOK
+  WORKER
 }
 
 enum PaymentProvider {
