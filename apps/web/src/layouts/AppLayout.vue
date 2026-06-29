@@ -91,6 +91,15 @@
             <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">domain</span>
             <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.tenants') }}</span>
           </router-link>
+          <router-link 
+            v-if="authStore.checkAllPermissions(['platform:audit:read'])"
+            to="/platform/audit" 
+            class="lf-nav-item"
+            active-class="lf-nav-item--active"
+          >
+            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">history</span>
+            <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.audit') }}</span>
+          </router-link>
         </div>
       </nav>
 

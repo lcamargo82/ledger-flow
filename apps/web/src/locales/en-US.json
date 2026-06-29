@@ -614,7 +614,77 @@
     "sidebar": {
       "operations": "Operations",
       "platform": "Platform",
-      "tenants": "Platform Tenants"
+      "tenants": "Platform Tenants",
+      "audit": "Global Audit"
+    },
+    "audit": {
+      "title": "Global Audit",
+      "description": "View the platform's global audit logs.",
+      "severity": {
+        "INFO": "Info",
+        "WARNING": "Warning",
+        "CRITICAL": "Critical"
+      },
+      "table": {
+        "occurredAt": "Date/Time",
+        "organization": "Organization",
+        "action": "Action",
+        "severity": "Severity",
+        "actorType": "Actor",
+        "entityType": "Entity",
+        "source": "Source",
+        "summary": "Summary",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewDetails": "View Details",
+        "viewAllTenantLogs": "View full audit"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search action, summary...",
+        "severity": "Severity",
+        "actorType": "Actor",
+        "source": "Source",
+        "dateFrom": "Date From",
+        "dateTo": "Date To",
+        "apply": "Apply Filters",
+        "clear": "Clear"
+      },
+      "details": {
+        "title": "Audit Details"
+      },
+      "empty": {
+        "title": "No audit logs found",
+        "description": "Adjust your search filters to view results."
+      }
+    },
+    "support": {
+      "title": "Operational Details",
+      "health": "Tenant Health",
+      "recentCriticalEvents": "Recent critical events",
+      "recentWarnings": "Recent warnings",
+      "recentWebhookFailures": "Recent webhook failures",
+      "lastSuccessfulWebhookAt": "Last webhook processed",
+      "lastPaymentStatusChangeAt": "Last payment update",
+      "lastOwnerLoginAt": "Last Owner login",
+      "pendingInvitation": "Pending invitation",
+      "recommendedActions": "Recommended Actions",
+      "noRecommendedActions": "No recommended actions at this time. The tenant is healthy.",
+      "recommendation": {
+        "REVIEW_WEBHOOK_FAILURES": "Review recent webhook failures with the tenant.",
+        "REVIEW_SUBSCRIPTION_STATUS": "Subscription is past due, check payment status.",
+        "REACTIVATE_TENANT": "Tenant is inactive, consider reactivating if applicable."
+      }
+    },
+    "tenantDetails": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "Support & Health",
+        "audit": "Recent Audit"
+      },
+      "overviewEmpty": "The overview will be available soon.",
+      "recentAudit": "Recent Audit"
     }
   },
   "platformTenants": {

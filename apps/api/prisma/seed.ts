@@ -69,6 +69,8 @@ async function main() {
     { key: 'platform:subscriptions:update', description: 'Atualizar assinaturas da plataforma' },
     { key: 'platform:tenants:overview:read', description: 'Visualizar resumo operacional de tenants da plataforma' },
     { key: 'platform:tenants:health:read', description: 'Visualizar saúde operacional de tenants da plataforma' },
+    { key: 'platform:audit:read', description: 'Visualizar logs de auditoria global da plataforma' },
+    { key: 'platform:support:read', description: 'Visualizar resumo de suporte dos tenants' },
   ];
 
   const permissions: Permission[] = [];

@@ -613,7 +613,77 @@
     "sidebar": {
       "operations": "Operação",
       "platform": "Plataforma",
-      "tenants": "Tenants da Plataforma"
+      "tenants": "Tenants da Plataforma",
+      "audit": "Auditoria Global"
+    },
+    "audit": {
+      "title": "Auditoria Global",
+      "description": "Visualize os logs de auditoria globais da plataforma.",
+      "severity": {
+        "INFO": "Info",
+        "WARNING": "Aviso",
+        "CRITICAL": "Crítico"
+      },
+      "table": {
+        "occurredAt": "Data/Hora",
+        "organization": "Organização",
+        "action": "Ação",
+        "severity": "Severidade",
+        "actorType": "Ator",
+        "entityType": "Entidade",
+        "source": "Fonte",
+        "summary": "Resumo",
+        "actions": "Ações"
+      },
+      "actions": {
+        "viewDetails": "Ver detalhes",
+        "viewAllTenantLogs": "Ver auditoria completa"
+      },
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar ação, resumo...",
+        "severity": "Severidade",
+        "actorType": "Ator",
+        "source": "Fonte",
+        "dateFrom": "Data Inicial",
+        "dateTo": "Data Final",
+        "apply": "Aplicar Filtros",
+        "clear": "Limpar"
+      },
+      "details": {
+        "title": "Detalhes da Auditoria"
+      },
+      "empty": {
+        "title": "Nenhum log de auditoria encontrado",
+        "description": "Ajuste os filtros de busca para visualizar os resultados."
+      }
+    },
+    "support": {
+      "title": "Detalhes Operacionais",
+      "health": "Saúde do Tenant",
+      "recentCriticalEvents": "Eventos críticos recentes",
+      "recentWarnings": "Avisos recentes",
+      "recentWebhookFailures": "Falhas recentes em webhooks",
+      "lastSuccessfulWebhookAt": "Último webhook processado",
+      "lastPaymentStatusChangeAt": "Última atualização de pagamento",
+      "lastOwnerLoginAt": "Último acesso do Owner",
+      "pendingInvitation": "Convite pendente de aceite",
+      "recommendedActions": "Ações Recomendadas",
+      "noRecommendedActions": "Nenhuma ação recomendada no momento. O tenant está saudável.",
+      "recommendation": {
+        "REVIEW_WEBHOOK_FAILURES": "Revisar as falhas recentes de webhook com o tenant.",
+        "REVIEW_SUBSCRIPTION_STATUS": "Assinatura atrasada, verificar status de pagamento.",
+        "REACTIVATE_TENANT": "O tenant está inativo, considere reativação se aplicável."
+      }
+    },
+    "tenantDetails": {
+      "tabs": {
+        "overview": "Visão Geral",
+        "support": "Suporte e Saúde",
+        "audit": "Auditoria Recente"
+      },
+      "overviewEmpty": "A visão geral estará disponível em breve.",
+      "recentAudit": "Auditoria Recente"
     }
   },
   "platformTenants": {
