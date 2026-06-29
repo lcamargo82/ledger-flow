@@ -9,6 +9,9 @@ import type {
   UpdateTenantSubscriptionDto,
   CreatePlatformTenantDto,
   PlatformTenantProvisionResponse,
+  PlatformTenantOverviewResponse,
+  PlatformTenantHealthResponse,
+  PlatformTenantActivityResponse
 } from '../types/platform.types';
 
 class PlatformTenantsService {
@@ -44,6 +47,21 @@ class PlatformTenantsService {
 
   async resendTenantInvitation(id: string): Promise<{ success: boolean; message: string }> {
     const { data } = await api.post<{ success: boolean; message: string }>(`/platform/tenants/${id}/invitation/resend`);
+    return data;
+  }
+
+  async getTenantOverview(id: string): Promise<PlatformTenantOverviewResponse> {
+    const { data } = await api.get<PlatformTenantOverviewResponse>(`/platform/tenants/${id}/overview`);
+    return data;
+  }
+
+  async getTenantHealth(id: string): Promise<PlatformTenantHealthResponse> {
+    const { data } = await api.get<PlatformTenantHealthResponse>(`/platform/tenants/${id}/health`);
+    return data;
+  }
+
+  async getTenantActivity(id: string): Promise<PlatformTenantActivityResponse> {
+    const { data } = await api.get<PlatformTenantActivityResponse>(`/platform/tenants/${id}/activity`);
     return data;
   }
 }

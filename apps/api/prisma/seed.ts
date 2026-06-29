@@ -67,6 +67,8 @@ async function main() {
     { key: 'platform:tenants:invite', description: 'Convidar e reenviar convites para tenants' },
     { key: 'platform:subscriptions:read', description: 'Visualizar assinaturas da plataforma' },
     { key: 'platform:subscriptions:update', description: 'Atualizar assinaturas da plataforma' },
+    { key: 'platform:tenants:overview:read', description: 'Visualizar resumo operacional de tenants da plataforma' },
+    { key: 'platform:tenants:health:read', description: 'Visualizar saúde operacional de tenants da plataforma' },
   ];
 
   const permissions: Permission[] = [];

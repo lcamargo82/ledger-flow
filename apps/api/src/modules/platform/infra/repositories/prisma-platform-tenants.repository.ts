@@ -75,4 +75,132 @@ export class PrismaPlatformTenantsRepository implements PlatformTenantsRepositor
       } as any,
     });
   }
+
+  async findTenantOverviewById(tenantId: string) {
+    return this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+      include: {
+        subscription: true,
+      },
+    });
+  }
+
+  async countUsersByTenant(tenantId: string) {
+    const [total, active] = await Promise.all([
+      this.prisma.user.count({ where: { tenantId } }),
+      this.prisma.user.count({ where: { tenantId, active: true } }),
+    ]);
+    return { total, active };
+  }
+
+  async countCustomersByTenant(tenantId: string) {
+    const [total, active] = await Promise.all([
+      this.prisma.customer.count({ where: { tenantId } }),
+      this.prisma.customer.count({ where: { tenantId, active: true } }),
+    ]);
+    return { total, active };
+  }
+
+  async countPaymentsByStatus(tenantId: string) {
+    const groupByStatus = await this.prisma.payment.groupBy({
+      by: ['status'],
+      where: { tenantId },
+      _count: { status: true },
+    });
+
+    const result: Record<string, number> = {
+      PENDING: 0,
+      PROCESSING: 0,
+      APPROVED: 0,
+      FAILED: 0,
+      CANCELED: 0,
+      REFUNDED: 0,
+    };
+
+    let total = 0;
+    for (const group of groupByStatus) {
+      result[group.status] = group._count.status;
+      total += group._count.status;
+    }
+    result['TOTAL'] = total;
+
+    return result;
+  }
+
+  async findGatewaySummaryByTenant(tenantId: string) {
+    const configurations = await this.prisma.gatewayConfiguration.findMany({
+      where: { tenantId, status: 'ACTIVE' },
+      select: {
+        provider: true,
+        environment: true,
+        status: true,
+        healthStatus: true,
+        lastHealthCheckAt: true,
+      },
+    });
+
+    return {
+      hasActiveConfiguration: configurations.length > 0,
+      activeProviders: configurations,
+    };
+  }
+
+  async findWebhookSummaryByTenant(tenantId: string, sinceDate: Date) {
+    const [lastWebhook, processed, failed, ignored] = await Promise.all([
+      this.prisma.webhookInboxEvent.findFirst({
+        where: { tenantId },
+        orderBy: { receivedAt: 'desc' },
+        select: { receivedAt: true },
+      }),
+      this.prisma.webhookInboxEvent.count({
+        where: { tenantId, status: 'PROCESSED', receivedAt: { gte: sinceDate } },
+      }),
+      this.prisma.webhookInboxEvent.count({
+        where: { tenantId, status: 'FAILED', receivedAt: { gte: sinceDate } },
+      }),
+      this.prisma.webhookInboxEvent.count({
+        where: { tenantId, status: 'IGNORED', receivedAt: { gte: sinceDate } },
+      }),
+    ]);
+
+    return {
+      lastReceivedAt: lastWebhook?.receivedAt || null,
+      processed,
+      failed,
+      ignored,
+    };
+  }
+
+  async findRecentActivityByTenant(tenantId: string, limit: number = 10) {
+    // Only fetch safe operational logs (avoid sensitive customer/payment data)
+    return this.prisma.auditLog.findMany({
+      where: { 
+        tenantId,
+        action: {
+          in: [
+            'platform.tenant.created',
+            'tenant.activated',
+            'tenant.deactivated',
+            'tenant.subscription.updated',
+            'platform.tenant.invitation_sent',
+            'platform.tenant.invitation_resent',
+            'auth.tenant_invitation_accepted',
+            'gateway.configuration.created',
+            'gateway.configuration.updated',
+            'payment.provider_status_updated',
+            'webhook.processing_failed',
+          ]
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        action: true,
+        createdAt: true,
+        actorUserId: true,
+        metadata: true,
+      }
+    });
+  }
 }

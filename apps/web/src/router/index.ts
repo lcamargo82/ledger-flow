@@ -166,6 +166,17 @@ const router = createRouter({
       }
     },
     {
+      path: '/platform/tenants/:id',
+      name: 'platform-tenant-details',
+      component: () => import('../views/PlatformTenantDetailsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:tenants:overview:read']
+      }
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: NotFoundView,
