@@ -607,10 +607,18 @@ A plataforma suporta recuperação de senha segura:
 * Token temporário: Não é logado nem persistido no localStorage/sessionStorage.
 * E-mails em ambiente de desenvolvimento podem ser inspecionados via Mailpit (`http://localhost:8026`).
 
-**Credenciais demo:**
+**Credenciais demo (Tenant Cliente):**
 
 ```text
 E-mail: owner@ledgerflow.local
+Senha: ChangeMe123!
+
+```
+
+**Credenciais de Plataforma (Admin Master):**
+
+```text
+E-mail: platform.owner@ledgerflow.local
 Senha: ChangeMe123!
 
 ```

@@ -16,6 +16,8 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard';
 import { PermissionGuard } from './modules/auth/presentation/guards/permission.guard';
+import { PlatformAdminGuard } from './modules/auth/presentation/guards/platform-admin.guard';
+import { PlatformModule } from './modules/platform/platform.module';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { PermissionGuard } from './modules/auth/presentation/guards/permission.g
     EmailModule,
     PaymentsModule,
     WebhooksModule,
+    PlatformModule,
   ],
   controllers: [AppController],
   providers: [
@@ -42,6 +45,10 @@ import { PermissionGuard } from './modules/auth/presentation/guards/permission.g
     {
       provide: APP_GUARD,
       useClass: PermissionGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PlatformAdminGuard,
     },
   ],
 })

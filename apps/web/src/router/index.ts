@@ -15,6 +15,7 @@ import CustomersView from '../views/CustomersView.vue'
 import PaymentsView from '../views/PaymentsView.vue'
 import ForbiddenView from '../views/ForbiddenView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
+import PlatformTenantsView from '../views/PlatformTenantsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -129,6 +130,17 @@ const router = createRouter({
       }
     },
     {
+      path: '/platform/tenants',
+      name: 'platform-tenants',
+      component: PlatformTenantsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:tenants:read']
+      }
+    },
+    {
       path: '/dev/ui-kit',
       name: 'ui-kit',
       component: () => import('../views/UIKitView.vue'),
@@ -184,6 +196,10 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.checkAllPermissions(requiredPerms)) {
       return next({ path: '/forbidden' })
     }
+  }
+
+  if (to.meta.platformAdminOnly && !authStore.user?.isPlatformAdmin) {
+    return next({ path: '/forbidden' })
   }
 
   next()

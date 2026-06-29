@@ -6,7 +6,21 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  // 1. Create or update Tenant
+  // 1. Create or update Platform and Demo Tenants
+  const platformTenant = await prisma.tenant.upsert({
+    where: { slug: 'ledgerflow-platform' },
+    update: {
+      name: 'LedgerFlow Platform',
+      kind: 'PLATFORM',
+    },
+    create: {
+      name: 'LedgerFlow Platform',
+      slug: 'ledgerflow-platform',
+      kind: 'PLATFORM',
+    },
+  });
+  console.log(`Tenant created: ${platformTenant.name}`);
+
   const tenant = await prisma.tenant.upsert({
     where: { slug: 'ledgerflow-demo' },
     update: {
@@ -45,6 +59,12 @@ async function main() {
     { key: 'notifications:read', description: 'Visualizar notificações' },
     { key: 'audit:read', description: 'Visualizar trilha de auditoria' },
     { key: 'tenant:update', description: 'Atualizar configurações do tenant' },
+    { key: 'platform:access', description: 'Acesso à administração da plataforma' },
+    { key: 'platform:tenants:read', description: 'Visualizar tenants da plataforma' },
+    { key: 'platform:tenants:update', description: 'Atualizar tenants da plataforma' },
+    { key: 'platform:tenants:status', description: 'Alterar status de tenants da plataforma' },
+    { key: 'platform:subscriptions:read', description: 'Visualizar assinaturas da plataforma' },
+    { key: 'platform:subscriptions:update', description: 'Atualizar assinaturas da plataforma' },
   ];
 
   const permissions: Permission[] = [];
@@ -60,10 +80,11 @@ async function main() {
 
   // 3. Create Roles
   const rolesData = [
-    { key: 'OWNER', name: 'Owner', description: 'Proprietário da conta com acesso total', system: true },
-    { key: 'FINANCE_OPERATOR', name: 'Financeiro', description: 'Operador financeiro', system: true },
-    { key: 'SUPPORT_VIEWER', name: 'Suporte', description: 'Acesso apenas leitura para suporte', system: true },
-    { key: 'DEVELOPER', name: 'Desenvolvedor', description: 'Gerenciamento técnico (API, Webhooks)', system: true },
+    { key: 'OWNER', name: 'Owner', description: 'Proprietário da conta com acesso total', system: true, tenantId: tenant.id },
+    { key: 'FINANCE_OPERATOR', name: 'Financeiro', description: 'Operador financeiro', system: true, tenantId: tenant.id },
+    { key: 'SUPPORT_VIEWER', name: 'Suporte', description: 'Acesso apenas leitura para suporte', system: true, tenantId: tenant.id },
+    { key: 'DEVELOPER', name: 'Desenvolvedor', description: 'Gerenciamento técnico (API, Webhooks)', system: true, tenantId: tenant.id },
+    { key: 'PLATFORM_OWNER', name: 'Platform Owner', description: 'Administrador geral da plataforma', system: true, tenantId: platformTenant.id },
   ];
 
   const roles: Role[] = [];
@@ -71,7 +92,7 @@ async function main() {
     const role = await prisma.role.upsert({
       where: {
         tenantId_key: {
-          tenantId: tenant.id,
+          tenantId: r.tenantId,
           key: r.key,
         },
       },
@@ -81,7 +102,7 @@ async function main() {
         system: r.system,
       },
       create: {
-        tenantId: tenant.id,
+        tenantId: r.tenantId,
         name: r.name,
         key: r.key,
         description: r.description,
@@ -111,6 +132,28 @@ async function main() {
       });
     }
     console.log('Assigned all permissions to OWNER role');
+  }
+
+  // 4.5 Assign platform permissions to PLATFORM_OWNER role
+  const platformOwnerRole = roles.find((r) => r.key === 'PLATFORM_OWNER');
+  if (platformOwnerRole) {
+    const platformPerms = permissions.filter(p => p.key.startsWith('platform:'));
+    for (const p of platformPerms) {
+      await prisma.rolePermission.upsert({
+        where: {
+          roleId_permissionId: {
+            roleId: platformOwnerRole.id,
+            permissionId: p.id,
+          },
+        },
+        update: {},
+        create: {
+          roleId: platformOwnerRole.id,
+          permissionId: p.id,
+        },
+      });
+    }
+    console.log('Assigned platform permissions to PLATFORM_OWNER role');
   }
 
   // 5. Create Demo Owner user
@@ -156,6 +199,49 @@ async function main() {
     console.log('Assigned OWNER role to Demo Owner user');
   }
 
+  // 6.5 Create Platform Owner user and assign role
+  const platformOwnerEmail = process.env.PLATFORM_ADMIN_EMAIL || 'platform.owner@ledgerflow.local';
+  const platformPasswordHash = await bcrypt.hash(process.env.PLATFORM_ADMIN_PASSWORD || 'ChangeMe123!', 10);
+
+  const platformOwnerUser = await prisma.user.upsert({
+    where: {
+      tenantId_email: {
+        tenantId: platformTenant.id,
+        email: platformOwnerEmail,
+      },
+    },
+    update: {
+      name: 'Platform Admin',
+      isPlatformAdmin: true,
+    },
+    create: {
+      tenantId: platformTenant.id,
+      name: 'Platform Admin',
+      email: platformOwnerEmail,
+      passwordHash: platformPasswordHash,
+      isPlatformAdmin: true,
+      active: true,
+    },
+  });
+  console.log(`Platform Owner user created/verified: ${platformOwnerUser.email}`);
+
+  if (platformOwnerRole) {
+    await prisma.userRole.upsert({
+      where: {
+        userId_roleId: {
+          userId: platformOwnerUser.id,
+          roleId: platformOwnerRole.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: platformOwnerUser.id,
+        roleId: platformOwnerRole.id,
+      },
+    });
+    console.log('Assigned PLATFORM_OWNER role to Platform Admin user');
+  }
+
   // 7. Create Demo Customer
   const customer = await prisma.customer.upsert({
     where: {
@@ -174,6 +260,23 @@ async function main() {
     },
   });
   console.log(`Demo Customer created/verified: ${customer.name}`);
+
+  // 7.5 Create Demo Tenant Subscription
+  await prisma.tenantSubscription.upsert({
+    where: { tenantId: tenant.id },
+    update: {
+      plan: 'PROFESSIONAL',
+      status: 'ACTIVE',
+    },
+    create: {
+      tenantId: tenant.id,
+      plan: 'PROFESSIONAL',
+      status: 'ACTIVE',
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    },
+  });
+  console.log(`Demo Tenant Subscription created/verified`);
 
   // 8. Create Demo Payments
   const paymentsData = [

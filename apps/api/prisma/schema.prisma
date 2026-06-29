@@ -7,17 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TenantKind {
+  PLATFORM
+  CUSTOMER
+}
+
 model Tenant {
   id        String   @id @default(uuid())
   name      String
-  slug      String   @unique
-  timezone  String   @default("America/Sao_Paulo")
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  slug      String     @unique
+  kind      TenantKind @default(CUSTOMER)
+  timezone  String     @default("America/Sao_Paulo")
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
-  users         User[]
-  roles         Role[]
+  users                User[]
+  roles                Role[]
+  subscription         TenantSubscription?
   authAttempts  AuthAttempt[]
   customers             Customer[]
   payments              Payment[]
@@ -35,6 +42,7 @@ model User {
   name                String
   email               String
   passwordHash        String
+  isPlatformAdmin     Boolean   @default(false)
   active              Boolean   @default(true)
   lastLoginAt         DateTime?
   lastLoginIp         String?
@@ -472,3 +480,41 @@ model WebhookInboxEvent {
   @@index([receivedAt])
   @@map("webhook_inbox_events")
 }
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+  CUSTOM
+}
+
+enum TenantSubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELED
+}
+
+model TenantSubscription {
+  id                          String                   @id @default(uuid())
+  tenantId                    String                   @unique
+  plan                        SubscriptionPlan         @default(FREE)
+  status                      TenantSubscriptionStatus @default(TRIAL)
+  trialEndsAt                 DateTime?
+  currentPeriodStart          DateTime?
+  currentPeriodEnd            DateTime?
+  externalSubscriptionReference String?
+  notes                       String?
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([plan])
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@map("tenant_subscriptions")
+}
+

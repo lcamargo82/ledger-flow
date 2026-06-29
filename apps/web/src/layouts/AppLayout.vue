@@ -73,6 +73,18 @@
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_tree</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>
         </a>
+
+        <!-- Platform Admin Menu -->
+        <div v-if="authStore.user?.isPlatformAdmin" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <router-link 
+            to="/platform/tenants" 
+            class="lf-nav-item"
+            active-class="lf-nav-item--active"
+          >
+            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">domain</span>
+            <span class="text" v-show="!isCollapsed">Platform Tenants</span>
+          </router-link>
+        </div>
       </nav>
 
       <div class="lf-sidebar__footer">

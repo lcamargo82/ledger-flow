@@ -35,6 +35,7 @@ export class AuthService {
       const user = await this.prisma.user.findFirst({
         where: { email },
         include: {
+          tenant: true,
           roles: {
             include: {
               role: {
@@ -148,7 +149,10 @@ export class AuthService {
       const payload: AuthTokenPayload = {
         sub: user.id,
         tenantId: user.tenantId,
+        tenantName: user.tenant.name,
+        tenantKind: user.tenant.kind,
         email: user.email,
+        isPlatformAdmin: user.isPlatformAdmin,
         roles,
         permissions,
         sessionId: sessionId!,
@@ -162,8 +166,11 @@ export class AuthService {
         user: {
           id: user.id,
           tenantId: user.tenantId,
+          tenantName: user.tenant.name,
+          tenantKind: user.tenant.kind,
           name: user.name,
           email: user.email,
+          isPlatformAdmin: user.isPlatformAdmin,
           roles,
           permissions,
           sessionId: sessionId!,
@@ -193,6 +200,7 @@ export class AuthService {
       include: {
         user: {
           include: {
+            tenant: true,
             roles: {
               include: {
                 role: {
@@ -238,7 +246,10 @@ export class AuthService {
     const payload: AuthTokenPayload = {
       sub: storedToken.user.id,
       tenantId: storedToken.user.tenantId,
+      tenantName: storedToken.user.tenant.name,
+      tenantKind: storedToken.user.tenant.kind,
       email: storedToken.user.email,
+      isPlatformAdmin: storedToken.user.isPlatformAdmin,
       roles,
       permissions: Array.from(permissionsSet),
       sessionId: storedToken.session?.id,
