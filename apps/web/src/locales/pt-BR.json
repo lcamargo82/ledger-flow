@@ -602,5 +602,31 @@
       "platform": "Plataforma",
       "tenants": "Tenants da Plataforma"
     }
+  },
+  "platformTenants": {
+    "title": "Tenants da Plataforma",
+    "description": "Gerencie todas as organizações de clientes no LedgerFlow.",
+    "searchLabel": "Buscar",
+    "searchPlaceholder": "Buscar tenants...",
+    "statusLabel": "Status",
+    "statusAll": "Todos os Status",
+    "planLabel": "Plano",
+    "planAll": "Todos os Planos",
+    "emptyTitle": "Nenhum tenant encontrado",
+    "emptyDescription": "Tente alterar os filtros de busca.",
+    "table": {
+      "name": "Nome do Tenant",
+      "plan": "Plano",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "actions": {
+      "view": "Visualizar"
+    }
   }
 }

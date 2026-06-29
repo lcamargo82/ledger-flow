@@ -603,5 +603,31 @@
       "platform": "Platform",
       "tenants": "Platform Tenants"
     }
+  },
+  "platformTenants": {
+    "title": "Platform Tenants",
+    "description": "Manage all customer organizations on LedgerFlow.",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search tenants...",
+    "statusLabel": "Status",
+    "statusAll": "All Statuses",
+    "planLabel": "Plan",
+    "planAll": "All Plans",
+    "emptyTitle": "No tenants found",
+    "emptyDescription": "Try changing the search filters.",
+    "table": {
+      "name": "Tenant Name",
+      "plan": "Plan",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "view": "View"
+    }
   }
 }
