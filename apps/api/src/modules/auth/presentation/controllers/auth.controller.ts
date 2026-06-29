@@ -6,6 +6,7 @@ import { RefreshTokenDto } from '../../application/dto/refresh-token.dto';
 import { LogoutDto } from '../../application/dto/logout.dto';
 import { ForgotPasswordDto } from '../../application/dto/forgot-password.dto';
 import { ResetPasswordDto } from '../../application/dto/reset-password.dto';
+import { AcceptTenantInvitationDto } from '../../application/dto/accept-tenant-invitation.dto';
 import { AuthResponse } from '../../application/types/auth-response.type';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -122,6 +123,23 @@ export class AuthController {
     const userAgent = this.extractUserAgent(req);
 
     return this.authService.resetPassword(resetPasswordDto, ipAddress, userAgent);
+  }
+
+  @Public()
+  @Post('accept-tenant-invitation')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Accept tenant invitation and set password' })
+  @ApiBody({ type: AcceptTenantInvitationDto })
+  @ApiOkResponse({ description: 'Conta ativada com sucesso' })
+  @ApiBadRequestResponse({ description: 'Token inválido ou expirado' })
+  async acceptTenantInvitation(
+    @Body() dto: AcceptTenantInvitationDto,
+    @Req() req: Request,
+  ): Promise<{ message: string }> {
+    const ipAddress = this.extractIpAddress(req);
+    const userAgent = this.extractUserAgent(req);
+
+    return this.authService.acceptTenantInvitation(dto, ipAddress, userAgent);
   }
 
   private extractIpAddress(req: Request): string | undefined {

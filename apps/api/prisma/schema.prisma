@@ -12,6 +12,13 @@ enum TenantKind {
   CUSTOMER
 }
 
+enum TenantInvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
 enum PermissionScope {
   TENANT
   PLATFORM
@@ -37,6 +44,7 @@ model Tenant {
   gatewayConfigurations GatewayConfiguration[]
   gatewayReferences     GatewayCustomerReference[]
   webhookInboxEvents    WebhookInboxEvent[]
+  adminInvitations      TenantAdminInvitation[]
 
   @@map("tenants")
 }
@@ -61,6 +69,7 @@ model User {
   refreshTokens       RefreshToken[]
   sessions            UserSession[]
   passwordResetTokens PasswordResetToken[]
+  tenantAdminInvitations TenantAdminInvitation[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -247,6 +256,32 @@ model PasswordResetToken {
   @@index([usedAt])
   @@index([createdAt])
   @@map("password_reset_tokens")
+}
+
+model TenantAdminInvitation {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String
+  email     String
+  tokenHash String   @unique
+  status    TenantInvitationStatus @default(PENDING)
+  expiresAt DateTime
+  acceptedAt DateTime?
+  revokedAt DateTime?
+  createdByUserId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
+  @@map("tenant_admin_invitations")
 }
 
 model AuditLog {

@@ -85,6 +85,19 @@
         "passwordsDoNotMatch": "As senhas não coincidem.",
         "resetFailed": "Não foi possível redefinir sua senha agora. Tente novamente."
       }
+    },
+    "acceptInvitation": {
+      "title": "Ativar conta",
+      "subtitle": "Defina sua senha para acessar a plataforma.",
+      "passwordLabel": "Senha",
+      "confirmPasswordLabel": "Confirmar senha",
+      "submit": "Ativar conta",
+      "submitting": "Ativando...",
+      "successTitle": "Conta ativada",
+      "successMessage": "Sua conta foi ativada com sucesso. Você já pode acessar a plataforma.",
+      "goToLogin": "Ir para o Login",
+      "tokenMissing": "Convite inválido ou expirado.",
+      "failed": "Não foi possível ativar sua conta. Verifique o link ou tente novamente."
     }
   },
   "dashboard": {
@@ -626,7 +639,44 @@
       "inactive": "Inativo"
     },
     "actions": {
-      "view": "Visualizar"
+      "view": "Visualizar",
+      "invitationSent": "Convite enviado"
+    },
+    "create": {
+      "success": "Tenant provisionado com sucesso.",
+      "failed": "Erro ao provisionar o tenant."
+    },
+    "createModal": {
+      "button": "Novo Tenant",
+      "title": "Provisionar Novo Tenant",
+      "steps": {
+        "organization": "1. Organização",
+        "subscription": "2. Assinatura",
+        "owner": "3. Proprietário"
+      },
+      "organization": {
+        "nameLabel": "Nome da Empresa",
+        "slugLabel": "Slug (URL)",
+        "timezoneLabel": "Fuso Horário",
+        "timezoneSaoPaulo": "América/São Paulo"
+      },
+      "subscription": {
+        "planLabel": "Plano",
+        "statusLabel": "Status Inicial",
+        "trialLabel": "Trial (Teste)",
+        "activeLabel": "Ativo",
+        "trialEndsAtLabel": "Fim do Período de Teste"
+      },
+      "owner": {
+        "nameLabel": "Nome do Proprietário",
+        "emailLabel": "E-mail do Proprietário",
+        "infoMessage": "Ao concluir, um e-mail com link de ativação será enviado para o proprietário definir sua senha."
+      },
+      "actions": {
+        "back": "Voltar",
+        "next": "Próximo",
+        "submit": "Provisionar Tenant"
+      }
     }
   }
 }

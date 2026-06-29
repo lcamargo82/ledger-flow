@@ -7,6 +7,7 @@ import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { LogoutDto } from '../dto/logout.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
+import { AcceptTenantInvitationDto } from '../dto/accept-tenant-invitation.dto';
 import { AuthResponse } from '../types/auth-response.type';
 import { AuthTokenPayload } from '../types/auth-token-payload.type';
 import * as bcrypt from 'bcrypt';
@@ -434,6 +435,90 @@ export class AuthService {
     });
 
     return { message: 'Password has been reset successfully.' };
+  }
+
+  async acceptTenantInvitation(
+    dto: AcceptTenantInvitationDto,
+    ipAddress?: string,
+    userAgent?: string,
+  ): Promise<{ message: string }> {
+    const { token, password } = dto;
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const invitation = await this.prisma.tenantAdminInvitation.findFirst({
+      where: {
+        tokenHash,
+        status: 'PENDING',
+        expiresAt: { gt: new Date() },
+      },
+      include: { user: true, tenant: true },
+    });
+
+    if (!invitation || !invitation.user.active || !invitation.tenant.active) {
+      throw new HttpException('Convite inválido ou expirado.', HttpStatus.BAD_REQUEST);
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await this.prisma.$transaction(async (tx) => {
+      // Set password
+      await tx.user.update({
+        where: { id: invitation.user.id },
+        data: {
+          passwordHash,
+          failedLoginAttempts: 0,
+          lockedUntil: null,
+        },
+      });
+
+      // Mark invitation as accepted
+      await tx.tenantAdminInvitation.update({
+        where: { id: invitation.id },
+        data: {
+          status: 'ACCEPTED',
+          acceptedAt: new Date(),
+        },
+      });
+
+      // Revoke other pending invitations
+      await tx.tenantAdminInvitation.updateMany({
+        where: {
+          userId: invitation.user.id,
+          status: 'PENDING',
+          id: { not: invitation.id },
+        },
+        data: {
+          status: 'REVOKED',
+          revokedAt: new Date(),
+        },
+      });
+
+      // Revoke sessions
+      await tx.userSession.updateMany({
+        where: { userId: invitation.user.id, active: true },
+        data: { active: false, revokedAt: new Date() },
+      });
+
+      await tx.refreshToken.updateMany({
+        where: { userId: invitation.user.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+
+      // Audit Log
+      await tx.auditLog.create({
+        data: {
+          tenantId: invitation.tenantId,
+          actorUserId: invitation.user.id,
+          action: 'platform.tenant.invitation_accepted',
+          entityType: 'TenantAdminInvitation',
+          entityId: invitation.id,
+          ipAddress,
+          userAgent,
+        },
+      });
+    });
+
+    return { message: 'Sua conta foi ativada com sucesso. Agora você pode entrar na plataforma.' };
   }
 
   private maskEmail(email: string): string {

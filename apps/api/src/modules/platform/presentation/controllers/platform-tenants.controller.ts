@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiOkResponse, ApiNotFoundResponse, ApiForbiddenResponse, ApiConflictResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { PlatformTenantsService } from '../../application/services/platform-tenants.service';
 import { ListPlatformTenantsQueryDto } from '../../application/dto/list-platform-tenants-query.dto';
@@ -12,13 +12,28 @@ import type { AuthenticatedUser } from '../../../auth/application/types/authenti
 import { PaginatedPlatformTenantsResponseDto } from '../../application/dto/paginated-platform-tenants-response.dto';
 import { PlatformTenantResponseDto } from '../../application/dto/platform-tenant-response.dto';
 import { PlatformTenantDetailsResponseDto } from '../../application/dto/platform-tenant-details-response.dto';
+import { CreatePlatformTenantDto } from '../../application/dto/create-platform-tenant.dto';
+import { TenantProvisioningService } from '../../application/services/tenant-provisioning.service';
 
 @ApiTags('Platform Administration')
 @ApiBearerAuth('access-token')
 @PlatformAdminOnly()
 @Controller('platform/tenants')
 export class PlatformTenantsController {
-  constructor(private readonly service: PlatformTenantsService) {}
+  constructor(
+    private readonly service: PlatformTenantsService,
+    private readonly provisioningService: TenantProvisioningService,
+  ) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @RequirePermissions('platform:tenants:create')
+  @ApiOperation({ summary: 'Provision a new customer tenant' })
+  @ApiOkResponse({ description: 'Tenant successfully provisioned' })
+  @ApiForbiddenResponse({ description: 'You do not have permission to access platform administration.' })
+  createTenant(@Body() dto: CreatePlatformTenantDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.provisioningService.provisionCustomerTenant(dto, user.id);
+  }
 
   @Get()
   @RequirePermissions('platform:tenants:read')

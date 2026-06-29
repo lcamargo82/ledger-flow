@@ -86,6 +86,19 @@
         "passwordsDoNotMatch": "Passwords do not match.",
         "resetFailed": "Could not reset your password at this time. Please try again."
       }
+    },
+    "acceptInvitation": {
+      "title": "Activate account",
+      "subtitle": "Set your password to access the platform.",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Activate account",
+      "submitting": "Activating...",
+      "successTitle": "Account activated",
+      "successMessage": "Your account has been successfully activated. You can now log into the platform.",
+      "goToLogin": "Go to Login",
+      "tokenMissing": "Invalid or expired invitation.",
+      "failed": "Could not activate your account. Please check the link or try again."
     }
   },
   "dashboard": {
@@ -627,7 +640,44 @@
       "inactive": "Inactive"
     },
     "actions": {
-      "view": "View"
+      "view": "View",
+      "invitationSent": "Invitation sent"
+    },
+    "create": {
+      "success": "Tenant provisioned successfully.",
+      "failed": "Failed to provision tenant."
+    },
+    "createModal": {
+      "button": "New Tenant",
+      "title": "Provision New Tenant",
+      "steps": {
+        "organization": "1. Organization",
+        "subscription": "2. Subscription",
+        "owner": "3. Owner"
+      },
+      "organization": {
+        "nameLabel": "Company Name",
+        "slugLabel": "Slug (URL)",
+        "timezoneLabel": "Timezone",
+        "timezoneSaoPaulo": "America/Sao_Paulo"
+      },
+      "subscription": {
+        "planLabel": "Plan",
+        "statusLabel": "Initial Status",
+        "trialLabel": "Trial (Test)",
+        "activeLabel": "Active",
+        "trialEndsAtLabel": "Trial End Date"
+      },
+      "owner": {
+        "nameLabel": "Owner Name",
+        "emailLabel": "Owner Email",
+        "infoMessage": "Upon completion, an email with an activation link will be sent to the owner to set their password."
+      },
+      "actions": {
+        "back": "Back",
+        "next": "Next",
+        "submit": "Provision Tenant"
+      }
     }
   }
 }

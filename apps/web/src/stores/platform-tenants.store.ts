@@ -7,6 +7,7 @@ import type {
   UpdatePlatformTenantDto,
   UpdatePlatformTenantStatusDto,
   UpdateTenantSubscriptionDto,
+  CreatePlatformTenantDto,
 } from '../types/platform.types';
 import platformTenantsService from '../services/platform-tenants.service';
 import { useToastStore } from './toast.store';
@@ -123,6 +124,38 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
     }
   };
 
+  const createTenant = async (dto: CreatePlatformTenantDto) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await platformTenantsService.createTenant(dto);
+      toastStore.success('Organização criada', t('platform.tenants.create.success'));
+      return response;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to create tenant';
+      toastStore.error(error.value || '', t('platform.tenants.create.failed'));
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const resendInvitation = async (id: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await platformTenantsService.resendTenantInvitation(id);
+      toastStore.success('Convite reenviado', t('platform.tenants.actions.invitationSent'));
+      return response;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to resend invitation';
+      toastStore.error(error.value || '', 'Erro ao reenviar convite');
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     tenants,
     currentTenant,
@@ -134,5 +167,7 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
     updateTenant,
     updateStatus,
     updateSubscription,
+    createTenant,
+    resendInvitation,
   };
 });
