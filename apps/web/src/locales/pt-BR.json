@@ -600,7 +600,7 @@
     "sidebar": {
       "operations": "Operação",
       "platform": "Plataforma",
-      "tenants": "Platform Tenants"
+      "tenants": "Tenants da Plataforma"
     }
   }
 }
