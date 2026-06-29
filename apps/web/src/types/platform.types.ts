@@ -93,3 +93,45 @@ export interface UpdateTenantSubscriptionDto {
   currentPeriodEnd?: string;
   notes?: string;
 }
+
+export interface CreatePlatformTenantDto {
+  organization: {
+    name: string;
+    slug: string;
+    timezone: string;
+  };
+  owner: {
+    name: string;
+    email: string;
+  };
+  subscription: {
+    plan: SubscriptionPlan;
+    status: TenantSubscriptionStatus;
+    trialEndsAt?: string;
+    currentPeriodStart?: string;
+    currentPeriodEnd?: string;
+    notes?: string;
+  };
+}
+
+export interface PlatformTenantProvisionResponse {
+  tenant: {
+    id: string;
+    name: string;
+    slug: string;
+    active: boolean;
+    kind: string;
+    timezone: string;
+    subscription: {
+      plan: string;
+      status: string;
+    };
+    owner: {
+      id: string;
+      name: string;
+      email: string;
+      invitationStatus: string;
+      invitationExpiresAt: string;
+    };
+  };
+}

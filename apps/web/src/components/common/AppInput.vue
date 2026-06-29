@@ -29,7 +29,7 @@ defineOptions({ inheritAttrs: false });
 import { useId } from 'vue';
 
 interface Props {
-  modelValue: string | number;
+  modelValue: string | number | undefined;
   label?: string;
   type?: string;
   placeholder?: string;

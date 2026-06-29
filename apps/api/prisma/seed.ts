@@ -60,9 +60,11 @@ async function main() {
     { key: 'audit:read', description: 'Visualizar trilha de auditoria' },
     { key: 'tenant:update', description: 'Atualizar configurações do tenant' },
     { key: 'platform:access', description: 'Acesso à administração da plataforma' },
+    { key: 'platform:tenants:create', description: 'Criar tenants da plataforma' },
     { key: 'platform:tenants:read', description: 'Visualizar tenants da plataforma' },
     { key: 'platform:tenants:update', description: 'Atualizar tenants da plataforma' },
     { key: 'platform:tenants:status', description: 'Alterar status de tenants da plataforma' },
+    { key: 'platform:tenants:invite', description: 'Convidar e reenviar convites para tenants' },
     { key: 'platform:subscriptions:read', description: 'Visualizar assinaturas da plataforma' },
     { key: 'platform:subscriptions:update', description: 'Atualizar assinaturas da plataforma' },
   ];

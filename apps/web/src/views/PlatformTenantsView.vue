@@ -12,6 +12,9 @@ import AppTable from '../components/common/AppTable.vue'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppButton from '../components/common/AppButton.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
+import AppModal from '../components/common/AppModal.vue'
+import type { CreatePlatformTenantDto } from '../types/platform.types'
+import { SubscriptionPlan, TenantSubscriptionStatus } from '../types/platform.types'
 
 const { t, currentLocale } = useI18n()
 const platformTenantsStore = usePlatformTenantsStore()
@@ -19,6 +22,67 @@ const platformTenantsStore = usePlatformTenantsStore()
 const searchQuery = ref('')
 const selectedStatus = ref('')
 const selectedPlan = ref('')
+
+const isCreateModalOpen = ref(false)
+const currentStep = ref(1)
+
+const createForm = ref<CreatePlatformTenantDto>({
+  organization: {
+    name: '',
+    slug: '',
+    timezone: 'America/Sao_Paulo',
+  },
+  owner: {
+    name: '',
+    email: '',
+  },
+  subscription: {
+    plan: SubscriptionPlan.STARTER,
+    status: TenantSubscriptionStatus.TRIAL,
+    trialEndsAt: '',
+  },
+})
+
+const resetCreateForm = () => {
+  createForm.value = {
+    organization: { name: '', slug: '', timezone: 'America/Sao_Paulo' },
+    owner: { name: '', email: '' },
+    subscription: { plan: SubscriptionPlan.STARTER, status: TenantSubscriptionStatus.TRIAL, trialEndsAt: '' },
+  }
+  currentStep.value = 1
+}
+
+const openCreateModal = () => {
+  resetCreateForm()
+  isCreateModalOpen.value = true
+}
+
+const autoFillSlug = () => {
+  if (createForm.value.organization.name && !createForm.value.organization.slug) {
+    createForm.value.organization.slug = createForm.value.organization.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+}
+
+const nextStep = () => {
+  if (currentStep.value < 3) currentStep.value++
+}
+
+const prevStep = () => {
+  if (currentStep.value > 1) currentStep.value--
+}
+
+const handleCreateTenant = async () => {
+  try {
+    await platformTenantsStore.createTenant(createForm.value)
+    isCreateModalOpen.value = false
+    fetchTenants()
+  } catch (err) {
+    // error handled by store
+  }
+}
 
 const statusOptions = computed(() => [
   { value: '', label: t('platformTenants.statusAll') },
@@ -66,7 +130,13 @@ const handleSearch = () => {
     <AppPageHeader 
       :title="t('platformTenants.title')" 
       :description="t('platformTenants.description')"
-    />
+    >
+      <template #actions>
+        <AppButton @click="openCreateModal">
+          {{ t('platformTenants.createModal.button') }}
+        </AppButton>
+      </template>
+    </AppPageHeader>
 
     <AppErrorState 
       v-if="platformTenantsStore.error && !platformTenantsStore.tenants.length" 
@@ -152,6 +222,98 @@ const handleSearch = () => {
         </template>
       </AppTable>
     </template>
+
+    <AppModal
+      v-model="isCreateModalOpen"
+      :title="t('platformTenants.createModal.title')"
+    >
+      <div class="create-tenant-steps">
+        <div class="step-indicator">
+          <div class="step" :class="{ active: currentStep === 1, completed: currentStep > 1 }">{{ t('platformTenants.createModal.steps.organization') }}</div>
+          <div class="step" :class="{ active: currentStep === 2, completed: currentStep > 2 }">{{ t('platformTenants.createModal.steps.subscription') }}</div>
+          <div class="step" :class="{ active: currentStep === 3 }">{{ t('platformTenants.createModal.steps.owner') }}</div>
+        </div>
+
+        <form @submit.prevent="currentStep === 3 ? handleCreateTenant() : nextStep()">
+          <div v-if="currentStep === 1" class="step-content space-y-4">
+            <AppInput
+              id="orgName"
+              :label="t('platformTenants.createModal.organization.nameLabel')"
+              v-model="createForm.organization.name"
+              required
+              @blur="autoFillSlug"
+            />
+            <AppInput
+              id="orgSlug"
+              :label="t('platformTenants.createModal.organization.slugLabel')"
+              v-model="createForm.organization.slug"
+              required
+            />
+            <AppSelect
+              id="orgTimezone"
+              :label="t('platformTenants.createModal.organization.timezoneLabel')"
+              v-model="createForm.organization.timezone"
+              :options="[{value: 'America/Sao_Paulo', label: t('platformTenants.createModal.organization.timezoneSaoPaulo')}]"
+              required
+            />
+          </div>
+
+          <div v-if="currentStep === 2" class="step-content space-y-4">
+            <AppSelect
+              id="subPlan"
+              :label="t('platformTenants.createModal.subscription.planLabel')"
+              v-model="createForm.subscription.plan"
+              :options="planOptions.filter(o => o.value !== '')"
+              required
+            />
+            <AppSelect
+              id="subStatus"
+              :label="t('platformTenants.createModal.subscription.statusLabel')"
+              v-model="createForm.subscription.status"
+              :options="[
+                {value: 'TRIAL', label: t('platformTenants.createModal.subscription.trialLabel')},
+                {value: 'ACTIVE', label: t('platformTenants.createModal.subscription.activeLabel')}
+              ]"
+              required
+            />
+            <AppInput
+              v-if="createForm.subscription.status === 'TRIAL'"
+              id="subTrial"
+              type="date"
+              :label="t('platformTenants.createModal.subscription.trialEndsAtLabel')"
+              v-model="createForm.subscription.trialEndsAt"
+              required
+            />
+          </div>
+
+          <div v-if="currentStep === 3" class="step-content space-y-4">
+            <AppInput
+              id="ownerName"
+              :label="t('platformTenants.createModal.owner.nameLabel')"
+              v-model="createForm.owner.name"
+              required
+            />
+            <AppInput
+              id="ownerEmail"
+              type="email"
+              :label="t('platformTenants.createModal.owner.emailLabel')"
+              v-model="createForm.owner.email"
+              required
+            />
+            <div class="bg-blue-50 text-blue-800 p-4 rounded text-sm mt-4">
+              {{ t('platformTenants.createModal.owner.infoMessage') }}
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-between">
+            <AppButton v-if="currentStep > 1" type="button" variant="secondary" @click="prevStep">{{ t('platformTenants.createModal.actions.back') }}</AppButton>
+            <div v-else></div>
+            <AppButton v-if="currentStep < 3" type="submit">{{ t('platformTenants.createModal.actions.next') }}</AppButton>
+            <AppButton v-else type="submit" :loading="platformTenantsStore.loading">{{ t('platformTenants.createModal.actions.submit') }}</AppButton>
+          </div>
+        </form>
+      </div>
+    </AppModal>
   </div>
 </template>
 
@@ -181,5 +343,31 @@ const handleSearch = () => {
 
 .filter-item--large {
   min-width: 200px;
+}
+
+.step-indicator {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.step.active {
+  color: var(--primary, #3b82f6);
+  border-bottom-color: var(--primary, #3b82f6);
+}
+
+.step.completed {
+  color: var(--success, #10b981);
 }
 </style>

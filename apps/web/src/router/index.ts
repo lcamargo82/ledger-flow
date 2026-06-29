@@ -48,6 +48,15 @@ const router = createRouter({
       }
     },
     {
+      path: '/accept-invitation',
+      name: 'accept-invitation',
+      component: () => import('../views/AcceptTenantInvitationView.vue'),
+      meta: {
+        layout: AuthLayout,
+        public: true
+      }
+    },
+    {
       path: '/',
       redirect: '/dashboard'
     },

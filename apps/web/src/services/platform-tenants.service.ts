@@ -7,6 +7,8 @@ import type {
   UpdatePlatformTenantDto,
   UpdatePlatformTenantStatusDto,
   UpdateTenantSubscriptionDto,
+  CreatePlatformTenantDto,
+  PlatformTenantProvisionResponse,
 } from '../types/platform.types';
 
 class PlatformTenantsService {
@@ -32,6 +34,16 @@ class PlatformTenantsService {
 
   async updateSubscription(id: string, dto: UpdateTenantSubscriptionDto): Promise<PlatformTenantDetailsResponse> {
     const { data } = await api.patch<PlatformTenantDetailsResponse>(`/platform/tenants/${id}/subscription`, dto);
+    return data;
+  }
+
+  async createTenant(dto: CreatePlatformTenantDto): Promise<PlatformTenantProvisionResponse> {
+    const { data } = await api.post<PlatformTenantProvisionResponse>('/platform/tenants', dto);
+    return data;
+  }
+
+  async resendTenantInvitation(id: string): Promise<{ success: boolean; message: string }> {
+    const { data } = await api.post<{ success: boolean; message: string }>(`/platform/tenants/${id}/invitation/resend`);
     return data;
   }
 }
