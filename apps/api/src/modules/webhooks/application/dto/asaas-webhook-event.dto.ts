@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsNumber, ValidateNested, IsDefined } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  ValidateNested,
+  IsDefined,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class AsaasWebhookPaymentDto {

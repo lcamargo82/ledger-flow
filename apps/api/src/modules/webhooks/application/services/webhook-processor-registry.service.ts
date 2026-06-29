@@ -5,7 +5,10 @@ import { WebhookProviderNotSupportedError } from '../../domain/errors/webhook-er
 
 @Injectable()
 export class WebhookProcessorRegistryService {
-  private readonly processors = new Map<WebhookProvider, WebhookEventProcessor>();
+  private readonly processors = new Map<
+    WebhookProvider,
+    WebhookEventProcessor
+  >();
 
   register(provider: WebhookProvider, processor: WebhookEventProcessor): void {
     this.processors.set(provider, processor);

@@ -638,6 +638,30 @@
       "paymentRefunded": "Pagamento estornado",
       "generic": "Evento de pagamento atualizado"
     },
+    "instructions": {
+      "title": "Como pagar",
+      "pixTitle": "Pix",
+      "boletoTitle": "Boleto bancário",
+      "pixCopyPasteLabel": "Pix Copia e Cola",
+      "copyPixCode": "Copiar código",
+      "pixCodeCopied": "Copiado para a área de transferência!",
+      "expirationLabel": "Expira em",
+      "dueDateLabel": "Vencimento",
+      "openBankSlip": "Abrir Boleto",
+      "copyPaymentLink": "Copiar link de pagamento",
+      "refresh": "Atualizar",
+      "refreshing": "Atualizando...",
+      "pendingMessage": "Aguardando confirmação...",
+      "notAvailable": "As instruções de pagamento ainda não estão disponíveis.",
+      "expired": "Expirado. Crie um novo pagamento.",
+      "unavailableForCurrentStatus": "Instruções indisponíveis para o status atual.",
+      "loadFailed": "Não foi possível carregar as instruções."
+    },
+    "cancel": {
+      "providerConflict": "O provedor recusou o cancelamento. A cobrança pode já estar paga, estornada ou inelegível.",
+      "providerUnavailable": "O provedor está indisponível no momento. Tente novamente.",
+      "providerCanceled": "Pagamento cancelado com sucesso no provedor."
+    },
     "empty": {
       "title": "Nenhum pagamento encontrado",
       "description": "Crie um novo pagamento ou ajuste os filtros para visualizar os resultados."

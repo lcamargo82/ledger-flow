@@ -15,6 +15,7 @@ export class PlatformTenantHealthReasonDto {
 export class PlatformTenantHealthResponseDto {
   @ApiProperty() tenantId: string;
   @ApiProperty({ enum: TenantHealthStatus }) status: TenantHealthStatus;
-  @ApiProperty({ type: [PlatformTenantHealthReasonDto] }) reasons: PlatformTenantHealthReasonDto[];
+  @ApiProperty({ type: [PlatformTenantHealthReasonDto] })
+  reasons: PlatformTenantHealthReasonDto[];
   @ApiProperty() evaluatedAt: string;
 }

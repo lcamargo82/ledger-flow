@@ -27,7 +27,9 @@ export class WebhookIngressService {
     const adapter = this.adapterRegistry.getAdapter(provider);
 
     await adapter.authenticate(authInput);
-    this.logger.log(`[WebhookIngressService] webhook.ingress.authenticated provider=${provider}`);
+    this.logger.log(
+      `[WebhookIngressService] webhook.ingress.authenticated provider=${provider}`,
+    );
 
     const normalizedEvent = await adapter.normalize(payloadInput);
     this.logger.log(
@@ -53,10 +55,15 @@ export class WebhookIngressService {
       payloadHash: normalizedEvent.payloadHash,
       payloadSummary: normalizedEvent.payloadSummary,
     });
-    this.logger.log(`[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`);
+    this.logger.log(
+      `[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`,
+    );
 
     if (!adapter.supportsEvent(normalizedEvent.rawProviderEventType)) {
-      await this.inboxRepository.markIgnored(inboxEvent.id, 'Event type not supported');
+      await this.inboxRepository.markIgnored(
+        inboxEvent.id,
+        'Event type not supported',
+      );
       this.logger.log(
         `[WebhookIngressService] webhook.ingress.ignored eventId=${normalizedEvent.providerEventId} reason="Event type not supported"`,
       );

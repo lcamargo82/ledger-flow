@@ -23,7 +23,10 @@ export class PlatformAuditController {
   @Get('audit-logs')
   @PlatformAdminOnly()
   @RequirePermissions('platform:audit:read')
-  @ApiOperation({ summary: 'List platform audit logs', description: 'Lists global audit logs. Exclusive to Platform Admin.' })
+  @ApiOperation({
+    summary: 'List platform audit logs',
+    description: 'Lists global audit logs. Exclusive to Platform Admin.',
+  })
   async listGlobalAuditLogs(
     @Query() query: ListPlatformAuditLogsQueryDto,
   ): Promise<PaginatedPlatformAuditLogResponseDto> {
@@ -33,7 +36,11 @@ export class PlatformAuditController {
   @Get('tenants/:id/audit-logs')
   @PlatformAdminOnly()
   @RequirePermissions('platform:audit:read')
-  @ApiOperation({ summary: 'List tenant audit logs', description: 'Lists audit logs for a specific tenant. Exclusive to Platform Admin.' })
+  @ApiOperation({
+    summary: 'List tenant audit logs',
+    description:
+      'Lists audit logs for a specific tenant. Exclusive to Platform Admin.',
+  })
   async listTenantAuditLogs(
     @Param('id') tenantId: string,
     @Query() query: ListPlatformAuditLogsQueryDto,
@@ -44,7 +51,11 @@ export class PlatformAuditController {
   @Get('tenants/:id/support-summary')
   @PlatformAdminOnly()
   @RequirePermissions('platform:support:read')
-  @ApiOperation({ summary: 'Get tenant support summary', description: 'Returns a support summary for a specific tenant. Exclusive to Platform Admin.' })
+  @ApiOperation({
+    summary: 'Get tenant support summary',
+    description:
+      'Returns a support summary for a specific tenant. Exclusive to Platform Admin.',
+  })
   async getTenantSupportSummary(
     @Param('id') tenantId: string,
   ): Promise<PlatformTenantSupportSummaryDto> {

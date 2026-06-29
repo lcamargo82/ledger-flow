@@ -15,9 +15,11 @@ export class SmtpEmailProvider implements EmailProvider {
     const port = this.configService.get<number>('SMTP_PORT') || 1025;
     const user = this.configService.get<string>('SMTP_USER');
     const pass = this.configService.get<string>('SMTP_PASS');
-    const fromName = this.configService.get<string>('SMTP_FROM_NAME') || 'LedgerFlow';
+    const fromName =
+      this.configService.get<string>('SMTP_FROM_NAME') || 'LedgerFlow';
     const fromEmail =
-      this.configService.get<string>('SMTP_FROM_EMAIL') || 'noreply@ledgerflow.local';
+      this.configService.get<string>('SMTP_FROM_EMAIL') ||
+      'noreply@ledgerflow.local';
 
     this.fromAddress = `"${fromName}" <${fromEmail}>`;
 
@@ -44,10 +46,15 @@ export class SmtpEmailProvider implements EmailProvider {
         text: options.text,
         html: options.html,
       });
-      this.logger.log(`Email sent successfully to ${options.to} - Subject: ${options.subject}`);
+      this.logger.log(
+        `Email sent successfully to ${options.to} - Subject: ${options.subject}`,
+      );
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`Failed to send email to ${options.to}: ${err.message}`, err.stack);
+      this.logger.error(
+        `Failed to send email to ${options.to}: ${err.message}`,
+        err.stack,
+      );
       throw error;
     }
   }

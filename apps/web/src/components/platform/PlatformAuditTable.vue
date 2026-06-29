@@ -41,8 +41,8 @@ const formatDate = (dateString: string) => {
   <div>
     <AppTable
       :columns="columns"
-      :data="logs"
-      :loading="isLoading"
+      :items="logs"
+      :is-loading="isLoading"
       key-field="id"
     >
       <template #empty>
@@ -78,8 +78,8 @@ const formatDate = (dateString: string) => {
       <template #cell-actions="{ item }">
         <AppButton
           variant="secondary"
-          size="sm"
-          @click="viewDetails(item)"
+          size="small"
+          @click="viewDetails(item as any)"
         >
           {{ t('platform.audit.actions.viewDetails') }}
         </AppButton>

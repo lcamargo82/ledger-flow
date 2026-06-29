@@ -35,6 +35,7 @@ export interface PaymentListItem {
   currency: string;
   method: PaymentMethod;
   status: PaymentStatus;
+  provider?: string | null;
   description?: string | null;
   createdAt: string;
 }

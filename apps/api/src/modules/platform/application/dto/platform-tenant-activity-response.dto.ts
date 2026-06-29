@@ -11,5 +11,6 @@ export class PlatformTenantActivityItemDto {
 }
 
 export class PlatformTenantActivityResponseDto {
-  @ApiProperty({ type: [PlatformTenantActivityItemDto] }) items: PlatformTenantActivityItemDto[];
+  @ApiProperty({ type: [PlatformTenantActivityItemDto] })
+  items: PlatformTenantActivityItemDto[];
 }

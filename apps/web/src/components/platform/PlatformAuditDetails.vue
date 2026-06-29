@@ -26,9 +26,9 @@ defineExpose({ open, close });
 
 <template>
   <AppModal
-    :is-open="isOpen"
+    :modelValue="isOpen"
+    @update:modelValue="isOpen = $event"
     :title="t('platform.audit.details.title')"
-    @close="close"
   >
     <div class="space-y-4">
       <div class="flex items-center justify-between">

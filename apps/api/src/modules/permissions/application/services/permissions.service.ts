@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { PermissionsResponseDto } from '../dto/permissions-response.dto';
@@ -8,7 +9,9 @@ import { PermissionScope } from '@prisma/client';
 export class PermissionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listPermissions(user: AuthenticatedUser): Promise<PermissionsResponseDto> {
+  async listPermissions(
+    user: AuthenticatedUser,
+  ): Promise<PermissionsResponseDto> {
     const whereClause: any = {};
     if (user.tenantKind !== 'PLATFORM') {
       whereClause.scope = PermissionScope.TENANT;

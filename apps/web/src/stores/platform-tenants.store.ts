@@ -5,7 +5,6 @@ import type {
   PlatformTenantDetailsResponse,
   ListPlatformTenantsQuery,
   UpdatePlatformTenantDto,
-  UpdatePlatformTenantStatusDto,
   UpdateTenantSubscriptionDto,
   CreatePlatformTenantDto,
   PlatformTenantOverviewResponse,
