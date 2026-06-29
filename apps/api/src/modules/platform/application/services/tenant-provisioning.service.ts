@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable, ConflictException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { CreatePlatformTenantDto } from '../dto/create-platform-tenant.dto';

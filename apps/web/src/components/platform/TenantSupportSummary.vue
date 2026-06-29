@@ -37,7 +37,7 @@ const healthVariant = computed(() => {
     case 'CRITICAL': return 'danger';
     case 'WARNING': return 'warning';
     case 'HEALTHY': return 'success';
-    default: return 'secondary';
+    default: return 'default';
   }
 });
 

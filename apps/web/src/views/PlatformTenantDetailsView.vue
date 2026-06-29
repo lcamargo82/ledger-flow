@@ -137,7 +137,7 @@ const viewFullAudit = () => {
         <AppCard>
           <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-medium text-slate-900">{{ t('platform.tenantDetails.recentAudit') }}</h3>
-            <AppButton variant="secondary" size="sm" @click="viewFullAudit">
+            <AppButton variant="secondary" size="small" @click="viewFullAudit">
               {{ t('platform.audit.actions.viewAllTenantLogs') }}
             </AppButton>
           </div>

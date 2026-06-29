@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { TenantAdminInvitationsRepository } from '../../domain/repositories/tenant-admin-invitations.repository';

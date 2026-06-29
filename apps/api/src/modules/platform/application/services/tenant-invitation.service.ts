@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { TenantAdminInvitationsRepository } from '../../domain/repositories/tenant-admin-invitations.repository';

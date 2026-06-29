@@ -110,7 +110,8 @@ export class PaymentsController {
       id,
       user.tenantId,
     );
-    const { providerPaymentId, ...sanitizedInstructions } = instructions;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { providerPaymentId: _, ...sanitizedInstructions } = instructions;
     return { instructions: sanitizedInstructions };
   }
 
