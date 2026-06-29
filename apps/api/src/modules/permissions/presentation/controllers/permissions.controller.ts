@@ -12,6 +12,8 @@ import { PermissionsResponseDto } from '../../application/dto/permissions-respon
 import { JwtAuthGuard } from '../../../../modules/auth/presentation/guards/jwt-auth.guard';
 import { PermissionGuard } from '../../../../modules/auth/presentation/guards/permission.guard';
 import { RequirePermissions } from '../../../../modules/auth/presentation/decorators/require-permissions.decorator';
+import { CurrentUser } from '../../../../modules/auth/presentation/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../../../modules/auth/application/types/authenticated-user.type';
 
 @ApiTags('Permissions')
 @ApiBearerAuth()
@@ -28,7 +30,7 @@ export class PermissionsController {
   @ApiForbiddenResponse({
     description: 'Forbidden - requires permissions:read permission',
   })
-  async listPermissions(): Promise<PermissionsResponseDto> {
-    return this.permissionsService.listPermissions();
+  async listPermissions(@CurrentUser() user: AuthenticatedUser): Promise<PermissionsResponseDto> {
+    return this.permissionsService.listPermissions(user);
   }
 }

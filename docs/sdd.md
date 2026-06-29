@@ -542,6 +542,18 @@ export class PaymentGatewayFactory {
 
 ---
 
+# 6.5 Integração Asaas (Sandbox)
+
+A primeira integração real do sistema (implementada na Fase 6.1) foca exclusivamente no ambiente Sandbox do Asaas.
+
+## Características:
+* **Isolamento Total:** Credenciais criptografadas via AES-256-GCM (nunca injetadas globalmente, apenas decriptadas em memória).
+* **Mapeamento de Customer:** Uso da entidade intermediária `GatewayCustomerReference` para evitar duplicidade de clientes no provedor.
+* **Idempotência Externa:** Validação via GET `/payments?externalReference={ref}` antes do POST de criação, blindando falhas de concorrência ou timeouts de resposta do provider.
+* **Orquestração Assíncrona-Like:** Embora síncrono no primeiro momento, a criação da fatura interna sempre prevalece (estado `PENDING`) e não bloqueia a continuidade caso o asaas apresente instabilidade - registrando na auditoria a falha e o adapter apenas interrompe a chamada, delegando re-tentativas para fluxos futuros (Webhooks/Filas).
+
+---
+
 # 7. Segurança
 
 # 7.1 Autenticação
@@ -1425,7 +1437,17 @@ Criar:
 
 ---
 
-# 19. Banco de Dados — Modelo Inicial
+### Webhook Inbox Pattern — Asaas
+
+O sistema utiliza a arquitetura de *Inbox Pattern* com a entidade `WebhookInboxEvent` para gerenciar as notificações do Asaas Sandbox com segurança e idempotência.
+
+- **Idempotência:** A chave única engloba `provider` + `providerEventId`. Mensagens retransmitidas pelo Asaas geram `HTTP 200` automático caso a chave já exista, prevenindo atualizações duplas.
+- **Autenticação:** Ocorre comparando (em *timing-safe*) a chave secreta global do `asaas-access-token`.
+- **Status Mapping:** Baseado no evento original, o LedgerFlow atualiza os status internos da engine (`PENDING`, `APPROVED`, `CANCELED`, etc).
+- **Audit e Eventos:** Transições significativas de status disparam `PaymentEvent` (Timeline do front-end) e registros imutáveis de `AuditLog`.
+- **Evolução:** Atualizações atualmente processadas de forma síncrona. O Inbox foi modelado de maneira a facilitar migração futura para infraestrutura com RabbitMQ e *Outbox Pattern*.
+
+## 4. Banco de Dados — Modelo Inicial
 
 # 19.1 Entidades principais
 
@@ -1903,3 +1925,13 @@ O sistema suporta a redefinição de senhas enviando um e-mail com link contendo
 - O endpoint `POST /auth/reset-password` exige o token original recebido por e-mail, revoga ativamente todos os `refresh tokens` e sessões (`UserSession`) do usuário logo após o reset bem-sucedido e zera bloqueios prévios.
 - A comunicação de e-mail é feita via Mailpit em desenvolvimento por meio de um `EmailService` e uma interface `EmailProvider`.
 - Auditorias registram os eventos `auth.password_recovery_requested` e `auth.password_reset_completed`.
+
+
+### Payments Notes
+* PaymentsView segue View -> Store -> Service -> HTTP Client.
+* Paginação vem do backend.
+* tenantId não é enviado pelo frontend.
+* amount é convertido para centavos antes do request.
+* Idempotency-Key é gerada somente em memória.
+* RBAC frontend é UX; backend é autoridade final.
+

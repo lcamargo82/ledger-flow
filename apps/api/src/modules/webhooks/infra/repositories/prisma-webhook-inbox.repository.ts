@@ -1,0 +1,119 @@
+import { Injectable } from '@nestjs/common';
+import {
+  Prisma,
+  WebhookInboxEvent,
+  WebhookProcessingStatus,
+  WebhookProvider,
+} from '@prisma/client';
+import {
+  CreateWebhookInboxEventInput,
+  IWebhookInboxRepository,
+} from '../../domain/interfaces/webhook-inbox.repository';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
+
+@Injectable()
+export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findByProviderEventId(
+    provider: WebhookProvider,
+    providerEventId: string,
+  ): Promise<WebhookInboxEvent | null> {
+    return this.prisma.webhookInboxEvent.findUnique({
+      where: {
+        provider_providerEventId: {
+          provider,
+          providerEventId,
+        },
+      },
+    });
+  }
+
+  async createReceived(data: CreateWebhookInboxEventInput): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.create({
+      data: {
+        provider: data.provider,
+        providerEventId: data.providerEventId,
+        eventType: data.eventType,
+        payloadHash: data.payloadHash,
+        payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+        status: WebhookProcessingStatus.RECEIVED,
+      },
+    });
+  }
+
+  async markProcessing(id: string): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.update({
+      where: { id },
+      data: {
+        status: WebhookProcessingStatus.PROCESSING,
+      },
+    });
+  }
+
+  async markProcessed(
+    id: string,
+    paymentId?: string,
+    gatewayConfigurationId?: string,
+    tenantId?: string,
+  ): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.update({
+      where: { id },
+      data: {
+        status: WebhookProcessingStatus.PROCESSED,
+        processedAt: new Date(),
+        paymentId,
+        gatewayConfigurationId,
+        tenantId,
+      },
+    });
+  }
+
+  async markIgnored(
+    id: string,
+    reason?: string,
+    paymentId?: string,
+    gatewayConfigurationId?: string,
+    tenantId?: string,
+  ): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.update({
+      where: { id },
+      data: {
+        status: WebhookProcessingStatus.IGNORED,
+        processedAt: new Date(),
+        failureReason: reason,
+        paymentId,
+        gatewayConfigurationId,
+        tenantId,
+      },
+    });
+  }
+
+  async markFailed(id: string, reason: string): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.update({
+      where: { id },
+      data: {
+        status: WebhookProcessingStatus.FAILED,
+        failedAt: new Date(),
+        failureReason: reason,
+      },
+    });
+  }
+
+  async incrementAttempt(id: string): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.update({
+      where: { id },
+      data: {
+        attemptCount: { increment: 1 },
+      },
+    });
+  }
+
+  async findRecentByPaymentId(paymentId: string): Promise<WebhookInboxEvent[]> {
+    return this.prisma.webhookInboxEvent.findMany({
+      where: { paymentId },
+      orderBy: { receivedAt: 'desc' },
+      take: 10,
+    });
+  }
+}

@@ -13,6 +13,24 @@ export class AuthenticatedUserResponseDto {
   })
   tenantId: string;
 
+  @ApiProperty({
+    example: 'LedgerFlow Demo',
+    description: 'Nome do tenant do usuário',
+  })
+  tenantName: string;
+
+  @ApiProperty({
+    example: 'CUSTOMER',
+    description: 'Tipo do tenant (CUSTOMER ou PLATFORM)',
+  })
+  tenantKind: string;
+
+  @ApiProperty({
+    example: false,
+    description: 'Indica se o usuário é administrador da plataforma',
+  })
+  isPlatformAdmin: boolean;
+
   @ApiProperty({ example: 'John Doe', description: 'Nome do usuário' })
   name: string;
 

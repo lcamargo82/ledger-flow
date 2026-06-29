@@ -223,13 +223,87 @@ Cada fase deve entregar:
 
 ## Fase 5 — Payments MVP
 
+**Status:** Em andamento
+
+### Fase 5B — Payments Frontend
+Fase 5A — Payments Core Backend Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Modelos do banco de dados (Payment, PaymentEvent).
+* Seed de permissões (create, read, cancel, refund).
+* Módulo NestJS isolado.
+* Repository com interface abstrata e implementação Prisma.
+* Serviço core com lógica de criação, validação de transição, cancelamento, reembolso e log de auditoria.
+* Idempotência garantida via header `Idempotency-Key` e hashes criptografados (`idempotencyKeyHash`, `idempotencyRequestHash`).
+* Proteção contra alteração arbitrária de status via payload (APIs específicas e restritas).
+* Testes isolados com rotas.
+
 ---
 
-## Fase 6 — Webhooks
+## Fase 6.0 — Multi-Gateway Abstraction Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Banco de Dados: `GatewayConfiguration` e enums associados.
+* Segurança: Implementação de AES-256-GCM para criptografia das credenciais dos gateways.
+* Arquitetura: Criação do `GatewaysModule` com `PaymentGatewayFactoryService` e `PaymentGatewayResolverService`.
+* Abstração: Interfaces base (`IPaymentGateway`, `GatewayCapabilities`, `GatewayCredentials`).
+* Adapters Iniciais: Esqueletos para Stripe, Asaas, Mercado Pago, PagBank e Pagar.me com exceção `GatewayNotImplementedError`.
+* Core: `PaymentsService` adaptado para preparar roteamento através do Gateway Resolver.
+* Documentação: ADR 0018 criado e atualizações no plano e security SDD.
 
 ---
 
-## Fase 7 — Reports
+## Fase 6.1 — Asaas Adapter + Sandbox
+
+**Status:** Concluída
+
+**Itens:**
+* Cliente API base configurado com Base URL apontada exclusivamente para Sandbox.
+* Mapping customizado de status (AsaasStatusMapper).
+* Orquestrador assíncrono simulado via `GatewayPaymentOrchestrationService`.
+* `AsaasPaymentGatewayAdapter` injetando credenciais desencriptadas da API e lidando com PIX e Boleto.
+* Criação persistente de clientes espelhados no gateway (`PrismaGatewayCustomerReferenceRepository`).
+* Validação rigorosa de idempotência (através de `externalReference` + `GET` prévio no provedor).
+* Script seguro de injeção de API Key criptografada no banco para uso do adapter (`configure-asaas-sandbox.ts`).
+* Configuração blindada para isolar segredos (`AES-256-GCM`).
+
+---
+
+## Fase 6.2 — Stripe Adapter (Futuro)
+
+---
+
+## Fase 7A — Webhooks Inbound Asaas Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Criação de tabelas de Inbox para idempotência de webhooks.
+* Implementação do Webhook Inbox Repository.
+* Recebimento de eventos do Asaas.
+* Sincronização segura de status de pagamento e logs de auditoria.
+
+---
+
+## Fase 7B — Unified Webhook Infrastructure Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Refatoração da infraestrutura de webhooks para suportar múltiplos provedores (Stripe, Asaas, Mercado Pago, PagBank, Pagar.me).
+* Criação de `ProviderWebhookAdapter`, `ProviderWebhookAuthenticator` e `ProviderWebhookNormalizer`.
+* Implementação do Padrão Registry (`WebhookAdapterRegistryService` e `WebhookProcessorRegistryService`).
+* Refatoração do `WebhookIngressService` para orquestração genérica.
+* Adapters "esqueleto" para provedores não-Asaas preparados para Fase futura.
+
+---
+
+## Fase 7C — Reports
+
 
 ---
 

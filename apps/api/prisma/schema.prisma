@@ -7,19 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TenantKind {
+  PLATFORM
+  CUSTOMER
+}
+
+enum TenantInvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum PermissionScope {
+  TENANT
+  PLATFORM
+}
+
 model Tenant {
   id        String   @id @default(uuid())
   name      String
-  slug      String   @unique
-  timezone  String   @default("America/Sao_Paulo")
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  slug      String     @unique
+  kind      TenantKind @default(CUSTOMER)
+  timezone  String     @default("America/Sao_Paulo")
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
-  users        User[]
-  roles        Role[]
-  authAttempts AuthAttempt[]
-  customers    Customer[]
+  users                User[]
+  roles                Role[]
+  subscription         TenantSubscription?
+  authAttempts  AuthAttempt[]
+  customers             Customer[]
+  payments              Payment[]
+  paymentEvents         PaymentEvent[]
+  gatewayConfigurations GatewayConfiguration[]
+  gatewayReferences     GatewayCustomerReference[]
+  webhookInboxEvents    WebhookInboxEvent[]
+  adminInvitations      TenantAdminInvitation[]
 
   @@map("tenants")
 }
@@ -30,6 +55,7 @@ model User {
   name                String
   email               String
   passwordHash        String
+  isPlatformAdmin     Boolean   @default(false)
   active              Boolean   @default(true)
   lastLoginAt         DateTime?
   lastLoginIp         String?
@@ -43,6 +69,7 @@ model User {
   refreshTokens       RefreshToken[]
   sessions            UserSession[]
   passwordResetTokens PasswordResetToken[]
+  tenantAdminInvitations TenantAdminInvitation[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -71,10 +98,11 @@ model Role {
 
 model Permission {
   id          String   @id @default(uuid())
-  key         String   @unique
+  key         String          @unique
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  scope       PermissionScope @default(TENANT)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   roles RolePermission[]
 
@@ -195,7 +223,9 @@ model Customer {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+  gatewayReferences GatewayCustomerReference[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, document])
@@ -228,22 +258,327 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
+model TenantAdminInvitation {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String
+  email     String
+  tokenHash String   @unique
+  status    TenantInvitationStatus @default(PENDING)
+  expiresAt DateTime
+  acceptedAt DateTime?
+  revokedAt DateTime?
+  createdByUserId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
+  @@map("tenant_admin_invitations")
+}
+
 model AuditLog {
   id          String   @id @default(uuid())
+  scope       PermissionScope?
+  severity    AuditSeverity?
   tenantId    String?
   actorUserId String?
-  action      String
+  actorType   AuditActorType?
+  source      String?
   entityType  String?
   entityId    String?
+  action      String
+  summary     String?
   metadata    Json?
   ipAddress   String?
   userAgent   String?
+  traceId     String?
   createdAt   DateTime @default(now())
 
   @@index([tenantId])
-  @@index([actorUserId])
   @@index([action])
+  @@index([severity])
+  @@index([actorType])
+  @@index([actorUserId])
   @@index([entityType, entityId])
   @@index([createdAt])
+  @@index([tenantId, createdAt])
   @@map("audit_logs")
 }
+
+enum AuditSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum AuditActorType {
+  USER
+  PLATFORM_ADMIN
+  SYSTEM
+  WEBHOOK
+  WORKER
+}
+
+enum PaymentProvider {
+  STRIPE
+  ASAAS
+  MERCADO_PAGO
+  PAGBANK
+  PAGARME
+}
+
+enum GatewayEnvironment {
+  SANDBOX
+  TEST
+  LIVE
+}
+
+enum GatewayConfigurationStatus {
+  ACTIVE
+  INACTIVE
+  DISABLED
+}
+
+enum GatewayHealthStatus {
+  UNKNOWN
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+}
+
+model GatewayConfiguration {
+  id                     String                     @id @default(uuid())
+  tenantId               String
+  provider               PaymentProvider
+  environment            GatewayEnvironment
+  status                 GatewayConfigurationStatus @default(INACTIVE)
+  priority               Int                        @default(100)
+  displayName            String?
+  supportedMethods       Json?
+  encryptedCredentials   String?
+  credentialsFingerprint String?
+  healthStatus           GatewayHealthStatus        @default(UNKNOWN)
+  lastHealthCheckAt      DateTime?
+  lastHealthCheckMessage String?
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime                   @updatedAt
+
+  tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments          Payment[]
+  gatewayReferences GatewayCustomerReference[]
+  webhookInboxEvents WebhookInboxEvent[]
+
+  @@unique([tenantId, provider, environment])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, provider])
+  @@index([tenantId, priority])
+  @@index([provider, environment])
+  @@map("gateway_configurations")
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  APPROVED
+  FAILED
+  CANCELED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  PIX
+  BOLETO
+  CARD
+  BANK_TRANSFER
+  OTHER
+}
+
+model Payment {
+  id                     String        @id @default(uuid())
+  tenantId               String
+  customerId             String
+  reference              String
+  externalReference      String?
+  amount                 Int
+  currency               String        @default("BRL")
+  method                 PaymentMethod
+  status                 PaymentStatus @default(PENDING)
+  description            String?
+  dueDate                DateTime?
+  metadata               Json?
+  idempotencyKeyHash     String
+  idempotencyRequestHash String
+  provider               PaymentProvider?
+  providerPaymentId      String?
+  providerStatus         String?
+  providerUpdatedAt      DateTime?
+  providerInvoiceUrl     String?
+  providerBankSlipUrl    String?
+  providerPixCopyPaste   String?
+  providerPixExpiresAt   DateTime?
+  providerPaymentUrl     String?
+  gatewayConfigurationId String?
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  canceledAt             DateTime?
+  refundedAt             DateTime?
+
+  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer             Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+  events               PaymentEvent[]
+  webhookInboxEvents   WebhookInboxEvent[]
+
+  @@unique([tenantId, reference])
+  @@unique([tenantId, idempotencyKeyHash])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, customerId])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, reference])
+  @@index([customerId])
+  @@index([provider, providerPaymentId])
+  @@index([gatewayConfigurationId])
+  @@map("payments")
+}
+
+model PaymentEvent {
+  id             String         @id @default(uuid())
+  tenantId       String
+  paymentId      String
+  type           String
+  previousStatus PaymentStatus?
+  currentStatus  PaymentStatus?
+  message        String?
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([paymentId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("payment_events")
+}
+
+model GatewayCustomerReference {
+  id                     String               @id @default(uuid())
+  tenantId               String
+  customerId             String
+  gatewayConfigurationId String
+  provider               PaymentProvider
+  providerCustomerId     String
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer             Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  gatewayConfiguration GatewayConfiguration @relation(fields: [gatewayConfigurationId], references: [id], onDelete: Cascade)
+
+  @@unique([gatewayConfigurationId, customerId])
+  @@unique([gatewayConfigurationId, providerCustomerId])
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([gatewayConfigurationId])
+  @@index([provider, providerCustomerId])
+  @@map("gateway_customer_references")
+}
+
+enum WebhookProvider {
+  ASAAS
+  STRIPE
+  MERCADO_PAGO
+  PAGBANK
+  PAGARME
+}
+
+enum WebhookProcessingStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  IGNORED
+  FAILED
+}
+
+model WebhookInboxEvent {
+  id                     String                  @id @default(uuid())
+  provider               WebhookProvider
+  providerEventId        String
+  eventType              String
+  tenantId               String?
+  paymentId              String?
+  gatewayConfigurationId String?
+  status                 WebhookProcessingStatus @default(RECEIVED)
+  payloadHash            String
+  payloadSummary         Json?
+  receivedAt             DateTime                @default(now())
+  processedAt            DateTime?
+  failedAt               DateTime?
+  failureReason          String?
+  attemptCount           Int                     @default(0)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  tenant               Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  payment              Payment?              @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([provider])
+  @@index([eventType])
+  @@index([status])
+  @@index([tenantId])
+  @@index([paymentId])
+  @@index([gatewayConfigurationId])
+  @@index([receivedAt])
+  @@map("webhook_inbox_events")
+}
+
+enum SubscriptionPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+  CUSTOM
+}
+
+enum TenantSubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+  CANCELED
+}
+
+model TenantSubscription {
+  id                          String                   @id @default(uuid())
+  tenantId                    String                   @unique
+  plan                        SubscriptionPlan         @default(FREE)
+  status                      TenantSubscriptionStatus @default(TRIAL)
+  trialEndsAt                 DateTime?
+  currentPeriodStart          DateTime?
+  currentPeriodEnd            DateTime?
+  externalSubscriptionReference String?
+  notes                       String?
+  createdAt                   DateTime                 @default(now())
+  updatedAt                   DateTime                 @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([plan])
+  @@index([status])
+  @@index([currentPeriodEnd])
+  @@map("tenant_subscriptions")
+}
+

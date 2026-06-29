@@ -136,9 +136,10 @@ Logs, traces, métricas, Prometheus, Grafana e Datadog opcional.
 
 Webhooks enviados para clientes.
 
-## M11 — Multi-Gateway
+## M11 — Multi-Gateway Abstraction & Integration
 
-Asaas, Mercado Pago e configuração dinâmica por tenant.
+Fundação abstrata (Fase 6.0) já implementada com Stripe, Asaas, Mercado Pago, PagBank e Pagar.me como skeletons e AES-256-GCM para credenciais. Próximos passos: Sandbox e Go-Live dos providers.
+Unified Webhook Infrastructure (Fase 7B) finalizada para receber webhooks multitenant agnostic providers.
 
 ## M12 — Tests, Security & Portfolio
 
@@ -1499,6 +1500,7 @@ Expandir o sistema para mais de um gateway real.
 **Prioridade:** P3
 **Tipo:** Backend / Payments
 **Milestone:** M11
+**Status:** DONE
 
 ### Critérios de aceite
 
@@ -2027,3 +2029,16 @@ Uma issue só pode ser marcada como `DONE` quando:
 - [ ] Criar modal de criação e edição de cliente.
 - [ ] Implementar ativação e desativação via `AppConfirmDialog`.
 - [ ] Implementar bloqueio por Role/Permissions.
+
+### Fase 7A — Asaas Inbound Webhooks
+- [x] Asaas inbound webhook
+- [x] Webhook inbox pattern
+- [x] Webhook idempotency
+- [x] Webhook event normalization
+- [x] Asaas webhook authentication
+- [ ] Stripe webhook adapter
+- [ ] Mercado Pago webhook adapter
+- [ ] webhook worker/RabbitMQ
+- [ ] webhook monitoring UI
+- [ ] retry queue
+- [ ] dead-letter queue

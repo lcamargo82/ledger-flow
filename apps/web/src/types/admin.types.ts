@@ -2,6 +2,7 @@ export interface PermissionListItem {
   id: string;
   key: string;
   description?: string;
+  scope: string;
   createdAt: string;
   updatedAt: string;
 }

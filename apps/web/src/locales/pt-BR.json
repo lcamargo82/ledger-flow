@@ -85,6 +85,19 @@
         "passwordsDoNotMatch": "As senhas não coincidem.",
         "resetFailed": "Não foi possível redefinir sua senha agora. Tente novamente."
       }
+    },
+    "acceptInvitation": {
+      "title": "Ativar conta",
+      "subtitle": "Defina sua senha para acessar a plataforma.",
+      "passwordLabel": "Senha",
+      "confirmPasswordLabel": "Confirmar senha",
+      "submit": "Ativar conta",
+      "submitting": "Ativando...",
+      "successTitle": "Conta ativada",
+      "successMessage": "Sua conta foi ativada com sucesso. Você já pode acessar a plataforma.",
+      "goToLogin": "Ir para o Login",
+      "tokenMissing": "Convite inválido ou expirado.",
+      "failed": "Não foi possível ativar sua conta. Verifique o link ou tente novamente."
     }
   },
   "dashboard": {
@@ -219,7 +232,8 @@
       "OWNER": "Owner",
       "FINANCE_OPERATOR": "Financeiro",
       "SUPPORT_VIEWER": "Suporte",
-      "DEVELOPER": "Desenvolvedor"
+      "DEVELOPER": "Desenvolvedor",
+      "PLATFORM_OWNER": "Platform Owner"
     }
   },
   "common": {
@@ -273,23 +287,91 @@
     "logoutConfirmMessage": "Você tem certeza que deseja encerrar a sua sessão atual?"
   },
   "permissions": {
-    "missing": "Sem permissão",
+    "missing": "Permissão negada",
     "title": "Permissões do Sistema",
     "description": "Lista de todas as permissões globais disponíveis no sistema.",
     "searchPlaceholder": "Buscar permissões...",
+    "list": {
+      "auth": { "login": "Realizar login" },
+      "users": {
+        "create": "Criar usuários",
+        "read": "Visualizar usuários",
+        "update": "Atualizar usuários",
+        "delete": "Excluir usuários"
+      },
+      "roles": { "manage": "Gerenciar papéis e permissões" },
+      "permissions": { "read": "Visualizar permissões" },
+      "customers": {
+        "create": "Criar clientes",
+        "read": "Visualizar clientes",
+        "update": "Atualizar clientes",
+        "delete": "Excluir clientes"
+      },
+      "payments": {
+        "create": "Criar pagamentos",
+        "read": "Visualizar pagamentos",
+        "cancel": "Cancelar pagamentos",
+        "refund": "Reembolsar pagamentos"
+      },
+      "reports": { "export": "Exportar relatórios" },
+      "webhooks": { "manage": "Gerenciar webhooks" },
+      "api-keys": { "manage": "Gerenciar chaves de API" },
+      "gateways": { "manage": "Gerenciar gateways" },
+      "notifications": { "read": "Visualizar notificações" },
+      "audit": { "read": "Visualizar trilha de auditoria" },
+      "tenant": {
+        "read": "Visualizar dados básicos do tenant",
+        "update": "Atualizar configurações do tenant"
+      },
+      "platform": {
+        "access": "Acesso à administração da plataforma",
+        "tenants": {
+          "create": "Criar tenants da plataforma",
+          "read": "Visualizar tenants da plataforma",
+          "update": "Atualizar tenants da plataforma",
+          "status": "Alterar status de tenants da plataforma",
+          "invite": "Convidar e reenviar convites para tenants",
+          "overview": { "read": "Visualizar resumo operacional de tenants da plataforma" },
+          "health": { "read": "Visualizar saúde operacional de tenants da plataforma" }
+        },
+        "subscriptions": {
+          "read": "Visualizar assinaturas da plataforma",
+          "update": "Atualizar assinaturas da plataforma"
+        },
+        "audit": { "read": "Visualizar logs de auditoria global da plataforma" },
+        "support": { "read": "Visualizar resumo de suporte dos tenants" }
+      }
+    },
     "table": {
       "key": "Chave",
       "description": "Descrição",
-      "createdAt": "Criado em"
+      "createdAt": "Criado em",
+      "scope": "Escopo"
     },
     "emptyTitle": "Nenhuma permissão encontrada",
     "emptyDescription": "A busca não retornou resultados.",
     "errorTitle": "Erro ao carregar permissões",
-    "errorDescription": "Ocorreu um erro ao buscar as permissões."
+    "errorDescription": "Ocorreu um erro ao buscar as permissões.",
+    "scope": {
+      "all": "Todos",
+      "tenant": "Tenant",
+      "platform": "Plataforma"
+    },
+    "scopeBadge": {
+      "tenant": "Tenant",
+      "platform": "Plataforma"
+    }
   },
   "roles": {
-    "title": "Gerenciamento de Roles",
+    "title": "Gerenciamento de Papéis",
     "description": "Visualize os papéis de acesso do seu tenant.",
+    "list": {
+      "OWNER": { "name": "Owner", "description": "Proprietário da conta com acesso total" },
+      "FINANCE_OPERATOR": { "name": "Financeiro", "description": "Operador financeiro" },
+      "SUPPORT_VIEWER": { "name": "Suporte", "description": "Acesso apenas leitura para suporte" },
+      "DEVELOPER": { "name": "Desenvolvedor", "description": "Gerenciamento técnico (API, Webhooks)" },
+      "PLATFORM_OWNER": { "name": "Platform Owner", "description": "Administrador geral da plataforma" }
+    },
     "table": {
       "name": "Nome",
       "key": "Chave",
@@ -450,6 +532,319 @@
       "previous": "Anterior",
       "next": "Próximo",
       "perPage": "Itens por página"
+    }
+  },
+  "payments": {
+    "title": "Pagamentos",
+    "description": "Acompanhe e gerencie os pagamentos da organização.",
+    "actions": {
+      "create": "Novo pagamento",
+      "viewDetails": "Ver detalhes",
+      "cancel": "Cancelar",
+      "search": "Buscar",
+      "clearFilters": "Limpar",
+      "tryAgain": "Tentar novamente",
+      "close": "Fechar"
+    },
+    "filters": {
+      "searchLabel": "Buscar por referência, cliente...",
+      "searchPlaceholder": "Digite a referência ou nome...",
+      "statusLabel": "Status",
+      "methodLabel": "Método",
+      "dateFromLabel": "Data inicial",
+      "dateToLabel": "Data final",
+      "statusAll": "Todos",
+      "methodAll": "Todos"
+    },
+    "table": {
+      "reference": "Referência",
+      "customer": "Cliente",
+      "amount": "Valor",
+      "method": "Método",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "form": {
+      "createTitle": "Novo pagamento",
+      "customerLabel": "Cliente",
+      "customerPlaceholder": "Selecione um cliente",
+      "amountLabel": "Valor",
+      "amountPlaceholder": "0,00",
+      "currencyLabel": "Moeda",
+      "methodLabel": "Método",
+      "methodPlaceholder": "Selecione um método",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Descrição opcional do pagamento",
+      "submit": "Criar pagamento",
+      "creating": "Criando pagamento...",
+      "cancel": "Cancelar",
+      "validation": {
+        "customerRequired": "Cliente é obrigatório.",
+        "amountRequired": "Valor é obrigatório.",
+        "amountInvalid": "Valor inválido.",
+        "methodRequired": "Método é obrigatório.",
+        "dateRangeInvalid": "Período inválido."
+      }
+    },
+    "details": {
+      "title": "Detalhes do Pagamento",
+      "summary": "Resumo",
+      "timeline": "Timeline",
+      "reference": "Referência",
+      "customer": "Cliente",
+      "amount": "Valor",
+      "currency": "Moeda",
+      "method": "Método",
+      "status": "Status",
+      "description": "Descrição",
+      "createdAt": "Criado em",
+      "updatedAt": "Atualizado em",
+      "canceledAt": "Cancelado em",
+      "refundedAt": "Estornado em",
+      "notAvailable": "Não disponível",
+      "howToPay": "Como pagar",
+      "refreshInstructions": "Atualizar instruções",
+      "pixCopyPaste": "Pix Copia e Cola",
+      "expiresAt": "Expira em",
+      "expiredWarning": "Expirado. Crie um novo pagamento.",
+      "bankSlip": "Boleto bancário",
+      "bankSlipDescription": "Clique no botão abaixo para abrir seu boleto seguro.",
+      "openBankSlip": "Abrir Boleto",
+      "dueDate": "Vencimento",
+      "noInstructions": "As instruções de pagamento ainda não estão disponíveis.",
+      "copied": "Copiado para a área de transferência!",
+      "copyError": "Não foi possível copiar."
+    },
+    "status": {
+      "PENDING": "Pendente",
+      "PROCESSING": "Processando",
+      "APPROVED": "Aprovado",
+      "FAILED": "Falhou",
+      "CANCELED": "Cancelado",
+      "REFUNDED": "Estornado"
+    },
+    "method": {
+      "PIX": "Pix",
+      "BOLETO": "Boleto",
+      "CARD": "Cartão",
+      "BANK_TRANSFER": "Transferência bancária",
+      "OTHER": "Outro"
+    },
+    "events": {
+      "paymentCreated": "Pagamento criado",
+      "paymentCanceled": "Pagamento cancelado",
+      "paymentRefundRequested": "Estorno solicitado",
+      "paymentRefunded": "Pagamento estornado",
+      "generic": "Evento de pagamento atualizado"
+    },
+    "empty": {
+      "title": "Nenhum pagamento encontrado",
+      "description": "Crie um novo pagamento ou ajuste os filtros para visualizar os resultados."
+    },
+    "error": {
+      "title": "Não foi possível carregar os pagamentos",
+      "description": "Tente novamente em alguns instantes.",
+      "createFailed": "Erro ao criar pagamento.",
+      "cancelFailed": "Erro ao cancelar pagamento.",
+      "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
+      "customerRequired": "Cliente obrigatório.",
+      "amountInvalid": "Valor inválido."
+    },
+    "toast": {
+      "created": "Pagamento criado com sucesso.",
+      "canceled": "Pagamento cancelado com sucesso."
+    },
+    "confirmCancel": {
+      "title": "Cancelar pagamento",
+      "message": "Tem certeza de que deseja cancelar este pagamento? Esta ação não poderá ser desfeita.",
+      "confirm": "Cancelar pagamento"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Próxima",
+      "pageOf": "Página {page} de {totalPages}",
+      "perPage": "Itens por página"
+    }
+  },
+  "platform": {
+    "sidebar": {
+      "operations": "Operação",
+      "platform": "Plataforma",
+      "tenants": "Tenants da Plataforma",
+      "audit": "Auditoria Global"
+    },
+    "audit": {
+      "title": "Auditoria Global",
+      "description": "Visualize os logs de auditoria globais da plataforma.",
+      "severity": {
+        "INFO": "Info",
+        "WARNING": "Aviso",
+        "CRITICAL": "Crítico"
+      },
+      "table": {
+        "occurredAt": "Data/Hora",
+        "organization": "Organização",
+        "action": "Ação",
+        "severity": "Severidade",
+        "actorType": "Ator",
+        "entityType": "Entidade",
+        "source": "Fonte",
+        "summary": "Resumo",
+        "actions": "Ações"
+      },
+      "actions": {
+        "viewDetails": "Ver detalhes",
+        "viewAllTenantLogs": "Ver auditoria completa"
+      },
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar ação, resumo...",
+        "severity": "Severidade",
+        "actorType": "Ator",
+        "source": "Fonte",
+        "dateFrom": "Data Inicial",
+        "dateTo": "Data Final",
+        "apply": "Aplicar Filtros",
+        "clear": "Limpar"
+      },
+      "details": {
+        "title": "Detalhes da Auditoria"
+      },
+      "empty": {
+        "title": "Nenhum log de auditoria encontrado",
+        "description": "Ajuste os filtros de busca para visualizar os resultados."
+      }
+    },
+    "support": {
+      "title": "Detalhes Operacionais",
+      "health": "Saúde do Tenant",
+      "recentCriticalEvents": "Eventos críticos recentes",
+      "recentWarnings": "Avisos recentes",
+      "recentWebhookFailures": "Falhas recentes em webhooks",
+      "lastSuccessfulWebhookAt": "Último webhook processado",
+      "lastPaymentStatusChangeAt": "Última atualização de pagamento",
+      "lastOwnerLoginAt": "Último acesso do Owner",
+      "pendingInvitation": "Convite pendente de aceite",
+      "recommendedActions": "Ações Recomendadas",
+      "noRecommendedActions": "Nenhuma ação recomendada no momento. O tenant está saudável.",
+      "recommendation": {
+        "REVIEW_WEBHOOK_FAILURES": "Revisar as falhas recentes de webhook com o tenant.",
+        "REVIEW_SUBSCRIPTION_STATUS": "Assinatura atrasada, verificar status de pagamento.",
+        "REACTIVATE_TENANT": "O tenant está inativo, considere reativação se aplicável."
+      }
+    },
+    "tenantDetails": {
+      "tabs": {
+        "overview": "Visão Geral",
+        "support": "Suporte e Saúde",
+        "audit": "Auditoria Recente"
+      },
+      "overviewEmpty": "A visão geral estará disponível em breve.",
+      "recentAudit": "Auditoria Recente"
+    }
+  },
+  "platformTenants": {
+    "title": "Tenants da Plataforma",
+    "description": "Gerencie todas as organizações de clientes no LedgerFlow.",
+    "searchLabel": "Buscar",
+    "searchPlaceholder": "Buscar tenants...",
+    "statusLabel": "Status",
+    "statusAll": "Todos os Status",
+    "planLabel": "Plano",
+    "planAll": "Todos os Planos",
+    "emptyTitle": "Nenhum tenant encontrado",
+    "emptyDescription": "Tente alterar os filtros de busca.",
+    "table": {
+      "name": "Nome do Tenant",
+      "plan": "Plano",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "invitationSent": "Convite enviado"
+    },
+    "create": {
+      "success": "Tenant provisionado com sucesso.",
+      "failed": "Erro ao provisionar o tenant."
+    },
+    "createModal": {
+      "button": "Novo Tenant",
+      "title": "Provisionar Novo Tenant",
+      "steps": {
+        "organization": "1. Organização",
+        "subscription": "2. Assinatura",
+        "owner": "3. Proprietário"
+      },
+      "organization": {
+        "nameLabel": "Nome da Empresa",
+        "slugLabel": "Slug (URL)",
+        "timezoneLabel": "Fuso Horário",
+        "timezoneSaoPaulo": "América/São Paulo"
+      },
+      "subscription": {
+        "planLabel": "Plano",
+        "statusLabel": "Status Inicial",
+        "trialLabel": "Trial (Teste)",
+        "activeLabel": "Ativo",
+        "trialEndsAtLabel": "Fim do Período de Teste"
+      },
+      "owner": {
+        "nameLabel": "Nome do Proprietário",
+        "emailLabel": "E-mail do Proprietário",
+        "infoMessage": "Ao concluir, um e-mail com link de ativação será enviado para o proprietário definir sua senha."
+      },
+      "actions": {
+        "back": "Voltar",
+        "next": "Próximo",
+        "submit": "Provisionar Tenant"
+      }
+    },
+    "overview": {
+      "backToTenants": "Voltar para Tenants",
+      "operations": "Operações",
+      "gateway": "Gateway de Pagamento",
+      "webhooks": "Webhooks",
+      "activity": "Atividade Recente"
+    },
+    "health": {
+      "HEALTHY": "Saudável",
+      "ATTENTION": "Atenção",
+      "CRITICAL": "Crítico",
+      "UNKNOWN": "Desconhecido"
+    },
+    "metrics": {
+      "usersTitle": "Usuários",
+      "usersTotal": "Total",
+      "usersActive": "Ativos",
+      "customersTitle": "Clientes",
+      "customersTotal": "Total",
+      "customersActive": "Ativos",
+      "paymentsTitle": "Pagamentos",
+      "paymentsTotal": "Total",
+      "paymentsPending": "Pendentes",
+      "paymentsFailed": "Falharam"
+    },
+    "gateway": {
+      "noActiveConfiguration": "Nenhuma configuração de gateway ativa encontrada.",
+      "status": "Status",
+      "healthStatus": "Saúde",
+      "lastHealthCheck": "Última verificação"
+    },
+    "webhooks": {
+      "lastReceivedAt": "Último evento",
+      "processedLast24Hours": "Processados (24h)",
+      "failedLast24Hours": "Falharam (24h)",
+      "ignoredLast24Hours": "Ignorados (24h)"
+    },
+    "activity": {
+      "empty": "Nenhuma atividade recente encontrada."
     }
   }
 }

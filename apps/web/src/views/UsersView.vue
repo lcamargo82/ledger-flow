@@ -28,12 +28,18 @@ const toast = useToastStore()
 
 const searchInput = ref(usersStore.filters.search || '')
 
-const availableRoles = computed(() => [
-  { key: 'OWNER', label: t('users.roles.OWNER') },
-  { key: 'FINANCE_OPERATOR', label: t('users.roles.FINANCE_OPERATOR') },
-  { key: 'SUPPORT_VIEWER', label: t('users.roles.SUPPORT_VIEWER') },
-  { key: 'DEVELOPER', label: t('users.roles.DEVELOPER') }
-])
+const availableRoles = computed(() => {
+  const roles = [
+    { key: 'OWNER', label: t('users.roles.OWNER') },
+    { key: 'FINANCE_OPERATOR', label: t('users.roles.FINANCE_OPERATOR') },
+    { key: 'SUPPORT_VIEWER', label: t('users.roles.SUPPORT_VIEWER') },
+    { key: 'DEVELOPER', label: t('users.roles.DEVELOPER') }
+  ]
+  if (authStore.user?.isPlatformAdmin) {
+    roles.push({ key: 'PLATFORM_OWNER', label: t('users.roles.PLATFORM_OWNER') })
+  }
+  return roles
+})
 
 // Table columns
 const columns = computed(() => [
@@ -129,6 +135,7 @@ const handleStatusChange = async () => {
 }
 
 const getRoleBadgeVariant = (role: string) => {
+  if (role === 'PLATFORM_OWNER') return 'warning'
   if (role === 'OWNER') return 'info'
   if (role === 'DEVELOPER') return 'success'
   if (role === 'FINANCE_OPERATOR') return 'warning'

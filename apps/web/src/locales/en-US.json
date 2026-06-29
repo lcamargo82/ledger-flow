@@ -86,6 +86,19 @@
         "passwordsDoNotMatch": "Passwords do not match.",
         "resetFailed": "Could not reset your password at this time. Please try again."
       }
+    },
+    "acceptInvitation": {
+      "title": "Activate account",
+      "subtitle": "Set your password to access the platform.",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Activate account",
+      "submitting": "Activating...",
+      "successTitle": "Account activated",
+      "successMessage": "Your account has been successfully activated. You can now log into the platform.",
+      "goToLogin": "Go to Login",
+      "tokenMissing": "Invalid or expired invitation.",
+      "failed": "Could not activate your account. Please check the link or try again."
     }
   },
   "dashboard": {
@@ -220,7 +233,8 @@
       "OWNER": "Owner",
       "FINANCE_OPERATOR": "Finance",
       "SUPPORT_VIEWER": "Support",
-      "DEVELOPER": "Developer"
+      "DEVELOPER": "Developer",
+      "PLATFORM_OWNER": "Platform Owner"
     }
   },
   "common": {
@@ -278,19 +292,87 @@
     "title": "System Permissions",
     "description": "List of all available global permissions in the system.",
     "searchPlaceholder": "Search permissions...",
+    "list": {
+      "auth": { "login": "Perform login" },
+      "users": {
+        "create": "Create users",
+        "read": "View users",
+        "update": "Update users",
+        "delete": "Delete users"
+      },
+      "roles": { "manage": "Manage roles and permissions" },
+      "permissions": { "read": "View permissions" },
+      "customers": {
+        "create": "Create customers",
+        "read": "View customers",
+        "update": "Update customers",
+        "delete": "Delete customers"
+      },
+      "payments": {
+        "create": "Create payments",
+        "read": "View payments",
+        "cancel": "Cancel payments",
+        "refund": "Refund payments"
+      },
+      "reports": { "export": "Export reports" },
+      "webhooks": { "manage": "Manage webhooks" },
+      "api-keys": { "manage": "Manage API keys" },
+      "gateways": { "manage": "Manage gateways" },
+      "notifications": { "read": "View notifications" },
+      "audit": { "read": "View audit trail" },
+      "tenant": {
+        "read": "View basic tenant data",
+        "update": "Update tenant settings"
+      },
+      "platform": {
+        "access": "Access platform administration",
+        "tenants": {
+          "create": "Create platform tenants",
+          "read": "View platform tenants",
+          "update": "Update platform tenants",
+          "status": "Change status of platform tenants",
+          "invite": "Invite and resend tenant invitations",
+          "overview": { "read": "View operational summary of platform tenants" },
+          "health": { "read": "View operational health of platform tenants" }
+        },
+        "subscriptions": {
+          "read": "View platform subscriptions",
+          "update": "Update platform subscriptions"
+        },
+        "audit": { "read": "View global platform audit logs" },
+        "support": { "read": "View tenant support summary" }
+      }
+    },
     "table": {
       "key": "Key",
       "description": "Description",
-      "createdAt": "Created at"
+      "createdAt": "Created at",
+      "scope": "Scope"
     },
     "emptyTitle": "No permissions found",
     "emptyDescription": "The search returned no results.",
     "errorTitle": "Error loading permissions",
-    "errorDescription": "An error occurred while fetching permissions."
+    "errorDescription": "An error occurred while fetching permissions.",
+    "scope": {
+      "all": "All",
+      "tenant": "Tenant",
+      "platform": "Platform"
+    },
+    "scopeBadge": {
+      "tenant": "Tenant",
+      "platform": "Platform"
+    }
   },
   "roles": {
     "title": "Roles Management",
     "description": "View the access roles for your tenant.",
+    "list": {
+      "OWNER": { "name": "Owner", "description": "Full access account owner" },
+      "FINANCE_OPERATOR": { "name": "Finance", "description": "Financial operator" },
+      "SUPPORT_VIEWER": { "name": "Support", "description": "Read-only access for support" },
+      "DEVELOPER": { "name": "Developer", "description": "Technical management (API, Webhooks)" },
+      "PLATFORM_OWNER": { "name": "Platform Owner", "description": "General platform administrator" }
+    },
     "table": {
       "name": "Name",
       "key": "Key",
@@ -451,6 +533,319 @@
       "previous": "Previous",
       "next": "Next",
       "perPage": "Items per page"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "description": "Track and manage the organization's payments.",
+    "actions": {
+      "create": "New payment",
+      "viewDetails": "View details",
+      "cancel": "Cancel",
+      "search": "Search",
+      "clearFilters": "Clear",
+      "tryAgain": "Try again",
+      "close": "Close"
+    },
+    "filters": {
+      "searchLabel": "Search by reference, customer...",
+      "searchPlaceholder": "Type reference or name...",
+      "statusLabel": "Status",
+      "methodLabel": "Method",
+      "dateFromLabel": "Start Date",
+      "dateToLabel": "End Date",
+      "statusAll": "All",
+      "methodAll": "All"
+    },
+    "table": {
+      "reference": "Reference",
+      "customer": "Customer",
+      "amount": "Amount",
+      "method": "Method",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "New payment",
+      "customerLabel": "Customer",
+      "customerPlaceholder": "Select a customer",
+      "amountLabel": "Amount",
+      "amountPlaceholder": "0.00",
+      "currencyLabel": "Currency",
+      "methodLabel": "Method",
+      "methodPlaceholder": "Select a method",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional payment description",
+      "submit": "Create payment",
+      "creating": "Creating payment...",
+      "cancel": "Cancel",
+      "validation": {
+        "customerRequired": "Customer is required.",
+        "amountRequired": "Amount is required.",
+        "amountInvalid": "Invalid amount.",
+        "methodRequired": "Method is required.",
+        "dateRangeInvalid": "Invalid date range."
+      }
+    },
+    "details": {
+      "title": "Payment Details",
+      "summary": "Summary",
+      "timeline": "Timeline",
+      "reference": "Reference",
+      "customer": "Customer",
+      "amount": "Amount",
+      "currency": "Currency",
+      "method": "Method",
+      "status": "Status",
+      "description": "Description",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "canceledAt": "Canceled At",
+      "refundedAt": "Refunded At",
+      "notAvailable": "Not available",
+      "howToPay": "How to pay",
+      "refreshInstructions": "Refresh instructions",
+      "pixCopyPaste": "Pix Copy and Paste",
+      "expiresAt": "Expires at",
+      "expiredWarning": "Expired. Please create a new payment.",
+      "bankSlip": "Bank Slip",
+      "bankSlipDescription": "Click the button below to open your secure bank slip.",
+      "openBankSlip": "Open Bank Slip",
+      "dueDate": "Due Date",
+      "noInstructions": "Payment instructions are not available yet.",
+      "copied": "Copied to clipboard!",
+      "copyError": "Failed to copy."
+    },
+    "status": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "APPROVED": "Approved",
+      "FAILED": "Failed",
+      "CANCELED": "Canceled",
+      "REFUNDED": "Refunded"
+    },
+    "method": {
+      "PIX": "Pix",
+      "BOLETO": "Boleto",
+      "CARD": "Card",
+      "BANK_TRANSFER": "Bank Transfer",
+      "OTHER": "Other"
+    },
+    "events": {
+      "paymentCreated": "Payment created",
+      "paymentCanceled": "Payment canceled",
+      "paymentRefundRequested": "Refund requested",
+      "paymentRefunded": "Payment refunded",
+      "generic": "Payment event updated"
+    },
+    "empty": {
+      "title": "No payments found",
+      "description": "Create a new payment or adjust filters to view results."
+    },
+    "error": {
+      "title": "Could not load payments",
+      "description": "Please try again in a few moments.",
+      "createFailed": "Failed to create payment.",
+      "cancelFailed": "Failed to cancel payment.",
+      "invalidStatus": "This payment can no longer be canceled in its current status.",
+      "customerRequired": "Customer required.",
+      "amountInvalid": "Invalid amount."
+    },
+    "toast": {
+      "created": "Payment created successfully.",
+      "canceled": "Payment canceled successfully."
+    },
+    "confirmCancel": {
+      "title": "Cancel payment",
+      "message": "Are you sure you want to cancel this payment? This action cannot be undone.",
+      "confirm": "Cancel payment"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {totalPages}",
+      "perPage": "Items per page"
+    }
+  },
+  "platform": {
+    "sidebar": {
+      "operations": "Operations",
+      "platform": "Platform",
+      "tenants": "Platform Tenants",
+      "audit": "Global Audit"
+    },
+    "audit": {
+      "title": "Global Audit",
+      "description": "View the platform's global audit logs.",
+      "severity": {
+        "INFO": "Info",
+        "WARNING": "Warning",
+        "CRITICAL": "Critical"
+      },
+      "table": {
+        "occurredAt": "Date/Time",
+        "organization": "Organization",
+        "action": "Action",
+        "severity": "Severity",
+        "actorType": "Actor",
+        "entityType": "Entity",
+        "source": "Source",
+        "summary": "Summary",
+        "actions": "Actions"
+      },
+      "actions": {
+        "viewDetails": "View Details",
+        "viewAllTenantLogs": "View full audit"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search action, summary...",
+        "severity": "Severity",
+        "actorType": "Actor",
+        "source": "Source",
+        "dateFrom": "Date From",
+        "dateTo": "Date To",
+        "apply": "Apply Filters",
+        "clear": "Clear"
+      },
+      "details": {
+        "title": "Audit Details"
+      },
+      "empty": {
+        "title": "No audit logs found",
+        "description": "Adjust your search filters to view results."
+      }
+    },
+    "support": {
+      "title": "Operational Details",
+      "health": "Tenant Health",
+      "recentCriticalEvents": "Recent critical events",
+      "recentWarnings": "Recent warnings",
+      "recentWebhookFailures": "Recent webhook failures",
+      "lastSuccessfulWebhookAt": "Last webhook processed",
+      "lastPaymentStatusChangeAt": "Last payment update",
+      "lastOwnerLoginAt": "Last Owner login",
+      "pendingInvitation": "Pending invitation",
+      "recommendedActions": "Recommended Actions",
+      "noRecommendedActions": "No recommended actions at this time. The tenant is healthy.",
+      "recommendation": {
+        "REVIEW_WEBHOOK_FAILURES": "Review recent webhook failures with the tenant.",
+        "REVIEW_SUBSCRIPTION_STATUS": "Subscription is past due, check payment status.",
+        "REACTIVATE_TENANT": "Tenant is inactive, consider reactivating if applicable."
+      }
+    },
+    "tenantDetails": {
+      "tabs": {
+        "overview": "Overview",
+        "support": "Support & Health",
+        "audit": "Recent Audit"
+      },
+      "overviewEmpty": "The overview will be available soon.",
+      "recentAudit": "Recent Audit"
+    }
+  },
+  "platformTenants": {
+    "title": "Platform Tenants",
+    "description": "Manage all customer organizations on LedgerFlow.",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search tenants...",
+    "statusLabel": "Status",
+    "statusAll": "All Statuses",
+    "planLabel": "Plan",
+    "planAll": "All Plans",
+    "emptyTitle": "No tenants found",
+    "emptyDescription": "Try changing the search filters.",
+    "table": {
+      "name": "Tenant Name",
+      "plan": "Plan",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "view": "View",
+      "invitationSent": "Invitation sent"
+    },
+    "create": {
+      "success": "Tenant provisioned successfully.",
+      "failed": "Failed to provision tenant."
+    },
+    "createModal": {
+      "button": "New Tenant",
+      "title": "Provision New Tenant",
+      "steps": {
+        "organization": "1. Organization",
+        "subscription": "2. Subscription",
+        "owner": "3. Owner"
+      },
+      "organization": {
+        "nameLabel": "Company Name",
+        "slugLabel": "Slug (URL)",
+        "timezoneLabel": "Timezone",
+        "timezoneSaoPaulo": "America/Sao_Paulo"
+      },
+      "subscription": {
+        "planLabel": "Plan",
+        "statusLabel": "Initial Status",
+        "trialLabel": "Trial (Test)",
+        "activeLabel": "Active",
+        "trialEndsAtLabel": "Trial End Date"
+      },
+      "owner": {
+        "nameLabel": "Owner Name",
+        "emailLabel": "Owner Email",
+        "infoMessage": "Upon completion, an email with an activation link will be sent to the owner to set their password."
+      },
+      "actions": {
+        "back": "Back",
+        "next": "Next",
+        "submit": "Provision Tenant"
+      }
+    },
+    "overview": {
+      "backToTenants": "Back to Tenants",
+      "operations": "Operations",
+      "gateway": "Payment Gateway",
+      "webhooks": "Webhooks",
+      "activity": "Recent Activity"
+    },
+    "health": {
+      "HEALTHY": "Healthy",
+      "ATTENTION": "Attention",
+      "CRITICAL": "Critical",
+      "UNKNOWN": "Unknown"
+    },
+    "metrics": {
+      "usersTitle": "Users",
+      "usersTotal": "Total",
+      "usersActive": "Active",
+      "customersTitle": "Customers",
+      "customersTotal": "Total",
+      "customersActive": "Active",
+      "paymentsTitle": "Payments",
+      "paymentsTotal": "Total",
+      "paymentsPending": "Pending",
+      "paymentsFailed": "Failed"
+    },
+    "gateway": {
+      "noActiveConfiguration": "No active gateway configuration found.",
+      "status": "Status",
+      "healthStatus": "Health",
+      "lastHealthCheck": "Last check"
+    },
+    "webhooks": {
+      "lastReceivedAt": "Last event",
+      "processedLast24Hours": "Processed (24h)",
+      "failedLast24Hours": "Failed (24h)",
+      "ignoredLast24Hours": "Ignored (24h)"
+    },
+    "activity": {
+      "empty": "No recent activity found."
     }
   }
 }

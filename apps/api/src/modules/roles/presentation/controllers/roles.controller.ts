@@ -32,10 +32,8 @@ export class RolesController {
   @ApiForbiddenResponse({
     description: 'Forbidden - requires roles:manage permission',
   })
-  async listRoles(
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<RolesResponseDto> {
-    return this.rolesService.listRoles(user.tenantId);
+  async listRoles(@CurrentUser() user: AuthenticatedUser): Promise<RolesResponseDto> {
+    return this.rolesService.listRoles(user);
   }
 
   @Get(':id')
@@ -51,6 +49,6 @@ export class RolesController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
   ): Promise<RoleResponseDto> {
-    return this.rolesService.getRoleById(user.tenantId, id);
+    return this.rolesService.getRoleById(user, id);
   }
 }

@@ -109,3 +109,11 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 
 * **Rota:** `/components` (Apenas em dev/local)
 * **Objetivo:** Exibir a biblioteca base documentando todos os componentes criados a partir das referências (`docs/html/components.html`).
+
+
+### Payments
+- **Rota:** `/payments`
+- **Permissões:** `payments:read`, `payments:create`, `payments:cancel`
+- **Componentes:** Tabela de listagem com paginação e filtros (Busca, Status, Método, Data), Modal de criação (`PaymentForm`), Modal de Detalhes com Resumo e Timeline, Confirmação de cancelamento (`AppConfirmDialog`).
+- **Segurança:** O valor é enviado em centavos, tenantId inferido, idempotency key gerada em memória para submit.
+

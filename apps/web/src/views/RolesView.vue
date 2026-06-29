@@ -37,6 +37,21 @@ const openRoleDetails = async (id: string) => {
     isModalOpen.value = true
   }
 }
+
+const getRoleField = (item: any, field: 'name' | 'description') => {
+  const i18nKey = `roles.list.${item.key}.${field}`
+  const translation = t(i18nKey)
+  if (translation.startsWith('[') && translation.endsWith(']')) {
+    return item[field]
+  }
+  return translation
+}
+
+const getPermissionDescription = (key: string) => {
+  const i18nKey = `permissions.list.${key.replace(/:/g, '.')}`
+  const translation = t(i18nKey)
+  return translation.startsWith('[') ? key : translation
+}
 </script>
 
 <template>
@@ -62,7 +77,24 @@ const openRoleDetails = async (id: string) => {
         :empty-description="t('roles.emptyDescription')"
       >
         <template #key="{ item }">
-          <span class="font-medium font-mono text-xs text-gray-700 dark:text-gray-300">{{ item.key }}</span>
+          <div class="flex items-center gap-2">
+            <span class="font-medium font-mono text-xs text-gray-700 dark:text-gray-300">{{ item.key }}</span>
+            <AppBadge v-if="item.key === 'PLATFORM_OWNER'" variant="warning">
+              Platform
+            </AppBadge>
+          </div>
+        </template>
+
+        <template #name="{ item }">
+          <span class="text-sm font-medium text-gray-900 dark:text-white">
+            {{ getRoleField(item, 'name') }}
+          </span>
+        </template>
+
+        <template #description="{ item }">
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            {{ getRoleField(item, 'description') }}
+          </span>
         </template>
 
         <template #system="{ item }">
@@ -105,7 +137,7 @@ const openRoleDetails = async (id: string) => {
         <div class="grid grid-cols-2 gap-4">
           <div>
             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ t('roles.table.name') }}</h4>
-            <p class="text-gray-900 dark:text-white font-medium">{{ rolesStore.selectedRole.name }}</p>
+            <p class="text-gray-900 dark:text-white font-medium">{{ getRoleField(rolesStore.selectedRole, 'name') }}</p>
           </div>
           <div>
             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ t('roles.table.key') }}</h4>
@@ -113,7 +145,7 @@ const openRoleDetails = async (id: string) => {
           </div>
           <div class="col-span-2">
             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ t('roles.table.description') }}</h4>
-            <p class="text-gray-900 dark:text-white">{{ rolesStore.selectedRole.description || '-' }}</p>
+            <p class="text-gray-900 dark:text-white">{{ getRoleField(rolesStore.selectedRole, 'description') || '-' }}</p>
           </div>
           <div class="col-span-2">
             <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{{ t('roles.details.permissions') }} ({{ rolesStore.selectedRole.permissions.length }})</h4>
@@ -121,7 +153,8 @@ const openRoleDetails = async (id: string) => {
               <AppBadge 
                 v-for="perm in rolesStore.selectedRole.permissions" 
                 :key="perm" 
-                variant="default"
+                :variant="perm.startsWith('platform:') ? 'warning' : 'default'"
+                :title="getPermissionDescription(perm)"
               >
                 {{ perm }}
               </AppBadge>

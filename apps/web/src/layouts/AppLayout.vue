@@ -11,6 +11,10 @@
         <img v-else :src="brandAssets.appIcon" alt="LF Icon" class="lf-sidebar-logo-icon-img" />
       </div>
       <nav class="lf-sidebar__nav">
+        <!-- Section: Operations -->
+        <div v-if="authStore.user?.isPlatformAdmin && !isCollapsed" class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3">
+          {{ t('platform.sidebar.operations') }}
+        </div>
         <router-link to="/dashboard" class="lf-nav-item" active-class="lf-nav-item--active">
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">dashboard</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.dashboard') }}</span>
@@ -60,15 +64,43 @@
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_balance</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.tenantSettings') }}</span>
         </router-link>
-        <!-- Mock Nav Items -->
-        <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
+        <router-link 
+          v-if="authStore.checkAllPermissions(['payments:read'])" 
+          to="/payments" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">payments</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
-        </a>
+        </router-link>
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_tree</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>
         </a>
+
+        <!-- Platform Admin Menu -->
+        <div v-if="authStore.user?.isPlatformAdmin" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div v-if="!isCollapsed" class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3">
+            {{ t('platform.sidebar.platform') }}
+          </div>
+          <router-link 
+            to="/platform/tenants" 
+            class="lf-nav-item"
+            active-class="lf-nav-item--active"
+          >
+            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">domain</span>
+            <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.tenants') }}</span>
+          </router-link>
+          <router-link 
+            v-if="authStore.checkAllPermissions(['platform:audit:read'])"
+            to="/platform/audit" 
+            class="lf-nav-item"
+            active-class="lf-nav-item--active"
+          >
+            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">history</span>
+            <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.audit') }}</span>
+          </router-link>
+        </div>
       </nav>
 
       <div class="lf-sidebar__footer">

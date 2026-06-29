@@ -178,6 +178,7 @@ Algoritmo sugerido:
 
 ```text
 AES-256-GCM
+GATEWAY_CREDENTIALS_ENCRYPTION_KEY (32-bytes base64 string)
 ```
 
 Regras:

@@ -12,8 +12,10 @@ import RolesView from '../views/RolesView.vue'
 import PermissionsView from '../views/PermissionsView.vue'
 import TenantSettingsView from '../views/TenantSettingsView.vue'
 import CustomersView from '../views/CustomersView.vue'
+import PaymentsView from '../views/PaymentsView.vue'
 import ForbiddenView from '../views/ForbiddenView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
+import PlatformTenantsView from '../views/PlatformTenantsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +42,15 @@ const router = createRouter({
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('../views/ResetPasswordView.vue'),
+      meta: {
+        layout: AuthLayout,
+        public: true
+      }
+    },
+    {
+      path: '/accept-invitation',
+      name: 'accept-invitation',
+      component: () => import('../views/AcceptTenantInvitationView.vue'),
       meta: {
         layout: AuthLayout,
         public: true
@@ -109,12 +120,55 @@ const router = createRouter({
       }
     },
     {
+      path: '/payments',
+      name: 'payments',
+      component: PaymentsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['payments:read']
+      }
+    },
+    {
       path: '/forbidden',
       name: 'forbidden',
       component: ForbiddenView,
       meta: {
         layout: AppLayout,
         requiresAuth: true
+      }
+    },
+    {
+      path: '/platform/tenants',
+      name: 'platform-tenants',
+      component: PlatformTenantsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:tenants:read']
+      }
+    },
+    {
+      path: '/platform/tenants/:id',
+      name: 'platform-tenant-details',
+      component: () => import('../views/PlatformTenantDetailsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:tenants:read']
+      }
+    },
+    {
+      path: '/platform/audit',
+      name: 'platform-audit',
+      component: () => import('../views/PlatformAuditView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:audit:read']
       }
     },
     {
@@ -131,6 +185,17 @@ const router = createRouter({
         } else {
           next('/not-found')
         }
+      }
+    },
+    {
+      path: '/platform/tenants/:id',
+      name: 'platform-tenant-details',
+      component: () => import('../views/PlatformTenantDetailsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:tenants:overview:read']
       }
     },
     {
@@ -173,6 +238,10 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.checkAllPermissions(requiredPerms)) {
       return next({ path: '/forbidden' })
     }
+  }
+
+  if (to.meta.platformAdminOnly && !authStore.user?.isPlatformAdmin) {
+    return next({ path: '/forbidden' })
   }
 
   next()

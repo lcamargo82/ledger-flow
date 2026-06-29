@@ -75,7 +75,8 @@ O LedgerFlow simula uma solução para esses problemas com uma arquitetura prepa
 * Gestão de permissões.
 * Gestão de clientes.
 * Gestão de pagamentos.
-* Integração inicial com Stripe.
+* Gestão de Tenants (Provisionamento, Overview e Saúde Operacional).
+* Integração inicial com Asaas Sandbox (Fase 6.1).
 * Arquitetura desacoplada para múltiplos gateways.
 * Webhooks inbound.
 * Webhooks outbound.
@@ -607,10 +608,18 @@ A plataforma suporta recuperação de senha segura:
 * Token temporário: Não é logado nem persistido no localStorage/sessionStorage.
 * E-mails em ambiente de desenvolvimento podem ser inspecionados via Mailpit (`http://localhost:8026`).
 
-**Credenciais demo:**
+**Credenciais demo (Tenant Cliente):**
 
 ```text
 E-mail: owner@ledgerflow.local
+Senha: ChangeMe123!
+
+```
+
+**Credenciais de Plataforma (Admin Master):**
+
+```text
+E-mail: platform.owner@ledgerflow.local
 Senha: ChangeMe123!
 
 ```
@@ -759,9 +768,9 @@ IPaymentGateway
 
 ```
 
-O Stripe será o primeiro provider real.
+O Asaas (Sandbox) é o primeiro provider real implementado.
 
-O core de pagamento não deve importar SDK do Stripe diretamente. O SDK deve ficar isolado no adapter.
+O core de pagamento não importa SDKs externos diretamente. Eles ficam isolados no adapter.
 
 ---
 # 16. Outbox e Inbox
@@ -1196,3 +1205,31 @@ Projeto desenvolvido como estudo avançado de arquitetura backend/frontend, sist
 Este projeto é destinado a estudo e portfólio.
 
 A licença será definida futuramente.
+
+
+## Fase 5B - Payments Frontend
+* Listagem e filtros de pagamentos
+* Criação de pagamento interno
+* Conversão de valor para centavos
+* Geração de Idempotency-Key em memória
+* Detalhes e timeline
+* Cancelamento
+* Gateway real ainda futuro.
+
+## Fase 7A - Asaas Inbound Webhooks
+
+O LedgerFlow recebe atualizações síncronas de pagamentos emitidos pelo gateway Asaas Sandbox. O webhook está exposto em `/webhooks/asaas`.
+
+- Autenticação por token no header (`asaas-access-token` configurável via `.env`).
+- Resposta a eventos segue o **Inbox Pattern**, salvando o histórico da recepção em banco local.
+- Sincronização segura atualiza os pagamentos do LedgerFlow baseado no `providerPaymentId`.
+- Para receber webhooks do Sandbox num ambiente local, crie um túnel reverso, como `ngrok` ou `cloudflare tunnel`, e cadastre a URL HTTPS no painel de Webhooks do Asaas Sandbox.
+- O sistema não utiliza **Polling contínuo**, economizando rate-limits do Asaas e priorizando conexões assíncronas.
+
+
+
+### Platform Admin as Internal Tenant User
+
+O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (*Dual-Role*). Ele age simultaneamente como:
+- **Usuário Operacional (Tenant)**: Dentro do tenant interno `LedgerFlow Platform`, o Platform Admin gerencia usuários, clientes e pagamentos da mesma forma que qualquer tenant padrão, utilizando a role `OWNER` com escopo `TENANT`.
+- **Administrador Global (Platform)**: Utilizando a role especial `PLATFORM_OWNER` com escopo `PLATFORM`, o Admin Master tem a capacidade de gerenciar todos os tenants do ecossistema a partir de uma interface separada na plataforma.

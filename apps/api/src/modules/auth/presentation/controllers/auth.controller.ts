@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Req,
-  HttpCode,
-  HttpStatus,
-  Get,
-} from '@nestjs/common';
+import { Controller, Post, Body, Req, HttpCode, HttpStatus, Get } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthService } from '../../application/services/auth.service';
 import { LoginDto } from '../../application/dto/login.dto';
@@ -14,6 +6,7 @@ import { RefreshTokenDto } from '../../application/dto/refresh-token.dto';
 import { LogoutDto } from '../../application/dto/logout.dto';
 import { ForgotPasswordDto } from '../../application/dto/forgot-password.dto';
 import { ResetPasswordDto } from '../../application/dto/reset-password.dto';
+import { AcceptTenantInvitationDto } from '../../application/dto/accept-tenant-invitation.dto';
 import { AuthResponse } from '../../application/types/auth-response.type';
 import { Public } from '../decorators/public.decorator';
 import { CurrentUser } from '../decorators/current-user.decorator';
@@ -49,10 +42,7 @@ export class AuthController {
     description: 'Autentica o usuário e retorna o access e refresh tokens',
   })
   @ApiUnauthorizedResponse({ description: 'Credenciais inválidas' })
-  async login(
-    @Body() loginDto: LoginDto,
-    @Req() req: Request,
-  ): Promise<AuthResponse> {
+  async login(@Body() loginDto: LoginDto, @Req() req: Request): Promise<AuthResponse> {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
 
@@ -69,9 +59,7 @@ export class AuthController {
     description: 'Gera um novo access token a partir de um refresh token',
   })
   @ApiUnauthorizedResponse({ description: 'Token inválido ou revogado' })
-  async refresh(
-    @Body() refreshTokenDto: RefreshTokenDto,
-  ): Promise<{ accessToken: string }> {
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string }> {
     return this.authService.refresh(refreshTokenDto);
   }
 
@@ -93,8 +81,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get authenticated user profile' })
   @ApiOkResponse({
     type: MeResponseDto,
-    description:
-      'Retorna o usuário autenticado com roles, permissões, tenantId e sessionId',
+    description: 'Retorna o usuário autenticado com roles, permissões, tenantId e sessionId',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
   getProfile(@CurrentUser() user: AuthenticatedUser) {
@@ -107,8 +94,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Request password recovery' })
   @ApiBody({ type: ForgotPasswordDto })
   @ApiOkResponse({
-    description:
-      'Se o e-mail existir, as instruções de recuperação serão enviadas.',
+    description: 'Se o e-mail existir, as instruções de recuperação serão enviadas.',
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
   // @ApiTooManyRequestsResponse({ description: 'Muitas requisições (TODO: rate limit)' }) // TODO: Implement rate limiting
@@ -119,11 +105,7 @@ export class AuthController {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
 
-    return this.authService.forgotPassword(
-      forgotPasswordDto,
-      ipAddress,
-      userAgent,
-    );
+    return this.authService.forgotPassword(forgotPasswordDto, ipAddress, userAgent);
   }
 
   @Public()
@@ -140,11 +122,24 @@ export class AuthController {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
 
-    return this.authService.resetPassword(
-      resetPasswordDto,
-      ipAddress,
-      userAgent,
-    );
+    return this.authService.resetPassword(resetPasswordDto, ipAddress, userAgent);
+  }
+
+  @Public()
+  @Post('accept-tenant-invitation')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Accept tenant invitation and set password' })
+  @ApiBody({ type: AcceptTenantInvitationDto })
+  @ApiOkResponse({ description: 'Conta ativada com sucesso' })
+  @ApiBadRequestResponse({ description: 'Token inválido ou expirado' })
+  async acceptTenantInvitation(
+    @Body() dto: AcceptTenantInvitationDto,
+    @Req() req: Request,
+  ): Promise<{ message: string }> {
+    const ipAddress = this.extractIpAddress(req);
+    const userAgent = this.extractUserAgent(req);
+
+    return this.authService.acceptTenantInvitation(dto, ipAddress, userAgent);
   }
 
   private extractIpAddress(req: Request): string | undefined {

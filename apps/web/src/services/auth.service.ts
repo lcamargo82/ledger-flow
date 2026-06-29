@@ -38,5 +38,10 @@ export const authService = {
 
   async logout(refreshToken: string): Promise<void> {
     await httpClient.post('/auth/logout', { refreshToken })
+  },
+
+  async acceptTenantInvitation(token: string, password: string): Promise<{ message: string }> {
+    const response = await httpClient.post<{ message: string }>('/auth/accept-tenant-invitation', { token, password })
+    return response.data
   }
 }
