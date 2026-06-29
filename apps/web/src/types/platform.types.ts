@@ -93,3 +93,83 @@ export interface UpdateTenantSubscriptionDto {
   currentPeriodEnd?: string;
   notes?: string;
 }
+
+export interface PlatformTenantOverviewResponse {
+  tenant: {
+    id: string;
+    name: string;
+    slug: string;
+    active: boolean;
+    timezone: string;
+    createdAt: string;
+    subscription: {
+      plan: string;
+      status: string;
+      trialEndsAt?: string;
+      currentPeriodEnd?: string;
+    };
+  };
+  operations: {
+    usersTotal: number;
+    usersActive: number;
+    customersTotal: number;
+    customersActive: number;
+    paymentsTotal: number;
+    paymentsPending: number;
+    paymentsProcessing: number;
+    paymentsApproved: number;
+    paymentsFailed: number;
+    paymentsCanceled: number;
+    paymentsRefunded: number;
+  };
+  gateway: {
+    hasActiveConfiguration: boolean;
+    activeProviders: Array<{
+      provider: string;
+      environment: string;
+      status: string;
+      healthStatus: string;
+      lastHealthCheckAt?: string;
+    }>;
+  };
+  webhooks: {
+    lastReceivedAt?: string;
+    processedLast24Hours: number;
+    failedLast24Hours: number;
+    ignoredLast24Hours: number;
+  };
+  activity: {
+    lastPaymentCreatedAt?: string;
+    lastPaymentStatusChangeAt?: string;
+    lastUserLoginAt?: string;
+  };
+}
+
+export enum TenantHealthStatusEnum {
+  HEALTHY = 'HEALTHY',
+  ATTENTION = 'ATTENTION',
+  CRITICAL = 'CRITICAL',
+  UNKNOWN = 'UNKNOWN',
+}
+
+export interface PlatformTenantHealthResponse {
+  tenantId: string;
+  status: TenantHealthStatusEnum;
+  reasons: Array<{
+    code: string;
+    message: string;
+  }>;
+  evaluatedAt: string;
+}
+
+export interface PlatformTenantActivityResponse {
+  items: Array<{
+    id: string;
+    action: string;
+    label: string;
+    occurredAt: string;
+    severity: 'INFO' | 'WARNING' | 'ERROR';
+    actorType?: string;
+    metadata?: any;
+  }>;
+}

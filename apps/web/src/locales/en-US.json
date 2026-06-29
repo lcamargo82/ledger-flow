@@ -628,6 +628,46 @@
     },
     "actions": {
       "view": "View"
+    },
+    "overview": {
+      "backToTenants": "Back to Tenants",
+      "operations": "Operations",
+      "gateway": "Payment Gateway",
+      "webhooks": "Webhooks",
+      "activity": "Recent Activity"
+    },
+    "health": {
+      "HEALTHY": "Healthy",
+      "ATTENTION": "Attention",
+      "CRITICAL": "Critical",
+      "UNKNOWN": "Unknown"
+    },
+    "metrics": {
+      "usersTitle": "Users",
+      "usersTotal": "Total",
+      "usersActive": "Active",
+      "customersTitle": "Customers",
+      "customersTotal": "Total",
+      "customersActive": "Active",
+      "paymentsTitle": "Payments",
+      "paymentsTotal": "Total",
+      "paymentsPending": "Pending",
+      "paymentsFailed": "Failed"
+    },
+    "gateway": {
+      "noActiveConfiguration": "No active gateway configuration found.",
+      "status": "Status",
+      "healthStatus": "Health",
+      "lastHealthCheck": "Last check"
+    },
+    "webhooks": {
+      "lastReceivedAt": "Last event",
+      "processedLast24Hours": "Processed (24h)",
+      "failedLast24Hours": "Failed (24h)",
+      "ignoredLast24Hours": "Ignored (24h)"
+    },
+    "activity": {
+      "empty": "No recent activity found."
     }
   }
 }

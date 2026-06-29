@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { usePlatformTenantsStore } from '../stores/platform-tenants.store'
 import { formatDateTime } from '../utils/date-format'
@@ -15,6 +16,7 @@ import AppErrorState from '../components/common/AppErrorState.vue'
 
 const { t, currentLocale } = useI18n()
 const platformTenantsStore = usePlatformTenantsStore()
+const router = useRouter()
 
 const searchQuery = ref('')
 const selectedStatus = ref('')
@@ -140,11 +142,12 @@ const handleSearch = () => {
           </span>
         </template>
 
-        <template #actions>
+        <template #actions="{ item }">
           <div class="flex justify-end gap-2">
             <AppButton 
               variant="secondary" 
               size="small"
+              @click="router.push(`/platform/tenants/${item.id}`)"
             >
               {{ t('platformTenants.actions.view') }}
             </AppButton>

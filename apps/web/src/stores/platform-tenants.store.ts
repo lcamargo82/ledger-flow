@@ -7,6 +7,9 @@ import type {
   UpdatePlatformTenantDto,
   UpdatePlatformTenantStatusDto,
   UpdateTenantSubscriptionDto,
+  PlatformTenantOverviewResponse,
+  PlatformTenantHealthResponse,
+  PlatformTenantActivityResponse
 } from '../types/platform.types';
 import platformTenantsService from '../services/platform-tenants.service';
 import { useToastStore } from './toast.store';
@@ -15,6 +18,9 @@ import { useI18n } from '../composables/useI18n';
 export const usePlatformTenantsStore = defineStore('platformTenants', () => {
   const tenants = ref<PlatformTenantResponse[]>([]);
   const currentTenant = ref<PlatformTenantDetailsResponse | null>(null);
+  const currentTenantOverview = ref<PlatformTenantOverviewResponse | null>(null);
+  const currentTenantHealth = ref<PlatformTenantHealthResponse | null>(null);
+  const currentTenantActivity = ref<PlatformTenantActivityResponse | null>(null);
   const total = ref(0);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -123,6 +129,26 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
     }
   };
 
+  const fetchTenantOverview = async (id: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const [overview, health, activity] = await Promise.all([
+        platformTenantsService.getTenantOverview(id),
+        platformTenantsService.getTenantHealth(id),
+        platformTenantsService.getTenantActivity(id)
+      ]);
+      currentTenantOverview.value = overview;
+      currentTenantHealth.value = health;
+      currentTenantActivity.value = activity;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch tenant overview';
+      toastStore.error(error.value || '', t('platform.error.loadFailed'));
+    } finally {
+      loading.value = false;
+    }
+  };
+
   return {
     tenants,
     currentTenant,
@@ -134,5 +160,9 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
     updateTenant,
     updateStatus,
     updateSubscription,
+    currentTenantOverview,
+    currentTenantHealth,
+    currentTenantActivity,
+    fetchTenantOverview,
   };
 });

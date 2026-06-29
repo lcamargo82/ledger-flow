@@ -627,6 +627,46 @@
     },
     "actions": {
       "view": "Visualizar"
+    },
+    "overview": {
+      "backToTenants": "Voltar para Tenants",
+      "operations": "Operações",
+      "gateway": "Gateway de Pagamento",
+      "webhooks": "Webhooks",
+      "activity": "Atividade Recente"
+    },
+    "health": {
+      "HEALTHY": "Saudável",
+      "ATTENTION": "Atenção",
+      "CRITICAL": "Crítico",
+      "UNKNOWN": "Desconhecido"
+    },
+    "metrics": {
+      "usersTitle": "Usuários",
+      "usersTotal": "Total",
+      "usersActive": "Ativos",
+      "customersTitle": "Clientes",
+      "customersTotal": "Total",
+      "customersActive": "Ativos",
+      "paymentsTitle": "Pagamentos",
+      "paymentsTotal": "Total",
+      "paymentsPending": "Pendentes",
+      "paymentsFailed": "Falharam"
+    },
+    "gateway": {
+      "noActiveConfiguration": "Nenhuma configuração de gateway ativa encontrada.",
+      "status": "Status",
+      "healthStatus": "Saúde",
+      "lastHealthCheck": "Última verificação"
+    },
+    "webhooks": {
+      "lastReceivedAt": "Último evento",
+      "processedLast24Hours": "Processados (24h)",
+      "failedLast24Hours": "Falharam (24h)",
+      "ignoredLast24Hours": "Ignorados (24h)"
+    },
+    "activity": {
+      "empty": "Nenhuma atividade recente encontrada."
     }
   }
 }

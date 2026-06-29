@@ -12,6 +12,9 @@ import type { AuthenticatedUser } from '../../../auth/application/types/authenti
 import { PaginatedPlatformTenantsResponseDto } from '../../application/dto/paginated-platform-tenants-response.dto';
 import { PlatformTenantResponseDto } from '../../application/dto/platform-tenant-response.dto';
 import { PlatformTenantDetailsResponseDto } from '../../application/dto/platform-tenant-details-response.dto';
+import { PlatformTenantOverviewResponseDto } from '../../application/dto/platform-tenant-overview-response.dto';
+import { PlatformTenantHealthResponseDto } from '../../application/dto/platform-tenant-health-response.dto';
+import { PlatformTenantActivityResponseDto } from '../../application/dto/platform-tenant-activity-response.dto';
 
 @ApiTags('Platform Administration')
 @ApiBearerAuth('access-token')
@@ -71,5 +74,35 @@ export class PlatformTenantsController {
   @ApiForbiddenResponse({ description: 'You do not have permission to access platform administration.' })
   updateSubscription(@Param('id') id: string, @Body() dto: UpdateTenantSubscriptionDto, @CurrentUser() user: AuthenticatedUser) {
     return this.service.updateSubscription(id, dto, user.id);
+  }
+
+  @Get(':id/overview')
+  @RequirePermissions('platform:tenants:overview:read')
+  @ApiOperation({ summary: 'Get operational overview of a tenant' })
+  @ApiOkResponse({ type: PlatformTenantOverviewResponseDto })
+  @ApiNotFoundResponse({ description: 'Tenant not found.' })
+  @ApiForbiddenResponse({ description: 'You do not have permission to access platform administration.' })
+  getOverview(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.service.getTenantOverview(id, user.id);
+  }
+
+  @Get(':id/health')
+  @RequirePermissions('platform:tenants:health:read')
+  @ApiOperation({ summary: 'Get operational health of a tenant' })
+  @ApiOkResponse({ type: PlatformTenantHealthResponseDto })
+  @ApiNotFoundResponse({ description: 'Tenant not found.' })
+  @ApiForbiddenResponse({ description: 'You do not have permission to access platform administration.' })
+  getHealth(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.service.getTenantHealth(id, user.id);
+  }
+
+  @Get(':id/activity')
+  @RequirePermissions('platform:tenants:overview:read')
+  @ApiOperation({ summary: 'Get recent operational activity of a tenant' })
+  @ApiOkResponse({ type: PlatformTenantActivityResponseDto })
+  @ApiNotFoundResponse({ description: 'Tenant not found.' })
+  @ApiForbiddenResponse({ description: 'You do not have permission to access platform administration.' })
+  getActivity(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.service.getTenantActivity(id, user.id);
   }
 }
