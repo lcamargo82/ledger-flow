@@ -9,18 +9,33 @@ import AppTable from '../components/common/AppTable.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
 import AppCard from '../components/common/AppCard.vue'
+import AppBadge from '../components/common/AppBadge.vue'
+import AppSelect from '../components/common/AppSelect.vue'
 
 const { t, currentLocale } = useI18n()
 const permissionsStore = usePermissionsStore()
 const authStore = useAuthStore()
 
 const searchInput = ref('')
+const selectedScope = ref('')
 
-const columns = computed(() => [
-  { key: 'key', label: t('permissions.table.key') },
-  { key: 'description', label: t('permissions.table.description') },
-  { key: 'createdAt', label: t('permissions.table.createdAt') }
+const scopeOptions = computed(() => [
+  { value: '', label: t('permissions.scope.all') },
+  { value: 'TENANT', label: t('permissions.scope.tenant') },
+  { value: 'PLATFORM', label: t('permissions.scope.platform') },
 ])
+
+const columns = computed(() => {
+  const base = [
+    { key: 'key', label: t('permissions.table.key') },
+    { key: 'description', label: t('permissions.table.description') },
+  ]
+  if (authStore.user?.isPlatformAdmin) {
+    base.push({ key: 'scope', label: t('permissions.table.scope') })
+  }
+  base.push({ key: 'createdAt', label: t('permissions.table.createdAt') })
+  return base
+})
 
 onMounted(() => {
   if (authStore.checkPermission('permissions:read')) {
@@ -30,9 +45,15 @@ onMounted(() => {
 
 const filteredPermissions = computed(() => {
   const query = searchInput.value.toLowerCase()
-  if (!query) return permissionsStore.permissions
+  let list = permissionsStore.permissions
   
-  return permissionsStore.permissions.filter(p => 
+  if (selectedScope.value) {
+    list = list.filter(p => p.scope === selectedScope.value)
+  }
+
+  if (!query) return list
+  
+  return list.filter(p => 
     p.key.toLowerCase().includes(query) || 
     (p.description && p.description.toLowerCase().includes(query))
   )
@@ -55,12 +76,21 @@ const filteredPermissions = computed(() => {
 
     <template v-else>
       <AppCard class="lf-mb-6">
-        <div class="w-full max-w-md">
-          <AppInput 
-            id="search"
-            v-model="searchInput"
-            :placeholder="t('permissions.searchPlaceholder')"
-          />
+        <div class="flex flex-col sm:flex-row gap-4 w-full">
+          <div class="w-full sm:w-2/3">
+            <AppInput 
+              id="search"
+              v-model="searchInput"
+              :placeholder="t('permissions.searchPlaceholder')"
+            />
+          </div>
+          <div class="w-full sm:w-1/3" v-if="authStore.user?.isPlatformAdmin">
+            <AppSelect
+              id="scope-filter"
+              v-model="selectedScope"
+              :options="scopeOptions"
+            />
+          </div>
         </div>
       </AppCard>
 
@@ -73,6 +103,12 @@ const filteredPermissions = computed(() => {
       >
         <template #key="{ item }">
           <span class="font-medium font-mono text-xs text-indigo-600 dark:text-indigo-400">{{ item.key }}</span>
+        </template>
+
+        <template #scope="{ item }">
+          <AppBadge :variant="item.scope === 'PLATFORM' ? 'warning' : 'info'">
+            {{ item.scope === 'PLATFORM' ? t('permissions.scopeBadge.platform') : t('permissions.scopeBadge.tenant') }}
+          </AppBadge>
         </template>
 
         <template #createdAt="{ item }">

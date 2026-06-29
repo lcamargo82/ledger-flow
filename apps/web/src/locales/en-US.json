@@ -220,7 +220,8 @@
       "OWNER": "Owner",
       "FINANCE_OPERATOR": "Finance",
       "SUPPORT_VIEWER": "Support",
-      "DEVELOPER": "Developer"
+      "DEVELOPER": "Developer",
+      "PLATFORM_OWNER": "Platform Owner"
     }
   },
   "common": {
@@ -281,12 +282,22 @@
     "table": {
       "key": "Key",
       "description": "Description",
-      "createdAt": "Created at"
+      "createdAt": "Created at",
+      "scope": "Scope"
     },
     "emptyTitle": "No permissions found",
     "emptyDescription": "The search returned no results.",
     "errorTitle": "Error loading permissions",
-    "errorDescription": "An error occurred while fetching permissions."
+    "errorDescription": "An error occurred while fetching permissions.",
+    "scope": {
+      "all": "All",
+      "tenant": "Tenant",
+      "platform": "Platform"
+    },
+    "scopeBadge": {
+      "tenant": "Tenant",
+      "platform": "Platform"
+    }
   },
   "roles": {
     "title": "Roles Management",
@@ -584,6 +595,13 @@
       "next": "Next",
       "pageOf": "Page {page} of {totalPages}",
       "perPage": "Items per page"
+    }
+  },
+  "platform": {
+    "sidebar": {
+      "operations": "Operations",
+      "platform": "Platform",
+      "tenants": "Platform Tenants"
     }
   }
 }

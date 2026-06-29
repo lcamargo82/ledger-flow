@@ -219,7 +219,8 @@
       "OWNER": "Owner",
       "FINANCE_OPERATOR": "Financeiro",
       "SUPPORT_VIEWER": "Suporte",
-      "DEVELOPER": "Desenvolvedor"
+      "DEVELOPER": "Desenvolvedor",
+      "PLATFORM_OWNER": "Platform Owner"
     }
   },
   "common": {
@@ -280,12 +281,22 @@
     "table": {
       "key": "Chave",
       "description": "Descrição",
-      "createdAt": "Criado em"
+      "createdAt": "Criado em",
+      "scope": "Escopo"
     },
     "emptyTitle": "Nenhuma permissão encontrada",
     "emptyDescription": "A busca não retornou resultados.",
     "errorTitle": "Erro ao carregar permissões",
-    "errorDescription": "Ocorreu um erro ao buscar as permissões."
+    "errorDescription": "Ocorreu um erro ao buscar as permissões.",
+    "scope": {
+      "all": "Todos",
+      "tenant": "Tenant",
+      "platform": "Plataforma"
+    },
+    "scopeBadge": {
+      "tenant": "Tenant",
+      "platform": "Plataforma"
+    }
   },
   "roles": {
     "title": "Gerenciamento de Roles",
@@ -583,6 +594,13 @@
       "next": "Próxima",
       "pageOf": "Página {page} de {totalPages}",
       "perPage": "Itens por página"
+    }
+  },
+  "platform": {
+    "sidebar": {
+      "operations": "Operação",
+      "platform": "Plataforma",
+      "tenants": "Platform Tenants"
     }
   }
 }

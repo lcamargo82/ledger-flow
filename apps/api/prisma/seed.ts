@@ -69,10 +69,11 @@ async function main() {
 
   const permissions: Permission[] = [];
   for (const p of permissionsData) {
+    const scope = p.key.startsWith('platform:') ? 'PLATFORM' : 'TENANT';
     const perm = await prisma.permission.upsert({
       where: { key: p.key },
-      update: { description: p.description },
-      create: p,
+      update: { description: p.description, scope: scope as any },
+      create: { ...p, scope: scope as any },
     });
     permissions.push(perm);
   }
@@ -81,6 +82,7 @@ async function main() {
   // 3. Create Roles
   const rolesData = [
     { key: 'OWNER', name: 'Owner', description: 'Proprietário da conta com acesso total', system: true, tenantId: tenant.id },
+    { key: 'OWNER', name: 'Owner', description: 'Proprietário da conta com acesso total', system: true, tenantId: platformTenant.id },
     { key: 'FINANCE_OPERATOR', name: 'Financeiro', description: 'Operador financeiro', system: true, tenantId: tenant.id },
     { key: 'SUPPORT_VIEWER', name: 'Suporte', description: 'Acesso apenas leitura para suporte', system: true, tenantId: tenant.id },
     { key: 'DEVELOPER', name: 'Desenvolvedor', description: 'Gerenciamento técnico (API, Webhooks)', system: true, tenantId: tenant.id },
@@ -114,24 +116,31 @@ async function main() {
   console.log(`Roles created/updated: ${roles.length}`);
 
   // 4. Assign all permissions to OWNER role
-  const ownerRole = roles.find((r) => r.key === 'OWNER');
-  if (ownerRole) {
+  const ownerRoles = roles.filter((r) => r.key === 'OWNER');
+  for (const ownerRole of ownerRoles) {
     for (const p of permissions) {
-      await prisma.rolePermission.upsert({
-        where: {
-          roleId_permissionId: {
+      // Platform owner role should not get PLATFORM permissions implicitly? Wait.
+      // The user instruction says: "Garantir que a role OWNER exista e possua todas as permissões normais de tenant já previstas no projeto."
+      // So OWNER gets TENANT permissions only, or both if it's the platform tenant? 
+      // User says: "Garantir que PLATFORM_OWNER tenha somente permissões `PLATFORM`." and "OWNER Responsável pelas permissões normais de tenant". 
+      // So OWNER role gets ONLY TENANT permissions.
+      if (p.scope === 'TENANT') {
+        await prisma.rolePermission.upsert({
+          where: {
+            roleId_permissionId: {
+              roleId: ownerRole.id,
+              permissionId: p.id,
+            },
+          },
+          update: {},
+          create: {
             roleId: ownerRole.id,
             permissionId: p.id,
           },
-        },
-        update: {},
-        create: {
-          roleId: ownerRole.id,
-          permissionId: p.id,
-        },
-      });
+        });
+      }
     }
-    console.log('Assigned all permissions to OWNER role');
+    console.log(`Assigned TENANT permissions to OWNER role for tenant ${ownerRole.tenantId}`);
   }
 
   // 4.5 Assign platform permissions to PLATFORM_OWNER role
@@ -182,18 +191,19 @@ async function main() {
   console.log(`Demo Owner user created/verified: ${ownerUser.email}`);
 
   // 6. Assign OWNER role to Demo Owner
-  if (ownerRole) {
+  const demoOwnerRole = roles.find((r) => r.key === 'OWNER' && r.tenantId === tenant.id);
+  if (demoOwnerRole) {
     await prisma.userRole.upsert({
       where: {
         userId_roleId: {
           userId: ownerUser.id,
-          roleId: ownerRole.id,
+          roleId: demoOwnerRole.id,
         },
       },
       update: {},
       create: {
         userId: ownerUser.id,
-        roleId: ownerRole.id,
+        roleId: demoOwnerRole.id,
       },
     });
     console.log('Assigned OWNER role to Demo Owner user');
@@ -240,6 +250,24 @@ async function main() {
       },
     });
     console.log('Assigned PLATFORM_OWNER role to Platform Admin user');
+  }
+
+  const platformNormalOwnerRole = roles.find((r) => r.key === 'OWNER' && r.tenantId === platformTenant.id);
+  if (platformNormalOwnerRole) {
+    await prisma.userRole.upsert({
+      where: {
+        userId_roleId: {
+          userId: platformOwnerUser.id,
+          roleId: platformNormalOwnerRole.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: platformOwnerUser.id,
+        roleId: platformNormalOwnerRole.id,
+      },
+    });
+    console.log('Assigned OWNER role to Platform Admin user');
   }
 
   // 7. Create Demo Customer

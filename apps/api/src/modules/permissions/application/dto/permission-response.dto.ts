@@ -10,6 +10,9 @@ export class PermissionResponseDto {
   @ApiProperty({ example: 'Visualizar usuários', required: false })
   description?: string;
 
+  @ApiProperty({ example: 'TENANT', enum: ['TENANT', 'PLATFORM'] })
+  scope: string;
+
   @ApiProperty({ example: '2023-01-01T00:00:00.000Z' })
   createdAt: Date;
 

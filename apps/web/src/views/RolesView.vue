@@ -62,7 +62,12 @@ const openRoleDetails = async (id: string) => {
         :empty-description="t('roles.emptyDescription')"
       >
         <template #key="{ item }">
-          <span class="font-medium font-mono text-xs text-gray-700 dark:text-gray-300">{{ item.key }}</span>
+          <div class="flex items-center gap-2">
+            <span class="font-medium font-mono text-xs text-gray-700 dark:text-gray-300">{{ item.key }}</span>
+            <AppBadge v-if="item.key === 'PLATFORM_OWNER'" variant="warning">
+              Platform
+            </AppBadge>
+          </div>
         </template>
 
         <template #system="{ item }">
@@ -121,7 +126,7 @@ const openRoleDetails = async (id: string) => {
               <AppBadge 
                 v-for="perm in rolesStore.selectedRole.permissions" 
                 :key="perm" 
-                variant="default"
+                :variant="perm.startsWith('platform:') ? 'warning' : 'default'"
               >
                 {{ perm }}
               </AppBadge>

@@ -1226,3 +1226,9 @@ O LedgerFlow recebe atualizações síncronas de pagamentos emitidos pelo gatewa
 - O sistema não utiliza **Polling contínuo**, economizando rate-limits do Asaas e priorizando conexões assíncronas.
 
 
+
+### Platform Admin as Internal Tenant User
+
+O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (*Dual-Role*). Ele age simultaneamente como:
+- **Usuário Operacional (Tenant)**: Dentro do tenant interno `LedgerFlow Platform`, o Platform Admin gerencia usuários, clientes e pagamentos da mesma forma que qualquer tenant padrão, utilizando a role `OWNER` com escopo `TENANT`.
+- **Administrador Global (Platform)**: Utilizando a role especial `PLATFORM_OWNER` com escopo `PLATFORM`, o Admin Master tem a capacidade de gerenciar todos os tenants do ecossistema a partir de uma interface separada na plataforma.
