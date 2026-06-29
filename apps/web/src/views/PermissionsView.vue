@@ -55,9 +55,19 @@ const filteredPermissions = computed(() => {
   
   return list.filter(p => 
     p.key.toLowerCase().includes(query) || 
-    (p.description && p.description.toLowerCase().includes(query))
+    (p.description && p.description.toLowerCase().includes(query)) ||
+    getPermissionDescription(p).toLowerCase().includes(query)
   )
 })
+
+const getPermissionDescription = (item: any) => {
+  const i18nKey = `permissions.list.${item.key.replace(/:/g, '.')}`
+  const translation = t(i18nKey)
+  if (translation.startsWith('[') && translation.endsWith(']')) {
+    return item.description
+  }
+  return translation
+}
 </script>
 
 <template>
@@ -103,6 +113,12 @@ const filteredPermissions = computed(() => {
       >
         <template #key="{ item }">
           <span class="font-medium font-mono text-xs text-indigo-600 dark:text-indigo-400">{{ item.key }}</span>
+        </template>
+
+        <template #description="{ item }">
+          <span class="text-sm text-gray-700 dark:text-gray-300">
+            {{ getPermissionDescription(item) }}
+          </span>
         </template>
 
         <template #scope="{ item }">

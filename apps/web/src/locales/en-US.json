@@ -292,6 +292,57 @@
     "title": "System Permissions",
     "description": "List of all available global permissions in the system.",
     "searchPlaceholder": "Search permissions...",
+    "list": {
+      "auth": { "login": "Perform login" },
+      "users": {
+        "create": "Create users",
+        "read": "View users",
+        "update": "Update users",
+        "delete": "Delete users"
+      },
+      "roles": { "manage": "Manage roles and permissions" },
+      "permissions": { "read": "View permissions" },
+      "customers": {
+        "create": "Create customers",
+        "read": "View customers",
+        "update": "Update customers",
+        "delete": "Delete customers"
+      },
+      "payments": {
+        "create": "Create payments",
+        "read": "View payments",
+        "cancel": "Cancel payments",
+        "refund": "Refund payments"
+      },
+      "reports": { "export": "Export reports" },
+      "webhooks": { "manage": "Manage webhooks" },
+      "api-keys": { "manage": "Manage API keys" },
+      "gateways": { "manage": "Manage gateways" },
+      "notifications": { "read": "View notifications" },
+      "audit": { "read": "View audit trail" },
+      "tenant": {
+        "read": "View basic tenant data",
+        "update": "Update tenant settings"
+      },
+      "platform": {
+        "access": "Access platform administration",
+        "tenants": {
+          "create": "Create platform tenants",
+          "read": "View platform tenants",
+          "update": "Update platform tenants",
+          "status": "Change status of platform tenants",
+          "invite": "Invite and resend tenant invitations",
+          "overview": { "read": "View operational summary of platform tenants" },
+          "health": { "read": "View operational health of platform tenants" }
+        },
+        "subscriptions": {
+          "read": "View platform subscriptions",
+          "update": "Update platform subscriptions"
+        },
+        "audit": { "read": "View global platform audit logs" },
+        "support": { "read": "View tenant support summary" }
+      }
+    },
     "table": {
       "key": "Key",
       "description": "Description",
@@ -315,6 +366,13 @@
   "roles": {
     "title": "Roles Management",
     "description": "View the access roles for your tenant.",
+    "list": {
+      "OWNER": { "name": "Owner", "description": "Full access account owner" },
+      "FINANCE_OPERATOR": { "name": "Finance", "description": "Financial operator" },
+      "SUPPORT_VIEWER": { "name": "Support", "description": "Read-only access for support" },
+      "DEVELOPER": { "name": "Developer", "description": "Technical management (API, Webhooks)" },
+      "PLATFORM_OWNER": { "name": "Platform Owner", "description": "General platform administrator" }
+    },
     "table": {
       "name": "Name",
       "key": "Key",
