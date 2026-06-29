@@ -156,8 +156,12 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
     } catch (err: any) {
       error.value = err.message || 'Failed to resend invitation';
       toastStore.error(error.value || '', 'Erro ao reenviar convite');
-      throw err;
-=======
+    } finally {
+      loading.value = false;
+    }
+  };
+
+
   const fetchTenantOverview = async (id: string) => {
     loading.value = true;
     error.value = null;

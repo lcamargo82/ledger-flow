@@ -214,5 +214,4 @@ export interface PlatformTenantActivityResponse {
     actorType?: string;
     metadata?: any;
   }>;
->>>>>>> feature/platform-tenant-overview-health
 }
