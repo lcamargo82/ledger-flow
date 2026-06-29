@@ -8,7 +8,9 @@ import { PermissionScope } from '@prisma/client';
 export class PermissionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async listPermissions(user: AuthenticatedUser): Promise<PermissionsResponseDto> {
+  async listPermissions(
+    user: AuthenticatedUser,
+  ): Promise<PermissionsResponseDto> {
     const whereClause: any = {};
     if (user.tenantKind !== 'PLATFORM') {
       whereClause.scope = PermissionScope.TENANT;

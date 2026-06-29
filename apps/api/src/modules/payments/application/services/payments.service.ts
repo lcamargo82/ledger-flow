@@ -140,6 +140,21 @@ export class PaymentsService {
 
     const instructions = await this.gatewayOrchestrator.getPaymentInstructions(tenantId, payment);
 
+    try {
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          providerInvoiceUrl: instructions.invoiceUrl ?? undefined,
+          providerBankSlipUrl: instructions.bankSlipUrl ?? undefined,
+          providerPixCopyPaste: instructions.pixCopyPaste ?? undefined,
+          providerPixExpiresAt: instructions.expiresAt ?? undefined,
+          providerPaymentUrl: instructions.paymentUrl ?? undefined,
+        },
+      });
+    } catch (err) {
+      console.error(`Failed to update payment instructions metadata for payment ${payment.id}`, err);
+    }
+
     return instructions;
   }
 
@@ -157,6 +172,9 @@ export class PaymentsService {
     try {
       await this.gatewayOrchestrator.cancelPayment(tenantId, payment);
     } catch (err: any) {
+      if (err.message && err.message.includes('[AsaasAdapter] Conflict:')) {
+        throw new ConflictException('O provedor recusou o cancelamento: A cobrança pode já estar paga, estornada ou inelegível. Aguarde a sincronização pelo webhook.');
+      }
       throw new BadRequestException(`Falha ao cancelar pagamento no gateway: ${err.message}`);
     }
 

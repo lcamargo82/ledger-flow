@@ -27,7 +27,9 @@ export class PlatformAuditService {
       perPage: query.perPage || 20,
     });
 
-    const tenantIds = [...new Set(result.data.map((l) => l.tenantId).filter(Boolean))] as string[];
+    const tenantIds = [
+      ...new Set(result.data.map((l) => l.tenantId).filter(Boolean)),
+    ] as string[];
     const tenants = await this.prisma.tenant.findMany({
       where: { id: { in: tenantIds } },
     });
@@ -35,7 +37,10 @@ export class PlatformAuditService {
 
     return {
       data: result.data.map((log) =>
-        PlatformAuditMapper.toResponse(log, log.tenantId ? tenantMap.get(log.tenantId) : null),
+        PlatformAuditMapper.toResponse(
+          log,
+          log.tenantId ? tenantMap.get(log.tenantId) : null,
+        ),
       ),
       meta: result.meta,
     };
@@ -50,14 +55,18 @@ export class PlatformAuditService {
       throw new NotFoundException('Tenant not found');
     }
     if (tenant.kind === 'PLATFORM') {
-      throw new NotFoundException('Cannot list audit logs for PLATFORM tenant directly through this endpoint');
+      throw new NotFoundException(
+        'Cannot list audit logs for PLATFORM tenant directly through this endpoint',
+      );
     }
 
     const tenantQuery = { ...query, tenantId };
     return this.listGlobalAuditLogs(tenantQuery);
   }
 
-  private async buildWhereClause(query: ListPlatformAuditLogsQueryDto): Promise<Prisma.AuditLogWhereInput> {
+  private async buildWhereClause(
+    query: ListPlatformAuditLogsQueryDto,
+  ): Promise<Prisma.AuditLogWhereInput> {
     const where: Prisma.AuditLogWhereInput = {};
 
     if (query.tenantId) where.tenantId = query.tenantId;

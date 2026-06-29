@@ -17,12 +17,14 @@ const { t, currentLocale } = useI18n();
 const paymentsStore = usePaymentsStore();
 const toastStore = useToastStore();
 
-const isPendingOrProcessing = computed(() => {
-  return props.payment.status === 'PENDING' || props.payment.status === 'PROCESSING';
+const isAsaasAndPendingOrProcessing = computed(() => {
+  return props.payment.provider === 'ASAAS' && 
+         (props.payment.status === 'PENDING' || props.payment.status === 'PROCESSING') &&
+         (props.payment.method === 'PIX' || props.payment.method === 'BOLETO');
 });
 
 onMounted(async () => {
-  if (isPendingOrProcessing.value) {
+  if (isAsaasAndPendingOrProcessing.value) {
     await paymentsStore.fetchPaymentInstructions(props.payment.id);
   }
 });
@@ -34,7 +36,7 @@ onUnmounted(() => {
 const copyToClipboard = async (text: string) => {
   try {
     await navigator.clipboard.writeText(text);
-    toastStore.success(t('payments.details.copied'));
+    toastStore.success(t('payments.instructions.pixCodeCopied'));
   } catch (err) {
     toastStore.error(t('payments.details.copyError'));
   }
@@ -120,9 +122,9 @@ const getEventTranslation = (type: string) => {
     </section>
 
     <!-- Instructions Section -->
-    <section v-if="isPendingOrProcessing">
+    <section v-if="isAsaasAndPendingOrProcessing">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('payments.details.howToPay') }}</h3>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('payments.instructions.title') }}</h3>
         <AppButton 
           v-if="paymentsStore.paymentInstructions?.canRefresh" 
           variant="secondary" 
@@ -130,7 +132,7 @@ const getEventTranslation = (type: string) => {
           :loading="paymentsStore.isLoadingInstructions"
           @click="refreshInstructions"
         >
-          {{ t('payments.details.refreshInstructions') }}
+          {{ t('payments.instructions.refresh') }}
         </AppButton>
       </div>
 
@@ -145,7 +147,7 @@ const getEventTranslation = (type: string) => {
           </div>
           <div class="flex-1 w-full space-y-4">
             <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">{{ t('payments.details.pixCopyPaste') }}</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">{{ t('payments.instructions.pixCopyPasteLabel') }}</p>
               <div class="flex gap-2">
                 <input 
                   type="text" 
@@ -158,15 +160,15 @@ const getEventTranslation = (type: string) => {
                   @click="copyToClipboard(paymentsStore.paymentInstructions.pixCopyPaste || '')"
                   :disabled="!paymentsStore.paymentInstructions.pixCopyPaste"
                 >
-                  {{ t('common.copy') }}
+                  {{ t('payments.instructions.copyPixCode') }}
                 </AppButton>
               </div>
             </div>
             <div v-if="paymentsStore.paymentInstructions.expiresAt" class="text-sm text-gray-500 dark:text-gray-400">
-              {{ t('payments.details.expiresAt') }}: <span class="font-medium">{{ formatDateTime(paymentsStore.paymentInstructions.expiresAt, currentLocale) }}</span>
+              {{ t('payments.instructions.expirationLabel') }}: <span class="font-medium">{{ formatDateTime(paymentsStore.paymentInstructions.expiresAt, currentLocale) }}</span>
             </div>
             <div v-if="paymentsStore.paymentInstructions.isExpired" class="text-sm text-red-600 dark:text-red-400 font-medium">
-              {{ t('payments.details.expiredWarning') }}
+              {{ t('payments.instructions.expired') }}
             </div>
           </div>
         </div>
@@ -175,7 +177,7 @@ const getEventTranslation = (type: string) => {
         <div v-else-if="paymentsStore.paymentInstructions.method === 'BOLETO'" class="space-y-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('payments.details.bankSlip') }}</p>
+              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('payments.instructions.boletoTitle') }}</p>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('payments.details.bankSlipDescription') }}</p>
             </div>
             <a 
@@ -184,16 +186,16 @@ const getEventTranslation = (type: string) => {
               target="_blank"
               class="inline-flex items-center justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:w-auto"
             >
-              {{ t('payments.details.openBankSlip') }}
+              {{ t('payments.instructions.openBankSlip') }}
             </a>
           </div>
           <div v-if="paymentsStore.paymentInstructions.dueDate" class="text-sm text-gray-500 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-700">
-            {{ t('payments.details.dueDate') }}: <span class="font-medium">{{ formatDateTime(paymentsStore.paymentInstructions.dueDate, currentLocale) }}</span>
+            {{ t('payments.instructions.dueDateLabel') }}: <span class="font-medium">{{ formatDateTime(paymentsStore.paymentInstructions.dueDate, currentLocale) }}</span>
           </div>
         </div>
         
         <div v-else class="text-sm text-gray-500 dark:text-gray-400">
-          {{ t('payments.details.noInstructions') }}
+          {{ t('payments.instructions.notAvailable') }}
         </div>
       </div>
     </section>

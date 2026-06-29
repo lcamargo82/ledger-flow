@@ -24,7 +24,8 @@ export class PlatformTenantOverviewProviderDto {
 
 export class PlatformTenantOverviewGatewayDto {
   @ApiProperty() hasActiveConfiguration: boolean;
-  @ApiProperty({ type: [PlatformTenantOverviewProviderDto] }) activeProviders: PlatformTenantOverviewProviderDto[];
+  @ApiProperty({ type: [PlatformTenantOverviewProviderDto] })
+  activeProviders: PlatformTenantOverviewProviderDto[];
 }
 
 export class PlatformTenantOverviewWebhooksDto {

@@ -12,11 +12,17 @@ export class StripeWebhookAdapter implements ProviderWebhookAdapter {
   readonly provider = WebhookProvider.STRIPE;
 
   async authenticate(input: ProviderWebhookAuthenticationInput): Promise<void> {
-    throw new WebhookProviderNotSupportedError('Stripe webhook adapter not implemented.');
+    throw new WebhookProviderNotSupportedError(
+      'Stripe webhook adapter not implemented.',
+    );
   }
 
-  async normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent> {
-    throw new WebhookProviderNotSupportedError('Stripe webhook adapter not implemented.');
+  async normalize(
+    input: ProviderWebhookPayloadInput,
+  ): Promise<NormalizedWebhookEvent> {
+    throw new WebhookProviderNotSupportedError(
+      'Stripe webhook adapter not implemented.',
+    );
   }
 
   supportsEvent(eventType: string): boolean {

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PlatformTenantsRepository } from '../../domain/repositories/platform-tenants.repository';
 import { ListPlatformTenantsQueryDto } from '../dto/list-platform-tenants-query.dto';
 import { UpdatePlatformTenantDto } from '../dto/update-platform-tenant.dto';
@@ -8,7 +12,11 @@ import { PlatformTenantMapper } from '../mappers/platform-tenant.mapper';
 import { PaginatedPlatformTenantsResponseDto } from '../dto/paginated-platform-tenants-response.dto';
 import { PlatformTenantDetailsResponseDto } from '../dto/platform-tenant-details-response.dto';
 import { PlatformTenantOverviewResponseDto } from '../dto/platform-tenant-overview-response.dto';
-import { PlatformTenantHealthResponseDto, TenantHealthStatus, PlatformTenantHealthReasonDto } from '../dto/platform-tenant-health-response.dto';
+import {
+  PlatformTenantHealthResponseDto,
+  TenantHealthStatus,
+  PlatformTenantHealthReasonDto,
+} from '../dto/platform-tenant-health-response.dto';
 import { PlatformTenantActivityResponseDto } from '../dto/platform-tenant-activity-response.dto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 
@@ -19,7 +27,9 @@ export class PlatformTenantsService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async findAll(query: ListPlatformTenantsQueryDto): Promise<PaginatedPlatformTenantsResponseDto> {
+  async findAll(
+    query: ListPlatformTenantsQueryDto,
+  ): Promise<PaginatedPlatformTenantsResponseDto> {
     const [tenants, total] = await this.repository.findMany(query);
     return {
       data: tenants.map(PlatformTenantMapper.toResponseDto),
@@ -29,7 +39,10 @@ export class PlatformTenantsService {
     };
   }
 
-  async findOne(id: string, actorUserId: string): Promise<PlatformTenantDetailsResponseDto> {
+  async findOne(
+    id: string,
+    actorUserId: string,
+  ): Promise<PlatformTenantDetailsResponseDto> {
     const tenant = await this.repository.findById(id);
     if (!tenant || tenant.kind === 'PLATFORM') {
       throw new NotFoundException('Tenant not found.');
@@ -43,7 +56,10 @@ export class PlatformTenantsService {
   async update(id: string, dto: UpdatePlatformTenantDto, actorUserId: string) {
     const tenant = await this.repository.findById(id);
     if (!tenant) throw new NotFoundException('Tenant not found.');
-    if (tenant.kind === 'PLATFORM') throw new ConflictException('The platform tenant cannot be modified through this endpoint.');
+    if (tenant.kind === 'PLATFORM')
+      throw new ConflictException(
+        'The platform tenant cannot be modified through this endpoint.',
+      );
 
     const updated = await this.repository.update(id, dto);
 
@@ -54,17 +70,29 @@ export class PlatformTenantsService {
     return PlatformTenantMapper.toResponseDto(updated);
   }
 
-  async updateStatus(id: string, dto: UpdatePlatformTenantStatusDto, actorUserId: string) {
+  async updateStatus(
+    id: string,
+    dto: UpdatePlatformTenantStatusDto,
+    actorUserId: string,
+  ) {
     const tenant = await this.repository.findById(id);
     if (!tenant) throw new NotFoundException('Tenant not found.');
-    if (tenant.kind === 'PLATFORM') throw new ConflictException('The platform tenant cannot be modified through this endpoint.');
+    if (tenant.kind === 'PLATFORM')
+      throw new ConflictException(
+        'The platform tenant cannot be modified through this endpoint.',
+      );
 
     const updated = await this.repository.update(id, { active: dto.active });
 
-    await this.logAudit(dto.active ? 'platform.tenant.activated' : 'platform.tenant.deactivated', actorUserId, id, {
-      previousStatus: tenant.active,
-      currentStatus: dto.active,
-    });
+    await this.logAudit(
+      dto.active ? 'platform.tenant.activated' : 'platform.tenant.deactivated',
+      actorUserId,
+      id,
+      {
+        previousStatus: tenant.active,
+        currentStatus: dto.active,
+      },
+    );
 
     if (!dto.active) {
       await this.prisma.userSession.updateMany({
@@ -80,14 +108,23 @@ export class PlatformTenantsService {
     return PlatformTenantMapper.toResponseDto(updated);
   }
 
-  async updateSubscription(id: string, dto: UpdateTenantSubscriptionDto, actorUserId: string) {
+  async updateSubscription(
+    id: string,
+    dto: UpdateTenantSubscriptionDto,
+    actorUserId: string,
+  ) {
     const tenant = await this.repository.findById(id);
     if (!tenant) throw new NotFoundException('Tenant not found.');
-    if (tenant.kind === 'PLATFORM') throw new ConflictException('The platform tenant cannot be modified through this endpoint.');
+    if (tenant.kind === 'PLATFORM')
+      throw new ConflictException(
+        'The platform tenant cannot be modified through this endpoint.',
+      );
 
     if (dto.currentPeriodStart && dto.currentPeriodEnd) {
       if (new Date(dto.currentPeriodEnd) <= new Date(dto.currentPeriodStart)) {
-        throw new ConflictException('Subscription period end must be after the start date.');
+        throw new ConflictException(
+          'Subscription period end must be after the start date.',
+        );
       }
     }
 
@@ -107,7 +144,10 @@ export class PlatformTenantsService {
     return PlatformTenantMapper.toDetailsResponseDto(updatedTenant!);
   }
 
-  async getTenantOverview(id: string, actorUserId: string): Promise<PlatformTenantOverviewResponseDto> {
+  async getTenantOverview(
+    id: string,
+    actorUserId: string,
+  ): Promise<PlatformTenantOverviewResponseDto> {
     const tenant = await this.repository.findTenantOverviewById(id);
     if (!tenant || tenant.kind === 'PLATFORM') {
       throw new NotFoundException('Tenant not found.');
@@ -123,12 +163,27 @@ export class PlatformTenantsService {
     ]);
 
     const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const webhooks = await this.repository.findWebhookSummaryByTenant(id, since24h);
+    const webhooks = await this.repository.findWebhookSummaryByTenant(
+      id,
+      since24h,
+    );
 
     const [lastPayment, lastPaymentEvent, lastLoginUser] = await Promise.all([
-      this.prisma.payment.findFirst({ where: { tenantId: id }, orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
-      this.prisma.paymentEvent.findFirst({ where: { tenantId: id }, orderBy: { createdAt: 'desc' }, select: { createdAt: true } }),
-      this.prisma.user.findFirst({ where: { tenantId: id, lastLoginAt: { not: null } }, orderBy: { lastLoginAt: 'desc' }, select: { lastLoginAt: true } }),
+      this.prisma.payment.findFirst({
+        where: { tenantId: id },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+      this.prisma.paymentEvent.findFirst({
+        where: { tenantId: id },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+      this.prisma.user.findFirst({
+        where: { tenantId: id, lastLoginAt: { not: null } },
+        orderBy: { lastLoginAt: 'desc' },
+        select: { lastLoginAt: true },
+      }),
     ]);
 
     return {
@@ -143,7 +198,8 @@ export class PlatformTenantsService {
           plan: tenant.subscription?.plan || 'FREE',
           status: tenant.subscription?.status || 'TRIAL',
           trialEndsAt: tenant.subscription?.trialEndsAt?.toISOString(),
-          currentPeriodEnd: tenant.subscription?.currentPeriodEnd?.toISOString(),
+          currentPeriodEnd:
+            tenant.subscription?.currentPeriodEnd?.toISOString(),
         },
       },
       operations: {
@@ -161,7 +217,7 @@ export class PlatformTenantsService {
       },
       gateway: {
         hasActiveConfiguration: gateway.hasActiveConfiguration,
-        activeProviders: gateway.activeProviders.map(p => ({
+        activeProviders: gateway.activeProviders.map((p) => ({
           provider: p.provider,
           environment: p.environment,
           status: p.status,
@@ -183,7 +239,10 @@ export class PlatformTenantsService {
     };
   }
 
-  async getTenantHealth(id: string, actorUserId: string): Promise<PlatformTenantHealthResponseDto> {
+  async getTenantHealth(
+    id: string,
+    actorUserId: string,
+  ): Promise<PlatformTenantHealthResponseDto> {
     const tenant = await this.repository.findTenantOverviewById(id);
     if (!tenant || tenant.kind === 'PLATFORM') {
       throw new NotFoundException('Tenant not found.');
@@ -192,7 +251,10 @@ export class PlatformTenantsService {
     const [payments, gateway, webhooks] = await Promise.all([
       this.repository.countPaymentsByStatus(id),
       this.repository.findGatewaySummaryByTenant(id),
-      this.repository.findWebhookSummaryByTenant(id, new Date(Date.now() - 24 * 60 * 60 * 1000)),
+      this.repository.findWebhookSummaryByTenant(
+        id,
+        new Date(Date.now() - 24 * 60 * 60 * 1000),
+      ),
     ]);
 
     const reasons: PlatformTenantHealthReasonDto[] = [];
@@ -201,37 +263,66 @@ export class PlatformTenantsService {
     // Evaluate CRITICAL
     if (!tenant.active) {
       status = TenantHealthStatus.CRITICAL;
-      reasons.push({ code: 'TENANT_INACTIVE', message: 'The tenant account is currently deactivated.' });
+      reasons.push({
+        code: 'TENANT_INACTIVE',
+        message: 'The tenant account is currently deactivated.',
+      });
     }
-    if (tenant.subscription?.status === 'SUSPENDED' || tenant.subscription?.status === 'CANCELED') {
+    if (
+      tenant.subscription?.status === 'SUSPENDED' ||
+      tenant.subscription?.status === 'CANCELED'
+    ) {
       status = TenantHealthStatus.CRITICAL;
-      reasons.push({ code: 'SUBSCRIPTION_SUSPENDED', message: 'The subscription is suspended or canceled.' });
+      reasons.push({
+        code: 'SUBSCRIPTION_SUSPENDED',
+        message: 'The subscription is suspended or canceled.',
+      });
     }
 
     // Evaluate ATTENTION if not critical
     if (status === TenantHealthStatus.HEALTHY) {
       if (tenant.subscription?.status === 'PAST_DUE') {
         status = TenantHealthStatus.ATTENTION;
-        reasons.push({ code: 'SUBSCRIPTION_PAST_DUE', message: 'The subscription is past due.' });
+        reasons.push({
+          code: 'SUBSCRIPTION_PAST_DUE',
+          message: 'The subscription is past due.',
+        });
       }
       if (webhooks.failed > 0) {
         status = TenantHealthStatus.ATTENTION;
-        reasons.push({ code: 'WEBHOOK_FAILURES_RECENT', message: `There are ${webhooks.failed} failed webhook events in the last 24 hours.` });
+        reasons.push({
+          code: 'WEBHOOK_FAILURES_RECENT',
+          message: `There are ${webhooks.failed} failed webhook events in the last 24 hours.`,
+        });
       }
       const totalPayments = payments['TOTAL'] || 0;
       if (totalPayments > 0 && !gateway.hasActiveConfiguration) {
         status = TenantHealthStatus.ATTENTION;
-        reasons.push({ code: 'NO_GATEWAY_CONFIGURATION', message: 'Payments exist but there is no active gateway configuration.' });
+        reasons.push({
+          code: 'NO_GATEWAY_CONFIGURATION',
+          message:
+            'Payments exist but there is no active gateway configuration.',
+        });
       }
     }
 
     // Evaluate UNKNOWN
-    if (status === TenantHealthStatus.HEALTHY && (payments['TOTAL'] || 0) === 0 && !gateway.hasActiveConfiguration) {
+    if (
+      status === TenantHealthStatus.HEALTHY &&
+      (payments['TOTAL'] || 0) === 0 &&
+      !gateway.hasActiveConfiguration
+    ) {
       status = TenantHealthStatus.UNKNOWN;
-      reasons.push({ code: 'INSUFFICIENT_DATA', message: 'Insufficient operational data to determine health (no payments or gateways).' });
+      reasons.push({
+        code: 'INSUFFICIENT_DATA',
+        message:
+          'Insufficient operational data to determine health (no payments or gateways).',
+      });
     }
 
-    await this.logAudit('platform.tenant.health_requested', actorUserId, id, { healthStatus: status });
+    await this.logAudit('platform.tenant.health_requested', actorUserId, id, {
+      healthStatus: status,
+    });
 
     return {
       tenantId: id,
@@ -241,7 +332,10 @@ export class PlatformTenantsService {
     };
   }
 
-  async getTenantActivity(id: string, actorUserId: string): Promise<PlatformTenantActivityResponseDto> {
+  async getTenantActivity(
+    id: string,
+    actorUserId: string,
+  ): Promise<PlatformTenantActivityResponseDto> {
     const tenant = await this.repository.findTenantOverviewById(id);
     if (!tenant || tenant.kind === 'PLATFORM') {
       throw new NotFoundException('Tenant not found.');
@@ -250,12 +344,16 @@ export class PlatformTenantsService {
     const activity = await this.repository.findRecentActivityByTenant(id, 20);
 
     return {
-      items: activity.map(a => ({
+      items: activity.map((a) => ({
         id: a.id,
         action: a.action,
         label: this.formatActivityLabel(a.action),
         occurredAt: a.createdAt.toISOString(),
-        severity: a.action.includes('failed') ? 'ERROR' : a.action.includes('deactivated') ? 'WARNING' : 'INFO',
+        severity: a.action.includes('failed')
+          ? 'ERROR'
+          : a.action.includes('deactivated')
+            ? 'WARNING'
+            : 'INFO',
         actorType: a.actorUserId ? 'USER' : 'SYSTEM',
         metadata: a.metadata,
       })),
@@ -279,7 +377,12 @@ export class PlatformTenantsService {
     return labels[action] || action;
   }
 
-  private async logAudit(action: string, actorUserId: string, targetTenantId: string, metadata: any = {}) {
+  private async logAudit(
+    action: string,
+    actorUserId: string,
+    targetTenantId: string,
+    metadata: any = {},
+  ) {
     await this.prisma.auditLog.create({
       data: {
         actorUserId,

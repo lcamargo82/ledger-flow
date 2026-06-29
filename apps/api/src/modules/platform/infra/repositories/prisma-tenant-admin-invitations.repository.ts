@@ -7,13 +7,17 @@ import { TenantAdminInvitation } from '@prisma/client';
 export class PrismaTenantAdminInvitationsRepository implements TenantAdminInvitationsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Omit<TenantAdminInvitation, 'id' | 'createdAt' | 'updatedAt'>): Promise<TenantAdminInvitation> {
+  async create(
+    data: Omit<TenantAdminInvitation, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<TenantAdminInvitation> {
     return this.prisma.tenantAdminInvitation.create({
       data,
     });
   }
 
-  async findByTokenHash(tokenHash: string): Promise<TenantAdminInvitation | null> {
+  async findByTokenHash(
+    tokenHash: string,
+  ): Promise<TenantAdminInvitation | null> {
     return this.prisma.tenantAdminInvitation.findUnique({
       where: { tokenHash },
     });
@@ -28,10 +32,14 @@ export class PrismaTenantAdminInvitationsRepository implements TenantAdminInvita
     });
   }
 
-  async updateStatus(id: string, status: 'ACCEPTED' | 'REVOKED' | 'EXPIRED', timestampKey: 'acceptedAt' | 'revokedAt'): Promise<TenantAdminInvitation> {
+  async updateStatus(
+    id: string,
+    status: 'ACCEPTED' | 'REVOKED' | 'EXPIRED',
+    timestampKey: 'acceptedAt' | 'revokedAt',
+  ): Promise<TenantAdminInvitation> {
     const data: any = { status };
     data[timestampKey] = new Date();
-    
+
     return this.prisma.tenantAdminInvitation.update({
       where: { id },
       data,

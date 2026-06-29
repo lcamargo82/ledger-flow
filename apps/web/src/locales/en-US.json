@@ -639,6 +639,30 @@
       "paymentRefunded": "Payment refunded",
       "generic": "Payment event updated"
     },
+    "instructions": {
+      "title": "How to pay",
+      "pixTitle": "Pix",
+      "boletoTitle": "Bank slip",
+      "pixCopyPasteLabel": "Pix Copy and Paste",
+      "copyPixCode": "Copy code",
+      "pixCodeCopied": "Copied to clipboard!",
+      "expirationLabel": "Expires at",
+      "dueDateLabel": "Due date",
+      "openBankSlip": "Open Bank Slip",
+      "copyPaymentLink": "Copy payment link",
+      "refresh": "Refresh",
+      "refreshing": "Refreshing...",
+      "pendingMessage": "Awaiting confirmation...",
+      "notAvailable": "Payment instructions are not available yet.",
+      "expired": "Expired. Create a new payment.",
+      "unavailableForCurrentStatus": "Instructions unavailable for the current status.",
+      "loadFailed": "Could not load instructions."
+    },
+    "cancel": {
+      "providerConflict": "The provider refused the cancellation. The charge may already be paid, refunded, or ineligible.",
+      "providerUnavailable": "The provider is currently unavailable. Please try again.",
+      "providerCanceled": "Payment successfully canceled at the provider."
+    },
     "empty": {
       "title": "No payments found",
       "description": "Create a new payment or adjust filters to view results."
