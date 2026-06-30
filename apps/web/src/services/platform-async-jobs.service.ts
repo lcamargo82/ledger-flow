@@ -8,6 +8,6 @@ export const platformAsyncJobsService = {
   },
 
   async replay(id: string): Promise<void> {
-    await api.post(\`/platform/async-jobs/\${id}/replay\`);
+    await api.post(`/platform/async-jobs/\${id}/replay`);
   }
 };

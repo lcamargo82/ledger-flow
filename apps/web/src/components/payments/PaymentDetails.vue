@@ -122,7 +122,7 @@ const getEventTranslation = (type: string) => {
     </section>
 
     <!-- Async Status Banner -->
-    <section v-if="payment.asyncChargeStatus && ['QUEUED', 'PENDING', 'PROCESSING', 'RETRY_SCHEDULED'].includes(payment.asyncChargeStatus)">
+    <section v-if="payment.asyncChargeStatus && (['QUEUED', 'PENDING', 'PROCESSING', 'RETRY_SCHEDULED'] as string[]).includes(payment.asyncChargeStatus)">
       <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
         <div class="flex">
           <div class="flex-shrink-0">
