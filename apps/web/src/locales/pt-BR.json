@@ -782,6 +782,7 @@
       "operations": "Operação",
       "platform": "Plataforma",
       "tenants": "Tenants da Plataforma",
+      "gatewayConnections": "Integrações de Gateways",
       "audit": "Auditoria Global"
     },
     "audit": {

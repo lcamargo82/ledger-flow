@@ -55,48 +55,52 @@ const clearFilters = () => {
 </script>
 
 <template>
-  <div class="bg-white p-4 rounded-lg shadow-sm border border-slate-200 mb-6 space-y-4">
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <AppInput
-        v-model="filters.search"
-        :label="t('platform.audit.filters.search')"
-        :placeholder="t('platform.audit.filters.searchPlaceholder')"
-        @keyup.enter="applyFilters"
-      />
-      
-      <AppSelect
-        v-model="filters.severity"
-        :label="t('platform.audit.filters.severity')"
-        :options="severityOptions"
-      />
-      
-      <AppSelect
-        v-model="filters.actorType"
-        :label="t('platform.audit.filters.actorType')"
-        :options="actorOptions"
-      />
-      
-      <AppInput
-        v-model="filters.source"
-        :label="t('platform.audit.filters.source')"
-        placeholder="e.g. ASAAS"
-        @keyup.enter="applyFilters"
-      />
-
-      <AppInput
-        v-model="filters.dateFrom"
-        type="date"
-        :label="t('platform.audit.filters.dateFrom')"
-      />
-
-      <AppInput
-        v-model="filters.dateTo"
-        type="date"
-        :label="t('platform.audit.filters.dateTo')"
-      />
-    </div>
+  <div class="flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg shadow-sm border border-slate-200 mb-6">
+    <AppInput
+      v-model="filters.search"
+      :label="t('platform.audit.filters.search')"
+      :placeholder="t('platform.audit.filters.searchPlaceholder')"
+      @keyup.enter="applyFilters"
+      class="flex-1 min-w-[200px]"
+    />
     
-    <div class="flex justify-end space-x-2">
+    <AppSelect
+      v-model="filters.severity"
+      :label="t('platform.audit.filters.severity')"
+      :options="severityOptions"
+      class="flex-1 min-w-[200px]"
+    />
+    
+    <AppSelect
+      v-model="filters.actorType"
+      :label="t('platform.audit.filters.actorType')"
+      :options="actorOptions"
+      class="flex-1 min-w-[200px]"
+    />
+    
+    <AppInput
+      v-model="filters.source"
+      :label="t('platform.audit.filters.source')"
+      placeholder="e.g. ASAAS"
+      @keyup.enter="applyFilters"
+      class="flex-1 min-w-[200px]"
+    />
+
+    <AppInput
+      v-model="filters.dateFrom"
+      type="date"
+      :label="t('platform.audit.filters.dateFrom')"
+      class="flex-1 min-w-[150px]"
+    />
+
+    <AppInput
+      v-model="filters.dateTo"
+      type="date"
+      :label="t('platform.audit.filters.dateTo')"
+      class="flex-1 min-w-[150px]"
+    />
+    
+    <div class="flex gap-2 ml-auto">
       <AppButton variant="secondary" @click="clearFilters">
         {{ t('platform.audit.filters.clear') }}
       </AppButton>

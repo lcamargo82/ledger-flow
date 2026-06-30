@@ -782,6 +782,7 @@
       "operations": "Operations",
       "platform": "Platform",
       "tenants": "Platform Tenants",
+      "gatewayConnections": "Gateway Integrations",
       "audit": "Global Audit"
     },
     "audit": {
