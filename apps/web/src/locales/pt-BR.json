@@ -625,7 +625,7 @@
         "customerRequired": "Cliente é obrigatório.",
         "amountRequired": "Valor é obrigatório.",
         "amountInvalid": "Valor inválido.",
-      "notFound": "O registro solicitado não foi encontrado ou não existe.",
+      "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",
       "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações.",
         "methodRequired": "Método é obrigatório.",
         "dateRangeInvalid": "Período inválido."
@@ -719,7 +719,7 @@
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
       "customerRequired": "Cliente obrigatório.",
       "amountInvalid": "Valor inválido.",
-      "notFound": "O registro solicitado não foi encontrado ou não existe.",
+      "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",
       "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações."
     },
     "toast": {

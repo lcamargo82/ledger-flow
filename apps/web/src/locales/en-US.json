@@ -626,7 +626,7 @@
         "customerRequired": "Customer is required.",
         "amountRequired": "Amount is required.",
         "amountInvalid": "Invalid amount.",
-      "notFound": "The requested record was not found or does not exist.",
+      "notFound": "There is no active gateway configured for Pix payments in this environment.",
       "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations.",
         "methodRequired": "Method is required.",
         "dateRangeInvalid": "Invalid date range."
@@ -719,7 +719,7 @@
       "invalidStatus": "This payment can no longer be canceled in its current status.",
       "customerRequired": "Customer required.",
       "amountInvalid": "Invalid amount.",
-      "notFound": "The requested record was not found or does not exist.",
+      "notFound": "There is no active gateway configured for Pix payments in this environment.",
       "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations."
     },
     "toast": {
