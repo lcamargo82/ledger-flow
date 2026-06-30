@@ -4,9 +4,7 @@ import { ListPlatformTenantsQueryDto } from '../../application/dto/list-platform
 export abstract class PlatformTenantsRepository {
   abstract findMany(
     query: ListPlatformTenantsQueryDto,
-  ): Promise<
-    [Array<Tenant & { subscription: TenantSubscription | null }>, number]
-  >;
+  ): Promise<[Array<Tenant & { subscription: TenantSubscription | null }>, number]>;
   abstract findById(id: string): Promise<
     | (Tenant & {
         subscription: TenantSubscription | null;
@@ -25,15 +23,9 @@ export abstract class PlatformTenantsRepository {
 
   // Aggregation & Health Methods
   abstract findTenantOverviewById(tenantId: string): Promise<any>;
-  abstract countUsersByTenant(
-    tenantId: string,
-  ): Promise<{ total: number; active: number }>;
-  abstract countCustomersByTenant(
-    tenantId: string,
-  ): Promise<{ total: number; active: number }>;
-  abstract countPaymentsByStatus(
-    tenantId: string,
-  ): Promise<Record<string, number>>;
+  abstract countUsersByTenant(tenantId: string): Promise<{ total: number; active: number }>;
+  abstract countCustomersByTenant(tenantId: string): Promise<{ total: number; active: number }>;
+  abstract countPaymentsByStatus(tenantId: string): Promise<Record<string, number>>;
   abstract findGatewaySummaryByTenant(
     tenantId: string,
   ): Promise<{ hasActiveConfiguration: boolean; activeProviders: any[] }>;
@@ -46,8 +38,5 @@ export abstract class PlatformTenantsRepository {
     failed: number;
     ignored: number;
   }>;
-  abstract findRecentActivityByTenant(
-    tenantId: string,
-    limit?: number,
-  ): Promise<any[]>;
+  abstract findRecentActivityByTenant(tenantId: string, limit?: number): Promise<any[]>;
 }

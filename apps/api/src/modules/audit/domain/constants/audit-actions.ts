@@ -44,8 +44,7 @@ export const AuditActions = {
 
   // Support
   PLATFORM_SUPPORT_NOTE_CREATED: 'platform.support.note_created',
-  PLATFORM_SUPPORT_TENANT_STATUS_REVIEWED:
-    'platform.support.tenant_status_reviewed',
+  PLATFORM_SUPPORT_TENANT_STATUS_REVIEWED: 'platform.support.tenant_status_reviewed',
 } as const;
 
 export type AuditAction = (typeof AuditActions)[keyof typeof AuditActions];

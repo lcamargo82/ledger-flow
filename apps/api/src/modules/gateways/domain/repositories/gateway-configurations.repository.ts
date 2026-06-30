@@ -20,10 +20,7 @@ export interface UpsertGatewayConfigurationInput {
 }
 
 export abstract class GatewayConfigurationsRepository {
-  abstract findByIdAndTenant(
-    id: string,
-    tenantId: string,
-  ): Promise<GatewayConfiguration | null>;
+  abstract findByIdAndTenant(id: string, tenantId: string): Promise<GatewayConfiguration | null>;
 
   abstract findActiveByTenantAndProvider(
     tenantId: string,
@@ -50,9 +47,7 @@ export abstract class GatewayConfigurationsRepository {
     credentialsFingerprint?: string;
   }): Promise<GatewayConfiguration>;
 
-  abstract upsert(
-    input: UpsertGatewayConfigurationInput,
-  ): Promise<GatewayConfiguration>;
+  abstract upsert(input: UpsertGatewayConfigurationInput): Promise<GatewayConfiguration>;
 
   abstract updateStatus(
     id: string,

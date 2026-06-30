@@ -1,9 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  TenantKind,
-  SubscriptionPlan,
-  TenantSubscriptionStatus,
-} from '@prisma/client';
+import { TenantKind, SubscriptionPlan, TenantSubscriptionStatus } from '@prisma/client';
 
 export class TenantSubscriptionShortDto {
   @ApiProperty({ enum: SubscriptionPlan })

@@ -589,7 +589,11 @@
       "search": "Search",
       "clearFilters": "Clear",
       "tryAgain": "Try again",
-      "close": "Close"
+      "close": "Close",
+      "retryExternalCharge": "Try Again",
+      "retryingExternalCharge": "Trying...",
+      "openGatewaySettings": "Open Integrations",
+      "refreshPayment": "Refresh Status"
     },
     "filters": {
       "searchLabel": "Search by reference, customer...",
@@ -601,12 +605,36 @@
       "statusAll": "All",
       "methodAll": "All"
     },
+    "externalProcessing": {
+      "title": "External Integration",
+      "status": {
+        "NOT_REQUIRED": "Not Applicable",
+        "NOT_STARTED": "Not Started",
+        "PROCESSING": "Processing",
+        "RETRY_SCHEDULED": "Retry Scheduled",
+        "SUCCEEDED": "Succeeded",
+        "FAILED": "External Failure",
+        "DEAD_LETTERED": "Permanent Failure"
+      },
+      "message": {
+        "processing": "The charge is being created in the payment gateway.",
+        "retryScheduled": "A new creation attempt is scheduled.",
+        "succeeded": "Charge successfully created in the gateway.",
+        "failed": "The creation attempt in the gateway failed.",
+        "credentialInvalid": "The configured gateway credentials appear to be invalid.",
+        "gatewayNotConfigured": "There is no gateway configured for this method.",
+        "methodNotSupported": "This gateway does not support the selected method.",
+        "environmentNotAllowed": "This gateway is not allowed for the current environment.",
+        "providerUnavailable": "The payment provider is temporarily unavailable."
+      }
+    },
     "table": {
       "reference": "Reference",
       "customer": "Customer",
       "amount": "Amount",
       "method": "Method",
       "status": "Status",
+      "integration": "Integration",
       "createdAt": "Created At",
       "actions": "Actions"
     },
@@ -728,6 +756,14 @@
     "toast": {
       "created": "Payment created successfully.",
       "canceled": "Payment canceled successfully."
+    },
+    "retry": {
+      "success": "New charge attempt scheduled successfully.",
+      "failed": "Could not reprocess the external charge.",
+      "notAvailable": "This payment is not eligible for reprocessing.",
+      "alreadyCreated": "The external charge was already successfully created.",
+      "gatewayUnavailable": "The payment provider seems to be unavailable.",
+      "paymentFinalized": "This payment is already finalized (approved, canceled, or permanently failed)."
     },
     "confirmCancel": {
       "title": "Cancel payment",

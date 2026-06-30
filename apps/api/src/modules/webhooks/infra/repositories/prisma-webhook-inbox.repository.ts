@@ -29,9 +29,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
     });
   }
 
-  async createReceived(
-    data: CreateWebhookInboxEventInput,
-  ): Promise<WebhookInboxEvent> {
+  async createReceived(data: CreateWebhookInboxEventInput): Promise<WebhookInboxEvent> {
     return this.prisma.$transaction(async (tx) => {
       const inboxEvent = await tx.webhookInboxEvent.create({
         data: {
@@ -39,8 +37,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
           providerEventId: data.providerEventId,
           eventType: data.eventType,
           payloadHash: data.payloadHash,
-          payloadSummary:
-            (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+          payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
           status: WebhookProcessingStatus.RECEIVED,
         },
       });

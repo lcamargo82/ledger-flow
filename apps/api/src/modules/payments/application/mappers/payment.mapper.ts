@@ -12,6 +12,11 @@ export class PaymentMapper {
       ...publicData
     } = payment;
 
+    // Keep externalProcessing if it exists
+    if ('externalProcessing' in payment) {
+      publicData.externalProcessing = payment.externalProcessing;
+    }
+
     return publicData;
   }
 

@@ -52,6 +52,7 @@ async function main() {
     { key: 'payments:read', description: 'Visualizar pagamentos' },
     { key: 'payments:cancel', description: 'Cancelar pagamentos' },
     { key: 'payments:refund', description: 'Reembolsar pagamentos' },
+    { key: 'payments:retry', description: 'Reprocessar pagamentos falhos' },
     { key: 'reports:export', description: 'Exportar relatórios' },
     { key: 'webhooks:manage', description: 'Gerenciar webhooks' },
     { key: 'api-keys:manage', description: 'Gerenciar chaves de API' },

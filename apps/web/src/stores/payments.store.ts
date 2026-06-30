@@ -165,6 +165,20 @@ export const usePaymentsStore = defineStore('payments', () => {
     }
   };
 
+  const retryExternalCharge = async (id: string) => {
+    error.value = null;
+    try {
+      const response = await paymentsService.retryExternalCharge(id);
+      if (selectedPayment.value && selectedPayment.value.id === id) {
+        selectedPayment.value = response.payment;
+      }
+      return response.payment;
+    } catch (err) {
+      error.value = extractErrorMessage(err);
+      throw err;
+    }
+  };
+
   const setPage = (page: number) => {
     filters.value.page = page;
     fetchPayments();
@@ -254,6 +268,7 @@ export const usePaymentsStore = defineStore('payments', () => {
     fetchPaymentInstructions,
     createPayment,
     cancelPayment,
+    retryExternalCharge,
     setPage,
     setPerPage,
     setSearch,
