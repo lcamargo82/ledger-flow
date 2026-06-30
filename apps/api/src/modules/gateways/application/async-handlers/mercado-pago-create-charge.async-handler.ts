@@ -53,7 +53,13 @@ export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
 
     // Call orchestrator
     // We assume actorUserId is system since it's async
-    await this.orchestrator.orchestrate(payment.tenantId, payment, payment.customer, 'SYSTEM');
+    await this.orchestrator.orchestrate(
+      payment.tenantId,
+      payment,
+      payment.customer,
+      'SYSTEM',
+      activeConfig.id,
+    );
     this.logger.log(`Successfully orchestrated Mercado Pago payment ${input.aggregateId}`);
   }
 }
