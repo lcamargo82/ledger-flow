@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MercadoPagoOAuthTokenResponse, MercadoPagoCreatePaymentRequest, MercadoPagoPaymentResponse } from './mercado-pago.types';
+import {
+  MercadoPagoOAuthTokenResponse,
+  MercadoPagoCreatePaymentRequest,
+  MercadoPagoPaymentResponse,
+} from './mercado-pago.types';
 
 export class MercadoPagoApiError extends Error {
   constructor(
@@ -15,7 +19,8 @@ export class MercadoPagoApiError extends Error {
 @Injectable()
 export class MercadoPagoApiClient {
   private readonly logger = new Logger(MercadoPagoApiClient.name);
-  private readonly baseUrl = process.env.MERCADO_PAGO_BASE_URL || 'https://api.mercadopago.com';
+  private readonly baseUrl =
+    process.env.MERCADO_PAGO_BASE_URL || 'https://api.mercadopago.com';
 
   async exchangeAuthorizationCode(
     code: string,
@@ -61,7 +66,11 @@ export class MercadoPagoApiClient {
       headers['X-Idempotency-Key'] = idempotencyKey;
     }
 
-    return this.post<MercadoPagoPaymentResponse>('/v1/payments', payload, headers);
+    return this.post<MercadoPagoPaymentResponse>(
+      '/v1/payments',
+      payload,
+      headers,
+    );
   }
 
   async getPayment(
@@ -72,7 +81,10 @@ export class MercadoPagoApiClient {
       Authorization: `Bearer ${accessToken}`,
     };
 
-    return this.get<MercadoPagoPaymentResponse>(`/v1/payments/${providerPaymentId}`, headers);
+    return this.get<MercadoPagoPaymentResponse>(
+      `/v1/payments/${providerPaymentId}`,
+      headers,
+    );
   }
 
   private async post<T>(
@@ -121,8 +133,14 @@ export class MercadoPagoApiClient {
       const data = await response.json().catch(() => null);
 
       if (!response.ok) {
-        this.logger.error(`Mercado Pago API Error: [${response.status}] ${endpoint}`);
-        throw new MercadoPagoApiError(response.status, data, `API Error ${response.status}`);
+        this.logger.error(
+          `Mercado Pago API Error: [${response.status}] ${endpoint}`,
+        );
+        throw new MercadoPagoApiError(
+          response.status,
+          data,
+          `API Error ${response.status}`,
+        );
       }
 
       return data as T;
@@ -130,7 +148,9 @@ export class MercadoPagoApiClient {
       if (error instanceof MercadoPagoApiError) {
         throw error;
       }
-      this.logger.error(`Network or Parsing error to Mercado Pago: ${error?.message}`);
+      this.logger.error(
+        `Network or Parsing error to Mercado Pago: ${error?.message}`,
+      );
       throw new Error(`Failed to call Mercado Pago API: ${error?.message}`);
     }
   }

@@ -3,7 +3,21 @@ import {
   GatewayEnvironment,
   GatewayConfigurationStatus,
   PaymentProvider,
+  GatewayHealthStatus,
 } from '@prisma/client';
+
+export interface UpsertGatewayConfigurationInput {
+  tenantId: string;
+  provider: PaymentProvider;
+  environment: GatewayEnvironment;
+  status?: GatewayConfigurationStatus;
+  priority?: number;
+  displayName?: string;
+  supportedMethods?: any;
+  encryptedCredentials?: string;
+  credentialsFingerprint?: string;
+  healthStatus?: GatewayHealthStatus;
+}
 
 export abstract class GatewayConfigurationsRepository {
   abstract findByIdAndTenant(
@@ -36,17 +50,9 @@ export abstract class GatewayConfigurationsRepository {
     credentialsFingerprint?: string;
   }): Promise<GatewayConfiguration>;
 
-  abstract upsert(data: {
-    tenantId: string;
-    provider: PaymentProvider;
-    environment: GatewayEnvironment;
-    status?: GatewayConfigurationStatus;
-    priority?: number;
-    displayName?: string;
-    supportedMethods?: any;
-    encryptedCredentials?: string;
-    credentialsFingerprint?: string;
-  }): Promise<GatewayConfiguration>;
+  abstract upsert(
+    input: UpsertGatewayConfigurationInput,
+  ): Promise<GatewayConfiguration>;
 
   abstract updateStatus(
     id: string,

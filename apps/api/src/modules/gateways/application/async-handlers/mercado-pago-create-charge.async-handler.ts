@@ -9,7 +9,9 @@ import { PaymentProvider } from '@prisma/client';
 export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
   readonly eventType = 'payment.provider_charge_creation_requested';
   readonly consumerName = 'MercadoPagoCreateChargeAsyncHandler';
-  private readonly logger = new Logger(MercadoPagoCreateChargeAsyncHandler.name);
+  private readonly logger = new Logger(
+    MercadoPagoCreateChargeAsyncHandler.name,
+  );
 
   constructor(
     private readonly orchestrator: GatewayPaymentOrchestrationService,
@@ -17,11 +19,13 @@ export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
   ) {}
 
   async handle(input: AsyncMessageEnvelope): Promise<void> {
-    this.logger.log(`Handling Mercado Pago charge creation for payment ${input.aggregateId}`);
-    
+    this.logger.log(
+      `Handling Mercado Pago charge creation for payment ${input.aggregateId}`,
+    );
+
     const payment = await this.prisma.payment.findUnique({
       where: { id: input.aggregateId },
-      include: { customer: true }
+      include: { customer: true },
     });
 
     if (!payment) {
@@ -30,8 +34,10 @@ export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
     }
 
     if (payment.providerPaymentId) {
-       this.logger.log(`Payment ${input.aggregateId} already processed (has provider ID)`);
-       return;
+      this.logger.log(
+        `Payment ${input.aggregateId} already processed (has provider ID)`,
+      );
+      return;
     }
 
     // Check if the current active configuration for this tenant is Mercado Pago
@@ -44,14 +50,27 @@ export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
       orderBy: { priority: 'asc' },
     });
 
-    if (!activeConfig || activeConfig.provider !== PaymentProvider.MERCADO_PAGO) {
-      this.logger.debug(`Skipping payment ${input.aggregateId} as active provider is not Mercado Pago`);
+    if (
+      !activeConfig ||
+      activeConfig.provider !== PaymentProvider.MERCADO_PAGO
+    ) {
+      this.logger.debug(
+        `Skipping payment ${input.aggregateId} as active provider is not Mercado Pago`,
+      );
       return;
     }
 
     // Call orchestrator
     // We assume actorUserId is system since it's async
-    await this.orchestrator.orchestrate(payment.tenantId, payment, payment.customer as any, 'SYSTEM');
-    this.logger.log(`Successfully orchestrated Mercado Pago payment ${input.aggregateId}`);
+    await this.orchestrator.orchestrate(
+      payment.tenantId,
+      payment,
+      payment.customer,
+      'SYSTEM',
+      activeConfig.id,
+    );
+    this.logger.log(
+      `Successfully orchestrated Mercado Pago payment ${input.aggregateId}`,
+    );
   }
 }

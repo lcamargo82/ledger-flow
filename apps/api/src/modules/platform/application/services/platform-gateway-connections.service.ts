@@ -4,7 +4,10 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma/prisma.service';
-import { GatewayConfigurationStatus, GatewayConfiguration } from '@prisma/client';
+import {
+  GatewayConfigurationStatus,
+  GatewayConfiguration,
+} from '@prisma/client';
 import {
   PlatformGatewayConnectionResponseDto,
   UpdatePlatformGatewayConnectionStatusDto,
@@ -62,7 +65,9 @@ export class PlatformGatewayConnectionsService {
     return this.mapToResponse(updated);
   }
 
-  private mapToResponse(entity: GatewayConfiguration): PlatformGatewayConnectionResponseDto {
+  private mapToResponse(
+    entity: GatewayConfiguration,
+  ): PlatformGatewayConnectionResponseDto {
     return {
       id: entity.id,
       tenantId: entity.tenantId,

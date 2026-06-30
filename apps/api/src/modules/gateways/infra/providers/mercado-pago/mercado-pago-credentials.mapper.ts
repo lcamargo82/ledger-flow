@@ -8,7 +8,11 @@ export class MercadoPagoCredentialsMapper {
   static fromJSONString(jsonStr: string): MercadoPagoCredentials {
     try {
       const parsed = JSON.parse(jsonStr) as Partial<MercadoPagoCredentials>;
-      if (!parsed.accessToken || !parsed.refreshToken || !parsed.tokenExpiresAt) {
+      if (
+        !parsed.accessToken ||
+        !parsed.refreshToken ||
+        !parsed.tokenExpiresAt
+      ) {
         throw new Error('Invalid Mercado Pago credentials format.');
       }
       return {
@@ -19,7 +23,9 @@ export class MercadoPagoCredentialsMapper {
         scope: parsed.scope,
       };
     } catch (error) {
-      throw new Error(`Failed to parse Mercado Pago credentials: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to parse Mercado Pago credentials: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -31,6 +37,10 @@ export class MercadoPagoCredentialsMapper {
     }
     // Fallback: hash the access token so we can compare but not read it
     const crypto = require('crypto');
-    return crypto.createHash('sha256').update(credentials.accessToken).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(credentials.accessToken)
+      .digest('hex')
+      .substring(0, 16);
   }
 }

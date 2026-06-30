@@ -7,7 +7,7 @@ import {
   PaymentProvider,
 } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
-import { GatewayConfigurationsRepository } from '../../domain/repositories/gateway-configurations.repository';
+import { GatewayConfigurationsRepository, UpsertGatewayConfigurationInput } from '../../domain/repositories/gateway-configurations.repository';
 
 @Injectable()
 export class PrismaGatewayConfigurationsRepository implements GatewayConfigurationsRepository {
@@ -85,27 +85,37 @@ export class PrismaGatewayConfigurationsRepository implements GatewayConfigurati
     });
   }
 
-  async upsert(data: {
-    tenantId: string;
-    provider: PaymentProvider;
-    environment: GatewayEnvironment;
-    status?: GatewayConfigurationStatus;
-    priority?: number;
-    displayName?: string;
-    supportedMethods?: any;
-    encryptedCredentials?: string;
-    credentialsFingerprint?: string;
-  }): Promise<GatewayConfiguration> {
+  async upsert(input: UpsertGatewayConfigurationInput): Promise<GatewayConfiguration> {
+    const { tenantId, provider, environment, ...rest } = input;
     return this.prisma.gatewayConfiguration.upsert({
       where: {
         tenantId_provider_environment: {
-          tenantId: data.tenantId,
-          provider: data.provider,
-          environment: data.environment,
+          tenantId,
+          provider,
+          environment,
         },
       },
-      update: data,
-      create: data,
+      update: {
+        status: rest.status,
+        priority: rest.priority,
+        displayName: rest.displayName,
+        supportedMethods: rest.supportedMethods,
+        encryptedCredentials: rest.encryptedCredentials,
+        credentialsFingerprint: rest.credentialsFingerprint,
+        healthStatus: rest.healthStatus,
+      },
+      create: {
+        tenantId,
+        provider,
+        environment,
+        status: rest.status,
+        priority: rest.priority,
+        displayName: rest.displayName,
+        supportedMethods: rest.supportedMethods,
+        encryptedCredentials: rest.encryptedCredentials,
+        credentialsFingerprint: rest.credentialsFingerprint,
+        healthStatus: rest.healthStatus,
+      },
     });
   }
 

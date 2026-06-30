@@ -16,20 +16,25 @@ export class MercadoPagoOAuthStateService {
   generateState(tenantId: string, userId: string): string {
     const state = crypto.randomBytes(32).toString('hex');
     const expiresAt = Date.now() + this.expirationMinutes * 60 * 1000;
-    
+
     this.states.set(state, { tenantId, userId, expiresAt });
-    
+
     // Auto-cleanup after expiration
-    setTimeout(() => {
-      this.states.delete(state);
-    }, this.expirationMinutes * 60 * 1000);
+    setTimeout(
+      () => {
+        this.states.delete(state);
+      },
+      this.expirationMinutes * 60 * 1000,
+    );
 
     return state;
   }
 
-  validateAndConsumeState(state: string): { tenantId: string; userId: string } | null {
+  validateAndConsumeState(
+    state: string,
+  ): { tenantId: string; userId: string } | null {
     const data = this.states.get(state);
-    
+
     if (!data) {
       this.logger.warn(`Invalid or expired OAuth state provided.`);
       return null;
