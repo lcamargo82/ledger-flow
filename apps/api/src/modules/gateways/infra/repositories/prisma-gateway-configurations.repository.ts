@@ -85,6 +85,30 @@ export class PrismaGatewayConfigurationsRepository implements GatewayConfigurati
     });
   }
 
+  async upsert(data: {
+    tenantId: string;
+    provider: PaymentProvider;
+    environment: GatewayEnvironment;
+    status?: GatewayConfigurationStatus;
+    priority?: number;
+    displayName?: string;
+    supportedMethods?: any;
+    encryptedCredentials?: string;
+    credentialsFingerprint?: string;
+  }): Promise<GatewayConfiguration> {
+    return this.prisma.gatewayConfiguration.upsert({
+      where: {
+        tenantId_provider_environment: {
+          tenantId: data.tenantId,
+          provider: data.provider,
+          environment: data.environment,
+        },
+      },
+      update: data,
+      create: data,
+    });
+  }
+
   async updateStatus(
     id: string,
     tenantId: string,

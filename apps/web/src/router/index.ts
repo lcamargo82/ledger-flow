@@ -110,6 +110,16 @@ const router = createRouter({
       }
     },
     {
+      path: '/settings/gateways',
+      name: 'gateway-settings',
+      component: () => import('../views/GatewaySettingsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['gateway:manage']
+      }
+    },
+    {
       path: '/customers',
       name: 'customers',
       component: CustomersView,

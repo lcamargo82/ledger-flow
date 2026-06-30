@@ -33,6 +33,18 @@ export abstract class GatewayConfigurationsRepository {
     credentialsFingerprint?: string;
   }): Promise<GatewayConfiguration>;
 
+  abstract upsert(data: {
+    tenantId: string;
+    provider: PaymentProvider;
+    environment: GatewayEnvironment;
+    status?: GatewayConfigurationStatus;
+    priority?: number;
+    displayName?: string;
+    supportedMethods?: any;
+    encryptedCredentials?: string;
+    credentialsFingerprint?: string;
+  }): Promise<GatewayConfiguration>;
+
   abstract updateStatus(
     id: string,
     tenantId: string,

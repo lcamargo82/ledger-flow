@@ -3,7 +3,7 @@ import { PaymentProvider } from '@prisma/client';
 import { IPaymentGateway } from '../../domain/interfaces/payment-gateway.interface';
 import { StripePaymentGatewayAdapter } from '../../infra/adapters/stripe-payment-gateway.adapter';
 import { AsaasPaymentGatewayAdapter } from '../../infra/adapters/asaas-payment-gateway.adapter';
-import { MercadoPagoPaymentGatewayAdapter } from '../../infra/adapters/mercado-pago-payment-gateway.adapter';
+import { MercadoPagoPaymentGatewayAdapter } from '../../infra/providers/mercado-pago/mercado-pago-payment-gateway.adapter';
 import { PagBankPaymentGatewayAdapter } from '../../infra/adapters/pagbank-payment-gateway.adapter';
 import { PagarmePaymentGatewayAdapter } from '../../infra/adapters/pagarme-payment-gateway.adapter';
 import { GatewayNotSupportedError } from '../../domain/errors/gateway-errors';

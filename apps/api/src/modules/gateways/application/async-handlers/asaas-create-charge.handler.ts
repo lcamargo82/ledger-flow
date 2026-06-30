@@ -58,6 +58,19 @@ export class AsaasCreateChargeAsyncHandler implements AsyncEventHandler {
       );
     }
 
+    const activeConfig = await this.prisma.gatewayConfiguration.findFirst({
+      where: {
+        tenantId: payment.tenantId,
+        status: 'ACTIVE',
+      },
+      orderBy: { priority: 'asc' },
+    });
+
+    if (!activeConfig || activeConfig.provider !== 'ASAAS') {
+      this.logger.debug(`Skipping payment ${input.aggregateId} as active provider is not ASAAS`);
+      return;
+    }
+
     // Call orchestrator
     // We assume actorUserId is system since it's async
     await this.orchestrator.orchestrate(
