@@ -20,7 +20,7 @@
       </template>
 
       <template #environment="{ item }">
-        <AppBadge variant="neutral">{{ item.environment }}</AppBadge>
+        <AppBadge variant="default">{{ item.environment }}</AppBadge>
       </template>
 
       <template #status="{ item }">
@@ -47,7 +47,7 @@
           </AppButton>
           <AppButton 
             v-else 
-            variant="success" 
+            variant="primary" 
             size="small"
             @click="openReactivateModal(item)"
           >
@@ -148,7 +148,7 @@ const getStatusBadgeVariant = (status: string) => {
     case 'ACTIVE': return 'success';
     case 'INACTIVE': return 'warning';
     case 'DISABLED': return 'danger';
-    default: return 'neutral';
+    default: return 'default';
   }
 };
 
@@ -157,7 +157,7 @@ const getHealthBadgeVariant = (health: string) => {
     case 'HEALTHY': return 'success';
     case 'ATTENTION': return 'warning';
     case 'CRITICAL': return 'danger';
-    default: return 'neutral';
+    default: return 'default';
   }
 };
 
