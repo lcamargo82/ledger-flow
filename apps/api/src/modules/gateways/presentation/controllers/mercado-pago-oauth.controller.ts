@@ -7,11 +7,7 @@ import { MercadoPagoOAuthService } from '../../infra/providers/mercado-pago/merc
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../auth/application/types/authenticated-user.type';
 import { GatewayConfigurationsRepository } from '../../domain/repositories/gateway-configurations.repository';
-import {
-  PaymentProvider,
-  GatewayEnvironment,
-  GatewayConfigurationStatus,
-} from '@prisma/client';
+import { PaymentProvider, GatewayEnvironment, GatewayConfigurationStatus } from '@prisma/client';
 
 @Controller('gateways/mercado-pago')
 export class MercadoPagoOAuthController {
@@ -24,19 +20,12 @@ export class MercadoPagoOAuthController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermissions('gateway:manage')
   async connect(@CurrentUser() user: AuthenticatedUser) {
-    const authorizationUrl = await this.oauthService.generateAuthUrl(
-      user.tenantId,
-      user.id,
-    );
+    const authorizationUrl = await this.oauthService.generateAuthUrl(user.tenantId, user.id);
     return { authorizationUrl };
   }
 
   @Get('oauth/callback')
-  async callback(
-    @Query('code') code: string,
-    @Query('state') state: string,
-    @Res() res: any,
-  ) {
+  async callback(@Query('code') code: string, @Query('state') state: string, @Res() res: any) {
     try {
       if (!code || !state) {
         throw new Error('Code and state are required');
@@ -45,14 +34,10 @@ export class MercadoPagoOAuthController {
       await this.oauthService.handleCallback(code, state);
 
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5180';
-      return res.redirect(
-        `${frontendUrl}/settings/gateways?success=true&provider=mercado-pago`,
-      );
+      return res.redirect(`${frontendUrl}/settings/gateways?success=true&provider=mercado-pago`);
     } catch (error) {
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5180';
-      return res.redirect(
-        `${frontendUrl}/settings/gateways?error=true&provider=mercado-pago`,
-      );
+      return res.redirect(`${frontendUrl}/settings/gateways?error=true&provider=mercado-pago`);
     }
   }
 
@@ -69,9 +54,7 @@ export class MercadoPagoOAuthController {
   @RequirePermissions('gateway:read')
   async getConnectionStatus(@CurrentUser() user: AuthenticatedUser) {
     const isTestMode = process.env.MERCADO_PAGO_TEST_MODE === 'true';
-    const environment = isTestMode
-      ? GatewayEnvironment.TEST
-      : GatewayEnvironment.LIVE;
+    const environment = isTestMode ? GatewayEnvironment.TEST : GatewayEnvironment.LIVE;
 
     const config = await this.gatewayConfigRepo.findActiveByTenantAndProvider(
       user.tenantId,

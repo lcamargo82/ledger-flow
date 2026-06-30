@@ -43,9 +43,7 @@ export class PaymentGatewayResolverService {
     // Filter by supportedMethods
     const methodConfigs = eligibleConfigs.filter((c) => {
       try {
-        const methods = Array.isArray(c.supportedMethods)
-          ? c.supportedMethods
-          : [];
+        const methods = Array.isArray(c.supportedMethods) ? c.supportedMethods : [];
         return methods.includes(method);
       } catch (e) {
         return false;
@@ -91,10 +89,7 @@ export class PaymentGatewayResolverService {
         resolvedEnv,
       );
     } else {
-      configuration = await this.repository.findDefaultActiveByTenant(
-        tenantId,
-        resolvedEnv,
-      );
+      configuration = await this.repository.findDefaultActiveByTenant(tenantId, resolvedEnv);
     }
 
     if (!configuration) {

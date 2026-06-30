@@ -27,9 +27,7 @@ export class GatewayConnectionsService {
     private readonly encryptionService: GatewayCredentialsEncryptionService,
   ) {}
 
-  async listConnections(
-    tenantId: string,
-  ): Promise<GatewayConnectionResponseDto[]> {
+  async listConnections(tenantId: string): Promise<GatewayConnectionResponseDto[]> {
     const connections = await this.prisma.gatewayConfiguration.findMany({
       where: { tenantId },
       orderBy: { createdAt: 'desc' },
@@ -68,9 +66,7 @@ export class GatewayConnectionsService {
 
     // Round-trip validation
     try {
-      const decrypted = this.encryptionService.decrypt(
-        JSON.stringify(encryptedCredentials),
-      );
+      const decrypted = this.encryptionService.decrypt(JSON.stringify(encryptedCredentials));
       if (decrypted.apiKey !== dto.apiKey) {
         throw new Error('Decrypted value does not match');
       }
@@ -86,10 +82,7 @@ export class GatewayConnectionsService {
 
     // In a real scenario, we could validate the API key calling Asaas API with a ping/validate endpoint here.
 
-    const supportedMethods = dto.supportedMethods || [
-      PaymentMethod.PIX,
-      PaymentMethod.BOLETO,
-    ];
+    const supportedMethods = dto.supportedMethods || [PaymentMethod.PIX, PaymentMethod.BOLETO];
 
     if (existing) {
       const updated = await this.prisma.gatewayConfiguration.update({
@@ -172,9 +165,7 @@ export class GatewayConnectionsService {
 
     // Round-trip validation
     try {
-      const decrypted = this.encryptionService.decrypt(
-        JSON.stringify(encryptedCredentials),
-      );
+      const decrypted = this.encryptionService.decrypt(JSON.stringify(encryptedCredentials));
       if (decrypted.apiKey !== dto.apiKey) {
         throw new Error('Decrypted value does not match');
       }
@@ -221,10 +212,7 @@ export class GatewayConnectionsService {
     return this.mapToResponse(updated);
   }
 
-  async disconnectConnection(
-    tenantId: string,
-    id: string,
-  ): Promise<GatewayConnectionResponseDto> {
+  async disconnectConnection(tenantId: string, id: string): Promise<GatewayConnectionResponseDto> {
     const existing = await this.prisma.gatewayConfiguration.findFirst({
       where: { id, tenantId },
     });
@@ -246,9 +234,7 @@ export class GatewayConnectionsService {
     return this.mapToResponse(updated);
   }
 
-  private mapToResponse(
-    entity: GatewayConfiguration,
-  ): GatewayConnectionResponseDto {
+  private mapToResponse(entity: GatewayConfiguration): GatewayConnectionResponseDto {
     return {
       id: entity.id,
       provider: entity.provider,

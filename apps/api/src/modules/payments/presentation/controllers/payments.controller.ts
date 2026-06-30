@@ -1,13 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return */
-import {
-  Body,
-  Controller,
-  Get,
-  Headers,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -71,10 +63,7 @@ export class PaymentsController {
   @ApiUnauthorizedResponse({ description: 'Não autenticado.' })
   @ApiForbiddenResponse({ description: 'Sem permissão.' })
   async list(@CurrentUser() user: any, @Query() query: ListPaymentsQueryDto) {
-    const result = await this.paymentsService.listPayments(
-      user.tenantId,
-      query,
-    );
+    const result = await this.paymentsService.listPayments(user.tenantId, query);
     return {
       data: result.data.map((p) => PaymentMapper.toPublic(p)),
       meta: result.meta,
@@ -89,10 +78,7 @@ export class PaymentsController {
   @ApiForbiddenResponse({ description: 'Sem permissão.' })
   @ApiNotFoundResponse({ description: 'Pagamento não encontrado.' })
   async getDetails(@CurrentUser() user: any, @Param('id') id: string) {
-    const payment = await this.paymentsService.getPaymentDetails(
-      id,
-      user.tenantId,
-    );
+    const payment = await this.paymentsService.getPaymentDetails(id, user.tenantId);
     return { payment: PaymentMapper.toPublicWithEvents(payment) };
   }
 
@@ -106,10 +92,7 @@ export class PaymentsController {
   @ApiForbiddenResponse({ description: 'Sem permissão.' })
   @ApiNotFoundResponse({ description: 'Pagamento não encontrado.' })
   async getInstructions(@CurrentUser() user: any, @Param('id') id: string) {
-    const instructions = await this.paymentsService.getPaymentInstructions(
-      id,
-      user.tenantId,
-    );
+    const instructions = await this.paymentsService.getPaymentInstructions(id, user.tenantId);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { providerPaymentId: _, ...sanitizedInstructions } = instructions;
     return { instructions: sanitizedInstructions };
@@ -126,11 +109,7 @@ export class PaymentsController {
   @ApiNotFoundResponse({ description: 'Pagamento não encontrado.' })
   @ApiConflictResponse({ description: 'Status não permite cancelamento.' })
   async cancel(@CurrentUser() user: any, @Param('id') id: string) {
-    const payment = await this.paymentsService.cancelPayment(
-      id,
-      user.tenantId,
-      user.userId,
-    );
+    const payment = await this.paymentsService.cancelPayment(id, user.tenantId, user.userId);
     return { payment: PaymentMapper.toPublic(payment) };
   }
 
@@ -142,17 +121,21 @@ export class PaymentsController {
   @ApiForbiddenResponse({ description: 'Sem permissão.' })
   @ApiNotFoundResponse({ description: 'Pagamento não encontrado.' })
   @ApiConflictResponse({ description: 'Status não permite reembolso.' })
-  async refund(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-    @Body() data: RefundPaymentDto,
-  ) {
-    const payment = await this.paymentsService.refundPayment(
-      id,
-      user.tenantId,
-      user.userId,
-      data,
-    );
+  async refund(@CurrentUser() user: any, @Param('id') id: string, @Body() data: RefundPaymentDto) {
+    const payment = await this.paymentsService.refundPayment(id, user.tenantId, user.userId, data);
     return { payment: PaymentMapper.toPublic(payment) };
+  }
+
+  @Post(':id/retry-external-charge')
+  @RequirePermissions('payments:retry')
+  @ApiOperation({ summary: 'Reprocessar manualmente a criação de uma cobrança externa falha' })
+  @ApiOkResponse({ description: 'Nova tentativa agendada com sucesso.' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado.' })
+  @ApiForbiddenResponse({ description: 'Sem permissão.' })
+  @ApiNotFoundResponse({ description: 'Pagamento não encontrado.' })
+  @ApiConflictResponse({ description: 'Pagamento não elegível para reprocessamento.' })
+  async retryExternalCharge(@CurrentUser() user: any, @Param('id') id: string) {
+    const payment = await this.paymentsService.retryExternalCharge(id, user.tenantId, user.userId);
+    return { payment: PaymentMapper.toPublicWithEvents(payment) };
   }
 }

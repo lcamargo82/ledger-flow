@@ -30,9 +30,7 @@ export class MercadoPagoOAuthStateService {
     return state;
   }
 
-  validateAndConsumeState(
-    state: string,
-  ): { tenantId: string; userId: string } | null {
+  validateAndConsumeState(state: string): { tenantId: string; userId: string } | null {
     const data = this.states.get(state);
 
     if (!data) {

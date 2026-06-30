@@ -17,9 +17,7 @@ export class AsaasWebhookProcessingAsyncHandler implements AsyncEventHandler {
   ) {}
 
   async handle(input: AsyncMessageEnvelope): Promise<void> {
-    this.logger.log(
-      `Handling webhook processing for inbox event ${input.aggregateId}`,
-    );
+    this.logger.log(`Handling webhook processing for inbox event ${input.aggregateId}`);
     const inboxEvent = await this.prisma.webhookInboxEvent.findUnique({
       where: { id: input.aggregateId },
     });
@@ -33,17 +31,13 @@ export class AsaasWebhookProcessingAsyncHandler implements AsyncEventHandler {
       inboxEvent.status === WebhookProcessingStatus.PROCESSED ||
       inboxEvent.status === WebhookProcessingStatus.IGNORED
     ) {
-      this.logger.log(
-        `Webhook ${input.aggregateId} already in final state (${inboxEvent.status})`,
-      );
+      this.logger.log(`Webhook ${input.aggregateId} already in final state (${inboxEvent.status})`);
       return;
     }
 
     const processor = this.processorRegistry.getProcessor(inboxEvent.provider);
     if (!processor) {
-      this.logger.error(
-        `No processor found for provider ${inboxEvent.provider}`,
-      );
+      this.logger.error(`No processor found for provider ${inboxEvent.provider}`);
       return;
     }
 

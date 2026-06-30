@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from '../../composables/useI18n';
 import type { PaymentDetails } from '../../types/payments.types';
 import { formatDateTime } from '../../utils/date-format';
@@ -65,7 +66,46 @@ const getEventTranslation = (type: string) => {
     case 'payment.canceled': return t('payments.events.paymentCanceled');
     case 'payment.refund_requested': return t('payments.events.paymentRefundRequested');
     case 'payment.refunded': return t('payments.events.paymentRefunded');
+    case 'payment.provider_retry_requested': return t('payments.events.providerRetryRequested');
     default: return t('payments.events.generic');
+  }
+};
+
+const router = useRouter();
+const isRetrying = ref(false);
+
+const handleRetry = async () => {
+  if (!props.payment.id) return;
+  isRetrying.value = true;
+  try {
+    await paymentsStore.retryExternalCharge(props.payment.id);
+    toastStore.success(t('payments.retry.success'));
+    await refreshStatus();
+  } catch (err: any) {
+    // Error is typically handled in the store/interceptor, but we can catch to reset loading
+  } finally {
+    isRetrying.value = false;
+  }
+};
+
+const openSettings = () => {
+  router.push('/platform/gateway-connections'); // Ou o caminho correto para tenant gateways se existir
+};
+
+const refreshStatus = async () => {
+  await paymentsStore.fetchPaymentById(props.payment.id);
+};
+
+const getIntegrationVariant = (status: string) => {
+  switch (status) {
+    case 'NOT_REQUIRED': return 'default';
+    case 'NOT_STARTED': return 'default';
+    case 'PROCESSING': return 'info';
+    case 'RETRY_SCHEDULED': return 'warning';
+    case 'SUCCEEDED': return 'success';
+    case 'FAILED': return 'danger';
+    case 'DEAD_LETTERED': return 'danger';
+    default: return 'default';
   }
 };
 </script>
@@ -121,37 +161,50 @@ const getEventTranslation = (type: string) => {
       </div>
     </section>
 
-    <!-- Async Status Banner -->
-    <section v-if="payment.asyncChargeStatus && (['QUEUED', 'PENDING', 'PROCESSING', 'RETRY_SCHEDULED'] as string[]).includes(payment.asyncChargeStatus)">
-      <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm text-blue-700">
-              {{ t('payments.details.asyncProcessing') }}
-            </p>
-          </div>
-        </div>
+    <!-- External Processing Section -->
+    <section v-if="payment.externalProcessing && payment.externalProcessing.status !== 'NOT_REQUIRED'">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('payments.externalProcessing.title') }}</h3>
+        <AppButton 
+          variant="secondary" 
+          size="small" 
+          @click="refreshStatus"
+        >
+          {{ t('payments.actions.refreshPayment') }}
+        </AppButton>
       </div>
-    </section>
 
-    <!-- Async Failed Banner -->
-    <section v-if="payment.asyncChargeStatus === 'FAILED' || payment.asyncChargeStatus === 'DEAD_LETTERED'">
-      <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm text-red-700">
-              {{ t('payments.details.asyncFailed') }}
+      <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg border border-gray-100 dark:border-gray-700">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <AppBadge :variant="getIntegrationVariant(payment.externalProcessing.status) as any">
+                {{ t(`payments.externalProcessing.status.${payment.externalProcessing.status}`) }}
+              </AppBadge>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              {{ t(payment.externalProcessing.messageKey) }}
             </p>
+          </div>
+          
+          <div class="flex flex-col gap-2 min-w-[140px]">
+            <AppButton 
+              v-if="payment.externalProcessing.retryAvailable"
+              variant="primary" 
+              size="small"
+              :loading="isRetrying"
+              @click="handleRetry"
+            >
+              {{ t('payments.actions.retryExternalCharge') }}
+            </AppButton>
+            <AppButton 
+              v-if="payment.externalProcessing.status === 'FAILED' || payment.externalProcessing.status === 'DEAD_LETTERED'"
+              variant="secondary" 
+              size="small"
+              @click="openSettings"
+            >
+              {{ t('payments.actions.openGatewaySettings') }}
+            </AppButton>
           </div>
         </div>
       </div>

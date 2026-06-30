@@ -53,13 +53,9 @@ export class PlatformTenantsController {
   @ApiOperation({ summary: 'Provision a new customer tenant' })
   @ApiOkResponse({ description: 'Tenant successfully provisioned' })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
-  createTenant(
-    @Body() dto: CreatePlatformTenantDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
+  createTenant(@Body() dto: CreatePlatformTenantDto, @CurrentUser() user: AuthenticatedUser) {
     return this.provisioningService.provisionCustomerTenant(dto, user.id);
   }
 
@@ -68,8 +64,7 @@ export class PlatformTenantsController {
   @ApiOperation({ summary: 'List platform tenants' })
   @ApiOkResponse({ type: PaginatedPlatformTenantsResponseDto })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   findAll(@Query() query: ListPlatformTenantsQueryDto) {
     return this.service.findAll(query);
@@ -81,8 +76,7 @@ export class PlatformTenantsController {
   @ApiOkResponse({ type: PlatformTenantDetailsResponseDto })
   @ApiNotFoundResponse({ description: 'Tenant not found.' })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.service.findOne(id, user.id);
@@ -94,12 +88,10 @@ export class PlatformTenantsController {
   @ApiOkResponse({ type: PlatformTenantResponseDto })
   @ApiNotFoundResponse({ description: 'Tenant not found.' })
   @ApiConflictResponse({
-    description:
-      'The platform tenant cannot be modified through this endpoint.',
+    description: 'The platform tenant cannot be modified through this endpoint.',
   })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   update(
     @Param('id') id: string,
@@ -117,12 +109,10 @@ export class PlatformTenantsController {
   @ApiOkResponse({ type: PlatformTenantResponseDto })
   @ApiNotFoundResponse({ description: 'Tenant not found.' })
   @ApiConflictResponse({
-    description:
-      'The platform tenant cannot be modified through this endpoint.',
+    description: 'The platform tenant cannot be modified through this endpoint.',
   })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   updateStatus(
     @Param('id') id: string,
@@ -141,12 +131,10 @@ export class PlatformTenantsController {
     description: 'Subscription period end must be after the start date.',
   })
   @ApiConflictResponse({
-    description:
-      'The platform tenant cannot be modified through this endpoint.',
+    description: 'The platform tenant cannot be modified through this endpoint.',
   })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   updateSubscription(
     @Param('id') id: string,
@@ -162,8 +150,7 @@ export class PlatformTenantsController {
   @ApiOkResponse({ type: PlatformTenantOverviewResponseDto })
   @ApiNotFoundResponse({ description: 'Tenant not found.' })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   getOverview(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.service.getTenantOverview(id, user.id);
@@ -175,8 +162,7 @@ export class PlatformTenantsController {
   @ApiOkResponse({ type: PlatformTenantHealthResponseDto })
   @ApiNotFoundResponse({ description: 'Tenant not found.' })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   getHealth(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.service.getTenantHealth(id, user.id);
@@ -188,8 +174,7 @@ export class PlatformTenantsController {
   @ApiOkResponse({ type: PlatformTenantActivityResponseDto })
   @ApiNotFoundResponse({ description: 'Tenant not found.' })
   @ApiForbiddenResponse({
-    description:
-      'You do not have permission to access platform administration.',
+    description: 'You do not have permission to access platform administration.',
   })
   getActivity(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     return this.service.getTenantActivity(id, user.id);

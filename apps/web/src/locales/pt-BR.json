@@ -240,6 +240,7 @@
     }
   },
   "common": {
+    "all": "Todos",
     "logout": "Sair",
     "loggingOut": "Saindo...",
     "loading": "Carregando...",
@@ -588,7 +589,11 @@
       "search": "Buscar",
       "clearFilters": "Limpar",
       "tryAgain": "Tentar novamente",
-      "close": "Fechar"
+      "close": "Fechar",
+      "retryExternalCharge": "Tentar Novamente",
+      "retryingExternalCharge": "Tentando...",
+      "openGatewaySettings": "Abrir integrações",
+      "refreshPayment": "Atualizar status"
     },
     "filters": {
       "searchLabel": "Buscar por referência, cliente...",
@@ -600,12 +605,36 @@
       "statusAll": "Todos",
       "methodAll": "Todos"
     },
+    "externalProcessing": {
+      "title": "Integração Externa",
+      "status": {
+        "NOT_REQUIRED": "Não Aplicável",
+        "NOT_STARTED": "Não Iniciada",
+        "PROCESSING": "Processando",
+        "RETRY_SCHEDULED": "Tentativa Agendada",
+        "SUCCEEDED": "Sucesso",
+        "FAILED": "Falha Externa",
+        "DEAD_LETTERED": "Falha Permanente"
+      },
+      "message": {
+        "processing": "A cobrança está sendo criada no gateway de pagamento.",
+        "retryScheduled": "Uma nova tentativa de criação está agendada.",
+        "succeeded": "Cobrança criada com sucesso no gateway.",
+        "failed": "A tentativa de criação no gateway falhou.",
+        "credentialInvalid": "As credenciais do gateway configuradas parecem inválidas.",
+        "gatewayNotConfigured": "Não há gateway configurado para este método.",
+        "methodNotSupported": "Este gateway não suporta o método selecionado.",
+        "environmentNotAllowed": "Este gateway não está permitido para o ambiente atual.",
+        "providerUnavailable": "O provedor de pagamento está temporariamente indisponível."
+      }
+    },
     "table": {
       "reference": "Referência",
       "customer": "Cliente",
       "amount": "Valor",
       "method": "Método",
       "status": "Status",
+      "integration": "Integração",
       "createdAt": "Criado em",
       "actions": "Ações"
     },
@@ -729,6 +758,14 @@
       "created": "Pagamento criado com sucesso.",
       "canceled": "Pagamento cancelado com sucesso."
     },
+    "retry": {
+      "success": "Nova tentativa de cobrança agendada com sucesso.",
+      "failed": "Não foi possível reprocessar a cobrança externa.",
+      "notAvailable": "Este pagamento não é elegível para reprocessamento.",
+      "alreadyCreated": "A cobrança externa já foi criada com sucesso.",
+      "gatewayUnavailable": "O provedor de pagamento parece estar indisponível.",
+      "paymentFinalized": "Este pagamento já foi finalizado (aprovado, cancelado ou falhou permanentemente)."
+    },
     "confirmCancel": {
       "title": "Cancelar pagamento",
       "message": "Tem certeza de que deseja cancelar este pagamento? Esta ação não poderá ser desfeita.",
@@ -746,6 +783,7 @@
       "operations": "Operação",
       "platform": "Plataforma",
       "tenants": "Tenants da Plataforma",
+      "gatewayConnections": "Integrações de Gateways",
       "audit": "Auditoria Global"
     },
     "audit": {
@@ -755,6 +793,13 @@
         "INFO": "Info",
         "WARNING": "Aviso",
         "CRITICAL": "Crítico"
+      },
+      "actorType": {
+        "USER": "Usuário",
+        "PLATFORM_ADMIN": "Administrador da Plataforma",
+        "SYSTEM": "Sistema",
+        "WEBHOOK": "Webhook",
+        "WORKER": "Worker"
       },
       "table": {
         "occurredAt": "Data/Hora",

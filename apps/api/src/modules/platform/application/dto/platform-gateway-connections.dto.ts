@@ -1,9 +1,5 @@
 import { IsString, IsEnum, IsOptional, MaxLength } from 'class-validator';
-import {
-  GatewayEnvironment,
-  PaymentProvider,
-  GatewayConfigurationStatus,
-} from '@prisma/client';
+import { GatewayEnvironment, PaymentProvider, GatewayConfigurationStatus } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdatePlatformGatewayConnectionStatusDto {

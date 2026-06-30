@@ -32,15 +32,9 @@ export interface IPaymentsRepository {
     tenantId: string,
   ): Promise<(Payment & { events: PaymentEvent[] }) | null>;
 
-  findByIdempotencyKeyHash(
-    tenantId: string,
-    idempotencyKeyHash: string,
-  ): Promise<Payment | null>;
+  findByIdempotencyKeyHash(tenantId: string, idempotencyKeyHash: string): Promise<Payment | null>;
 
-  create(
-    data: Prisma.PaymentUncheckedCreateInput,
-    outboxEventData?: any,
-  ): Promise<Payment>;
+  create(data: Prisma.PaymentUncheckedCreateInput, outboxEventData?: any): Promise<Payment>;
 
   cancel(
     id: string,
@@ -54,7 +48,5 @@ export interface IPaymentsRepository {
     eventData: Prisma.PaymentEventUncheckedCreateWithoutPaymentInput,
   ): Promise<Payment>;
 
-  createEvent(
-    data: Prisma.PaymentEventUncheckedCreateInput,
-  ): Promise<PaymentEvent>;
+  createEvent(data: Prisma.PaymentEventUncheckedCreateInput): Promise<PaymentEvent>;
 }
