@@ -38,7 +38,8 @@ export class PlatformAuditController {
   @RequirePermissions('platform:audit:read')
   @ApiOperation({
     summary: 'List tenant audit logs',
-    description: 'Lists audit logs for a specific tenant. Exclusive to Platform Admin.',
+    description:
+      'Lists audit logs for a specific tenant. Exclusive to Platform Admin.',
   })
   async listTenantAuditLogs(
     @Param('id') tenantId: string,
@@ -52,7 +53,8 @@ export class PlatformAuditController {
   @RequirePermissions('platform:support:read')
   @ApiOperation({
     summary: 'Get tenant support summary',
-    description: 'Returns a support summary for a specific tenant. Exclusive to Platform Admin.',
+    description:
+      'Returns a support summary for a specific tenant. Exclusive to Platform Admin.',
   })
   async getTenantSupportSummary(
     @Param('id') tenantId: string,

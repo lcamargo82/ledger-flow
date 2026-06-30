@@ -28,7 +28,10 @@ export class PlatformAsyncJobsController {
     if (query.status) where.status = query.status;
     if (query.eventType) where.eventType = query.eventType;
 
-    const result = await this.outboxRepository.paginate({ where, orderBy: { createdAt: 'desc' } });
+    const result = await this.outboxRepository.paginate({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
 
     return {
       items: result.items.map(AsyncJobMapper.toResponseDto),

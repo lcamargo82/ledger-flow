@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Req, HttpCode, HttpStatus, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Req,
+  HttpCode,
+  HttpStatus,
+  Get,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthService } from '../../application/services/auth.service';
 import { LoginDto } from '../../application/dto/login.dto';
@@ -42,7 +50,10 @@ export class AuthController {
     description: 'Autentica o usuário e retorna o access e refresh tokens',
   })
   @ApiUnauthorizedResponse({ description: 'Credenciais inválidas' })
-  async login(@Body() loginDto: LoginDto, @Req() req: Request): Promise<AuthResponse> {
+  async login(
+    @Body() loginDto: LoginDto,
+    @Req() req: Request,
+  ): Promise<AuthResponse> {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
 
@@ -59,7 +70,9 @@ export class AuthController {
     description: 'Gera um novo access token a partir de um refresh token',
   })
   @ApiUnauthorizedResponse({ description: 'Token inválido ou revogado' })
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<{ accessToken: string }> {
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<{ accessToken: string }> {
     return this.authService.refresh(refreshTokenDto);
   }
 
@@ -81,7 +94,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Get authenticated user profile' })
   @ApiOkResponse({
     type: MeResponseDto,
-    description: 'Retorna o usuário autenticado com roles, permissões, tenantId e sessionId',
+    description:
+      'Retorna o usuário autenticado com roles, permissões, tenantId e sessionId',
   })
   @ApiUnauthorizedResponse({ description: 'Token ausente ou inválido' })
   getProfile(@CurrentUser() user: AuthenticatedUser) {
@@ -94,7 +108,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Request password recovery' })
   @ApiBody({ type: ForgotPasswordDto })
   @ApiOkResponse({
-    description: 'Se o e-mail existir, as instruções de recuperação serão enviadas.',
+    description:
+      'Se o e-mail existir, as instruções de recuperação serão enviadas.',
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
   // @ApiTooManyRequestsResponse({ description: 'Muitas requisições (TODO: rate limit)' }) // TODO: Implement rate limiting
@@ -105,7 +120,11 @@ export class AuthController {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
 
-    return this.authService.forgotPassword(forgotPasswordDto, ipAddress, userAgent);
+    return this.authService.forgotPassword(
+      forgotPasswordDto,
+      ipAddress,
+      userAgent,
+    );
   }
 
   @Public()
@@ -122,7 +141,11 @@ export class AuthController {
     const ipAddress = this.extractIpAddress(req);
     const userAgent = this.extractUserAgent(req);
 
-    return this.authService.resetPassword(resetPasswordDto, ipAddress, userAgent);
+    return this.authService.resetPassword(
+      resetPasswordDto,
+      ipAddress,
+      userAgent,
+    );
   }
 
   @Public()

@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PlatformTenantsController } from './presentation/controllers/platform-tenants.controller';
 import { PlatformAuditController } from './presentation/controllers/platform-audit.controller';
+import { PlatformGatewayConnectionsController } from './presentation/controllers/platform-gateway-connections.controller';
 import { PlatformTenantsService } from './application/services/platform-tenants.service';
 import { TenantProvisioningService } from './application/services/tenant-provisioning.service';
 import { TenantInvitationService } from './application/services/tenant-invitation.service';
 import { PlatformAuditService } from './application/services/platform-audit.service';
 import { PlatformSupportService } from './application/services/platform-support.service';
+import { PlatformGatewayConnectionsService } from './application/services/platform-gateway-connections.service';
 import { PlatformTenantsRepository } from './domain/repositories/platform-tenants.repository';
 import { TenantAdminInvitationsRepository } from './domain/repositories/tenant-admin-invitations.repository';
 import { PrismaPlatformTenantsRepository } from './infra/repositories/prisma-platform-tenants.repository';
@@ -17,13 +19,19 @@ import { TenantInvitationsController } from './presentation/controllers/tenant-i
 
 @Module({
   imports: [PrismaModule, EmailModule],
-  controllers: [PlatformTenantsController, TenantInvitationsController, PlatformAuditController],
+  controllers: [
+    PlatformTenantsController,
+    TenantInvitationsController,
+    PlatformAuditController,
+    PlatformGatewayConnectionsController,
+  ],
   providers: [
     PlatformTenantsService,
     TenantProvisioningService,
     TenantInvitationService,
     PlatformAuditService,
     PlatformSupportService,
+    PlatformGatewayConnectionsService,
     {
       provide: PlatformTenantsRepository,
       useClass: PrismaPlatformTenantsRepository,

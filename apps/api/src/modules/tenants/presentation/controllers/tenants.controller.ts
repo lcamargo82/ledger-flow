@@ -28,7 +28,9 @@ export class TenantsController {
   @ApiOperation({ summary: 'Get current tenant details' })
   @ApiOkResponse({ type: TenantResponseDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  async getCurrentTenant(@CurrentUser() user: AuthenticatedUser): Promise<TenantResponseDto> {
+  async getCurrentTenant(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<TenantResponseDto> {
     // Basic endpoint that doesn't strictly need extra permissions
     return this.tenantsService.getCurrentTenant(user.tenantId);
   }

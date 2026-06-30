@@ -21,7 +21,9 @@ export class PrismaAsyncJobExecutionRepository implements AsyncJobExecutionRepos
     });
   }
 
-  async createOrUpdate(data: Partial<AsyncJobExecution>): Promise<AsyncJobExecution> {
+  async createOrUpdate(
+    data: Partial<AsyncJobExecution>,
+  ): Promise<AsyncJobExecution> {
     if (data.id) {
       return this.prisma.asyncJobExecution.update({
         where: { id: data.id },
@@ -30,7 +32,10 @@ export class PrismaAsyncJobExecutionRepository implements AsyncJobExecutionRepos
     }
 
     if (data.outboxEventId && data.consumerName) {
-      const existing = await this.findByEventAndConsumer(data.outboxEventId, data.consumerName);
+      const existing = await this.findByEventAndConsumer(
+        data.outboxEventId,
+        data.consumerName,
+      );
       if (existing) {
         return this.prisma.asyncJobExecution.update({
           where: { id: existing.id },

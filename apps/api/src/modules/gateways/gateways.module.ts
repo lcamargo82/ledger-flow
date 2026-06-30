@@ -16,6 +16,9 @@ import { PagBankPaymentGatewayAdapter } from './infra/adapters/pagbank-payment-g
 import { PagarmePaymentGatewayAdapter } from './infra/adapters/pagarme-payment-gateway.adapter';
 import { GatewayCredentialsEncryptionService } from './application/services/gateway-credentials-encryption.service';
 import { Aes256GcmCredentialsEncryptionService } from './infra/crypto/aes-256-gcm-credentials-encryption.service';
+import { GatewayConnectionsService } from './application/services/gateway-connections.service';
+import { GatewayConnectionsController } from './presentation/controllers/gateway-connections.controller';
+import { TenantsModule } from '../tenants/tenants.module';
 import { IProviderCustomerReferenceRepository } from './domain/interfaces/provider-customer-reference.repository';
 import { PrismaGatewayCustomerReferenceRepository } from './infra/repositories/prisma-gateway-customer-reference.repository';
 import { AsaasApiClient } from './infra/clients/asaas-api.client';
@@ -29,13 +32,15 @@ import { MercadoPagoOAuthController } from './presentation/controllers/mercado-p
 import { MercadoPagoCreateChargeAsyncHandler } from './application/async-handlers/mercado-pago-create-charge.async-handler';
 
 @Module({
-  imports: [AsyncModule, AuthModule],
+  imports: [AsyncModule, AuthModule, TenantsModule],
   controllers: [
     MercadoPagoOAuthController,
+    GatewayConnectionsController,
   ],
   providers: [
     AsaasCreateChargeAsyncHandler,
     MercadoPagoCreateChargeAsyncHandler,
+    GatewayConnectionsService,
     {
       provide: GatewayConfigurationsRepository,
       useClass: PrismaGatewayConfigurationsRepository,

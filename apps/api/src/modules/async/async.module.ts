@@ -20,9 +20,15 @@ import { ExternalProviderExecutionPolicy } from './domain/interfaces/external-pr
   controllers: [PlatformAsyncJobsController],
   providers: [
     { provide: OutboxRepository, useClass: PrismaOutboxRepository },
-    { provide: AsyncJobExecutionRepository, useClass: PrismaAsyncJobExecutionRepository },
+    {
+      provide: AsyncJobExecutionRepository,
+      useClass: PrismaAsyncJobExecutionRepository,
+    },
     { provide: AsyncMessagePublisher, useClass: RabbitMQPublisher },
-    { provide: ExternalProviderExecutionPolicy, useClass: RedisExternalProviderRateLimitService },
+    {
+      provide: ExternalProviderExecutionPolicy,
+      useClass: RedisExternalProviderRateLimitService,
+    },
     OutboxDispatcherService,
     AsyncHandlerRegistryService,
     AsyncJobRetryService,
