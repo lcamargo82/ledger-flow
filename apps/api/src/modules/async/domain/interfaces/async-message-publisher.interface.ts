@@ -1,3 +1,3 @@
-export interface AsyncMessagePublisher {
-  publish(routingKey: string, payload: any): Promise<boolean>;
+export abstract class AsyncMessagePublisher {
+  abstract publish(routingKey: string, payload: any): Promise<boolean>;
 }

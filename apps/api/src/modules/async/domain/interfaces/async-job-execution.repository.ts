@@ -1,6 +1,6 @@
 import { AsyncJobExecution } from '@prisma/client';
 
-export interface AsyncJobExecutionRepository {
-  findByEventAndConsumer(outboxEventId: string, consumerName: string): Promise<AsyncJobExecution | null>;
-  createOrUpdate(data: Partial<AsyncJobExecution>): Promise<AsyncJobExecution>;
+export abstract class AsyncJobExecutionRepository {
+  abstract findByEventAndConsumer(outboxEventId: string, consumerName: string): Promise<AsyncJobExecution | null>;
+  abstract createOrUpdate(data: Partial<AsyncJobExecution>): Promise<AsyncJobExecution>;
 }

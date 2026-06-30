@@ -1,11 +1,11 @@
 import { OutboxEvent } from '@prisma/client';
 
-export interface OutboxRepository {
-  create(data: Omit<OutboxEvent, 'id' | 'createdAt' | 'updatedAt' | 'publishAttempts' | 'status' | 'publishedAt' | 'lockedAt' | 'lockOwner' | 'leaseExpiresAt' | 'lastErrorCode' | 'lastErrorSummary'>): Promise<OutboxEvent>;
-  findPendingAndLock(batchSize: number, lockOwner: string, leaseDurationMs: number): Promise<OutboxEvent[]>;
-  markAsPublished(id: string): Promise<void>;
-  markAsFailed(id: string, errorCode: string, errorSummary: string): Promise<void>;
-  releaseLock(id: string): Promise<void>;
-  findById(id: string): Promise<OutboxEvent | null>;
-  paginate(query: any): Promise<any>;
+export abstract class OutboxRepository {
+  abstract create(data: Omit<OutboxEvent, 'id' | 'createdAt' | 'updatedAt' | 'publishAttempts' | 'status' | 'publishedAt' | 'lockedAt' | 'lockOwner' | 'leaseExpiresAt' | 'lastErrorCode' | 'lastErrorSummary'>): Promise<OutboxEvent>;
+  abstract findPendingAndLock(batchSize: number, lockOwner: string, leaseDurationMs: number): Promise<OutboxEvent[]>;
+  abstract markAsPublished(id: string): Promise<void>;
+  abstract markAsFailed(id: string, errorCode: string, errorSummary: string): Promise<void>;
+  abstract releaseLock(id: string): Promise<void>;
+  abstract findById(id: string): Promise<OutboxEvent | null>;
+  abstract paginate(query: any): Promise<any>;
 }
