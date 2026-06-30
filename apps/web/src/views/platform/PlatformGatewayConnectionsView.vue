@@ -114,13 +114,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useToast } from 'vue-toastification';
-import { PlatformGatewayConnectionsService, type PlatformGatewayConnection } from '../../../services/platform-gateway-connections.service';
-import AppConfirmDialog from '../../../components/common/AppConfirmDialog.vue';
+import { useI18n } from '@/composables/useI18n';
+import { useToastStore } from '@/stores/toast.store';
+import { PlatformGatewayConnectionsService, type PlatformGatewayConnection } from '@/services/platform-gateway-connections.service';
+import AppConfirmDialog from '@components/common/AppConfirmDialog.vue';
 
 const { t } = useI18n();
-const toast = useToast();
+const toast = useToastStore();
 
 const connections = ref<PlatformGatewayConnection[]>([]);
 const isLoading = ref(true);

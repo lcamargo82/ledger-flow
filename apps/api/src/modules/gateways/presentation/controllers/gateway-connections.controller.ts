@@ -13,16 +13,16 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../../auth/presentation/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../auth/presentation/guards/permission.guard';
-import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
-import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
-import { AuthTokenPayload } from '../../../auth/application/types/auth-token-payload.type';
+import { JwtAuthGuard } from '@/modules/auth/presentation/guards/jwt-auth.guard';
+import { PermissionGuard } from '@/modules/auth/presentation/guards/permission.guard';
+import { RequirePermissions } from '@/modules/auth/presentation/decorators/require-permissions.decorator';
+import { CurrentUser } from '@/modules/auth/presentation/decorators/current-user.decorator';
+import type { AuthTokenPayload } from '@/modules/auth/application/types/auth-token-payload.type';
 import { GatewayConnectionsService } from '../../application/services/gateway-connections.service';
 import {
   TenantFeatureAccessService,
   TENANT_FEATURES,
-} from '../../../tenants/application/services/tenant-feature-access.service';
+} from '@/modules/tenants/application/services/tenant-feature-access.service';
 import {
   CreateAsaasGatewayConnectionDto,
   UpdateGatewayConnectionDto,

@@ -4,7 +4,7 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma/prisma.service';
+import { PrismaService } from '@/database/prisma/prisma.service';
 import { GatewayCredentialsEncryptionService } from './gateway-credentials-encryption.service';
 import {
   GatewayEnvironment,
@@ -198,7 +198,7 @@ export class GatewayConnectionsService {
       environment: entity.environment,
       status: entity.status,
       priority: entity.priority,
-      displayName: entity.displayName,
+      displayName: entity.displayName ?? undefined,
       supportedMethods: entity.supportedMethods as PaymentMethod[],
       healthStatus: entity.healthStatus,
       credentialsConfigured: !!entity.encryptedCredentials,

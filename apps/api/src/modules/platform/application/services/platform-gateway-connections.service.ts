@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma/prisma.service';
+import { PrismaService } from '@/database/prisma/prisma.service';
 import { GatewayConfigurationStatus, GatewayConfiguration } from '@prisma/client';
 import {
   PlatformGatewayConnectionResponseDto,

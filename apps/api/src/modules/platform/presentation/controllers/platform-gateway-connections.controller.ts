@@ -12,10 +12,10 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../../auth/presentation/guards/jwt-auth.guard';
-import { PermissionGuard } from '../../../auth/presentation/guards/permission.guard';
-import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
-import { PlatformAdminGuard } from '../../../auth/presentation/guards/platform-admin.guard';
+import { JwtAuthGuard } from '@/modules/auth/presentation/guards/jwt-auth.guard';
+import { PermissionGuard } from '@/modules/auth/presentation/guards/permission.guard';
+import { RequirePermissions } from '@/modules/auth/presentation/decorators/require-permissions.decorator';
+import { PlatformAdminGuard } from '@/modules/auth/presentation/guards/platform-admin.guard';
 import { PlatformGatewayConnectionsService } from '../../application/services/platform-gateway-connections.service';
 import {
   UpdatePlatformGatewayConnectionStatusDto,

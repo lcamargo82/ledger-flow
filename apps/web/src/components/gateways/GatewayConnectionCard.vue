@@ -52,8 +52,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { GatewayConnection } from '../../services/gateway-connections.service';
+import { useI18n } from '@/composables/useI18n';
+import type { GatewayConnection } from '@/services/gateway-connections.service';
 
 const { t } = useI18n();
 

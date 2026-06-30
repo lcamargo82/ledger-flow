@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PlatformTenantsController } from './presentation/controllers/platform-tenants.controller';
 import { PlatformAuditController } from './presentation/controllers/platform-audit.controller';
-import { PlatformSupportController } from './presentation/controllers/platform-support.controller';
 import { PlatformGatewayConnectionsController } from './presentation/controllers/platform-gateway-connections.controller';
 import { PlatformTenantsService } from './application/services/platform-tenants.service';
 import { TenantProvisioningService } from './application/services/tenant-provisioning.service';
@@ -24,7 +23,6 @@ import { TenantInvitationsController } from './presentation/controllers/tenant-i
     PlatformTenantsController,
     TenantInvitationsController,
     PlatformAuditController,
-    PlatformSupportController,
     PlatformGatewayConnectionsController,
   ],
   providers: [

@@ -62,18 +62,18 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useToast } from 'vue-toastification';
-import { GatewayConnectionsService, type GatewayConnection } from '../../services/gateway-connections.service';
+import { useI18n } from '@/composables/useI18n';
+import { useToastStore } from '@/stores/toast.store';
+import { GatewayConnectionsService, type GatewayConnection } from '@/services/gateway-connections.service';
 
-import GatewayConnectionEmptyState from '../../components/gateways/GatewayConnectionEmptyState.vue';
-import GatewayConnectionCard from '../../components/gateways/GatewayConnectionCard.vue';
-import GatewayConnectionForm from '../../components/gateways/GatewayConnectionForm.vue';
-import GatewayCredentialUpdateModal from '../../components/gateways/GatewayCredentialUpdateModal.vue';
-import GatewayConnectionStatusModal from '../../components/gateways/GatewayConnectionStatusModal.vue';
+import GatewayConnectionEmptyState from '@components/gateways/GatewayConnectionEmptyState.vue';
+import GatewayConnectionCard from '@components/gateways/GatewayConnectionCard.vue';
+import GatewayConnectionForm from '@components/gateways/GatewayConnectionForm.vue';
+import GatewayCredentialUpdateModal from '@components/gateways/GatewayCredentialUpdateModal.vue';
+import GatewayConnectionStatusModal from '@components/gateways/GatewayConnectionStatusModal.vue';
 
 const { t } = useI18n();
-const toast = useToast();
+const toast = useToastStore();
 
 const connections = ref<GatewayConnection[]>([]);
 const isLoading = ref(true);

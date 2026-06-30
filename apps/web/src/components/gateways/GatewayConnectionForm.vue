@@ -57,9 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { GatewayConnection } from '../../services/gateway-connections.service';
+import { ref, reactive, watch, computed } from 'vue';
+import { useI18n } from '@/composables/useI18n';
+import type { GatewayConnection } from '@/services/gateway-connections.service';
 
 const { t } = useI18n();
 
@@ -97,8 +97,6 @@ watch(() => props.isOpen, (open) => {
     }
   }
 });
-
-import { computed } from 'vue';
 
 const submit = () => {
   emit('saved', { ...form });

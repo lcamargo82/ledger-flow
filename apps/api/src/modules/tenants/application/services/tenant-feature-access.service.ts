@@ -1,5 +1,5 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma/prisma.service';
+import { PrismaService } from '@/database/prisma/prisma.service';
 
 export const TENANT_FEATURES = {
   GATEWAY_CONNECTIONS: 'gateway_connections',
