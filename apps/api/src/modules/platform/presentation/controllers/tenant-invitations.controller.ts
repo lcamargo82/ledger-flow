@@ -1,5 +1,10 @@
 import { Controller, Param, Post, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { TenantInvitationService } from '../../application/services/tenant-invitation.service';
 import { PlatformAdminOnly } from '../../../auth/presentation/decorators/platform-admin-only.decorator';
 import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';

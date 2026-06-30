@@ -19,7 +19,8 @@ import { PrismaModule } from '../../database/prisma/prisma.module';
         secret: configService.get<string>('JWT_ACCESS_SECRET'),
         signOptions: {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          expiresIn: (configService.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m') as any,
+          expiresIn: (configService.get<string>('JWT_ACCESS_EXPIRES_IN') ||
+            '15m') as any,
         },
       }),
     }),

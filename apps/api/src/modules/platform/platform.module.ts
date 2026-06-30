@@ -20,7 +20,7 @@ import { TenantInvitationsController } from './presentation/controllers/tenant-i
   controllers: [
     PlatformTenantsController,
     TenantInvitationsController,
-    PlatformAuditController
+    PlatformAuditController,
   ],
   providers: [
     PlatformTenantsService,

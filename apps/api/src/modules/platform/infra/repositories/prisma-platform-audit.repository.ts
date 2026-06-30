@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
-import { PlatformAuditRepository, PaginatedPlatformAuditLogs } from '../../domain/repositories/platform-audit.repository';
+import {
+  PlatformAuditRepository,
+  PaginatedPlatformAuditLogs,
+} from '../../domain/repositories/platform-audit.repository';
 import { Prisma } from '@prisma/client';
 
 @Injectable()

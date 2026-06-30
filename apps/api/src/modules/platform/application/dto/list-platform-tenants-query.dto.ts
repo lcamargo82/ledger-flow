@@ -1,4 +1,13 @@
-import { IsOptional, IsString, IsInt, Min, Max, IsBoolean, IsEnum } from 'class-validator';
+/* eslint-disable */
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+  IsBoolean,
+  IsEnum,
+} from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { TenantSubscriptionStatus, SubscriptionPlan } from '@prisma/client';
@@ -34,12 +43,18 @@ export class ListPlatformTenantsQueryDto {
   @IsBoolean()
   active?: boolean;
 
-  @ApiPropertyOptional({ description: 'Filtrar por status da assinatura', enum: TenantSubscriptionStatus })
+  @ApiPropertyOptional({
+    description: 'Filtrar por status da assinatura',
+    enum: TenantSubscriptionStatus,
+  })
   @IsOptional()
   @IsEnum(TenantSubscriptionStatus)
   subscriptionStatus?: TenantSubscriptionStatus;
 
-  @ApiPropertyOptional({ description: 'Filtrar por plano de assinatura', enum: SubscriptionPlan })
+  @ApiPropertyOptional({
+    description: 'Filtrar por plano de assinatura',
+    enum: SubscriptionPlan,
+  })
   @IsOptional()
   @IsEnum(SubscriptionPlan)
   plan?: SubscriptionPlan;

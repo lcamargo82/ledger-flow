@@ -121,7 +121,15 @@ export class AsaasPaymentGatewayAdapter implements IPaymentGateway {
     }
 
     const apiKey = input.credentials['apiKey'];
-    const response = await this.asaasApiClient.cancelPayment(input.providerPaymentId, apiKey);
+    let response;
+    try {
+      response = await this.asaasApiClient.cancelPayment(input.providerPaymentId, apiKey);
+    } catch (error: any) {
+      if (error.name === 'AsaasApiError' && error.status === 400) {
+        throw new Error(`[AsaasAdapter] Conflict: ${error.message}`);
+      }
+      throw error;
+    }
 
     if (!response || !response.deleted) {
       throw new Error('[AsaasAdapter] Gateway refused to cancel or response is invalid.');

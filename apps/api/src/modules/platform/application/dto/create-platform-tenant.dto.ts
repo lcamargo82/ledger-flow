@@ -47,12 +47,18 @@ export class CreateTenantOwnerDto {
 }
 
 export class CreateTenantSubscriptionDto {
-  @ApiProperty({ enum: SubscriptionPlan, example: SubscriptionPlan.PROFESSIONAL })
+  @ApiProperty({
+    enum: SubscriptionPlan,
+    example: SubscriptionPlan.PROFESSIONAL,
+  })
   @IsEnum(SubscriptionPlan)
   @IsNotEmpty()
   plan: SubscriptionPlan;
 
-  @ApiProperty({ enum: TenantSubscriptionStatus, example: TenantSubscriptionStatus.TRIAL })
+  @ApiProperty({
+    enum: TenantSubscriptionStatus,
+    example: TenantSubscriptionStatus.TRIAL,
+  })
   @IsEnum(TenantSubscriptionStatus)
   @IsNotEmpty()
   status: TenantSubscriptionStatus;

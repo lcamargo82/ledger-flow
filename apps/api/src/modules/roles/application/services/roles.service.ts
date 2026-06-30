@@ -31,7 +31,11 @@ export class RolesService {
         description: role.description ?? undefined,
         system: role.system,
         permissions: role.permissions
-          .filter(rp => user.tenantKind === 'PLATFORM' || rp.permission.scope === PermissionScope.TENANT)
+          .filter(
+            (rp) =>
+              user.tenantKind === 'PLATFORM' ||
+              rp.permission.scope === PermissionScope.TENANT,
+          )
           .map((rp) => rp.permission.key),
         createdAt: role.createdAt,
         updatedAt: role.updatedAt,
@@ -39,7 +43,10 @@ export class RolesService {
     };
   }
 
-  async getRoleById(user: AuthenticatedUser, roleId: string): Promise<RoleResponseDto> {
+  async getRoleById(
+    user: AuthenticatedUser,
+    roleId: string,
+  ): Promise<RoleResponseDto> {
     const role = await this.prisma.role.findFirst({
       where: {
         id: roleId,
@@ -66,7 +73,11 @@ export class RolesService {
       description: role.description ?? undefined,
       system: role.system,
       permissions: role.permissions
-        .filter(rp => user.tenantKind === 'PLATFORM' || rp.permission.scope === PermissionScope.TENANT)
+        .filter(
+          (rp) =>
+            user.tenantKind === 'PLATFORM' ||
+            rp.permission.scope === PermissionScope.TENANT,
+        )
         .map((rp) => rp.permission.key),
       createdAt: role.createdAt,
       updatedAt: role.updatedAt,

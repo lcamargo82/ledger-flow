@@ -12,11 +12,17 @@ export class MercadoPagoWebhookAdapter implements ProviderWebhookAdapter {
   readonly provider = WebhookProvider.MERCADO_PAGO;
 
   async authenticate(input: ProviderWebhookAuthenticationInput): Promise<void> {
-    throw new WebhookProviderNotSupportedError('Mercado Pago webhook adapter not implemented.');
+    throw new WebhookProviderNotSupportedError(
+      'Mercado Pago webhook adapter not implemented.',
+    );
   }
 
-  async normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent> {
-    throw new WebhookProviderNotSupportedError('Mercado Pago webhook adapter not implemented.');
+  async normalize(
+    input: ProviderWebhookPayloadInput,
+  ): Promise<NormalizedWebhookEvent> {
+    throw new WebhookProviderNotSupportedError(
+      'Mercado Pago webhook adapter not implemented.',
+    );
   }
 
   supportsEvent(eventType: string): boolean {

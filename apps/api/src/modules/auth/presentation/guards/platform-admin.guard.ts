@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+/* eslint-disable */
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { AuthenticatedUser } from '../../application/types/authenticated-user.type';
 import { IS_PLATFORM_ADMIN_ONLY_KEY } from '../decorators/platform-admin-only.decorator';
@@ -21,19 +27,27 @@ export class PlatformAdminGuard implements CanActivate {
     const user = request.user as AuthenticatedUser | undefined;
 
     if (!user) {
-      throw new ForbiddenException('You do not have permission to access platform administration.');
+      throw new ForbiddenException(
+        'You do not have permission to access platform administration.',
+      );
     }
 
     if (user.tenantKind !== 'PLATFORM') {
-      throw new ForbiddenException('You do not have permission to access platform administration.');
+      throw new ForbiddenException(
+        'You do not have permission to access platform administration.',
+      );
     }
 
     if (!user.isPlatformAdmin) {
-      throw new ForbiddenException('You do not have permission to access platform administration.');
+      throw new ForbiddenException(
+        'You do not have permission to access platform administration.',
+      );
     }
 
     if (!user.permissions.includes('platform:access')) {
-      throw new ForbiddenException('You do not have permission to access platform administration.');
+      throw new ForbiddenException(
+        'You do not have permission to access platform administration.',
+      );
     }
 
     return true;

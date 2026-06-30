@@ -1,4 +1,12 @@
-import { IsOptional, IsString, IsInt, Min, Max, IsEnum, IsDateString } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Min,
+  Max,
+  IsEnum,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { AuditSeverity, AuditActorType } from '@prisma/client';
@@ -29,12 +37,18 @@ export class ListPlatformAuditLogsQueryDto {
   @IsString()
   action?: string;
 
-  @ApiPropertyOptional({ description: 'Filtrar por Severidade', enum: AuditSeverity })
+  @ApiPropertyOptional({
+    description: 'Filtrar por Severidade',
+    enum: AuditSeverity,
+  })
   @IsOptional()
   @IsEnum(AuditSeverity)
   severity?: AuditSeverity;
 
-  @ApiPropertyOptional({ description: 'Filtrar por Actor Type', enum: AuditActorType })
+  @ApiPropertyOptional({
+    description: 'Filtrar por Actor Type',
+    enum: AuditActorType,
+  })
   @IsOptional()
   @IsEnum(AuditActorType)
   actorType?: AuditActorType;
@@ -54,7 +68,10 @@ export class ListPlatformAuditLogsQueryDto {
   @IsDateString()
   dateTo?: string;
 
-  @ApiPropertyOptional({ description: 'Termo de busca (action, summary, entityType, tenant name/slug)' })
+  @ApiPropertyOptional({
+    description:
+      'Termo de busca (action, summary, entityType, tenant name/slug)',
+  })
   @IsOptional()
   @IsString()
   search?: string;

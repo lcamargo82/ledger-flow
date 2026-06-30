@@ -15,13 +15,21 @@ export interface IPaymentGateway {
 
   getCapabilities(): GatewayCapabilities;
 
-  createPayment(input: CreateGatewayPaymentInput): Promise<GatewayPaymentResult>;
+  createPayment(
+    input: CreateGatewayPaymentInput,
+  ): Promise<GatewayPaymentResult>;
 
-  cancelPayment(input: CancelGatewayPaymentInput): Promise<GatewayPaymentResult>;
+  cancelPayment(
+    input: CancelGatewayPaymentInput,
+  ): Promise<GatewayPaymentResult>;
 
-  refundPayment(input: RefundGatewayPaymentInput): Promise<GatewayPaymentResult>;
+  refundPayment(
+    input: RefundGatewayPaymentInput,
+  ): Promise<GatewayPaymentResult>;
 
   getPayment(input: GetGatewayPaymentInput): Promise<GatewayPaymentResult>;
 
-  getPaymentInstructions(input: GetGatewayPaymentInstructionsInput): Promise<GatewayPaymentInstructions>;
+  getPaymentInstructions(
+    input: GetGatewayPaymentInstructionsInput,
+  ): Promise<GatewayPaymentInstructions>;
 }
