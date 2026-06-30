@@ -2,7 +2,7 @@
   <AppModal
     :model-value="isOpen"
     @update:model-value="(val) => !val && $emit('close')"
-    :title="isEdit ? t('gateways.actions.edit') : t('gateways.asaas.connect')"
+    :title="isEdit ? t('gateways.actions.edit') : t('gateways.actions.connect')"
     @close="$emit('close')"
   >
     <form @submit.prevent="submit" class="flex flex-col gap-4">

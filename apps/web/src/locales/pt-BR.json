@@ -992,6 +992,7 @@
       "comingSoon": "Em breve"
     },
     "form": {
+      "provider": "Provedor",
       "displayName": "Nome de Exibição",
       "environment": "Ambiente",
       "priority": "Prioridade",
@@ -1019,6 +1020,7 @@
       "CRITICAL": "Crítico"
     },
     "actions": {
+      "connect": "Conectar conta",
       "edit": "Editar configuração",
       "activate": "Reativar conexão",
       "deactivate": "Desativar conexão",
