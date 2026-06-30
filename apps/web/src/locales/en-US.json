@@ -626,6 +626,8 @@
         "customerRequired": "Customer is required.",
         "amountRequired": "Amount is required.",
         "amountInvalid": "Invalid amount.",
+      "notFound": "The requested record was not found or does not exist.",
+      "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations.",
         "methodRequired": "Method is required.",
         "dateRangeInvalid": "Invalid date range."
       }
@@ -716,7 +718,9 @@
       "cancelFailed": "Failed to cancel payment.",
       "invalidStatus": "This payment can no longer be canceled in its current status.",
       "customerRequired": "Customer required.",
-      "amountInvalid": "Invalid amount."
+      "amountInvalid": "Invalid amount.",
+      "notFound": "The requested record was not found or does not exist.",
+      "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations."
     },
     "toast": {
       "created": "Payment created successfully.",

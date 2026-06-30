@@ -625,6 +625,8 @@
         "customerRequired": "Cliente é obrigatório.",
         "amountRequired": "Valor é obrigatório.",
         "amountInvalid": "Valor inválido.",
+      "notFound": "O registro solicitado não foi encontrado ou não existe.",
+      "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações.",
         "methodRequired": "Método é obrigatório.",
         "dateRangeInvalid": "Período inválido."
       }
@@ -716,7 +718,9 @@
       "cancelFailed": "Erro ao cancelar pagamento.",
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
       "customerRequired": "Cliente obrigatório.",
-      "amountInvalid": "Valor inválido."
+      "amountInvalid": "Valor inválido.",
+      "notFound": "O registro solicitado não foi encontrado ou não existe.",
+      "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações."
     },
     "toast": {
       "created": "Pagamento criado com sucesso.",

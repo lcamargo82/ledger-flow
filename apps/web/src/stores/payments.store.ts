@@ -64,7 +64,12 @@ export const usePaymentsStore = defineStore('payments', () => {
         return 'payments.error.createFailed';
       }
       if (err.response?.status === 403) return 'payments.error.forbidden';
-      if (err.response?.status === 404) return 'payments.error.notFound';
+      if (err.response?.status === 404) {
+        if (err.response.data?.message?.toLowerCase().includes('gateway configuration')) {
+          return 'payments.error.gatewayNotFound';
+        }
+        return 'payments.error.notFound';
+      }
       if (err.response?.status === 409) return 'payments.error.invalidStatus';
     }
     return 'payments.error.default';
