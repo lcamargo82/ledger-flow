@@ -4,6 +4,7 @@ import { AsyncHandlerRegistryService } from '../../application/services/async-ha
 import { AsyncMessageEnvelope } from '../../domain/entities/async-message-envelope';
 import { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
 import { AsyncJobStatus } from '@prisma/client';
+import { RabbitMqTopologyService } from './rabbitmq-topology.service';
 
 @Injectable()
 export class RabbitMQConsumer implements OnApplicationBootstrap {
@@ -14,6 +15,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
   constructor(
     private readonly registry: AsyncHandlerRegistryService,
     private readonly jobExecutionRepo: AsyncJobExecutionRepository,
+    private readonly topologyService: RabbitMqTopologyService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -23,6 +25,8 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
   }
 
   private async connect() {
+    await this.topologyService.initializeTopology();
+    
     const url = process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672';
     const prefetchCount = Number(process.env.RABBITMQ_PREFETCH) || 10;
     try {

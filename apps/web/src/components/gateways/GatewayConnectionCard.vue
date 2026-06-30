@@ -1,6 +1,6 @@
 <template>
   <div class="lf-card connection-card" :class="{ 'is-inactive': !isActive }">
-    <div class="lf-card-header">
+    <div class="lf-card-header flex justify-between items-center mb-5 pb-4 border-b border-[var(--lf-border-primary)]">
       <div class="connection-title">
         <h4>{{ connection.displayName || connection.provider }}</h4>
         <span class="lf-badge" :class="statusBadgeClass">{{ t(`gateways.status.${connection.status}`) }}</span>

@@ -1,15 +1,9 @@
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as amqp from 'amqplib';
 
 @Injectable()
-export class RabbitMqTopologyService implements OnApplicationBootstrap {
+export class RabbitMqTopologyService {
   private readonly logger = new Logger(RabbitMqTopologyService.name);
-
-  async onApplicationBootstrap() {
-    if (process.env.APP_PROCESS_ROLE === 'worker') {
-      await this.initializeTopology();
-    }
-  }
 
   async initializeTopology() {
     const url = process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672';
