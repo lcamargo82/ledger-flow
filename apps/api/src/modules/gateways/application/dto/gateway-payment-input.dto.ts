@@ -27,6 +27,7 @@ export class GetGatewayPaymentInput {
   paymentId: string;
   providerPaymentId: string;
   gatewayConfigurationId: string;
+  credentials?: Record<string, string>;
   environment: GatewayEnvironment;
 }
 
