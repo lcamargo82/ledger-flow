@@ -6,10 +6,12 @@
         <p class="text-secondary">{{ t('gateways.description') }}</p>
       </div>
       <div class="actions" v-if="hasConnections">
-        <button class="lf-btn lf-btn-primary" @click="openCreateModal">
-          <div class="i-ph-plus"></div>
-          {{ t('gateways.asaas.connect') }}
-        </button>
+        <AppButton variant="primary" @click="openCreateModal">
+          <template #icon>
+            <div class="i-ph-plus"></div>
+          </template>
+          Conectar conta
+        </AppButton>
       </div>
     </div>
 
@@ -35,18 +37,6 @@
           @disconnect="openDisconnectModal"
         />
 
-        <div v-if="!hasMercadoPago" class="lf-card connection-card is-inactive p-4 border border-dashed border-gray-300">
-          <div class="flex items-center gap-4 opacity-50">
-            <div class="i-ph-plugs text-3xl"></div>
-            <div>
-              <h4 class="font-semibold">{{ t('gateways.mercadoPago.title') }}</h4>
-              <p class="text-sm text-secondary">{{ t('gateways.mercadoPago.description') }}</p>
-            </div>
-            <div class="ml-auto">
-              <span class="lf-badge lf-badge-neutral">{{ t('gateways.mercadoPago.comingSoon') }}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -86,6 +76,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from '@/composables/useI18n';
 import { useToastStore } from '@/stores/toast.store';
 import { GatewayConnectionsService, type GatewayConnection } from '@/services/gateway-connections.service';
+import AppButton from '@components/common/AppButton.vue';
 
 import GatewayConnectionEmptyState from '@components/gateways/GatewayConnectionEmptyState.vue';
 import GatewayConnectionCard from '@components/gateways/GatewayConnectionCard.vue';

@@ -6,20 +6,20 @@
         <span class="lf-badge" :class="statusBadgeClass">{{ t(`gateways.status.${connection.status}`) }}</span>
       </div>
       <div class="connection-actions">
-        <button class="lf-btn lf-btn-icon" @click="$emit('edit', connection)" :title="t('gateways.actions.edit')">
-          <div class="i-ph-pencil-simple"></div>
+        <button class="lf-btn-icon" @click="$emit('edit', connection)" :title="t('gateways.actions.edit')">
+          <div class="i-ph-pencil-simple text-xl"></div>
         </button>
-        <button class="lf-btn lf-btn-icon" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
-          <div class="i-ph-key"></div>
+        <button class="lf-btn-icon" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
+          <div class="i-ph-key text-xl"></div>
         </button>
-        <button v-if="isActive" class="lf-btn lf-btn-icon" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">
-          <div class="i-ph-pause text-warning"></div>
+        <button v-if="isActive" class="lf-btn-icon" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">
+          <div class="i-ph-pause text-xl text-warning"></div>
         </button>
-        <button v-else-if="connection.status === 'INACTIVE'" class="lf-btn lf-btn-icon" @click="$emit('activate', connection)" :title="t('gateways.actions.activate')">
-          <div class="i-ph-play text-success"></div>
+        <button v-else-if="connection.status === 'INACTIVE'" class="lf-btn-icon" @click="$emit('activate', connection)" :title="t('gateways.actions.activate')">
+          <div class="i-ph-play text-xl text-success"></div>
         </button>
-        <button class="lf-btn lf-btn-icon" @click="$emit('disconnect', connection)" :title="t('gateways.actions.disconnect')">
-          <div class="i-ph-trash text-danger"></div>
+        <button class="lf-btn-icon" @click="$emit('disconnect', connection)" :title="t('gateways.actions.disconnect')">
+          <div class="i-ph-trash text-xl text-danger"></div>
         </button>
       </div>
     </div>
