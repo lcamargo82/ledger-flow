@@ -1,25 +1,25 @@
 <template>
   <div class="lf-card connection-card" :class="{ 'is-inactive': !isActive }">
-    <div class="lf-card-header flex justify-between items-center mb-5 pb-4 border-b border-[var(--lf-border-primary)]">
+    <div class="lf-card-header">
       <div class="connection-title">
         <h4>{{ connection.displayName || connection.provider }}</h4>
         <span class="lf-badge" :class="statusBadgeClass">{{ t(`gateways.status.${connection.status}`) }}</span>
       </div>
-      <div class="connection-actions flex gap-1">
-        <button class="p-2 rounded-full hover:bg-surface-hover transition-colors text-secondary hover:text-primary" @click="$emit('edit', connection)" :title="t('gateways.actions.edit')">
-          <div class="i-ph-pencil-simple text-xl"></div>
+      <div class="connection-actions">
+        <button class="action-btn" @click="$emit('edit', connection)" :title="t('gateways.actions.edit')">
+          <span class="material-symbols-outlined">edit</span>
         </button>
-        <button class="p-2 rounded-full hover:bg-surface-hover transition-colors text-secondary hover:text-primary" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
-          <div class="i-ph-key text-xl"></div>
+        <button class="action-btn" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
+          <span class="material-symbols-outlined">key</span>
         </button>
-        <button v-if="isActive" class="p-2 rounded-full hover:bg-surface-hover transition-colors hover:text-warning" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">
-          <div class="i-ph-pause text-xl text-warning"></div>
+        <button v-if="isActive" class="action-btn action-warning" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">
+          <span class="material-symbols-outlined">pause</span>
         </button>
-        <button v-else-if="connection.status === 'INACTIVE'" class="p-2 rounded-full hover:bg-surface-hover transition-colors hover:text-success" @click="$emit('activate', connection)" :title="t('gateways.actions.activate')">
-          <div class="i-ph-play text-xl text-success"></div>
+        <button v-else-if="connection.status === 'INACTIVE'" class="action-btn action-success" @click="$emit('activate', connection)" :title="t('gateways.actions.activate')">
+          <span class="material-symbols-outlined">play_arrow</span>
         </button>
-        <button class="p-2 rounded-full hover:bg-surface-hover transition-colors hover:text-danger" @click="$emit('disconnect', connection)" :title="t('gateways.actions.disconnect')">
-          <div class="i-ph-trash text-xl text-danger"></div>
+        <button class="action-btn action-danger" @click="$emit('disconnect', connection)" :title="t('gateways.actions.disconnect')">
+          <span class="material-symbols-outlined">delete</span>
         </button>
       </div>
     </div>
@@ -99,9 +99,53 @@ const statusBadgeClass = computed(() => {
   font-weight: 600;
 }
 
+.lf-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--lf-border-primary);
+}
+
 .connection-actions {
   display: flex;
   gap: 0.5rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--lf-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background-color: var(--lf-surface-secondary);
+  color: var(--lf-text-primary);
+}
+
+.action-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.action-warning:hover {
+  color: var(--lf-warning);
+}
+
+.action-success:hover {
+  color: var(--lf-success);
+}
+
+.action-danger:hover {
+  color: var(--lf-danger);
 }
 
 .info-grid {
