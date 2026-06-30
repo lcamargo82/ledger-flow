@@ -140,7 +140,7 @@ const getEventTranslation = (type: string) => {
     </section>
 
     <!-- Async Failed Banner -->
-    <section v-if="payment.asyncChargeStatus === 'FAILED'">
+    <section v-if="payment.asyncChargeStatus === 'FAILED' || payment.asyncChargeStatus === 'DEAD_LETTERED'">
       <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
         <div class="flex">
           <div class="flex-shrink-0">

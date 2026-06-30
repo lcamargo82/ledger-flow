@@ -3,7 +3,7 @@ import { AsyncModule } from '../async/async.module';
 import { AuthModule } from '../auth/auth.module';
 
 import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
-import { AsaasCreateChargeAsyncHandler } from './application/async-handlers/asaas-create-charge.handler';
+import { CreateProviderChargeAsyncHandler } from './application/async-handlers/create-provider-charge.async-handler';
 import { Module } from '@nestjs/common';
 import { PaymentGatewayFactoryService } from './application/services/payment-gateway-factory.service';
 import { PaymentGatewayResolverService } from './application/services/payment-gateway-resolver.service';
@@ -29,14 +29,11 @@ import { MercadoPagoOAuthStateService } from './infra/providers/mercado-pago/mer
 import { MercadoPagoOAuthService } from './infra/providers/mercado-pago/mercado-pago-oauth.service';
 import { MercadoPagoOAuthController } from './presentation/controllers/mercado-pago-oauth.controller';
 
-import { MercadoPagoCreateChargeAsyncHandler } from './application/async-handlers/mercado-pago-create-charge.async-handler';
-
 @Module({
   imports: [AsyncModule, AuthModule, TenantsModule],
   controllers: [MercadoPagoOAuthController, GatewayConnectionsController],
   providers: [
-    AsaasCreateChargeAsyncHandler,
-    MercadoPagoCreateChargeAsyncHandler,
+    CreateProviderChargeAsyncHandler,
     GatewayConnectionsService,
     {
       provide: GatewayConfigurationsRepository,
@@ -73,12 +70,10 @@ import { MercadoPagoCreateChargeAsyncHandler } from './application/async-handler
 export class GatewaysModule implements OnModuleInit {
   constructor(
     private readonly registry: AsyncHandlerRegistryService,
-    private readonly asaasCreateChargeHandler: AsaasCreateChargeAsyncHandler,
-    private readonly mercadoPagoCreateChargeHandler: MercadoPagoCreateChargeAsyncHandler,
+    private readonly createProviderChargeHandler: CreateProviderChargeAsyncHandler,
   ) {}
 
   onModuleInit() {
-    this.registry.register(this.asaasCreateChargeHandler);
-    this.registry.register(this.mercadoPagoCreateChargeHandler);
+    this.registry.register(this.createProviderChargeHandler);
   }
 }

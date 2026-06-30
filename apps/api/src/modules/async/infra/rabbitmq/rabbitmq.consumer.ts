@@ -26,7 +26,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
 
   private async connect() {
     await this.topologyService.initializeTopology();
-    
+
     const url = process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672';
     const prefetchCount = Number(process.env.RABBITMQ_PREFETCH) || 10;
     try {
