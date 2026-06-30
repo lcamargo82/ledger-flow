@@ -70,7 +70,10 @@ export class WebhooksModule implements OnModuleInit {
 
     this.adapterRegistry.register(WebhookProvider.ASAAS, this.asaasAdapter);
     this.adapterRegistry.register(WebhookProvider.STRIPE, this.stripeAdapter);
-    this.adapterRegistry.register(WebhookProvider.MERCADO_PAGO, this.mercadoPagoAdapter);
+    this.adapterRegistry.register(
+      WebhookProvider.MERCADO_PAGO,
+      this.mercadoPagoAdapter,
+    );
     this.adapterRegistry.register(WebhookProvider.PAGBANK, this.pagBankAdapter);
     this.adapterRegistry.register(WebhookProvider.PAGARME, this.pagarmeAdapter);
 

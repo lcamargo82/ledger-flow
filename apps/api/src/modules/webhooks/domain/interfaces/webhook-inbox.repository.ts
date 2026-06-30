@@ -13,7 +13,9 @@ export interface IWebhookInboxRepository {
     provider: WebhookProvider,
     providerEventId: string,
   ): Promise<WebhookInboxEvent | null>;
-  createReceived(data: CreateWebhookInboxEventInput): Promise<WebhookInboxEvent>;
+  createReceived(
+    data: CreateWebhookInboxEventInput,
+  ): Promise<WebhookInboxEvent>;
   markProcessing(id: string): Promise<WebhookInboxEvent>;
   markProcessed(
     id: string,

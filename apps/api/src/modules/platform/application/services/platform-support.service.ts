@@ -12,13 +12,17 @@ export class PlatformSupportService {
     private readonly tenantsRepo: PlatformTenantsRepository,
   ) {}
 
-  async getTenantSupportSummary(tenantId: string): Promise<PlatformTenantSupportSummaryDto> {
+  async getTenantSupportSummary(
+    tenantId: string,
+  ): Promise<PlatformTenantSupportSummaryDto> {
     const tenant = await this.tenantsRepo.findById(tenantId);
     if (!tenant) {
       throw new NotFoundException('Tenant not found');
     }
     if (tenant.kind === 'PLATFORM') {
-      throw new NotFoundException('Cannot get support summary for PLATFORM tenant');
+      throw new NotFoundException(
+        'Cannot get support summary for PLATFORM tenant',
+      );
     }
 
     const thirtyDaysAgo = new Date();
@@ -62,12 +66,15 @@ export class PlatformSupportService {
     ]);
 
     let healthStatus = 'HEALTHY';
-    if (recentCriticalEvents > 0 || recentWebhookFailures > 5) healthStatus = 'CRITICAL';
-    else if (recentWarnings > 5 || recentWebhookFailures > 0) healthStatus = 'WARNING';
+    if (recentCriticalEvents > 0 || recentWebhookFailures > 5)
+      healthStatus = 'CRITICAL';
+    else if (recentWarnings > 5 || recentWebhookFailures > 0)
+      healthStatus = 'WARNING';
     else if (!tenant.active) healthStatus = 'INACTIVE';
 
     const recommendedActions: string[] = [];
-    if (recentWebhookFailures > 0) recommendedActions.push('REVIEW_WEBHOOK_FAILURES');
+    if (recentWebhookFailures > 0)
+      recommendedActions.push('REVIEW_WEBHOOK_FAILURES');
     if (tenant.subscription?.status === 'PAST_DUE')
       recommendedActions.push('REVIEW_SUBSCRIPTION_STATUS');
     if (!tenant.active) recommendedActions.push('REACTIVATE_TENANT');

@@ -6,7 +6,10 @@ import {
 } from '@prisma/client';
 
 export abstract class GatewayConfigurationsRepository {
-  abstract findByIdAndTenant(id: string, tenantId: string): Promise<GatewayConfiguration | null>;
+  abstract findByIdAndTenant(
+    id: string,
+    tenantId: string,
+  ): Promise<GatewayConfiguration | null>;
 
   abstract findActiveByTenantAndProvider(
     tenantId: string,

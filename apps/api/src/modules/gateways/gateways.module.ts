@@ -14,6 +14,9 @@ import { PagBankPaymentGatewayAdapter } from './infra/adapters/pagbank-payment-g
 import { PagarmePaymentGatewayAdapter } from './infra/adapters/pagarme-payment-gateway.adapter';
 import { GatewayCredentialsEncryptionService } from './application/services/gateway-credentials-encryption.service';
 import { Aes256GcmCredentialsEncryptionService } from './infra/crypto/aes-256-gcm-credentials-encryption.service';
+import { GatewayConnectionsService } from './application/services/gateway-connections.service';
+import { GatewayConnectionsController } from './presentation/controllers/gateway-connections.controller';
+import { TenantsModule } from '../tenants/tenants.module';
 import { IProviderCustomerReferenceRepository } from './domain/interfaces/provider-customer-reference.repository';
 import { PrismaGatewayCustomerReferenceRepository } from './infra/repositories/prisma-gateway-customer-reference.repository';
 import { AsaasApiClient } from './infra/clients/asaas-api.client';
@@ -21,9 +24,11 @@ import { GatewayCustomerSyncService } from './application/services/gateway-custo
 import { GatewayPaymentOrchestrationService } from './application/services/gateway-payment-orchestration.service';
 
 @Module({
-  imports: [AsyncModule],
+  imports: [AsyncModule, TenantsModule],
+  controllers: [GatewayConnectionsController],
   providers: [
     AsaasCreateChargeAsyncHandler,
+    GatewayConnectionsService,
     {
       provide: GatewayConfigurationsRepository,
       useClass: PrismaGatewayConfigurationsRepository,

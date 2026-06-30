@@ -130,7 +130,9 @@
     "roles": "Roles",
     "permissions": "Permissions",
     "tenantSettings": "Organization",
-    "platformAsyncOperations": "Async Operations"
+    "platformAsyncOperations": "Async Operations",
+    "gatewayConnections": "Payment Integrations",
+    "platformGatewayConnections": "Integrations"
   },
   "users": {
     "title": "Users",
@@ -626,8 +628,8 @@
         "customerRequired": "Customer is required.",
         "amountRequired": "Amount is required.",
         "amountInvalid": "Invalid amount.",
-      "notFound": "There is no active gateway configured for Pix payments in this environment.",
-      "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations.",
+        "notFound": "There is no active gateway configured for Pix payments in this environment.",
+        "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations.",
         "methodRequired": "Method is required.",
         "dateRangeInvalid": "Invalid date range."
       }
@@ -842,6 +844,28 @@
         "success": "Operation queued successfully",
         "failed": "Failed to replay operation"
       }
+    },
+    "gateways": {
+      "title": "Gateway Integrations",
+      "description": "Overview of tenant gateway connections.",
+      "table": {
+        "tenant": "Tenant",
+        "provider": "Provider",
+        "environment": "Environment",
+        "status": "Status",
+        "methods": "Methods",
+        "health": "Health",
+        "updatedAt": "Updated At"
+      },
+      "actions": {
+        "suspend": "Suspend",
+        "reactivate": "Reactivate"
+      },
+      "suspend": {
+        "reason": "Suspension Reason",
+        "success": "Connection suspended successfully.",
+        "failed": "Failed to suspend connection."
+      }
     }
   },
   "platformTenants": {
@@ -946,5 +970,66 @@
     "activity": {
       "empty": "No recent activity found."
     }
+  },
+  "gateways": {
+    "title": "Payment Integrations",
+    "description": "Manage your organization gateway connections",
+    "empty": {
+      "title": "No gateway configured",
+      "description": "Connect a gateway to process external payments."
+    },
+    "asaas": {
+      "title": "Asaas",
+      "sandbox": "Sandbox",
+      "connect": "Connect Asaas Sandbox",
+      "connecting": "Connecting...",
+      "connected": "Connected",
+      "connectionFailed": "Connection Failed"
+    },
+    "form": {
+      "displayName": "Display Name",
+      "environment": "Environment",
+      "priority": "Priority",
+      "supportedMethods": "Supported Methods",
+      "apiKey": "API Key",
+      "apiKeyHint": "Your Asaas API Key",
+      "credentialsConfigured": "Credentials Configured",
+      "save": "Save Settings",
+      "updateCredentials": "Update Credentials"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "DISABLED": "Disabled"
+    },
+    "health": {
+      "UNKNOWN": "Unknown",
+      "HEALTHY": "Healthy",
+      "ATTENTION": "Attention",
+      "CRITICAL": "Critical"
+    },
+    "actions": {
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "updateCredentials": "Update Credentials"
+    },
+    "messages": {
+      "created": "Connection created successfully.",
+      "updated": "Settings updated.",
+      "credentialsUpdated": "Credentials securely updated.",
+      "statusUpdated": "Connection status changed.",
+      "notConfigured": "Not configured"
+    }
+  },
+  "features": {
+    "gatewayConnections": "Gateway Connections",
+    "asaasGateway": "Asaas Gateway",
+    "mercadoPagoGateway": "Mercado Pago Gateway",
+    "multiGateway": "Multi Gateway",
+    "inventoryManagement": "Inventory Management",
+    "commerceChannels": "Commerce Channels",
+    "reconciliation": "Reconciliation",
+    "advancedReports": "Advanced Reports"
   }
 }

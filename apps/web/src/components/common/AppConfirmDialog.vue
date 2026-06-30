@@ -5,7 +5,8 @@
     :title="title"
     :prevent-close="loading"
   >
-    <p class="lf-confirm-message">{{ message }}</p>
+    <p class="lf-confirm-message" v-if="message">{{ message }}</p>
+    <slot></slot>
     
     <template #footer>
       <AppButton

@@ -129,7 +129,9 @@
     "roles": "Roles",
     "permissions": "Permissões",
     "tenantSettings": "Organização",
-    "platformAsyncOperations": "Operações Assíncronas"
+    "platformAsyncOperations": "Operações Assíncronas",
+    "gatewayConnections": "Integrações de Pagamento",
+    "platformGatewayConnections": "Integrações"
   },
   "users": {
     "title": "Usuários",
@@ -625,8 +627,8 @@
         "customerRequired": "Cliente é obrigatório.",
         "amountRequired": "Valor é obrigatório.",
         "amountInvalid": "Valor inválido.",
-      "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",
-      "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações.",
+        "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",
+        "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações.",
         "methodRequired": "Método é obrigatório.",
         "dateRangeInvalid": "Período inválido."
       }
@@ -842,6 +844,28 @@
         "success": "Operação adicionada à fila com sucesso",
         "failed": "Falha ao solicitar o replay da operação"
       }
+    },
+    "gateways": {
+      "title": "Integrações de Gateways",
+      "description": "Visão geral das conexões de gateway dos tenants.",
+      "table": {
+        "tenant": "Tenant",
+        "provider": "Provedor",
+        "environment": "Ambiente",
+        "status": "Status",
+        "methods": "Métodos",
+        "health": "Saúde",
+        "updatedAt": "Atualizado em"
+      },
+      "actions": {
+        "suspend": "Suspender",
+        "reactivate": "Reativar"
+      },
+      "suspend": {
+        "reason": "Motivo da Suspensão",
+        "success": "Conexão suspensa com sucesso.",
+        "failed": "Falha ao suspender a conexão."
+      }
     }
   },
   "platformTenants": {
@@ -946,5 +970,66 @@
     "activity": {
       "empty": "Nenhuma atividade recente encontrada."
     }
+  },
+  "gateways": {
+    "title": "Integrações de Pagamento",
+    "description": "Gerencie as conexões de gateway da sua organização",
+    "empty": {
+      "title": "Nenhum gateway configurado",
+      "description": "Conecte um gateway para processar pagamentos externos."
+    },
+    "asaas": {
+      "title": "Asaas",
+      "sandbox": "Sandbox",
+      "connect": "Conectar Asaas Sandbox",
+      "connecting": "Conectando...",
+      "connected": "Conectado",
+      "connectionFailed": "Falha na conexão"
+    },
+    "form": {
+      "displayName": "Nome de Exibição",
+      "environment": "Ambiente",
+      "priority": "Prioridade",
+      "supportedMethods": "Métodos Suportados",
+      "apiKey": "API Key",
+      "apiKeyHint": "Sua chave de API do Asaas",
+      "credentialsConfigured": "Credenciais Configuradas",
+      "save": "Salvar Configurações",
+      "updateCredentials": "Atualizar Credenciais"
+    },
+    "status": {
+      "ACTIVE": "Ativo",
+      "INACTIVE": "Inativo",
+      "DISABLED": "Desabilitado"
+    },
+    "health": {
+      "UNKNOWN": "Desconhecido",
+      "HEALTHY": "Saudável",
+      "ATTENTION": "Atenção",
+      "CRITICAL": "Crítico"
+    },
+    "actions": {
+      "edit": "Editar",
+      "activate": "Ativar",
+      "deactivate": "Desativar",
+      "updateCredentials": "Atualizar Credenciais"
+    },
+    "messages": {
+      "created": "Conexão criada com sucesso.",
+      "updated": "Configurações atualizadas.",
+      "credentialsUpdated": "Credenciais atualizadas com segurança.",
+      "statusUpdated": "Status da conexão alterado.",
+      "notConfigured": "Não configurado"
+    }
+  },
+  "features": {
+    "gatewayConnections": "Gateway Connections",
+    "asaasGateway": "Asaas Gateway",
+    "mercadoPagoGateway": "Mercado Pago Gateway",
+    "multiGateway": "Multi Gateway",
+    "inventoryManagement": "Inventory Management",
+    "commerceChannels": "Commerce Channels",
+    "reconciliation": "Reconciliation",
+    "advancedReports": "Advanced Reports"
   }
 }

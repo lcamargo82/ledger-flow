@@ -8,7 +8,11 @@ import { GatewaysModule } from '../gateways/gateways.module';
 @Module({
   imports: [GatewaysModule],
   controllers: [PaymentsController],
-  providers: [PaymentsService, PrismaPaymentsRepository, PaymentReferenceService],
+  providers: [
+    PaymentsService,
+    PrismaPaymentsRepository,
+    PaymentReferenceService,
+  ],
   exports: [PaymentsService],
 })
 export class PaymentsModule {}
