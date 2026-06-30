@@ -116,7 +116,7 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['gateway:manage']
+        permissions: ['gateways:read']
       }
     },
     {

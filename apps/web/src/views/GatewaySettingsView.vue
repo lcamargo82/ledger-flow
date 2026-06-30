@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
-import api from '../services/api'
+import { httpClient as api } from '../services/http-client'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppCard from '../components/common/AppCard.vue'
 import AppButton from '../components/common/AppButton.vue'
@@ -68,7 +68,7 @@ const handleDisconnect = async () => {
 }
 
 onMounted(() => {
-  if (authStore.checkPermission('gateway:manage')) {
+  if (authStore.checkPermission('gateways:read')) {
     loadStatus()
   }
   
