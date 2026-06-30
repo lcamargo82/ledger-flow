@@ -77,6 +77,7 @@ O LedgerFlow simula uma solução para esses problemas com uma arquitetura prepa
 * Gestão de pagamentos.
 * Gestão de Tenants (Provisionamento, Overview e Saúde Operacional).
 * Integração inicial com Asaas Sandbox (Fase 6.1).
+* Integração com Mercado Pago via OAuth (Fase 6.2A).
 * Arquitetura desacoplada para múltiplos gateways.
 * Webhooks inbound.
 * Webhooks outbound.

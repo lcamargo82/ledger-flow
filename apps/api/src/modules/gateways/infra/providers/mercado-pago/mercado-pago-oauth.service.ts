@@ -27,8 +27,8 @@ export class MercadoPagoOAuthService {
       throw new Error('Mercado Pago OAuth variables are not properly configured.');
     }
 
-    const state = this.stateService.generateState(tenantId, userId);
-    
+    const state = await this.stateService.generateState(tenantId, userId);
+
     const url = new URL('https://auth.mercadopago.com/authorization');
     url.searchParams.append('client_id', clientId);
     url.searchParams.append('response_type', 'code');
@@ -38,28 +38,30 @@ export class MercadoPagoOAuthService {
 
     this.logger.log(`Generated Mercado Pago OAuth URL for tenant ${tenantId}`);
 
-    this.prisma.auditLog.create({
-      data: {
-        tenantId,
-        action: 'mercado_pago.oauth.connection_requested',
-        actorUserId: userId,
-        entityType: 'GATEWAY_CONFIGURATION',
-        entityId: 'NEW',
-      }
-    }).catch(e => this.logger.error('Failed to log audit:', e));
+    this.prisma.auditLog
+      .create({
+        data: {
+          tenantId,
+          action: 'mercado_pago.oauth.connection_requested',
+          actorUserId: userId,
+          entityType: 'GATEWAY_CONFIGURATION',
+          entityId: 'NEW',
+        },
+      })
+      .catch((e) => this.logger.error('Failed to log audit:', e));
 
     return url.toString();
   }
 
   async handleCallback(code: string, state: string): Promise<void> {
-    const stateData = this.stateService.validateAndConsumeState(state);
-    
+    const stateData = await this.stateService.validateAndConsumeState(state);
+
     if (!stateData) {
       throw new Error('Invalid or expired OAuth state');
     }
 
     const { tenantId, userId } = stateData;
-    
+
     this.logger.log(`Handling Mercado Pago OAuth callback for tenant ${tenantId}`);
 
     const clientId = process.env.MERCADO_PAGO_CLIENT_ID;
@@ -86,7 +88,7 @@ export class MercadoPagoOAuthService {
         scope: tokenResponse.scope,
       };
 
-      const encryptedResponse = await this.encryptionService.encrypt(credentials);
+      const encryptedResponse = this.encryptionService.encrypt(credentials);
       const encryptedCredentials = encryptedResponse.encryptedData;
       const fingerprint = MercadoPagoCredentialsMapper.deriveFingerprint(credentials);
 
@@ -104,32 +106,38 @@ export class MercadoPagoOAuthService {
         credentialsFingerprint: fingerprint,
       });
 
-      this.prisma.auditLog.create({
-        data: {
-          tenantId,
-          action: 'mercado_pago.oauth.connection_succeeded',
-          actorUserId: userId,
-          entityType: 'GATEWAY_CONFIGURATION',
-          entityId: config.id,
-          metadata: { environment }
-        }
-      }).catch(e => this.logger.error('Failed to log audit:', e));
-      
-    } catch (error: any) {
-      this.logger.error(`Failed to handle Mercado Pago callback for tenant ${tenantId}: ${error.message}`);
-      
-      this.prisma.auditLog.create({
-        data: {
-          tenantId,
-          action: 'mercado_pago.oauth.connection_failed',
-          actorUserId: userId,
-          entityType: 'GATEWAY_CONFIGURATION',
-          entityId: 'NEW',
-          metadata: { summary: error.message }
-        }
-      }).catch(e => this.logger.error('Failed to log audit:', e));
+      this.prisma.auditLog
+        .create({
+          data: {
+            tenantId,
+            action: 'mercado_pago.oauth.connection_succeeded',
+            actorUserId: userId,
+            entityType: 'GATEWAY_CONFIGURATION',
+            entityId: config.id,
+            metadata: { environment },
+          },
+        })
+        .catch((e) => this.logger.error('Failed to log audit:', e));
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(
+        `Failed to handle Mercado Pago callback for tenant ${tenantId}: ${err.message}`,
+      );
 
-      throw error;
+      this.prisma.auditLog
+        .create({
+          data: {
+            tenantId,
+            action: 'mercado_pago.oauth.connection_failed',
+            actorUserId: userId,
+            entityType: 'GATEWAY_CONFIGURATION',
+            entityId: 'NEW',
+            metadata: { summary: err.message },
+          },
+        })
+        .catch((e) => this.logger.error('Failed to log audit:', e));
+
+      throw err;
     }
   }
 
@@ -137,23 +145,33 @@ export class MercadoPagoOAuthService {
     const isTestMode = process.env.MERCADO_PAGO_TEST_MODE === 'true';
     const environment = isTestMode ? GatewayEnvironment.TEST : GatewayEnvironment.LIVE;
 
-    const config = await this.gatewayConfigRepo.findActiveByTenantAndProvider(tenantId, PaymentProvider.MERCADO_PAGO, environment);
+    const config = await this.gatewayConfigRepo.findActiveByTenantAndProvider(
+      tenantId,
+      PaymentProvider.MERCADO_PAGO,
+      environment,
+    );
 
     if (!config) {
-      return; 
+      return;
     }
 
-    await this.gatewayConfigRepo.updateStatus(config.id, tenantId, GatewayConfigurationStatus.INACTIVE);
-    
-    this.prisma.auditLog.create({
-      data: {
-        tenantId,
-        action: 'mercado_pago.oauth.disconnected',
-        actorUserId: userId,
-        entityType: 'GATEWAY_CONFIGURATION',
-        entityId: config.id,
-        metadata: { environment }
-      }
-    }).catch(e => this.logger.error('Failed to log audit:', e));
+    await this.gatewayConfigRepo.updateStatus(
+      config.id,
+      tenantId,
+      GatewayConfigurationStatus.INACTIVE,
+    );
+
+    this.prisma.auditLog
+      .create({
+        data: {
+          tenantId,
+          action: 'mercado_pago.oauth.disconnected',
+          actorUserId: userId,
+          entityType: 'GATEWAY_CONFIGURATION',
+          entityId: config.id,
+          metadata: { environment },
+        },
+      })
+      .catch((e) => this.logger.error('Failed to log audit:', e));
   }
 }

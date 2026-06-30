@@ -18,10 +18,10 @@ export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
 
   async handle(input: AsyncMessageEnvelope): Promise<void> {
     this.logger.log(`Handling Mercado Pago charge creation for payment ${input.aggregateId}`);
-    
+
     const payment = await this.prisma.payment.findUnique({
       where: { id: input.aggregateId },
-      include: { customer: true }
+      include: { customer: true },
     });
 
     if (!payment) {
@@ -30,8 +30,8 @@ export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
     }
 
     if (payment.providerPaymentId) {
-       this.logger.log(`Payment ${input.aggregateId} already processed (has provider ID)`);
-       return;
+      this.logger.log(`Payment ${input.aggregateId} already processed (has provider ID)`);
+      return;
     }
 
     // Check if the current active configuration for this tenant is Mercado Pago
@@ -45,13 +45,15 @@ export class MercadoPagoCreateChargeAsyncHandler implements AsyncEventHandler {
     });
 
     if (!activeConfig || activeConfig.provider !== PaymentProvider.MERCADO_PAGO) {
-      this.logger.debug(`Skipping payment ${input.aggregateId} as active provider is not Mercado Pago`);
+      this.logger.debug(
+        `Skipping payment ${input.aggregateId} as active provider is not Mercado Pago`,
+      );
       return;
     }
 
     // Call orchestrator
     // We assume actorUserId is system since it's async
-    await this.orchestrator.orchestrate(payment.tenantId, payment, payment.customer as any, 'SYSTEM');
+    await this.orchestrator.orchestrate(payment.tenantId, payment, payment.customer, 'SYSTEM');
     this.logger.log(`Successfully orchestrated Mercado Pago payment ${input.aggregateId}`);
   }
 }

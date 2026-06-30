@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma/prisma.service';
 import { GatewayCredentialsEncryptionService } from './gateway-credentials-encryption.service';
 import {
@@ -27,9 +22,7 @@ export class GatewayConnectionsService {
     private readonly encryptionService: GatewayCredentialsEncryptionService,
   ) {}
 
-  async listConnections(
-    tenantId: string,
-  ): Promise<GatewayConnectionResponseDto[]> {
+  async listConnections(tenantId: string): Promise<GatewayConnectionResponseDto[]> {
     const connections = await this.prisma.gatewayConfiguration.findMany({
       where: { tenantId },
       orderBy: { createdAt: 'desc' },
@@ -71,10 +64,7 @@ export class GatewayConnectionsService {
 
     // In a real scenario, we could validate the API key calling Asaas API with a ping/validate endpoint here.
 
-    const supportedMethods = dto.supportedMethods || [
-      PaymentMethod.PIX,
-      PaymentMethod.BOLETO,
-    ];
+    const supportedMethods = dto.supportedMethods || [PaymentMethod.PIX, PaymentMethod.BOLETO];
 
     if (existing) {
       const updated = await this.prisma.gatewayConfiguration.update({

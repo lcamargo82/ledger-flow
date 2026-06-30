@@ -41,9 +41,7 @@ export interface ProviderWebhookAdapter {
 
   authenticate(input: ProviderWebhookAuthenticationInput): Promise<void>;
 
-  normalize(
-    input: ProviderWebhookPayloadInput,
-  ): Promise<NormalizedWebhookEvent>;
+  normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent>;
 
   supportsEvent(eventType: string): boolean;
 }

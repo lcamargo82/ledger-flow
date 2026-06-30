@@ -10,6 +10,11 @@
           <div class="i-ph-plus"></div>
           {{ t('gateways.asaas.connect') }}
         </button>
+        <button class="lf-btn lf-btn-secondary" @click="handleConnectMercadoPago" :disabled="isConnectingMp">
+          <div class="i-ph-link" v-if="!isConnectingMp"></div>
+          <div class="lf-spinner-small" v-else></div>
+          {{ t('gateways.mercadoPago.connect') }}
+        </button>
       </div>
     </div>
 
@@ -20,7 +25,8 @@
       
       <GatewayConnectionEmptyState 
         v-else-if="!hasConnections" 
-        @connect="openCreateModal"
+        @connectAsaas="openCreateModal"
+        @connectMercadoPago="handleConnectMercadoPago"
       />
 
       <div v-else class="connections-list">
@@ -64,6 +70,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from '@/composables/useI18n';
 import { useToastStore } from '@/stores/toast.store';
+import { useRoute, useRouter } from 'vue-router';
 import { GatewayConnectionsService, type GatewayConnection } from '@/services/gateway-connections.service';
 
 import GatewayConnectionEmptyState from '@components/gateways/GatewayConnectionEmptyState.vue';
@@ -74,6 +81,8 @@ import GatewayConnectionStatusModal from '@components/gateways/GatewayConnection
 
 const { t } = useI18n();
 const toast = useToastStore();
+const route = useRoute();
+const router = useRouter();
 
 const connections = ref<GatewayConnection[]>([]);
 const isLoading = ref(true);
@@ -87,6 +96,8 @@ const isStatusOpen = ref(false);
 const selectedConnection = ref<GatewayConnection | null>(null);
 const statusAction = ref<'activate' | 'deactivate'>('activate');
 
+const isConnectingMp = ref(false);
+
 const loadConnections = async () => {
   isLoading.value = true;
   try {
@@ -98,7 +109,26 @@ const loadConnections = async () => {
   }
 };
 
+const handleConnectMercadoPago = async () => {
+  isConnectingMp.value = true;
+  try {
+    const url = await GatewayConnectionsService.getMercadoPagoAuthUrl();
+    window.location.href = url;
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || 'Erro ao iniciar conexão com Mercado Pago');
+  } finally {
+    isConnectingMp.value = false;
+  }
+};
+
 onMounted(() => {
+  if (route.query.success === 'true') {
+    toast.success(t('gateways.messages.created'));
+    router.replace({ query: {} });
+  } else if (route.query.error === 'true') {
+    toast.error(t('gateways.messages.errorConnecting') || 'Erro ao conectar com gateway');
+    router.replace({ query: {} });
+  }
   loadConnections();
 });
 

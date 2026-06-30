@@ -9,7 +9,7 @@
         <button class="lf-btn lf-btn-icon" @click="$emit('edit', connection)" :title="t('gateways.actions.edit')">
           <div class="i-ph-pencil-simple"></div>
         </button>
-        <button class="lf-btn lf-btn-icon" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
+        <button v-if="connection.provider !== 'MERCADO_PAGO'" class="lf-btn lf-btn-icon" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
           <div class="i-ph-key"></div>
         </button>
         <button v-if="isActive" class="lf-btn lf-btn-icon" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">

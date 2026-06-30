@@ -986,6 +986,13 @@
       "connected": "Conectado",
       "connectionFailed": "Falha na conexão"
     },
+    "mercadoPago": {
+      "title": "Mercado Pago",
+      "connect": "Conectar Mercado Pago",
+      "connecting": "Conectando...",
+      "connected": "Conectado",
+      "connectionFailed": "Falha na conexão"
+    },
     "form": {
       "displayName": "Nome de Exibição",
       "environment": "Ambiente",
@@ -1019,7 +1026,8 @@
       "updated": "Configurações atualizadas.",
       "credentialsUpdated": "Credenciais atualizadas com segurança.",
       "statusUpdated": "Status da conexão alterado.",
-      "notConfigured": "Não configurado"
+      "notConfigured": "Não configurado",
+      "errorConnecting": "Erro ao conectar com gateway"
     }
   },
   "features": {

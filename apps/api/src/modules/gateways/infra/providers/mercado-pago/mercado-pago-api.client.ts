@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MercadoPagoOAuthTokenResponse, MercadoPagoCreatePaymentRequest, MercadoPagoPaymentResponse } from './mercado-pago.types';
+import {
+  MercadoPagoOAuthTokenResponse,
+  MercadoPagoCreatePaymentRequest,
+  MercadoPagoPaymentResponse,
+} from './mercado-pago.types';
 
 export class MercadoPagoApiError extends Error {
   constructor(
@@ -83,10 +87,7 @@ export class MercadoPagoApiClient {
     return this.request<T>('POST', endpoint, payload, headers);
   }
 
-  private async get<T>(
-    endpoint: string,
-    headers?: Record<string, string>,
-  ): Promise<T> {
+  private async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
     return this.request<T>('GET', endpoint, undefined, headers);
   }
 
@@ -126,12 +127,13 @@ export class MercadoPagoApiClient {
       }
 
       return data as T;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof MercadoPagoApiError) {
         throw error;
       }
-      this.logger.error(`Network or Parsing error to Mercado Pago: ${error?.message}`);
-      throw new Error(`Failed to call Mercado Pago API: ${error?.message}`);
+      const err = error as Error;
+      this.logger.error(`Network or Parsing error to Mercado Pago: ${err?.message}`);
+      throw new Error(`Failed to call Mercado Pago API: ${err?.message}`);
     }
   }
 }

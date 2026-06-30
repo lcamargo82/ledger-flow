@@ -7,9 +7,14 @@
       <div class="i-ph-plugs-connected"></div>
     </template>
     <template #action>
-      <AppButton variant="primary" icon="ph-plus" @click="$emit('connect')">
-        {{ t('gateways.asaas.connect') }}
-      </AppButton>
+      <div class="flex gap-4">
+        <AppButton variant="primary" icon="ph-plus" @click="$emit('connectAsaas')">
+          {{ t('gateways.asaas.connect') }}
+        </AppButton>
+        <AppButton variant="secondary" icon="ph-link" @click="$emit('connectMercadoPago')">
+          {{ t('gateways.mercadoPago.connect') }}
+        </AppButton>
+      </div>
     </template>
   </AppEmptyState>
 </template>
@@ -20,7 +25,7 @@ import AppEmptyState from '@components/common/AppEmptyState.vue';
 import AppButton from '@components/common/AppButton.vue';
 
 const { t } = useI18n();
-defineEmits(['connect']);
+defineEmits(['connectAsaas', 'connectMercadoPago']);
 </script>
 
 

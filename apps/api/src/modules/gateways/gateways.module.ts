@@ -33,10 +33,7 @@ import { MercadoPagoCreateChargeAsyncHandler } from './application/async-handler
 
 @Module({
   imports: [AsyncModule, AuthModule, TenantsModule],
-  controllers: [
-    MercadoPagoOAuthController,
-    GatewayConnectionsController,
-  ],
+  controllers: [MercadoPagoOAuthController, GatewayConnectionsController],
   providers: [
     AsaasCreateChargeAsyncHandler,
     MercadoPagoCreateChargeAsyncHandler,

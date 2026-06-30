@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
 import * as crypto from 'crypto';
 
-interface OAuthStateData {
+export interface OAuthStateData {
   tenantId: string;
   userId: string;
   expiresAt: number;
@@ -10,39 +12,59 @@ interface OAuthStateData {
 @Injectable()
 export class MercadoPagoOAuthStateService {
   private readonly logger = new Logger(MercadoPagoOAuthStateService.name);
-  private readonly states = new Map<string, OAuthStateData>();
+  private readonly redis: Redis;
+  private readonly prefix = 'mp_oauth_state:';
   private readonly expirationMinutes = 10;
 
-  generateState(tenantId: string, userId: string): string {
+  constructor(private readonly configService: ConfigService) {
+    const redisUrl = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+    this.redis = new Redis(redisUrl, {
+      maxRetriesPerRequest: 3,
+      retryStrategy(times) {
+        return Math.min(times * 50, 2000);
+      },
+    });
+    this.redis.on('error', (err) => {
+      this.logger.error(`Redis connection error: ${err}`);
+    });
+  }
+
+  async generateState(tenantId: string, userId: string): Promise<string> {
     const state = crypto.randomBytes(32).toString('hex');
     const expiresAt = Date.now() + this.expirationMinutes * 60 * 1000;
-    
-    this.states.set(state, { tenantId, userId, expiresAt });
-    
-    // Auto-cleanup after expiration
-    setTimeout(() => {
-      this.states.delete(state);
-    }, this.expirationMinutes * 60 * 1000);
+
+    const data: OAuthStateData = { tenantId, userId, expiresAt };
+    const key = `${this.prefix}${state}`;
+
+    await this.redis.set(key, JSON.stringify(data), 'EX', this.expirationMinutes * 60);
 
     return state;
   }
 
-  validateAndConsumeState(state: string): { tenantId: string; userId: string } | null {
-    const data = this.states.get(state);
-    
-    if (!data) {
+  async validateAndConsumeState(
+    state: string,
+  ): Promise<{ tenantId: string; userId: string } | null> {
+    const key = `${this.prefix}${state}`;
+    const result = await this.redis.get(key);
+
+    if (!result) {
       this.logger.warn(`Invalid or expired OAuth state provided.`);
       return null;
     }
 
     // Always consume (one-time use)
-    this.states.delete(state);
+    await this.redis.del(key);
 
-    if (Date.now() > data.expiresAt) {
-      this.logger.warn(`OAuth state expired for tenant ${data.tenantId}.`);
+    try {
+      const data = JSON.parse(result) as OAuthStateData;
+      if (Date.now() > data.expiresAt) {
+        this.logger.warn(`OAuth state expired logically for tenant ${data.tenantId}.`);
+        return null;
+      }
+      return { tenantId: data.tenantId, userId: data.userId };
+    } catch (e) {
+      this.logger.error(`Failed to parse OAuth state data: ${e}`);
       return null;
     }
-
-    return { tenantId: data.tenantId, userId: data.userId };
   }
 }

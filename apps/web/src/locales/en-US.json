@@ -986,6 +986,13 @@
       "connected": "Connected",
       "connectionFailed": "Connection Failed"
     },
+    "mercadoPago": {
+      "title": "Mercado Pago",
+      "connect": "Connect Mercado Pago",
+      "connecting": "Connecting...",
+      "connected": "Connected",
+      "connectionFailed": "Connection Failed"
+    },
     "form": {
       "displayName": "Display Name",
       "environment": "Environment",
@@ -1018,8 +1025,9 @@
       "created": "Connection created successfully.",
       "updated": "Settings updated.",
       "credentialsUpdated": "Credentials securely updated.",
-      "statusUpdated": "Connection status changed.",
-      "notConfigured": "Not configured"
+      "statusUpdated": "Connection status updated.",
+      "notConfigured": "Not configured",
+      "errorConnecting": "Error connecting with gateway"
     }
   },
   "features": {

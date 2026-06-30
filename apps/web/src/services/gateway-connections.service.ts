@@ -64,4 +64,13 @@ export class GatewayConnectionsService {
     const { data } = await api.patch<GatewayConnection>(`/gateways/connections/${id}/status`, payload);
     return data;
   }
+
+  static async getMercadoPagoAuthUrl(): Promise<string> {
+    const { data } = await api.get<{ url: string }>('/mercado-pago/oauth/url');
+    return data.url;
+  }
+
+  static async disconnectMercadoPago(): Promise<void> {
+    await api.post('/mercado-pago/oauth/disconnect');
+  }
 }

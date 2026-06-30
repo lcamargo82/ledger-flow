@@ -1,4 +1,5 @@
 import { MercadoPagoCredentials } from './mercado-pago.types';
+import * as crypto from 'crypto';
 
 export class MercadoPagoCredentialsMapper {
   static toJSONString(credentials: MercadoPagoCredentials): string {
@@ -30,7 +31,10 @@ export class MercadoPagoCredentialsMapper {
       return `mp_${credentials.merchantId}`;
     }
     // Fallback: hash the access token so we can compare but not read it
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(credentials.accessToken).digest('hex').substring(0, 16);
+    return crypto
+      .createHash('sha256')
+      .update(credentials.accessToken)
+      .digest('hex')
+      .substring(0, 16);
   }
 }

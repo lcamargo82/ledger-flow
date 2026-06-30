@@ -273,6 +273,21 @@ Fase 5A — Payments Core Backend Foundation
 
 ---
 
+## Fase 6.2A — Mercado Pago OAuth Connection Foundation
+
+**Status:** Concluída
+
+**Itens:**
+* Cliente API base configurado para OAuth 2.0 (`/oauth/token`).
+* Backend: Gerenciamento seguro de state com Redis (`ioredis`) para prevenir CSRF e Replay Attacks.
+* Orquestrador de OAuth: `MercadoPagoOAuthService` (redirecionamento, handling de callback e criptografia de credenciais).
+* Controle de Acesso: Validação de RBAC (`gateways:create`, `gateways:read`, `gateways:manage`) e `TenantFeatureAccessService` (`mercado_pago_gateway`).
+* Frontend: UI no `GatewaysPage.vue` para Conectar Mercado Pago e tratamento do OAuth redirect (`?success=true` ou `?error=true`).
+* Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
+* Documentação: ADR 0031.
+
+---
+
 ## Fase 6.2 — Stripe Adapter (Futuro)
 
 ---
