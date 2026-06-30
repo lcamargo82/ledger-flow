@@ -148,6 +148,9 @@ export class GatewayConnectionsController {
       tenantId: user.tenantId,
       feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
     });
-    return this.gatewayConnectionsService.disconnectConnection(user.tenantId, id);
+    return this.gatewayConnectionsService.disconnectConnection(
+      user.tenantId,
+      id,
+    );
   }
 }

@@ -1,4 +1,4 @@
 export const ASYNC_CONSUMER_NAMES = {
-  ASAAS_CREATE_CHARGE: 'AsaasCreateChargeAsyncHandler',
+  CREATE_PROVIDER_CHARGE: 'CreateProviderChargeAsyncHandler',
   ASAAS_WEBHOOK_PROCESSING: 'AsaasWebhookProcessingAsyncHandler',
 };

@@ -65,15 +65,19 @@ export class GatewayConnectionsService {
     const encryptedCredentials = this.encryptionService.encrypt({
       apiKey: dto.apiKey,
     });
-    
+
     // Round-trip validation
     try {
-      const decrypted = this.encryptionService.decrypt(JSON.stringify(encryptedCredentials));
+      const decrypted = this.encryptionService.decrypt(
+        JSON.stringify(encryptedCredentials),
+      );
       if (decrypted.apiKey !== dto.apiKey) {
         throw new Error('Decrypted value does not match');
       }
     } catch (err) {
-      throw new BadRequestException('The provided credential could not be validated and protected.');
+      throw new BadRequestException(
+        'The provided credential could not be validated and protected.',
+      );
     }
 
     const fingerprint = this.encryptionService.createFingerprint({
@@ -168,12 +172,16 @@ export class GatewayConnectionsService {
 
     // Round-trip validation
     try {
-      const decrypted = this.encryptionService.decrypt(JSON.stringify(encryptedCredentials));
+      const decrypted = this.encryptionService.decrypt(
+        JSON.stringify(encryptedCredentials),
+      );
       if (decrypted.apiKey !== dto.apiKey) {
         throw new Error('Decrypted value does not match');
       }
     } catch (err) {
-      throw new BadRequestException('The provided credential could not be validated and protected.');
+      throw new BadRequestException(
+        'The provided credential could not be validated and protected.',
+      );
     }
 
     const fingerprint = this.encryptionService.createFingerprint({
