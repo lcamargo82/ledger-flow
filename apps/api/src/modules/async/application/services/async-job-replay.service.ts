@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import type { OutboxRepository } from '../../domain/interfaces/outbox.repository';
-import type { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
+import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
 import { OutboxEventStatus } from '@prisma/client';
 
 @Injectable()

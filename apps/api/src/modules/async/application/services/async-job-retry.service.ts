@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
+import { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
 import { AsyncJobStatus } from '@prisma/client';
 import { ASYNC_RETRY_POLICY } from '../constants/async-retry-policy';
-import type { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
+import { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
 
 @Injectable()
 export class AsyncJobRetryService {

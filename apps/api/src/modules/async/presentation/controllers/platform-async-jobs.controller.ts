@@ -3,7 +3,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../../auth/presentation/guards/jwt-auth.guard';
 import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
 import { ListAsyncJobsQueryDto } from '../../application/dto/list-async-jobs-query.dto';
-import type { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
 import { ReplayAsyncJobDto } from '../../application/dto/replay-async-job.dto';
 import { AsyncJobReplayService } from '../../application/services/async-job-replay.service';
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';

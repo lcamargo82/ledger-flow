@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
-import type { OutboxRepository } from '../../domain/interfaces/outbox.repository';
-import type { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
+import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
 import { AsyncMessageEnvelope } from '../../domain/entities/async-message-envelope';
 import { randomUUID } from 'crypto';
 
