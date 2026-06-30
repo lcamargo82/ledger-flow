@@ -1,0 +1,50 @@
+asyncapi: 3.0.0
+info:
+  title: LedgerFlow Async Messaging API
+  version: 1.0.0
+  description: Event-driven architecture components for LedgerFlow using RabbitMQ.
+servers:
+  rabbitmq:
+    host: localhost:5672
+    protocol: amqp
+channels:
+  payment.commands.q:
+    address: ledgerflow.payment.commands.q
+    messages:
+      paymentCommand:
+        $ref: '#/components/messages/PaymentChargeRequested'
+  webhook.commands.q:
+    address: ledgerflow.webhooks.commands.q
+    messages:
+      webhookCommand:
+        $ref: '#/components/messages/WebhookInboundRequested'
+components:
+  messages:
+    PaymentChargeRequested:
+      name: payment.provider_charge_creation_requested
+      title: Provider Charge Creation Requested
+      summary: Command to create a charge in an external provider.
+      payload:
+        type: object
+        properties:
+          messageId:
+            type: string
+          eventType:
+            type: string
+          aggregateId:
+            type: string
+          tenantId:
+            type: string
+    WebhookInboundRequested:
+      name: webhook.inbound_processing_requested
+      title: Webhook Inbound Processing Requested
+      summary: Command to process an inbound webhook asynchronously.
+      payload:
+        type: object
+        properties:
+          messageId:
+            type: string
+          eventType:
+            type: string
+          aggregateId:
+            type: string
