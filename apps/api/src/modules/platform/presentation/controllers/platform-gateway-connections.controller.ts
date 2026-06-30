@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -35,7 +28,9 @@ export class PlatformGatewayConnectionsController {
     summary: 'List all tenant gateway connections for platform admin',
   })
   @ApiResponse({ status: 200, type: [PlatformGatewayConnectionResponseDto] })
-  async listConnections(): Promise<{ data: PlatformGatewayConnectionResponseDto[] }> {
+  async listConnections(): Promise<{
+    data: PlatformGatewayConnectionResponseDto[];
+  }> {
     const connections = await this.service.listConnections();
     return { data: connections };
   }

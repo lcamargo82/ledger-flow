@@ -191,7 +191,9 @@ export class GatewayConnectionsService {
     return this.mapToResponse(updated);
   }
 
-  private mapToResponse(entity: GatewayConfiguration): GatewayConnectionResponseDto {
+  private mapToResponse(
+    entity: GatewayConfiguration,
+  ): GatewayConnectionResponseDto {
     return {
       id: entity.id,
       provider: entity.provider,
