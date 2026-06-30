@@ -34,10 +34,10 @@ export class MercadoPagoOAuthController {
       await this.oauthService.handleCallback(code, state);
 
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5180';
-      return res.redirect(`${frontendUrl}/settings/gateways?success=true&provider=mercado-pago`);
+      return res.redirect(`${frontendUrl}/settings/gateway-connections?success=true&provider=mercado-pago`);
     } catch {
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5180';
-      return res.redirect(`${frontendUrl}/settings/gateways?error=true&provider=mercado-pago`);
+      return res.redirect(`${frontendUrl}/settings/gateway-connections?error=true&provider=mercado-pago`);
     }
   }
 

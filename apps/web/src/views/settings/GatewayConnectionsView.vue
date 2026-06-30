@@ -5,16 +5,13 @@
         <h2>{{ t('gateways.title') }}</h2>
         <p class="text-secondary">{{ t('gateways.description') }}</p>
       </div>
-      <div class="actions" v-if="hasConnections">
-        <button class="lf-btn lf-btn-primary" @click="openCreateModal">
-          <div class="i-ph-plus"></div>
+      <div class="actions flex gap-4" v-if="hasConnections">
+        <AppButton variant="primary" icon="ph-plus" @click="openCreateModal">
           {{ t('gateways.asaas.connect') }}
-        </button>
-        <button class="lf-btn lf-btn-secondary" @click="handleConnectMercadoPago" :disabled="isConnectingMp">
-          <div class="i-ph-link" v-if="!isConnectingMp"></div>
-          <div class="lf-spinner-small" v-else></div>
+        </AppButton>
+        <AppButton variant="secondary" icon="ph-link" @click="handleConnectMercadoPago" :disabled="isConnectingMp" :loading="isConnectingMp">
           {{ t('gateways.mercadoPago.connect') }}
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -78,6 +75,7 @@ import GatewayConnectionCard from '@components/gateways/GatewayConnectionCard.vu
 import GatewayConnectionForm from '@components/gateways/GatewayConnectionForm.vue';
 import GatewayCredentialUpdateModal from '@components/gateways/GatewayCredentialUpdateModal.vue';
 import GatewayConnectionStatusModal from '@components/gateways/GatewayConnectionStatusModal.vue';
+import AppButton from '@components/common/AppButton.vue';
 
 const { t } = useI18n();
 const toast = useToastStore();

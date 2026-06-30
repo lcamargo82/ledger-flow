@@ -66,11 +66,11 @@ export class GatewayConnectionsService {
   }
 
   static async getMercadoPagoAuthUrl(): Promise<string> {
-    const { data } = await api.get<{ url: string }>('/mercado-pago/oauth/url');
-    return data.url;
+    const { data } = await api.post<{ authorizationUrl: string }>('/gateways/connections/mercado-pago/connect');
+    return data.authorizationUrl;
   }
 
   static async disconnectMercadoPago(): Promise<void> {
-    await api.post('/mercado-pago/oauth/disconnect');
+    await api.post('/gateways/connections/mercado-pago/disconnect');
   }
 }
