@@ -1,4 +1,4 @@
-import { api } from './api';
+import { httpClient as api } from './http-client';
 
 export interface GatewayConnection {
   id: string;
