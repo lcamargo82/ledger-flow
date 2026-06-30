@@ -1,3 +1,7 @@
+import { OnModuleInit } from '@nestjs/common';
+import { AsyncModule } from '../async/async.module';
+import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
+import { AsaasCreateChargeAsyncHandler } from './application/async-handlers/asaas-create-charge.handler';
 import { Module } from '@nestjs/common';
 import { PaymentGatewayFactoryService } from './application/services/payment-gateway-factory.service';
 import { PaymentGatewayResolverService } from './application/services/payment-gateway-resolver.service';
@@ -17,7 +21,9 @@ import { GatewayCustomerSyncService } from './application/services/gateway-custo
 import { GatewayPaymentOrchestrationService } from './application/services/gateway-payment-orchestration.service';
 
 @Module({
+  imports: [AsyncModule],
   providers: [
+    AsaasCreateChargeAsyncHandler,
     {
       provide: GatewayConfigurationsRepository,
       useClass: PrismaGatewayConfigurationsRepository,
@@ -47,4 +53,13 @@ import { GatewayPaymentOrchestrationService } from './application/services/gatew
     GatewayPaymentOrchestrationService,
   ],
 })
-export class GatewaysModule {}
+export class GatewaysModule implements OnModuleInit {
+  constructor(
+    private readonly registry: AsyncHandlerRegistryService,
+    private readonly asaasCreateChargeHandler: AsaasCreateChargeAsyncHandler,
+  ) {}
+
+  onModuleInit() {
+    this.registry.register(this.asaasCreateChargeHandler);
+  }
+}

@@ -172,6 +172,17 @@ const router = createRouter({
       }
     },
     {
+      path: '/platform/async-jobs',
+      name: 'platform-async-jobs',
+      component: () => import('../views/PlatformAsyncOperationsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:async:read']
+      }
+    },
+    {
       path: '/dev/ui-kit',
       name: 'ui-kit',
       component: () => import('../views/UIKitView.vue'),

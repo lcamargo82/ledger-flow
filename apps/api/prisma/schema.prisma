@@ -25,7 +25,7 @@ enum PermissionScope {
 }
 
 model Tenant {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   name      String
   slug      String     @unique
   kind      TenantKind @default(CUSTOMER)
@@ -34,10 +34,10 @@ model Tenant {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  users                User[]
-  roles                Role[]
-  subscription         TenantSubscription?
-  authAttempts  AuthAttempt[]
+  users                 User[]
+  roles                 Role[]
+  subscription          TenantSubscription?
+  authAttempts          AuthAttempt[]
   customers             Customer[]
   payments              Payment[]
   paymentEvents         PaymentEvent[]
@@ -45,6 +45,8 @@ model Tenant {
   gatewayReferences     GatewayCustomerReference[]
   webhookInboxEvents    WebhookInboxEvent[]
   adminInvitations      TenantAdminInvitation[]
+  outboxEvents          OutboxEvent[]
+  asyncJobExecutions    AsyncJobExecution[]
 
   @@map("tenants")
 }
@@ -64,11 +66,11 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  tenant              Tenant               @relation(fields: [tenantId], references: [id])
-  roles               UserRole[]
-  refreshTokens       RefreshToken[]
-  sessions            UserSession[]
-  passwordResetTokens PasswordResetToken[]
+  tenant                 Tenant                  @relation(fields: [tenantId], references: [id])
+  roles                  UserRole[]
+  refreshTokens          RefreshToken[]
+  sessions               UserSession[]
+  passwordResetTokens    PasswordResetToken[]
   tenantAdminInvitations TenantAdminInvitation[]
 
   @@unique([tenantId, email])
@@ -97,7 +99,7 @@ model Role {
 }
 
 model Permission {
-  id          String   @id @default(uuid())
+  id          String          @id @default(uuid())
   key         String          @unique
   description String?
   scope       PermissionScope @default(TENANT)
@@ -259,18 +261,18 @@ model PasswordResetToken {
 }
 
 model TenantAdminInvitation {
-  id        String   @id @default(uuid())
-  tenantId  String
-  userId    String
-  email     String
-  tokenHash String   @unique
-  status    TenantInvitationStatus @default(PENDING)
-  expiresAt DateTime
-  acceptedAt DateTime?
-  revokedAt DateTime?
+  id              String                 @id @default(uuid())
+  tenantId        String
+  userId          String
+  email           String
+  tokenHash       String                 @unique
+  status          TenantInvitationStatus @default(PENDING)
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  revokedAt       DateTime?
   createdByUserId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -285,7 +287,7 @@ model TenantAdminInvitation {
 }
 
 model AuditLog {
-  id          String   @id @default(uuid())
+  id          String           @id @default(uuid())
   scope       PermissionScope?
   severity    AuditSeverity?
   tenantId    String?
@@ -300,7 +302,7 @@ model AuditLog {
   ipAddress   String?
   userAgent   String?
   traceId     String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime         @default(now())
 
   @@index([tenantId])
   @@index([action])
@@ -371,9 +373,9 @@ model GatewayConfiguration {
   createdAt              DateTime                   @default(now())
   updatedAt              DateTime                   @updatedAt
 
-  tenant            Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  payments          Payment[]
-  gatewayReferences GatewayCustomerReference[]
+  tenant             Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments           Payment[]
+  gatewayReferences  GatewayCustomerReference[]
   webhookInboxEvents WebhookInboxEvent[]
 
   @@unique([tenantId, provider, environment])
@@ -403,15 +405,15 @@ enum PaymentMethod {
 }
 
 model Payment {
-  id                     String        @id @default(uuid())
+  id                     String           @id @default(uuid())
   tenantId               String
   customerId             String
   reference              String
   externalReference      String?
   amount                 Int
-  currency               String        @default("BRL")
+  currency               String           @default("BRL")
   method                 PaymentMethod
-  status                 PaymentStatus @default(PENDING)
+  status                 PaymentStatus    @default(PENDING)
   description            String?
   dueDate                DateTime?
   metadata               Json?
@@ -473,14 +475,14 @@ model PaymentEvent {
 }
 
 model GatewayCustomerReference {
-  id                     String               @id @default(uuid())
+  id                     String          @id @default(uuid())
   tenantId               String
   customerId             String
   gatewayConfigurationId String
   provider               PaymentProvider
   providerCustomerId     String
-  createdAt              DateTime             @default(now())
-  updatedAt              DateTime             @updatedAt
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
 
   tenant               Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   customer             Customer             @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -562,17 +564,17 @@ enum TenantSubscriptionStatus {
 }
 
 model TenantSubscription {
-  id                          String                   @id @default(uuid())
-  tenantId                    String                   @unique
-  plan                        SubscriptionPlan         @default(FREE)
-  status                      TenantSubscriptionStatus @default(TRIAL)
-  trialEndsAt                 DateTime?
-  currentPeriodStart          DateTime?
-  currentPeriodEnd            DateTime?
+  id                            String                   @id @default(uuid())
+  tenantId                      String                   @unique
+  plan                          SubscriptionPlan         @default(FREE)
+  status                        TenantSubscriptionStatus @default(TRIAL)
+  trialEndsAt                   DateTime?
+  currentPeriodStart            DateTime?
+  currentPeriodEnd              DateTime?
   externalSubscriptionReference String?
-  notes                       String?
-  createdAt                   DateTime                 @default(now())
-  updatedAt                   DateTime                 @updatedAt
+  notes                         String?
+  createdAt                     DateTime                 @default(now())
+  updatedAt                     DateTime                 @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
@@ -582,3 +584,88 @@ model TenantSubscription {
   @@map("tenant_subscriptions")
 }
 
+enum OutboxEventStatus {
+  PENDING
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELED
+}
+
+enum AsyncJobStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  RETRY_SCHEDULED
+  DEAD_LETTERED
+  FAILED
+}
+
+model OutboxEvent {
+  id            String  @id @default(uuid())
+  tenantId      String?
+  aggregateType String
+  aggregateId   String
+  eventType     String
+  eventVersion  Int     @default(1)
+
+  payload     Json
+  payloadHash String
+
+  status          OutboxEventStatus @default(PENDING)
+  publishAttempts Int               @default(0)
+  availableAt     DateTime          @default(now())
+  publishedAt     DateTime?
+  lockedAt        DateTime?
+  lockOwner       String?
+  leaseExpiresAt  DateTime?
+
+  lastErrorCode    String?
+  lastErrorSummary String?
+
+  traceId         String?
+  replayOfEventId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@index([status, availableAt])
+  @@index([tenantId, createdAt])
+  @@index([eventType, status])
+  @@index([aggregateType, aggregateId])
+  @@index([traceId])
+  @@index([replayOfEventId])
+  @@map("outbox_events")
+}
+
+model AsyncJobExecution {
+  id            String  @id @default(uuid())
+  outboxEventId String
+  consumerName  String
+  tenantId      String?
+
+  status       AsyncJobStatus @default(PENDING)
+  attemptCount Int            @default(0)
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  nextRetryAt DateTime?
+
+  lastErrorCode    String?
+  lastErrorSummary String?
+
+  traceId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@unique([outboxEventId, consumerName])
+  @@index([status, nextRetryAt])
+  @@index([tenantId, status])
+  @@index([traceId])
+  @@map("async_job_executions")
+}

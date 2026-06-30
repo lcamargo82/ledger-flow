@@ -137,7 +137,35 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
     });
   }
 
-  async create(data: Prisma.PaymentUncheckedCreateInput): Promise<Payment> {
+  async create(
+    data: Prisma.PaymentUncheckedCreateInput,
+    outboxEventData?: any,
+  ): Promise<Payment> {
+    if (outboxEventData) {
+      return this.prisma.$transaction(async (tx) => {
+        const payment = await tx.payment.create({
+          data,
+          include: {
+            customer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        });
+        
+        await tx.outboxEvent.create({
+          data: {
+            ...outboxEventData,
+            aggregateId: payment.id,
+          },
+        });
+        
+        return payment;
+      });
+    }
+
     return this.prisma.payment.create({
       data,
       include: {
@@ -146,6 +174,10 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
             id: true,
             name: true,
           },
+        },
+      },
+    });
+  },
         },
       },
     });

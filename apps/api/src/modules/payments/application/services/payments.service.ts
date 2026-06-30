@@ -73,6 +73,28 @@ export class PaymentsService {
 
     // Create Payment (starts as PENDING)
     const reference = this.referenceService.generateReference();
+    
+    // Prepare Outbox Event
+    const eventPayload = {
+      amount: data.amount,
+      currency: data.currency || 'BRL',
+      method: data.method,
+      description: data.description,
+      dueDate: dueDate?.toISOString(),
+      metadata: data.metadata,
+    };
+    const payloadHash = crypto.createHash('sha256').update(JSON.stringify(eventPayload)).digest('hex');
+
+    const outboxEventData = {
+      tenantId,
+      aggregateType: 'Payment',
+      // aggregateId will be populated in repository
+      eventType: 'payment.provider_charge_creation_requested',
+      eventVersion: 1,
+      payload: eventPayload,
+      payloadHash,
+    };
+
     const payment = await this.paymentsRepository.create({
       tenantId,
       customerId: data.customerId,
@@ -93,10 +115,7 @@ export class PaymentsService {
           message: 'Payment created',
         },
       },
-    });
-
-    // Gateway Orchestration
-    const orchestratedPayment = await this.gatewayOrchestrator.orchestrate(tenantId, payment, customer, actorUserId);
+    }, outboxEventData);
 
     // Audit Log
     await this.auditLog(tenantId, actorUserId, 'payment.created', payment.id, {
@@ -107,7 +126,7 @@ export class PaymentsService {
       status: payment.status,
     });
 
-    return orchestratedPayment;
+    return payment;
   }
 
   async listPayments(tenantId: string, query: ListPaymentsQueryDto) {

@@ -128,7 +128,8 @@
     "comingSoon": "Em breve",
     "roles": "Roles",
     "permissions": "Permissões",
-    "tenantSettings": "Organização"
+    "tenantSettings": "Organização",
+    "platformAsyncOperations": "Operações Assíncronas"
   },
   "users": {
     "title": "Usuários",
@@ -292,15 +293,21 @@
     "description": "Lista de todas as permissões globais disponíveis no sistema.",
     "searchPlaceholder": "Buscar permissões...",
     "list": {
-      "auth": { "login": "Realizar login" },
+      "auth": {
+        "login": "Realizar login"
+      },
       "users": {
         "create": "Criar usuários",
         "read": "Visualizar usuários",
         "update": "Atualizar usuários",
         "delete": "Excluir usuários"
       },
-      "roles": { "manage": "Gerenciar papéis e permissões" },
-      "permissions": { "read": "Visualizar permissões" },
+      "roles": {
+        "manage": "Gerenciar papéis e permissões"
+      },
+      "permissions": {
+        "read": "Visualizar permissões"
+      },
       "customers": {
         "create": "Criar clientes",
         "read": "Visualizar clientes",
@@ -313,12 +320,24 @@
         "cancel": "Cancelar pagamentos",
         "refund": "Reembolsar pagamentos"
       },
-      "reports": { "export": "Exportar relatórios" },
-      "webhooks": { "manage": "Gerenciar webhooks" },
-      "api-keys": { "manage": "Gerenciar chaves de API" },
-      "gateways": { "manage": "Gerenciar gateways" },
-      "notifications": { "read": "Visualizar notificações" },
-      "audit": { "read": "Visualizar trilha de auditoria" },
+      "reports": {
+        "export": "Exportar relatórios"
+      },
+      "webhooks": {
+        "manage": "Gerenciar webhooks"
+      },
+      "api-keys": {
+        "manage": "Gerenciar chaves de API"
+      },
+      "gateways": {
+        "manage": "Gerenciar gateways"
+      },
+      "notifications": {
+        "read": "Visualizar notificações"
+      },
+      "audit": {
+        "read": "Visualizar trilha de auditoria"
+      },
       "tenant": {
         "read": "Visualizar dados básicos do tenant",
         "update": "Atualizar configurações do tenant"
@@ -331,15 +350,23 @@
           "update": "Atualizar tenants da plataforma",
           "status": "Alterar status de tenants da plataforma",
           "invite": "Convidar e reenviar convites para tenants",
-          "overview": { "read": "Visualizar resumo operacional de tenants da plataforma" },
-          "health": { "read": "Visualizar saúde operacional de tenants da plataforma" }
+          "overview": {
+            "read": "Visualizar resumo operacional de tenants da plataforma"
+          },
+          "health": {
+            "read": "Visualizar saúde operacional de tenants da plataforma"
+          }
         },
         "subscriptions": {
           "read": "Visualizar assinaturas da plataforma",
           "update": "Atualizar assinaturas da plataforma"
         },
-        "audit": { "read": "Visualizar logs de auditoria global da plataforma" },
-        "support": { "read": "Visualizar resumo de suporte dos tenants" }
+        "audit": {
+          "read": "Visualizar logs de auditoria global da plataforma"
+        },
+        "support": {
+          "read": "Visualizar resumo de suporte dos tenants"
+        }
       }
     },
     "table": {
@@ -366,11 +393,26 @@
     "title": "Gerenciamento de Papéis",
     "description": "Visualize os papéis de acesso do seu tenant.",
     "list": {
-      "OWNER": { "name": "Owner", "description": "Proprietário da conta com acesso total" },
-      "FINANCE_OPERATOR": { "name": "Financeiro", "description": "Operador financeiro" },
-      "SUPPORT_VIEWER": { "name": "Suporte", "description": "Acesso apenas leitura para suporte" },
-      "DEVELOPER": { "name": "Desenvolvedor", "description": "Gerenciamento técnico (API, Webhooks)" },
-      "PLATFORM_OWNER": { "name": "Platform Owner", "description": "Administrador geral da plataforma" }
+      "OWNER": {
+        "name": "Owner",
+        "description": "Proprietário da conta com acesso total"
+      },
+      "FINANCE_OPERATOR": {
+        "name": "Financeiro",
+        "description": "Operador financeiro"
+      },
+      "SUPPORT_VIEWER": {
+        "name": "Suporte",
+        "description": "Acesso apenas leitura para suporte"
+      },
+      "DEVELOPER": {
+        "name": "Desenvolvedor",
+        "description": "Gerenciamento técnico (API, Webhooks)"
+      },
+      "PLATFORM_OWNER": {
+        "name": "Platform Owner",
+        "description": "Administrador geral da plataforma"
+      }
     },
     "table": {
       "name": "Nome",
@@ -766,6 +808,35 @@
       },
       "overviewEmpty": "A visão geral estará disponível em breve.",
       "recentAudit": "Auditoria Recente"
+    },
+    "async": {
+      "description": "Gerenciamento da fila de tarefas assíncronas do sistema",
+      "filters": {
+        "tenant": "Tenant ID",
+        "status": "Status",
+        "eventType": "Tipo de Evento",
+        "apply": "Filtrar"
+      },
+      "table": {
+        "occurredAt": "Criado Em",
+        "tenant": "Tenant",
+        "eventType": "Tipo",
+        "status": "Status",
+        "actions": "Ações"
+      },
+      "actions": {
+        "replay": "Replay"
+      },
+      "empty": {
+        "title": "Nenhuma operação assíncrona encontrada"
+      },
+      "replay": {
+        "title": "Reexecutar Operação",
+        "message": "Tem certeza que deseja recriar a operação {id}?",
+        "confirm": "Confirmar",
+        "success": "Operação adicionada à fila com sucesso",
+        "failed": "Falha ao solicitar o replay da operação"
+      }
     }
   },
   "platformTenants": {

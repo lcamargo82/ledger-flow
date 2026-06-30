@@ -37,7 +37,10 @@ export interface IPaymentsRepository {
     idempotencyKeyHash: string,
   ): Promise<Payment | null>;
 
-  create(data: Prisma.PaymentUncheckedCreateInput): Promise<Payment>;
+  create(
+    data: Prisma.PaymentUncheckedCreateInput,
+    outboxEventData?: any,
+  ): Promise<Payment>;
 
   cancel(
     id: string,

@@ -1,5 +1,28 @@
 
 services:
+  worker:
+    container_name: ledgerflow-worker
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: development
+    command: npm run start:worker
+    env_file:
+      - .env
+    volumes:
+      - ./apps/api:/usr/src/app/apps/api
+      - api_node_modules:/usr/src/app/apps/api/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
   api:
     container_name: ledgerflow-api
     build:
