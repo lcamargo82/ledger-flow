@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-import AppInput from '@/components/ui/AppInput.vue';
-import AppButton from '@/components/ui/AppButton.vue';
+import { useI18n } from '@/composables/useI18n';
+import AppInput from '@/components/common/AppInput.vue';
+import AppButton from '@/components/common/AppButton.vue';
 
 const props = defineProps<{
   modelValue: { tenantId: string; status: string; eventType: string; }

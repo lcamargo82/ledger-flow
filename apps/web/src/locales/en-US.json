@@ -986,6 +986,11 @@
       "connected": "Connected",
       "connectionFailed": "Connection Failed"
     },
+    "mercadoPago": {
+      "title": "Mercado Pago",
+      "description": "Connect your account to receive payments via Mercado Pago.",
+      "comingSoon": "Coming soon"
+    },
     "form": {
       "displayName": "Display Name",
       "environment": "Environment",
@@ -1002,6 +1007,11 @@
       "INACTIVE": "Inactive",
       "DISABLED": "Disabled"
     },
+    "connection": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "disabled": "Disabled"
+    },
     "health": {
       "UNKNOWN": "Unknown",
       "HEALTHY": "Healthy",
@@ -1009,10 +1019,33 @@
       "CRITICAL": "Critical"
     },
     "actions": {
-      "edit": "Edit",
-      "activate": "Activate",
-      "deactivate": "Deactivate",
-      "updateCredentials": "Update Credentials"
+      "edit": "Edit configuration",
+      "activate": "Reactivate connection",
+      "deactivate": "Deactivate connection",
+      "updateCredentials": "Update API Key",
+      "disconnect": "Disconnect permanently"
+    },
+    "credentials": {
+      "updateTitle": "Update Asaas credential",
+      "newApiKey": "New API Key",
+      "confirmUpdate": "Confirm update",
+      "updated": "Credentials securely updated.",
+      "validationFailed": "Could not validate and protect the provided credential.",
+      "invalid": "Invalid or malformed credential.",
+      "configured": "Configured"
+    },
+    "deactivate": {
+      "title": "Deactivate connection",
+      "message": "Deactivating this integration will prevent new external charges through it. Existing payments, events, and history will be preserved.",
+      "confirm": "Deactivate connection",
+      "success": "Connection successfully deactivated."
+    },
+    "disconnect": {
+      "title": "Disconnect permanently",
+      "message": "This action permanently removes the stored credential. New charges cannot be created until a new credential is configured.",
+      "confirmLabel": "Type DISCONNECT to confirm.",
+      "confirmValue": "DISCONNECT",
+      "success": "Connection permanently disconnected."
     },
     "messages": {
       "created": "Connection created successfully.",

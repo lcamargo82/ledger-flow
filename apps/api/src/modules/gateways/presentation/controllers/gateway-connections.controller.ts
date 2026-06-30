@@ -135,4 +135,19 @@ export class GatewayConnectionsController {
       dto.status,
     );
   }
+
+  @Post(':id/disconnect')
+  @RequirePermissions('gateways:manage')
+  @ApiOperation({ summary: 'Disconnect a gateway connection permanently' })
+  @ApiResponse({ status: 200, type: GatewayConnectionResponseDto })
+  async disconnect(
+    @CurrentUser() user: AuthTokenPayload,
+    @Param('id') id: string,
+  ): Promise<GatewayConnectionResponseDto> {
+    await this.featureAccessService.assertAccess({
+      tenantId: user.tenantId,
+      feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
+    });
+    return this.gatewayConnectionsService.disconnectConnection(user.tenantId, id);
+  }
 }

@@ -48,7 +48,11 @@ export class Aes256GcmCredentialsEncryptionService implements GatewayCredentials
       const ivString = iv.toString('base64');
 
       return {
-        encryptedData: `${ivString}:${authTag}:${encrypted}`,
+        version: 1,
+        algorithm: this.algorithm,
+        iv: ivString,
+        authTag: authTag,
+        ciphertext: encrypted,
       };
     } catch (error) {
       // Never log the secret
@@ -62,12 +66,37 @@ export class Aes256GcmCredentialsEncryptionService implements GatewayCredentials
         throw new GatewayCredentialsInvalidError('Missing encrypted data.');
       }
 
-      const parts = encryptedValue.split(':');
-      if (parts.length !== 3) {
-        throw new GatewayCredentialsInvalidError('Invalid encrypted data format.');
-      }
+      let ivString: string;
+      let authTagString: string;
+      let encryptedString: string;
 
-      const [ivString, authTagString, encryptedString] = parts;
+      try {
+        // Try to parse the new JSON format
+        const parsed = JSON.parse(encryptedValue) as EncryptedGatewayCredentials;
+        if (parsed.version === 1 && parsed.algorithm === this.algorithm) {
+          ivString = parsed.iv as string;
+          authTagString = parsed.authTag as string;
+          encryptedString = parsed.ciphertext as string;
+
+          if (!ivString || !authTagString || !encryptedString) {
+            throw new GatewayCredentialsInvalidError('Invalid encrypted data format.');
+          }
+        } else if (parsed.encryptedData) {
+          // Fallback if somehow it was wrapped
+          const parts = parsed.encryptedData.split(':');
+          if (parts.length !== 3) throw new Error('Invalid format');
+          [ivString, authTagString, encryptedString] = parts;
+        } else {
+          throw new Error('Invalid JSON structure');
+        }
+      } catch {
+        // Fallback to old format iv:authTag:encrypted
+        const parts = encryptedValue.split(':');
+        if (parts.length !== 3) {
+          throw new GatewayCredentialsInvalidError('Invalid encrypted data format.');
+        }
+        [ivString, authTagString, encryptedString] = parts;
+      }
 
       const iv = Buffer.from(ivString, 'base64');
       const authTag = Buffer.from(authTagString, 'base64');

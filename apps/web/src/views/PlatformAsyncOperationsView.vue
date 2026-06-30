@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import AppPageHeader from '@/components/layout/AppPageHeader.vue';
+import { useI18n } from '@/composables/useI18n';
+import AppPageHeader from '@/components/common/AppPageHeader.vue';
 import AsyncJobFilters from '@/components/platform/AsyncJobFilters.vue';
 import AsyncJobTable from '@/components/platform/AsyncJobTable.vue';
 import { usePlatformAsyncJobsStore } from '@/stores/platform-async-jobs.store';

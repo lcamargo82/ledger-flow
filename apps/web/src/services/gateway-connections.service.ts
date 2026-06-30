@@ -64,4 +64,9 @@ export class GatewayConnectionsService {
     const { data } = await api.patch<GatewayConnection>(`/gateways/connections/${id}/status`, payload);
     return data;
   }
+
+  static async disconnectConnection(id: string): Promise<GatewayConnection> {
+    const { data } = await api.post<GatewayConnection>(`/gateways/connections/${id}/disconnect`);
+    return data;
+  }
 }

@@ -22,11 +22,11 @@ describe('Aes256GcmCredentialsEncryptionService', () => {
     };
     const encrypted = service.encrypt(creds);
 
-    expect(encrypted.encryptedData).toBeDefined();
-    expect(encrypted.encryptedData).toContain(':');
-    expect(encrypted.encryptedData).not.toContain('secret123'); // No plaintext leak
+    expect(encrypted.ciphertext).toBeDefined();
+    expect(encrypted.ciphertext).not.toContain('secret123'); // No plaintext leak
+    expect(encrypted.version).toBe(1);
 
-    const decrypted = service.decrypt(encrypted.encryptedData);
+    const decrypted = service.decrypt(JSON.stringify(encrypted));
     expect(decrypted).toEqual(creds);
   });
 

@@ -65,6 +65,17 @@ export class GatewayConnectionsService {
     const encryptedCredentials = this.encryptionService.encrypt({
       apiKey: dto.apiKey,
     });
+    
+    // Round-trip validation
+    try {
+      const decrypted = this.encryptionService.decrypt(JSON.stringify(encryptedCredentials));
+      if (decrypted.apiKey !== dto.apiKey) {
+        throw new Error('Decrypted value does not match');
+      }
+    } catch (err) {
+      throw new BadRequestException('The provided credential could not be validated and protected.');
+    }
+
     const fingerprint = this.encryptionService.createFingerprint({
       apiKey: dto.apiKey,
     });
@@ -154,6 +165,17 @@ export class GatewayConnectionsService {
     const encryptedCredentials = this.encryptionService.encrypt({
       apiKey: dto.apiKey,
     });
+
+    // Round-trip validation
+    try {
+      const decrypted = this.encryptionService.decrypt(JSON.stringify(encryptedCredentials));
+      if (decrypted.apiKey !== dto.apiKey) {
+        throw new Error('Decrypted value does not match');
+      }
+    } catch (err) {
+      throw new BadRequestException('The provided credential could not be validated and protected.');
+    }
+
     const fingerprint = this.encryptionService.createFingerprint({
       apiKey: dto.apiKey,
     });
@@ -186,6 +208,31 @@ export class GatewayConnectionsService {
     const updated = await this.prisma.gatewayConfiguration.update({
       where: { id },
       data: { status },
+    });
+
+    return this.mapToResponse(updated);
+  }
+
+  async disconnectConnection(
+    tenantId: string,
+    id: string,
+  ): Promise<GatewayConnectionResponseDto> {
+    const existing = await this.prisma.gatewayConfiguration.findFirst({
+      where: { id, tenantId },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Gateway connection not found');
+    }
+
+    const updated = await this.prisma.gatewayConfiguration.update({
+      where: { id },
+      data: {
+        status: GatewayConfigurationStatus.DISABLED,
+        encryptedCredentials: null,
+        credentialsFingerprint: null,
+        healthStatus: 'UNKNOWN',
+      },
     });
 
     return this.mapToResponse(updated);

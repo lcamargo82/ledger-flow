@@ -1,4 +1,4 @@
-import { api } from '@/services/api';
+import { httpClient as api } from "@/services/http-client";
 import type { AsyncJob, ListAsyncJobsFilters } from '../types/platform-async-jobs.types';
 
 export const platformAsyncJobsService = {

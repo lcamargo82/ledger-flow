@@ -3,6 +3,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AsyncEventHandler } from '../../../async/domain/interfaces/async-event-handler.interface';
 import { AsyncMessageEnvelope } from '../../../async/domain/entities/async-message-envelope';
+import { NonRetryableAsyncJobError } from '../../../async/domain/errors/non-retryable-async-job.error';
 import { GatewayPaymentOrchestrationService } from '../services/gateway-payment-orchestration.service';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 
@@ -73,13 +74,21 @@ export class AsaasCreateChargeAsyncHandler implements AsyncEventHandler {
 
     // Call orchestrator
     // We assume actorUserId is system since it's async
-    await this.orchestrator.orchestrate(
-      payment.tenantId,
-      payment,
-      payment.customer,
-      'SYSTEM',
-      gatewayConfigurationId,
-    );
-    this.logger.log(`Successfully orchestrated payment ${paymentId}`);
+    try {
+      await this.orchestrator.orchestrate(
+        payment.tenantId,
+        payment,
+        payment.customer,
+        'SYSTEM',
+        gatewayConfigurationId,
+      );
+      this.logger.log(`Successfully orchestrated payment ${paymentId}`);
+    } catch (error: any) {
+      if (error.name === 'GatewayCredentialsInvalidError') {
+        this.logger.error(`[AsaasCreateChargeAsyncHandler] Credentials for configuration ${gatewayConfigurationId} are invalid. Marking as non-retryable.`);
+        throw new NonRetryableAsyncJobError('Não foi possível usar a credencial da integração. Atualize a credencial e tente novamente.', 'INVALID_CREDENTIALS');
+      }
+      throw error;
+    }
   }
 }

@@ -32,7 +32,21 @@
           @updateCredentials="openCredentialsModal"
           @activate="openStatusModal($event, 'activate')"
           @deactivate="openStatusModal($event, 'deactivate')"
+          @disconnect="openDisconnectModal"
         />
+
+        <div v-if="!hasMercadoPago" class="lf-card connection-card is-inactive p-4 border border-dashed border-gray-300">
+          <div class="flex items-center gap-4 opacity-50">
+            <div class="i-ph-plugs text-3xl"></div>
+            <div>
+              <h4 class="font-semibold">{{ t('gateways.mercadoPago.title') }}</h4>
+              <p class="text-sm text-secondary">{{ t('gateways.mercadoPago.description') }}</p>
+            </div>
+            <div class="ml-auto">
+              <span class="lf-badge lf-badge-neutral">{{ t('gateways.mercadoPago.comingSoon') }}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -57,6 +71,13 @@
       @close="closeStatus"
       @confirm="handleStatusConfirm"
     />
+
+    <GatewayConnectionDisconnectModal
+      :is-open="isDisconnectOpen"
+      :connection="selectedConnection"
+      @close="closeDisconnect"
+      @confirm="handleDisconnectConfirm"
+    />
   </div>
 </template>
 
@@ -71,6 +92,7 @@ import GatewayConnectionCard from '@components/gateways/GatewayConnectionCard.vu
 import GatewayConnectionForm from '@components/gateways/GatewayConnectionForm.vue';
 import GatewayCredentialUpdateModal from '@components/gateways/GatewayCredentialUpdateModal.vue';
 import GatewayConnectionStatusModal from '@components/gateways/GatewayConnectionStatusModal.vue';
+import GatewayConnectionDisconnectModal from '@components/gateways/GatewayConnectionDisconnectModal.vue';
 
 const { t } = useI18n();
 const toast = useToastStore();
@@ -84,8 +106,11 @@ const hasConnections = computed(() => connections.value.length > 0);
 const isFormOpen = ref(false);
 const isCredentialsOpen = ref(false);
 const isStatusOpen = ref(false);
+const isDisconnectOpen = ref(false);
 const selectedConnection = ref<GatewayConnection | null>(null);
 const statusAction = ref<'activate' | 'deactivate'>('activate');
+
+const hasMercadoPago = computed(() => connections.value.some(c => c.provider === 'MERCADO_PAGO'));
 
 const loadConnections = async () => {
   isLoading.value = true;
@@ -189,6 +214,29 @@ const handleStatusConfirm = async () => {
     await loadConnections();
   } catch (err: any) {
     toast.error(err.response?.data?.message || 'Erro ao alterar status');
+  }
+};
+
+// Disconnect
+const openDisconnectModal = (conn: GatewayConnection) => {
+  selectedConnection.value = conn;
+  isDisconnectOpen.value = true;
+};
+
+const closeDisconnect = () => {
+  isDisconnectOpen.value = false;
+  selectedConnection.value = null;
+};
+
+const handleDisconnectConfirm = async () => {
+  if (!selectedConnection.value) return;
+  try {
+    await GatewayConnectionsService.disconnectConnection(selectedConnection.value.id);
+    toast.success(t('gateways.disconnect.success'));
+    closeDisconnect();
+    await loadConnections();
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || 'Erro ao desconectar');
   }
 };
 </script>

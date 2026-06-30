@@ -986,6 +986,11 @@
       "connected": "Conectado",
       "connectionFailed": "Falha na conexão"
     },
+    "mercadoPago": {
+      "title": "Mercado Pago",
+      "description": "Conecte sua conta para receber pagamentos pelo Mercado Pago.",
+      "comingSoon": "Em breve"
+    },
     "form": {
       "displayName": "Nome de Exibição",
       "environment": "Ambiente",
@@ -1002,6 +1007,11 @@
       "INACTIVE": "Inativo",
       "DISABLED": "Desabilitado"
     },
+    "connection": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "disabled": "Desabilitado"
+    },
     "health": {
       "UNKNOWN": "Desconhecido",
       "HEALTHY": "Saudável",
@@ -1009,10 +1019,33 @@
       "CRITICAL": "Crítico"
     },
     "actions": {
-      "edit": "Editar",
-      "activate": "Ativar",
-      "deactivate": "Desativar",
-      "updateCredentials": "Atualizar Credenciais"
+      "edit": "Editar configuração",
+      "activate": "Reativar conexão",
+      "deactivate": "Desativar conexão",
+      "updateCredentials": "Atualizar API Key",
+      "disconnect": "Desconectar permanentemente"
+    },
+    "credentials": {
+      "updateTitle": "Atualizar credencial Asaas",
+      "newApiKey": "Nova API Key",
+      "confirmUpdate": "Confirmar atualização",
+      "updated": "Credenciais atualizadas com segurança.",
+      "validationFailed": "Não foi possível validar e proteger a credencial informada.",
+      "invalid": "Credencial inválida ou malformada.",
+      "configured": "Configuradas"
+    },
+    "deactivate": {
+      "title": "Desativar conexão",
+      "message": "Desativar esta integração impedirá novas cobranças externas por ela. Pagamentos, eventos e histórico existentes serão preservados.",
+      "confirm": "Desativar conexão",
+      "success": "Conexão desativada com sucesso."
+    },
+    "disconnect": {
+      "title": "Desconectar permanentemente",
+      "message": "Esta ação remove permanentemente a credencial armazenada. Novas cobranças não poderão ser criadas até que uma nova credencial seja configurada.",
+      "confirmLabel": "Digite DESCONECTAR para confirmar.",
+      "confirmValue": "DESCONECTAR",
+      "success": "Conexão desconectada permanentemente."
     },
     "messages": {
       "created": "Conexão criada com sucesso.",

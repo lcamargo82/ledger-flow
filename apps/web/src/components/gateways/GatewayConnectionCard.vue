@@ -13,10 +13,13 @@
           <div class="i-ph-key"></div>
         </button>
         <button v-if="isActive" class="lf-btn lf-btn-icon" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">
-          <div class="i-ph-power text-danger"></div>
+          <div class="i-ph-pause text-warning"></div>
         </button>
-        <button v-else class="lf-btn lf-btn-icon" @click="$emit('activate', connection)" :title="t('gateways.actions.activate')">
-          <div class="i-ph-power text-success"></div>
+        <button v-else-if="connection.status === 'INACTIVE'" class="lf-btn lf-btn-icon" @click="$emit('activate', connection)" :title="t('gateways.actions.activate')">
+          <div class="i-ph-play text-success"></div>
+        </button>
+        <button class="lf-btn lf-btn-icon" @click="$emit('disconnect', connection)" :title="t('gateways.actions.disconnect')">
+          <div class="i-ph-trash text-danger"></div>
         </button>
       </div>
     </div>
@@ -61,7 +64,7 @@ const props = defineProps<{
   connection: GatewayConnection
 }>();
 
-defineEmits(['edit', 'updateCredentials', 'activate', 'deactivate']);
+defineEmits(['edit', 'updateCredentials', 'activate', 'deactivate', 'disconnect']);
 
 const isActive = computed(() => props.connection.status === 'ACTIVE');
 

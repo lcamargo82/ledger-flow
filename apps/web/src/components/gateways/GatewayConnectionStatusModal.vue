@@ -2,8 +2,8 @@
   <AppConfirmDialog
     :model-value="isOpen"
     @update:model-value="(val) => !val && $emit('close')"
-    :title="isActivating ? t('gateways.actions.activate') : t('gateways.actions.deactivate')"
-    :message="`Tem certeza que deseja ${isActivating ? 'ativar' : 'desativar'} a conexão ${connection?.displayName || connection?.provider}?`"
+    :title="isActivating ? t('gateways.actions.activate') : t('gateways.deactivate.title')"
+    :message="isActivating ? `Tem certeza que deseja ativar a conexão ${connection?.displayName || connection?.provider}?` : t('gateways.deactivate.message')"
     :confirm-variant="isActivating ? 'primary' : 'danger'"
     @confirm="submit"
     @cancel="$emit('close')"
