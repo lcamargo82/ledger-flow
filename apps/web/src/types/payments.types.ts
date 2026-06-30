@@ -45,6 +45,7 @@ export interface PaymentDetails extends PaymentListItem {
   canceledAt?: string | null;
   refundedAt?: string | null;
   events: PaymentEvent[];
+  asyncChargeStatus?: string;
 }
 
 export interface PaginatedPaymentsMeta {
