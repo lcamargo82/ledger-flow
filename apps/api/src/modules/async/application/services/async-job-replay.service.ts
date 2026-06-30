@@ -25,7 +25,7 @@ export class AsyncJobReplayService {
       aggregateId: event.aggregateId,
       eventType: event.eventType,
       eventVersion: event.eventVersion,
-      payload: event.payload as any,
+      payload: event.payload,
       payloadHash: event.payloadHash,
       traceId: event.traceId,
       replayOfEventId: event.id,

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethod } from '@prisma/client';
+import { PaymentMethod, PaymentExecutionMode } from '@prisma/client';
 import {
   IsEnum,
   IsInt,
@@ -52,6 +52,15 @@ export class CreatePaymentDto {
   @IsEnum(PaymentMethod)
   @IsNotEmpty()
   method: PaymentMethod;
+
+  @ApiPropertyOptional({
+    description: 'Modo de execução (EXTERNAL_GATEWAY, MANUAL, INTERNAL)',
+    enum: PaymentExecutionMode,
+    default: PaymentExecutionMode.EXTERNAL_GATEWAY,
+  })
+  @IsEnum(PaymentExecutionMode)
+  @IsOptional()
+  executionMode?: PaymentExecutionMode;
 
   @ApiPropertyOptional({
     description: 'Descrição opcional do pagamento',

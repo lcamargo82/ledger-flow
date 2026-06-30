@@ -6,7 +6,7 @@ export class RabbitMqTopologyService implements OnApplicationBootstrap {
   private readonly logger = new Logger(RabbitMqTopologyService.name);
 
   async onApplicationBootstrap() {
-    if (process.env.IS_WORKER === 'true') {
+    if (process.env.APP_PROCESS_ROLE === 'worker') {
       await this.initializeTopology();
     }
   }
@@ -17,13 +17,15 @@ export class RabbitMqTopologyService implements OnApplicationBootstrap {
     try {
       connection = await amqp.connect(url);
     } catch (error: any) {
-      this.logger.error(`Failed to connect to RabbitMQ for topology initialization: ${error.message}`);
+      this.logger.error(
+        `Failed to connect to RabbitMQ for topology initialization: ${error.message}`,
+      );
       throw error; // Worker must fail if topology cannot be initialized
     }
 
     try {
       const channel = await connection.createChannel();
-      
+
       const exchange = 'ledgerflow.events';
       const dlx = 'ledgerflow.dlx';
 
@@ -31,8 +33,22 @@ export class RabbitMqTopologyService implements OnApplicationBootstrap {
       await channel.assertExchange(dlx, 'topic', { durable: true });
 
       // Commands Queues
-      await this.assertAndBindQueue(channel, 'ledgerflow.payment.commands.q', exchange, 'payment.command.*', dlx, 'payment.dlq');
-      await this.assertAndBindQueue(channel, 'ledgerflow.webhooks.commands.q', exchange, 'webhook.command.*', dlx, 'webhook.dlq');
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.payment.commands.q',
+        exchange,
+        'payment.command.*',
+        dlx,
+        'payment.dlq',
+      );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.webhooks.commands.q',
+        exchange,
+        'webhook.command.*',
+        dlx,
+        'webhook.dlq',
+      );
 
       // Retry Queues
       const retryIntervals = [30000, 120000, 600000, 1800000]; // 30s, 2m, 10m, 30m
@@ -60,7 +76,7 @@ export class RabbitMqTopologyService implements OnApplicationBootstrap {
       // DLQs
       await channel.assertQueue('ledgerflow.payment.dlq', { durable: true });
       await channel.bindQueue('ledgerflow.payment.dlq', dlx, 'payment.dlq');
-      
+
       await channel.assertQueue('ledgerflow.webhooks.dlq', { durable: true });
       await channel.bindQueue('ledgerflow.webhooks.dlq', dlx, 'webhook.dlq');
 
@@ -73,7 +89,14 @@ export class RabbitMqTopologyService implements OnApplicationBootstrap {
     }
   }
 
-  private async assertAndBindQueue(channel: any, queue: string, exchange: string, routingKey: string, dlx: string, dlqRoutingKey: string) {
+  private async assertAndBindQueue(
+    channel: any,
+    queue: string,
+    exchange: string,
+    routingKey: string,
+    dlx: string,
+    dlqRoutingKey: string,
+  ) {
     await channel.assertQueue(queue, {
       durable: true,
       deadLetterExchange: dlx,

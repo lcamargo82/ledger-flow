@@ -11,7 +11,11 @@ export class PrismaOutboxRepository implements OutboxRepository {
     return this.prisma.outboxEvent.create({ data });
   }
 
-  async findPendingAndLock(batchSize: number, lockOwner: string, leaseDurationMs: number): Promise<OutboxEvent[]> {
+  async findPendingAndLock(
+    batchSize: number,
+    lockOwner: string,
+    leaseDurationMs: number,
+  ): Promise<OutboxEvent[]> {
     const now = new Date();
     const leaseExpiresAt = new Date(now.getTime() + leaseDurationMs);
 

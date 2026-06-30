@@ -7,7 +7,10 @@ import { AsyncJobExecution } from '@prisma/client';
 export class PrismaAsyncJobExecutionRepository implements AsyncJobExecutionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByEventAndConsumer(outboxEventId: string, consumerName: string): Promise<AsyncJobExecution | null> {
+  async findByEventAndConsumer(
+    outboxEventId: string,
+    consumerName: string,
+  ): Promise<AsyncJobExecution | null> {
     return this.prisma.asyncJobExecution.findUnique({
       where: {
         outboxEventId_consumerName: {
@@ -27,13 +30,13 @@ export class PrismaAsyncJobExecutionRepository implements AsyncJobExecutionRepos
     }
 
     if (data.outboxEventId && data.consumerName) {
-        const existing = await this.findByEventAndConsumer(data.outboxEventId, data.consumerName);
-        if (existing) {
-            return this.prisma.asyncJobExecution.update({
-                where: { id: existing.id },
-                data,
-            });
-        }
+      const existing = await this.findByEventAndConsumer(data.outboxEventId, data.consumerName);
+      if (existing) {
+        return this.prisma.asyncJobExecution.update({
+          where: { id: existing.id },
+          data,
+        });
+      }
     }
 
     return this.prisma.asyncJobExecution.create({ data: data as any });

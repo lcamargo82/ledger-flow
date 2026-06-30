@@ -12,7 +12,8 @@ export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplic
   private readonly dispatcherId = randomUUID();
   private readonly batchSize = Number(process.env.OUTBOX_DISPATCH_BATCH_SIZE) || 50;
   private readonly intervalMs = Number(process.env.OUTBOX_DISPATCH_INTERVAL_MS) || 2000;
-  private readonly leaseDurationMs = (Number(process.env.OUTBOX_LEASE_DURATION_SECONDS) || 60) * 1000;
+  private readonly leaseDurationMs =
+    (Number(process.env.OUTBOX_LEASE_DURATION_SECONDS) || 60) * 1000;
   private isProcessing = false;
 
   constructor(
@@ -21,8 +22,12 @@ export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplic
   ) {}
 
   onApplicationBootstrap() {
-    this.logger.log(`outbox.dispatcher.started (ID: ${this.dispatcherId})`);
-    this.startPolling();
+    if (process.env.APP_PROCESS_ROLE === 'worker') {
+      this.logger.log(`outbox.dispatcher.started (ID: ${this.dispatcherId})`);
+      this.startPolling();
+    } else {
+      this.logger.log(`outbox.dispatcher skipped (APP_PROCESS_ROLE != worker)`);
+    }
   }
 
   onApplicationShutdown() {
@@ -46,8 +51,12 @@ export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplic
     this.isProcessing = true;
 
     try {
-      const events = await this.outboxRepository.findPendingAndLock(this.batchSize, this.dispatcherId, this.leaseDurationMs);
-      
+      const events = await this.outboxRepository.findPendingAndLock(
+        this.batchSize,
+        this.dispatcherId,
+        this.leaseDurationMs,
+      );
+
       if (events.length > 0) {
         this.logger.debug(`Found ${events.length} outbox events to dispatch`);
       }
@@ -63,12 +72,13 @@ export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplic
             aggregateId: event.aggregateId,
             traceId: event.traceId || undefined,
             occurredAt: event.createdAt.toISOString(),
+            payload: event.payload,
           };
 
           const routingKey = event.eventType;
-          
+
           const published = await this.messagePublisher.publish(routingKey, envelope);
-          
+
           if (published) {
             await this.outboxRepository.markAsPublished(event.id);
             this.logger.debug(`Successfully published outbox event ${event.id}`);

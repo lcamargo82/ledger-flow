@@ -27,9 +27,7 @@ export class PlatformAuditService {
       perPage: query.perPage || 20,
     });
 
-    const tenantIds = [
-      ...new Set(result.data.map((l) => l.tenantId).filter(Boolean)),
-    ] as string[];
+    const tenantIds = [...new Set(result.data.map((l) => l.tenantId).filter(Boolean))] as string[];
     const tenants = await this.prisma.tenant.findMany({
       where: { id: { in: tenantIds } },
     });
@@ -37,10 +35,7 @@ export class PlatformAuditService {
 
     return {
       data: result.data.map((log) =>
-        PlatformAuditMapper.toResponse(
-          log,
-          log.tenantId ? tenantMap.get(log.tenantId) : null,
-        ),
+        PlatformAuditMapper.toResponse(log, log.tenantId ? tenantMap.get(log.tenantId) : null),
       ),
       meta: result.meta,
     };

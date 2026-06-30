@@ -13,7 +13,7 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
     try {
       this.connection = await amqp.connect(url);
       this.channel = await this.connection.createConfirmChannel();
-      
+
       this.channel.on('return', (msg: any) => {
         this.logger.warn(`Message returned (no route found): ${msg.fields.routingKey}`);
         // Cannot directly fail the original promise here easily without tracking correlationIds,
@@ -36,29 +36,31 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
       const exchange = 'ledgerflow.events';
       const content = Buffer.from(JSON.stringify(payload));
       const messageId = payload.messageId;
-      
+
       const mappedRoutingKey = this.mapRoutingKey(routingKey);
 
       let wasReturned = false;
       const returnHandler = (msg: any) => {
         if (msg.properties.messageId === messageId) {
           wasReturned = true;
-          this.logger.warn(`Message returned (unroutable) for ${mappedRoutingKey}, messageId: ${messageId}`);
+          this.logger.warn(
+            `Message returned (unroutable) for ${mappedRoutingKey}, messageId: ${messageId}`,
+          );
         }
       };
-      
+
       this.channel.on('return', returnHandler);
 
       this.channel!.publish(
-        exchange, 
-        mappedRoutingKey, 
-        content, 
-        { 
-          persistent: true, 
+        exchange,
+        mappedRoutingKey,
+        content,
+        {
+          persistent: true,
           mandatory: true,
           messageId: messageId,
-          contentType: 'application/json'
-        }, 
+          contentType: 'application/json',
+        },
         (err: any, ok: any) => {
           this.channel.removeListener('return', returnHandler);
           if (err !== null) {
@@ -71,15 +73,16 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
               resolve(true);
             }
           }
-        }
+        },
       );
     });
   }
 
   private mapRoutingKey(eventType: string): string {
-    if (eventType.startsWith('payment.provider_charge_creation_requested')) return 'payment.command.create-charge';
-    if (eventType.startsWith('webhook.inbound_processing_requested')) return 'webhook.command.process';
+    if (eventType.startsWith('payment.provider_charge_creation_requested'))
+      return 'payment.command.create-charge';
+    if (eventType.startsWith('webhook.inbound_processing_requested'))
+      return 'webhook.command.process';
     return eventType;
   }
 }
-

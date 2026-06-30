@@ -9,6 +9,8 @@ services:
     command: npm run start:worker
     env_file:
       - .env
+    environment:
+      - APP_PROCESS_ROLE=worker
     volumes:
       - ./apps/api:/usr/src/app/apps/api
       - api_node_modules:/usr/src/app/apps/api/node_modules
@@ -31,6 +33,8 @@ services:
       target: development
     env_file:
       - .env
+    environment:
+      - APP_PROCESS_ROLE=api
     ports:
       - "${HOST_API_PORT:-3010}:${API_PORT:-3000}"
       - "${HOST_PRISMA_STUDIO_PORT:-5555}:5555"

@@ -21,7 +21,7 @@ export class AsyncJobResponseDto {
 
   @ApiPropertyOptional()
   traceId?: string;
-  
+
   @ApiPropertyOptional()
   lastErrorSummary?: string;
 }

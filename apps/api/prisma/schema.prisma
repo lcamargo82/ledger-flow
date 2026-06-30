@@ -405,16 +405,23 @@ enum PaymentMethod {
   OTHER
 }
 
+enum PaymentExecutionMode {
+  EXTERNAL_GATEWAY
+  MANUAL
+  INTERNAL
+}
+
 model Payment {
-  id                     String           @id @default(uuid())
+  id                     String               @id @default(uuid())
   tenantId               String
   customerId             String
   reference              String
   externalReference      String?
   amount                 Int
-  currency               String           @default("BRL")
+  currency               String               @default("BRL")
   method                 PaymentMethod
-  status                 PaymentStatus    @default(PENDING)
+  status                 PaymentStatus        @default(PENDING)
+  executionMode          PaymentExecutionMode @default(EXTERNAL_GATEWAY)
   description            String?
   dueDate                DateTime?
   metadata               Json?

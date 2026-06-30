@@ -5,7 +5,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PaymentStatus } from '@prisma/client';
+import { PaymentStatus, PaymentExecutionMode } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { PrismaPaymentsRepository } from '../../infra/repositories/prisma-payments.repository';
@@ -15,6 +15,7 @@ import { CreatePaymentDto } from '../dto/create-payment.dto';
 import { ListPaymentsQueryDto } from '../dto/list-payments-query.dto';
 import { RefundPaymentDto } from '../dto/refund-payment.dto';
 import { GatewayPaymentOrchestrationService } from '../../../gateways/application/services/gateway-payment-orchestration.service';
+import { PaymentGatewayResolverService } from '../../../gateways/application/services/payment-gateway-resolver.service';
 
 @Injectable()
 export class PaymentsService {
@@ -23,6 +24,7 @@ export class PaymentsService {
     private readonly referenceService: PaymentReferenceService,
     private readonly prisma: PrismaService, // Needed for audit log outside the repository if not separated
     private readonly gatewayOrchestrator: GatewayPaymentOrchestrationService,
+    private readonly gatewayResolver: PaymentGatewayResolverService,
   ) {}
 
   async createPayment(
@@ -68,32 +70,46 @@ export class PaymentsService {
       throw new NotFoundException('Customer not found or inactive.');
     }
 
+    const executionMode = data.executionMode || PaymentExecutionMode.EXTERNAL_GATEWAY;
+
+    let gatewayConfigurationId: string | undefined = undefined;
+    let provider: string | undefined = undefined;
+
+    if (executionMode === PaymentExecutionMode.EXTERNAL_GATEWAY) {
+      const resolved = await this.gatewayResolver.resolveByMethod(tenantId, data.method);
+      gatewayConfigurationId = resolved.configuration.id;
+      provider = resolved.configuration.provider;
+    }
+
     // Determine dueDate
     const dueDate = data.dueDate ? new Date(data.dueDate) : undefined;
 
     // Create Payment (starts as PENDING)
     const reference = this.referenceService.generateReference();
     
-    // Prepare Outbox Event
-    const eventPayload = {
-      amount: data.amount,
-      currency: data.currency || 'BRL',
-      method: data.method,
-      description: data.description,
-      dueDate: dueDate?.toISOString(),
-      metadata: data.metadata,
-    };
-    const payloadHash = crypto.createHash('sha256').update(JSON.stringify(eventPayload)).digest('hex');
+    let outboxEventData: any = undefined;
 
-    const outboxEventData = {
-      tenantId,
-      aggregateType: 'Payment',
-      // aggregateId will be populated in repository
-      eventType: 'payment.provider_charge_creation_requested',
-      eventVersion: 1,
-      payload: eventPayload,
-      payloadHash,
-    };
+    if (executionMode === PaymentExecutionMode.EXTERNAL_GATEWAY) {
+      // Prepare Outbox Event (Secure payload, only references)
+      const eventPayload = {
+        paymentId: 'WILL_BE_REPLACED_IN_REPOSITORY_TRANSACTION',
+        tenantId,
+        gatewayConfigurationId,
+        eventVersion: 1,
+      };
+      
+      const payloadHash = crypto.createHash('sha256').update(JSON.stringify(eventPayload)).digest('hex');
+
+      outboxEventData = {
+        tenantId,
+        aggregateType: 'Payment',
+        // aggregateId will be populated in repository
+        eventType: 'payment.provider_charge_creation_requested',
+        eventVersion: 1,
+        payload: eventPayload, // Repositories should replace paymentId
+        payloadHash,
+      };
+    }
 
     const payment = await this.paymentsRepository.create({
       tenantId,
@@ -102,6 +118,9 @@ export class PaymentsService {
       amount: data.amount,
       currency: data.currency || 'BRL',
       method: data.method,
+      executionMode,
+      gatewayConfigurationId,
+      provider: provider as any,
       description: data.description,
       dueDate,
       metadata: data.metadata as any,

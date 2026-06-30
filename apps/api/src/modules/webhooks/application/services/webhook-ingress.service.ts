@@ -27,9 +27,7 @@ export class WebhookIngressService {
     const adapter = this.adapterRegistry.getAdapter(provider);
 
     await adapter.authenticate(authInput);
-    this.logger.log(
-      `[WebhookIngressService] webhook.ingress.authenticated provider=${provider}`,
-    );
+    this.logger.log(`[WebhookIngressService] webhook.ingress.authenticated provider=${provider}`);
 
     const normalizedEvent = await adapter.normalize(payloadInput);
     this.logger.log(
@@ -55,9 +53,7 @@ export class WebhookIngressService {
       payloadHash: normalizedEvent.payloadHash,
       payloadSummary: normalizedEvent.payloadSummary,
     });
-    this.logger.log(
-      `[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`,
-    );
+    this.logger.log(`[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`);
 
     // Asynchronous processing enabled (Phase 8A)
     // The processor will be invoked by the worker via RabbitMQ and Outbox.

@@ -27,9 +27,9 @@ export class PlatformAsyncJobsController {
     if (query.tenantId) where.tenantId = query.tenantId;
     if (query.status) where.status = query.status;
     if (query.eventType) where.eventType = query.eventType;
-    
+
     const result = await this.outboxRepository.paginate({ where, orderBy: { createdAt: 'desc' } });
-    
+
     return {
       items: result.items.map(AsyncJobMapper.toResponseDto),
       total: result.total,

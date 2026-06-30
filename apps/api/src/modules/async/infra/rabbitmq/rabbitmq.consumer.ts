@@ -13,11 +13,11 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
 
   constructor(
     private readonly registry: AsyncHandlerRegistryService,
-    private readonly jobExecutionRepo: AsyncJobExecutionRepository
+    private readonly jobExecutionRepo: AsyncJobExecutionRepository,
   ) {}
 
   async onApplicationBootstrap() {
-    if (process.env.IS_WORKER === 'true') {
+    if (process.env.APP_PROCESS_ROLE === 'worker') {
       await this.connect();
     }
   }
@@ -31,7 +31,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
       await this.channel.prefetch(prefetchCount);
       this.logger.log('rabbitmq.connected');
       this.logger.log('rabbitmq.consumer.registered');
-      
+
       this.consume('ledgerflow.payment.commands.q');
       this.consume('ledgerflow.webhooks.commands.q');
     } catch (err: any) {
@@ -41,10 +41,10 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
 
   private async consume(queue: string) {
     if (!this.channel) return;
-    
+
     await this.channel.consume(queue, async (msg: any) => {
       if (!msg) return;
-      
+
       const contentStr = msg.content.toString();
       let payload: AsyncMessageEnvelope;
       try {
@@ -56,7 +56,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
       }
 
       const handlers = this.registry.getHandlers(payload.eventType);
-      
+
       if (handlers.length === 0) {
         this.logger.warn(`No handlers found for eventType: ${payload.eventType}`);
         this.channel.reject(msg, false);
@@ -83,7 +83,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
           });
         } catch (e: any) {
           this.logger.error(`Handler ${handler.consumerName} failed: ${e.message}`);
-          
+
           await this.jobExecutionRepo.createOrUpdate({
             id: jobExecution.id,
             status: AsyncJobStatus.FAILED,
@@ -92,15 +92,14 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
             attemptCount: jobExecution.attemptCount + 1,
             completedAt: new Date(),
           });
-          
+
           // Basic logic: Reject to DLQ if we don't handle advanced retry dynamically
           this.channel.reject(msg, false);
           return;
         }
       }
-      
+
       this.channel.ack(msg);
     });
   }
 }
-

@@ -12,15 +12,11 @@ import { WebhookPayloadInvalidError } from '../../../domain/errors/webhook-error
 
 @Injectable()
 export class AsaasWebhookNormalizer implements ProviderWebhookNormalizer {
-  async normalize(
-    input: ProviderWebhookPayloadInput,
-  ): Promise<NormalizedWebhookEvent> {
+  async normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent> {
     const { payload, receivedAt } = input;
 
     if (!payload || !payload.id || !payload.event) {
-      throw new WebhookPayloadInvalidError(
-        'Payload Asaas inválido ou incompleto.',
-      );
+      throw new WebhookPayloadInvalidError('Payload Asaas inválido ou incompleto.');
     }
 
     const providerEventId = payload.id;
@@ -32,10 +28,7 @@ export class AsaasWebhookNormalizer implements ProviderWebhookNormalizer {
 
     // Convert decimal value to cents
     let amountInCents: number | undefined;
-    if (
-      payload.payment?.value !== undefined &&
-      payload.payment?.value !== null
-    ) {
+    if (payload.payment?.value !== undefined && payload.payment?.value !== null) {
       amountInCents = Math.round(Number(payload.payment.value) * 100);
     }
 
@@ -59,9 +52,7 @@ export class AsaasWebhookNormalizer implements ProviderWebhookNormalizer {
       provider: WebhookProvider.ASAAS,
       providerEventId,
       eventType: rawProviderEventType,
-      occurredAt: payload.dateCreated
-        ? new Date(payload.dateCreated)
-        : receivedAt,
+      occurredAt: payload.dateCreated ? new Date(payload.dateCreated) : receivedAt,
       providerPaymentId: payload.payment?.id,
       paymentReference: payload.payment?.externalReference,
       providerStatus: payload.payment?.status,

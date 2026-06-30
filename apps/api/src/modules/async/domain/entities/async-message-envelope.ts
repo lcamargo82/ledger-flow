@@ -7,4 +7,5 @@ export interface AsyncMessageEnvelope {
   aggregateId: string;
   traceId?: string;
   occurredAt: string;
+  payload?: any;
 }

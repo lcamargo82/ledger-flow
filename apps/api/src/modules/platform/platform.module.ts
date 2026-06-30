@@ -17,11 +17,7 @@ import { TenantInvitationsController } from './presentation/controllers/tenant-i
 
 @Module({
   imports: [PrismaModule, EmailModule],
-  controllers: [
-    PlatformTenantsController,
-    TenantInvitationsController,
-    PlatformAuditController,
-  ],
+  controllers: [PlatformTenantsController, TenantInvitationsController, PlatformAuditController],
   providers: [
     PlatformTenantsService,
     TenantProvisioningService,
