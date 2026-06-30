@@ -241,6 +241,7 @@
     }
   },
   "common": {
+    "all": "All",
     "logout": "Logout",
     "loggingOut": "Logging out...",
     "loading": "Loading...",
@@ -792,6 +793,13 @@
         "INFO": "Info",
         "WARNING": "Warning",
         "CRITICAL": "Critical"
+      },
+      "actorType": {
+        "USER": "User",
+        "PLATFORM_ADMIN": "Platform Admin",
+        "SYSTEM": "System",
+        "WEBHOOK": "Webhook",
+        "WORKER": "Worker"
       },
       "table": {
         "occurredAt": "Date/Time",

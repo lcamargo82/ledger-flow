@@ -1,76 +1,61 @@
 <template>
-  <div class="lf-page">
-    <div class="lf-page-header">
-      <div class="title-area">
-        <h2>{{ t('platform.gateways.title') }}</h2>
-        <p class="text-secondary">{{ t('platform.gateways.description') }}</p>
-      </div>
-    </div>
+  <div class="space-y-6">
+    <AppPageHeader
+      :title="t('platform.gateways.title')"
+      :description="t('platform.gateways.description')"
+    />
 
-    <div class="lf-page-content">
-      <div v-if="isLoading" class="flex justify-center p-8">
-        <div class="lf-spinner"></div>
-      </div>
-      
-      <div v-else class="lf-card">
-        <div class="table-responsive">
-          <table class="lf-table">
-            <thead>
-              <tr>
-                <th>{{ t('platform.gateways.table.tenant') }}</th>
-                <th>{{ t('platform.gateways.table.provider') }}</th>
-                <th>{{ t('platform.gateways.table.environment') }}</th>
-                <th>{{ t('platform.gateways.table.status') }}</th>
-                <th>{{ t('platform.gateways.table.health') }}</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="connections.length === 0">
-                <td colspan="6" class="text-center text-secondary py-8">Nenhuma conexão de gateway encontrada.</td>
-              </tr>
-              <tr v-for="conn in connections" :key="conn.id">
-                <td>
-                  <span class="font-medium">{{ conn.tenantId }}</span>
-                </td>
-                <td>{{ conn.provider }}</td>
-                <td>
-                  <span class="lf-badge lf-badge-neutral">{{ conn.environment }}</span>
-                </td>
-                <td>
-                  <span class="lf-badge" :class="getStatusBadgeClass(conn.status)">
-                    {{ t(`gateways.status.${conn.status}`) }}
-                  </span>
-                </td>
-                <td>
-                  <span class="lf-badge" :class="getHealthBadgeClass(conn.healthStatus)">
-                    {{ t(`gateways.health.${conn.healthStatus}`) || conn.healthStatus }}
-                  </span>
-                </td>
-                <td>
-                  <div class="flex gap-2">
-                    <button 
-                      v-if="conn.status === 'ACTIVE'" 
-                      class="lf-btn lf-btn-danger lf-btn-sm"
-                      @click="openSuspendModal(conn)"
-                    >
-                      {{ t('platform.gateways.actions.suspend') }}
-                    </button>
-                    <button 
-                      v-else 
-                      class="lf-btn lf-btn-success lf-btn-sm"
-                      @click="openReactivateModal(conn)"
-                    >
-                      {{ t('platform.gateways.actions.reactivate') }}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <AppTable
+      :columns="columns"
+      :items="connections"
+      :is-loading="isLoading"
+      empty-title="Nenhuma conexão de gateway encontrada."
+    >
+      <template #tenantId="{ item }">
+        <span class="font-medium">{{ item.tenantId }}</span>
+      </template>
+
+      <template #provider="{ item }">
+        {{ item.provider }}
+      </template>
+
+      <template #environment="{ item }">
+        <AppBadge variant="neutral">{{ item.environment }}</AppBadge>
+      </template>
+
+      <template #status="{ item }">
+        <AppBadge :variant="getStatusBadgeVariant(item.status)">
+          {{ t(`gateways.status.${item.status}`) }}
+        </AppBadge>
+      </template>
+
+      <template #health="{ item }">
+        <AppBadge :variant="getHealthBadgeVariant(item.healthStatus)">
+          {{ t(`gateways.health.${item.healthStatus}`) || item.healthStatus }}
+        </AppBadge>
+      </template>
+
+      <template #actions="{ item }">
+        <div class="flex gap-2">
+          <AppButton 
+            v-if="item.status === 'ACTIVE'" 
+            variant="danger" 
+            size="small"
+            @click="openSuspendModal(item)"
+          >
+            {{ t('platform.gateways.actions.suspend') }}
+          </AppButton>
+          <AppButton 
+            v-else 
+            variant="success" 
+            size="small"
+            @click="openReactivateModal(item)"
+          >
+            {{ t('platform.gateways.actions.reactivate') }}
+          </AppButton>
         </div>
-      </div>
-    </div>
+      </template>
+    </AppTable>
 
     <AppConfirmDialog
       v-model="isSuspendModalOpen"
@@ -113,11 +98,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useI18n } from '@/composables/useI18n';
 import { useToastStore } from '@/stores/toast.store';
 import { PlatformGatewayConnectionsService, type PlatformGatewayConnection } from '@/services/platform-gateway-connections.service';
 import AppConfirmDialog from '@components/common/AppConfirmDialog.vue';
+import AppPageHeader from '@components/common/AppPageHeader.vue';
+import AppTable from '@components/common/AppTable.vue';
+import AppBadge from '@components/common/AppBadge.vue';
+import AppButton from '@components/common/AppButton.vue';
 
 const { t } = useI18n();
 const toast = useToastStore();
@@ -129,6 +118,15 @@ const isSuspendModalOpen = ref(false);
 const isReactivateModalOpen = ref(false);
 const selectedConnection = ref<PlatformGatewayConnection | null>(null);
 const suspendReason = ref('');
+
+const columns = computed(() => [
+  { key: 'tenantId', label: t('platform.gateways.table.tenant') },
+  { key: 'provider', label: t('platform.gateways.table.provider') },
+  { key: 'environment', label: t('platform.gateways.table.environment') },
+  { key: 'status', label: t('platform.gateways.table.status') },
+  { key: 'health', label: t('platform.gateways.table.health') },
+  { key: 'actions', label: 'Ações' },
+]);
 
 const loadConnections = async () => {
   isLoading.value = true;
@@ -145,21 +143,21 @@ onMounted(() => {
   loadConnections();
 });
 
-const getStatusBadgeClass = (status: string) => {
+const getStatusBadgeVariant = (status: string) => {
   switch (status) {
-    case 'ACTIVE': return 'lf-badge-success';
-    case 'INACTIVE': return 'lf-badge-warning';
-    case 'DISABLED': return 'lf-badge-danger';
-    default: return 'lf-badge-neutral';
+    case 'ACTIVE': return 'success';
+    case 'INACTIVE': return 'warning';
+    case 'DISABLED': return 'danger';
+    default: return 'neutral';
   }
 };
 
-const getHealthBadgeClass = (health: string) => {
+const getHealthBadgeVariant = (health: string) => {
   switch (health) {
-    case 'HEALTHY': return 'lf-badge-success';
-    case 'ATTENTION': return 'lf-badge-warning';
-    case 'CRITICAL': return 'lf-badge-danger';
-    default: return 'lf-badge-neutral';
+    case 'HEALTHY': return 'success';
+    case 'ATTENTION': return 'warning';
+    case 'CRITICAL': return 'danger';
+    default: return 'neutral';
   }
 };
 

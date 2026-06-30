@@ -240,6 +240,7 @@
     }
   },
   "common": {
+    "all": "Todos",
     "logout": "Sair",
     "loggingOut": "Saindo...",
     "loading": "Carregando...",
@@ -792,6 +793,13 @@
         "INFO": "Info",
         "WARNING": "Aviso",
         "CRITICAL": "Crítico"
+      },
+      "actorType": {
+        "USER": "Usuário",
+        "PLATFORM_ADMIN": "Administrador da Plataforma",
+        "SYSTEM": "Sistema",
+        "WEBHOOK": "Webhook",
+        "WORKER": "Worker"
       },
       "table": {
         "occurredAt": "Data/Hora",
