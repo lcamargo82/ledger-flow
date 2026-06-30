@@ -143,7 +143,37 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found.');
     }
 
-    return payment;
+    let asyncChargeStatus: string | undefined = undefined;
+    if (payment.status === PaymentStatus.PENDING && !payment.providerPaymentId) {
+      try {
+        const outbox = await this.prisma.outboxEvent.findFirst({
+          where: { aggregateId: payment.id, aggregateType: 'Payment', eventType: 'payment.provider_charge_creation_requested' },
+          orderBy: { createdAt: 'desc' }
+        });
+        if (outbox) {
+          if (outbox.status === 'PUBLISHED') {
+            const job = await this.prisma.asyncJobExecution.findFirst({
+              where: { outboxEventId: outbox.id },
+              orderBy: { createdAt: 'desc' }
+            });
+            if (job) {
+              asyncChargeStatus = String(job.status); // PENDING, PROCESSING, SUCCEEDED, FAILED, RETRY_SCHEDULED
+            } else {
+              asyncChargeStatus = 'QUEUED';
+            }
+          } else {
+            asyncChargeStatus = String(outbox.status); // PENDING
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching asyncChargeStatus', err);
+      }
+    }
+
+    return {
+      ...payment,
+      asyncChargeStatus,
+    };
   }
 
   async getPaymentInstructions(id: string, tenantId: string) {

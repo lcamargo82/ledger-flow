@@ -8,6 +8,6 @@ async function bootstrap() {
   
   // The OutboxDispatcherService and RabbitMQConsumer will automatically start 
   // because they implement OnApplicationBootstrap
-  console.log('Worker is running...');
+  console.log('async.worker.started');
 }
 bootstrap();

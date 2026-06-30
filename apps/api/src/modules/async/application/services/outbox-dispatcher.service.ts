@@ -21,7 +21,7 @@ export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplic
   ) {}
 
   onApplicationBootstrap() {
-    this.logger.log(`Starting Outbox Dispatcher (ID: ${this.dispatcherId})`);
+    this.logger.log(`outbox.dispatcher.started (ID: ${this.dispatcherId})`);
     this.startPolling();
   }
 

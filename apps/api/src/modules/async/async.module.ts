@@ -7,6 +7,7 @@ import { AsyncJobRetryService } from './application/services/async-job-retry.ser
 import { AsyncJobReplayService } from './application/services/async-job-replay.service';
 import { RabbitMQPublisher } from './infra/rabbitmq/rabbitmq.publisher';
 import { RabbitMQConsumer } from './infra/rabbitmq/rabbitmq.consumer';
+import { RabbitMqTopologyService } from './infra/rabbitmq/rabbitmq-topology.service';
 import { RedisExternalProviderRateLimitService } from './infra/redis/redis-external-provider-rate-limit.service';
 import { PlatformAsyncJobsController } from './presentation/controllers/platform-async-jobs.controller';
 
@@ -26,6 +27,7 @@ import { ExternalProviderExecutionPolicy } from './domain/interfaces/external-pr
     AsyncHandlerRegistryService,
     AsyncJobRetryService,
     AsyncJobReplayService,
+    RabbitMqTopologyService,
     RabbitMQConsumer,
   ],
   exports: [

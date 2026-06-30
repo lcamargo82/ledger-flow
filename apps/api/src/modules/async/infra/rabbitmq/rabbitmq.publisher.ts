@@ -13,44 +13,17 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
     try {
       this.connection = await amqp.connect(url);
       this.channel = await this.connection.createConfirmChannel();
+      
+      this.channel.on('return', (msg: any) => {
+        this.logger.warn(`Message returned (no route found): ${msg.fields.routingKey}`);
+        // Cannot directly fail the original promise here easily without tracking correlationIds,
+        // but since we're tracking the failure, we might need a map of pending publishes.
+      });
+
       this.logger.log('Connected to RabbitMQ (Publisher)');
-      await this.setupTopology();
     } catch (err: any) {
       this.logger.error(`Failed to connect to RabbitMQ: ${err.message}`);
     }
-  }
-
-  private async setupTopology() {
-    if (!this.channel) return;
-    const exchange = 'ledgerflow.events';
-    await this.channel.assertExchange(exchange, 'topic', { durable: true });
-    
-    const dlx = 'ledgerflow.dlx';
-    await this.channel.assertExchange(dlx, 'topic', { durable: true });
-
-    // Setup basic queues
-    const paymentQueue = 'ledgerflow.payment.commands.q';
-    await this.channel.assertQueue(paymentQueue, {
-      durable: true,
-      deadLetterExchange: dlx,
-      deadLetterRoutingKey: 'payment.dlq',
-    });
-    await this.channel.bindQueue(paymentQueue, exchange, 'payment.command.*');
-
-    const webhookQueue = 'ledgerflow.webhooks.commands.q';
-    await this.channel.assertQueue(webhookQueue, {
-      durable: true,
-      deadLetterExchange: dlx,
-      deadLetterRoutingKey: 'webhook.dlq',
-    });
-    await this.channel.bindQueue(webhookQueue, exchange, 'webhook.command.*');
-
-    // Dead letter queues
-    await this.channel.assertQueue('ledgerflow.payment.dlq', { durable: true });
-    await this.channel.bindQueue('ledgerflow.payment.dlq', dlx, 'payment.dlq');
-    
-    await this.channel.assertQueue('ledgerflow.webhooks.dlq', { durable: true });
-    await this.channel.bindQueue('ledgerflow.webhooks.dlq', dlx, 'webhook.dlq');
   }
 
   async publish(routingKey: string, payload: any): Promise<boolean> {
@@ -62,17 +35,44 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
     return new Promise((resolve, reject) => {
       const exchange = 'ledgerflow.events';
       const content = Buffer.from(JSON.stringify(payload));
+      const messageId = payload.messageId;
       
       const mappedRoutingKey = this.mapRoutingKey(routingKey);
 
-      this.channel!.publish(exchange, mappedRoutingKey, content, { persistent: true }, (err, ok) => {
-        if (err !== null) {
-          this.logger.error(`Publisher confirm failed for ${mappedRoutingKey}`);
-          resolve(false);
-        } else {
-          resolve(true);
+      let wasReturned = false;
+      const returnHandler = (msg: any) => {
+        if (msg.properties.messageId === messageId) {
+          wasReturned = true;
+          this.logger.warn(`Message returned (unroutable) for ${mappedRoutingKey}, messageId: ${messageId}`);
         }
-      });
+      };
+      
+      this.channel.on('return', returnHandler);
+
+      this.channel!.publish(
+        exchange, 
+        mappedRoutingKey, 
+        content, 
+        { 
+          persistent: true, 
+          mandatory: true,
+          messageId: messageId,
+          contentType: 'application/json'
+        }, 
+        (err: any, ok: any) => {
+          this.channel.removeListener('return', returnHandler);
+          if (err !== null) {
+            this.logger.error(`Publisher confirm failed for ${mappedRoutingKey}`);
+            resolve(false);
+          } else {
+            if (wasReturned) {
+              resolve(false);
+            } else {
+              resolve(true);
+            }
+          }
+        }
+      );
     });
   }
 
@@ -82,3 +82,4 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
     return eventType;
   }
 }
+
