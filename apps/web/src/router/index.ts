@@ -111,16 +111,6 @@ const router = createRouter({
     },
     {
       path: '/settings/gateways',
-      name: 'gateway-settings',
-      component: () => import('../views/GatewaySettingsView.vue'),
-      meta: {
-        layout: AppLayout,
-        requiresAuth: true,
-        permissions: ['gateways:read']
-      }
-    },
-    {
-      path: '/settings/gateway-connections',
       name: 'gateway-connections',
       component: () => import('../views/settings/GatewayConnectionsView.vue'),
       meta: {
