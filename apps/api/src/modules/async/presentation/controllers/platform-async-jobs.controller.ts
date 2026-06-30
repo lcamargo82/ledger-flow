@@ -1,12 +1,13 @@
 import { Controller, Get, Post, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
-import { RequirePermissions } from '../../auth/common/decorators/require-permissions.decorator';
-import { AsyncJobReplayService } from '../../application/services/async-job-replay.service';
-import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import { JwtAuthGuard } from '../../../auth/presentation/guards/jwt-auth.guard';
+import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
 import { ListAsyncJobsQueryDto } from '../../application/dto/list-async-jobs-query.dto';
+import type { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import { ReplayAsyncJobDto } from '../../application/dto/replay-async-job.dto';
+import { AsyncJobReplayService } from '../../application/services/async-job-replay.service';
+import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
 import { AsyncJobMapper } from '../../application/mappers/async-job.mapper';
-import { CurrentUser } from '../../auth/common/decorators/current-user.decorator';
 
 @ApiTags('Platform Async Jobs')
 @ApiBearerAuth()

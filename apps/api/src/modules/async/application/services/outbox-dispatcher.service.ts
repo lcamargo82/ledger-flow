@@ -1,15 +1,15 @@
 import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
-import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
-import { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
+import type { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import type { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
 import { AsyncMessageEnvelope } from '../../domain/entities/async-message-envelope';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger(OutboxDispatcherService.name);
   private timer: NodeJS.Timeout | null = null;
   private isShuttingDown = false;
-  private readonly dispatcherId = uuidv4();
+  private readonly dispatcherId = randomUUID();
   private readonly batchSize = Number(process.env.OUTBOX_DISPATCH_BATCH_SIZE) || 50;
   private readonly intervalMs = Number(process.env.OUTBOX_DISPATCH_INTERVAL_MS) || 2000;
   private readonly leaseDurationMs = (Number(process.env.OUTBOX_LEASE_DURATION_SECONDS) || 60) * 1000;

@@ -17,29 +17,29 @@ export class AsaasWebhookProcessingAsyncHandler implements AsyncEventHandler {
   ) {}
 
   async handle(input: AsyncMessageEnvelope): Promise<void> {
-    this.logger.log(\`Handling webhook processing for inbox event \${input.aggregateId}\`);
+    this.logger.log(`Handling webhook processing for inbox event ${input.aggregateId}`);
     const inboxEvent = await this.prisma.webhookInboxEvent.findUnique({
       where: { id: input.aggregateId }
     });
 
     if (!inboxEvent) {
-      this.logger.error(\`Webhook inbox event \${input.aggregateId} not found\`);
+      this.logger.error(`Webhook inbox event ${input.aggregateId} not found`);
       return;
     }
 
     if (inboxEvent.status === WebhookProcessingStatus.PROCESSED || inboxEvent.status === WebhookProcessingStatus.IGNORED) {
-      this.logger.log(\`Webhook \${input.aggregateId} already in final state (\${inboxEvent.status})\`);
+      this.logger.log(`Webhook ${input.aggregateId} already in final state (${inboxEvent.status})`);
       return;
     }
 
     const processor = this.processorRegistry.getProcessor(inboxEvent.provider);
     if (!processor) {
-       this.logger.error(\`No processor found for provider \${inboxEvent.provider}\`);
+       this.logger.error(`No processor found for provider ${inboxEvent.provider}`);
        return;
     }
 
     // We pass the raw payload that is inside the inbox event (wait, it's not saved completely, let's pass summary)
-    await processor.process(inboxEvent.payloadSummary, inboxEvent);
-    this.logger.log(\`Successfully processed webhook \${input.aggregateId}\`);
+    await processor.process(inboxEvent.payloadSummary as any);
+    this.logger.log(`Successfully processed webhook ${input.aggregateId}`);
   }
 }

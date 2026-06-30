@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma/prisma.service';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
 import { AsyncJobExecution } from '@prisma/client';
 

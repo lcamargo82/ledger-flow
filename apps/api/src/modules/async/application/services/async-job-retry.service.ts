@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
+import type { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
 import { AsyncJobStatus } from '@prisma/client';
 import { ASYNC_RETRY_POLICY } from '../constants/async-retry-policy';
-import { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
+import type { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
 
 @Injectable()
 export class AsyncJobRetryService {
@@ -23,7 +23,7 @@ export class AsyncJobRetryService {
       nextRetryAt,
     });
 
-    this.logger.log(\`Scheduled retry for execution \${executionId} at \${nextRetryAt}\`);
+    this.logger.log(`Scheduled retry for execution ${executionId} at ${nextRetryAt}`);
     
     // In a real system with delayed messages, we'd publish with a delay header.
     // For this foundation without external plugins, we might use a scheduler 

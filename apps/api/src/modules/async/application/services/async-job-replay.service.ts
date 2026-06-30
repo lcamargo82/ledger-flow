@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
-import { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
+import type { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import type { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
 import { OutboxEventStatus } from '@prisma/client';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class AsyncJobReplayService {
       availableAt: new Date(),
     });
 
-    this.logger.log(\`Replayed event \${eventId} as new event \${newEvent.id}\`);
+    this.logger.log(`Replayed event ${eventId} as new event ${newEvent.id}`);
     return newEvent;
   }
 }

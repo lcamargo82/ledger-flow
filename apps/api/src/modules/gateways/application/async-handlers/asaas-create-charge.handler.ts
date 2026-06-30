@@ -16,25 +16,25 @@ export class AsaasCreateChargeAsyncHandler implements AsyncEventHandler {
   ) {}
 
   async handle(input: AsyncMessageEnvelope): Promise<void> {
-    this.logger.log(\`Handling charge creation for payment \${input.aggregateId}\`);
+    this.logger.log(`Handling charge creation for payment ${input.aggregateId}`);
     const payment = await this.prisma.payment.findUnique({
       where: { id: input.aggregateId },
       include: { customer: true }
     });
 
     if (!payment) {
-      this.logger.error(\`Payment \${input.aggregateId} not found\`);
+      this.logger.error(`Payment ${input.aggregateId} not found`);
       return;
     }
 
     if (payment.providerPaymentId) {
-       this.logger.log(\`Payment \${input.aggregateId} already processed (has provider ID)\`);
+       this.logger.log(`Payment ${input.aggregateId} already processed (has provider ID)`);
        return;
     }
 
     // Call orchestrator
     // We assume actorUserId is system since it's async
     await this.orchestrator.orchestrate(payment.tenantId, payment, payment.customer as any, 'SYSTEM');
-    this.logger.log(\`Successfully orchestrated payment \${input.aggregateId}\`);
+    this.logger.log(`Successfully orchestrated payment ${input.aggregateId}`);
   }
 }

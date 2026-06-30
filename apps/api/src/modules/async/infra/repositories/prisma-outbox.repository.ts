@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../../database/prisma/prisma.service';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
 import { OutboxEvent, OutboxEventStatus } from '@prisma/client';
 
@@ -16,24 +16,24 @@ export class PrismaOutboxRepository implements OutboxRepository {
     const leaseExpiresAt = new Date(now.getTime() + leaseDurationMs);
 
     // Using raw query to lock and update safely
-    const lockedEvents = await this.prisma.$queryRaw<OutboxEvent[]>\`
+    const lockedEvents = await this.prisma.$queryRaw<OutboxEvent[]>`
       UPDATE "outbox_events"
       SET "status" = 'PUBLISHING',
-          "lockOwner" = \${lockOwner},
-          "lockedAt" = \${now},
-          "leaseExpiresAt" = \${leaseExpiresAt},
+          "lockOwner" = ${lockOwner},
+          "lockedAt" = ${now},
+          "leaseExpiresAt" = ${leaseExpiresAt},
           "publishAttempts" = "publishAttempts" + 1
       WHERE "id" IN (
         SELECT "id"
         FROM "outbox_events"
-        WHERE ("status" = 'PENDING' OR ("status" = 'PUBLISHING' AND "leaseExpiresAt" < \${now}))
-          AND "availableAt" <= \${now}
+        WHERE ("status" = 'PENDING' OR ("status" = 'PUBLISHING' AND "leaseExpiresAt" < ${now}))
+          AND "availableAt" <= ${now}
         ORDER BY "availableAt" ASC
-        LIMIT \${batchSize}
+        LIMIT ${batchSize}
         FOR UPDATE SKIP LOCKED
       )
       RETURNING *;
-    \`;
+    `;
 
     return lockedEvents;
   }

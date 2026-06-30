@@ -5,8 +5,8 @@ import * as amqp from 'amqplib';
 @Injectable()
 export class RabbitMQPublisher implements AsyncMessagePublisher {
   private readonly logger = new Logger(RabbitMQPublisher.name);
-  private connection: amqp.Connection | null = null;
-  private channel: amqp.ConfirmChannel | null = null;
+  private connection: any = null;
+  private channel: any = null;
 
   async connect() {
     const url = process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672';
@@ -16,7 +16,7 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
       this.logger.log('Connected to RabbitMQ (Publisher)');
       await this.setupTopology();
     } catch (err: any) {
-      this.logger.error(\`Failed to connect to RabbitMQ: \${err.message}\`);
+      this.logger.error(`Failed to connect to RabbitMQ: ${err.message}`);
     }
   }
 
@@ -67,7 +67,7 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
 
       this.channel!.publish(exchange, mappedRoutingKey, content, { persistent: true }, (err, ok) => {
         if (err !== null) {
-          this.logger.error(\`Publisher confirm failed for \${mappedRoutingKey}\`);
+          this.logger.error(`Publisher confirm failed for ${mappedRoutingKey}`);
           resolve(false);
         } else {
           resolve(true);

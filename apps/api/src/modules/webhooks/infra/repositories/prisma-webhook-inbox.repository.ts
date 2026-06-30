@@ -58,10 +58,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
 
       return inboxEvent;
     });
-  },
-    });
   }
-
   async markProcessing(id: string): Promise<WebhookInboxEvent> {
     return this.prisma.webhookInboxEvent.update({
       where: { id },

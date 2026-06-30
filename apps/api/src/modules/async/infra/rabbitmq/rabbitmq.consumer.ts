@@ -6,8 +6,8 @@ import { AsyncMessageEnvelope } from '../../domain/entities/async-message-envelo
 @Injectable()
 export class RabbitMQConsumer implements OnApplicationBootstrap {
   private readonly logger = new Logger(RabbitMQConsumer.name);
-  private connection: amqp.Connection | null = null;
-  private channel: amqp.Channel | null = null;
+  private connection: any = null;
+  private channel: any = null;
 
   constructor(private readonly registry: AsyncHandlerRegistryService) {}
 
@@ -30,7 +30,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
       this.consume('ledgerflow.payment.commands.q');
       this.consume('ledgerflow.webhooks.commands.q');
     } catch (err: any) {
-      this.logger.error(\`Failed to connect to RabbitMQ consumer: \${err.message}\`);
+      this.logger.error(`Failed to connect to RabbitMQ consumer: ${err.message}`);
     }
   }
 
@@ -48,7 +48,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
           try {
              await handler.handle(payload);
           } catch (e: any) {
-             this.logger.error(\`Handler \${handler.consumerName} failed: \${e.message}\`);
+             this.logger.error(`Handler ${handler.consumerName} failed: ${e.message}`);
              // In real implementation, handle retries / NACK here
              // Using simple ack for now to prevent infinite loops in mock
              // Actual implementation would check if it's RetryableError and Nack or Ack based on that
@@ -57,7 +57,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
         
         this.channel!.ack(msg);
       } catch (e: any) {
-        this.logger.error(\`Failed to process message from \${queue}: \${e.message}\`);
+        this.logger.error(`Failed to process message from ${queue}: ${e.message}`);
         this.channel!.reject(msg, false); // Send to DLQ
       }
     });

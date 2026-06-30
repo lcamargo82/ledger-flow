@@ -177,12 +177,7 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
         },
       },
     });
-  },
-        },
-      },
-    });
   }
-
   async cancel(
     id: string,
     tenantId: string,
