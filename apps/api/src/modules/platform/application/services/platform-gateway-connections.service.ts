@@ -1,13 +1,6 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma/prisma.service';
-import {
-  GatewayConfigurationStatus,
-  GatewayConfiguration,
-} from '@prisma/client';
+import { GatewayConfigurationStatus, GatewayConfiguration } from '@prisma/client';
 import {
   PlatformGatewayConnectionResponseDto,
   UpdatePlatformGatewayConnectionStatusDto,
@@ -43,15 +36,11 @@ export class PlatformGatewayConnectionsService {
       dto.status !== GatewayConfigurationStatus.ACTIVE &&
       dto.status !== GatewayConfigurationStatus.INACTIVE
     ) {
-      throw new BadRequestException(
-        'Platform Admin can only set status to ACTIVE or INACTIVE',
-      );
+      throw new BadRequestException('Platform Admin can only set status to ACTIVE or INACTIVE');
     }
 
     if (!dto.reason || dto.reason.length < 10) {
-      throw new BadRequestException(
-        'Reason is required and must be at least 10 characters long',
-      );
+      throw new BadRequestException('Reason is required and must be at least 10 characters long');
     }
 
     const updated = await this.prisma.gatewayConfiguration.update({
@@ -65,9 +54,7 @@ export class PlatformGatewayConnectionsService {
     return this.mapToResponse(updated);
   }
 
-  private mapToResponse(
-    entity: GatewayConfiguration,
-  ): PlatformGatewayConnectionResponseDto {
+  private mapToResponse(entity: GatewayConfiguration): PlatformGatewayConnectionResponseDto {
     return {
       id: entity.id,
       tenantId: entity.tenantId,

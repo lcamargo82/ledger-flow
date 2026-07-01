@@ -78,9 +78,7 @@ export class RabbitMqTopologyService {
       await connection.close();
       this.logger.log('rabbitmq.topology.initialized');
     } catch (error: any) {
-      this.logger.error(
-        `Failed to initialize RabbitMQ topology: ${error.message}`,
-      );
+      this.logger.error(`Failed to initialize RabbitMQ topology: ${error.message}`);
       throw error;
     }
   }

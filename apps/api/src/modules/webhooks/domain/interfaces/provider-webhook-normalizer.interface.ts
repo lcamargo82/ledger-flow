@@ -4,7 +4,5 @@ import {
 } from './provider-webhook-adapter.interface';
 
 export interface ProviderWebhookNormalizer {
-  normalize(
-    input: ProviderWebhookPayloadInput,
-  ): Promise<NormalizedWebhookEvent>;
+  normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent>;
 }

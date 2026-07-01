@@ -13,14 +13,10 @@ export class AsaasWebhookAuthenticator implements ProviderWebhookAuthenticator {
   constructor(private readonly configService: ConfigService) {}
 
   async authenticate(input: ProviderWebhookAuthenticationInput): Promise<void> {
-    const expectedToken = this.configService.get<string>(
-      'ASAAS_WEBHOOK_AUTH_TOKEN',
-    );
+    const expectedToken = this.configService.get<string>('ASAAS_WEBHOOK_AUTH_TOKEN');
 
     if (!expectedToken) {
-      this.logger.error(
-        '[AsaasWebhookAuthenticator] ASAAS_WEBHOOK_AUTH_TOKEN is not configured.',
-      );
+      this.logger.error('[AsaasWebhookAuthenticator] ASAAS_WEBHOOK_AUTH_TOKEN is not configured.');
       throw new WebhookAuthenticationError();
     }
 
@@ -55,8 +51,6 @@ export class AsaasWebhookAuthenticator implements ProviderWebhookAuthenticator {
       throw new WebhookAuthenticationError();
     }
 
-    this.logger.log(
-      '[AsaasWebhookAuthenticator] Asaas webhook authenticated successfully.',
-    );
+    this.logger.log('[AsaasWebhookAuthenticator] Asaas webhook authenticated successfully.');
   }
 }
