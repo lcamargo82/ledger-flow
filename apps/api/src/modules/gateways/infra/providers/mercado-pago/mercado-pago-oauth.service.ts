@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GatewayConfigurationStatus, GatewayEnvironment, PaymentProvider } from '@prisma/client';
+import {
+  GatewayConfigurationStatus,
+  GatewayEnvironment,
+  PaymentProvider,
+} from '@prisma/client';
 import { MercadoPagoApiClient } from './mercado-pago-api.client';
 import { MercadoPagoOAuthStateService } from './mercado-pago-oauth-state.service';
 import { MercadoPagoCredentialsMapper } from './mercado-pago-credentials.mapper';
@@ -24,7 +28,9 @@ export class MercadoPagoOAuthService {
     const redirectUri = process.env.MERCADO_PAGO_OAUTH_REDIRECT_URI;
 
     if (!clientId || !redirectUri) {
-      throw new Error('Mercado Pago OAuth variables are not properly configured.');
+      throw new Error(
+        'Mercado Pago OAuth variables are not properly configured.',
+      );
     }
 
     const state = await this.stateService.generateState(tenantId, userId);
@@ -62,14 +68,18 @@ export class MercadoPagoOAuthService {
 
     const { tenantId, userId } = stateData;
 
-    this.logger.log(`Handling Mercado Pago OAuth callback for tenant ${tenantId}`);
+    this.logger.log(
+      `Handling Mercado Pago OAuth callback for tenant ${tenantId}`,
+    );
 
     const clientId = process.env.MERCADO_PAGO_CLIENT_ID;
     const clientSecret = process.env.MERCADO_PAGO_CLIENT_SECRET;
     const redirectUri = process.env.MERCADO_PAGO_OAUTH_REDIRECT_URI;
 
     if (!clientId || !clientSecret || !redirectUri) {
-      throw new Error('Mercado Pago OAuth variables are not properly configured.');
+      throw new Error(
+        'Mercado Pago OAuth variables are not properly configured.',
+      );
     }
 
     try {
@@ -83,26 +93,33 @@ export class MercadoPagoOAuthService {
       const credentials = {
         accessToken: tokenResponse.access_token,
         refreshToken: tokenResponse.refresh_token,
-        tokenExpiresAt: new Date(Date.now() + tokenResponse.expires_in * 1000).toISOString(),
+        tokenExpiresAt: new Date(
+          Date.now() + tokenResponse.expires_in * 1000,
+        ).toISOString(),
         merchantId: String(tokenResponse.user_id),
         scope: tokenResponse.scope,
       };
 
       const encryptedResponse = this.encryptionService.encrypt(credentials);
       const encryptedCredentials = encryptedResponse.encryptedData;
-      const fingerprint = MercadoPagoCredentialsMapper.deriveFingerprint(credentials);
+      const fingerprint =
+        MercadoPagoCredentialsMapper.deriveFingerprint(credentials);
 
       const isTestMode = process.env.MERCADO_PAGO_TEST_MODE === 'true';
-      const environment = isTestMode ? GatewayEnvironment.TEST : GatewayEnvironment.LIVE;
+      const environment = isTestMode
+        ? GatewayEnvironment.TEST
+        : GatewayEnvironment.LIVE;
 
       // Ensure we preserve existing status if the connection was deactivated by platform admin
-      const existingConfig = await this.gatewayConfigRepo.findActiveByTenantAndProvider(
-        tenantId,
-        PaymentProvider.MERCADO_PAGO,
-        environment,
-      );
+      const existingConfig =
+        await this.gatewayConfigRepo.findActiveByTenantAndProvider(
+          tenantId,
+          PaymentProvider.MERCADO_PAGO,
+          environment,
+        );
 
-      let statusToSet: GatewayConfigurationStatus = GatewayConfigurationStatus.ACTIVE;
+      let statusToSet: GatewayConfigurationStatus =
+        GatewayConfigurationStatus.ACTIVE;
       if (existingConfig) {
         statusToSet = existingConfig.status;
       }
@@ -155,7 +172,9 @@ export class MercadoPagoOAuthService {
 
   async disconnect(tenantId: string, userId: string): Promise<void> {
     const isTestMode = process.env.MERCADO_PAGO_TEST_MODE === 'true';
-    const environment = isTestMode ? GatewayEnvironment.TEST : GatewayEnvironment.LIVE;
+    const environment = isTestMode
+      ? GatewayEnvironment.TEST
+      : GatewayEnvironment.LIVE;
 
     const config = await this.gatewayConfigRepo.findActiveByTenantAndProvider(
       tenantId,

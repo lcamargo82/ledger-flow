@@ -8,7 +8,11 @@ export class MercadoPagoCredentialsMapper {
   static fromJSONString(jsonStr: string): MercadoPagoCredentials {
     try {
       const parsed = JSON.parse(jsonStr) as Partial<MercadoPagoCredentials>;
-      if (!parsed.accessToken || !parsed.refreshToken || !parsed.tokenExpiresAt) {
+      if (
+        !parsed.accessToken ||
+        !parsed.refreshToken ||
+        !parsed.tokenExpiresAt
+      ) {
         throw new Error('Invalid Mercado Pago credentials format.');
       }
       return {
@@ -20,13 +24,17 @@ export class MercadoPagoCredentialsMapper {
       };
     } catch (error: unknown) {
       const err = error as Error;
-      throw new Error(`Failed to parse Mercado Pago credentials: ${err.message}`);
+      throw new Error(
+        `Failed to parse Mercado Pago credentials: ${err.message}`,
+      );
     }
   }
 
   static deriveFingerprint(credentials: MercadoPagoCredentials): string {
     if (!credentials.merchantId) {
-      throw new Error('Merchant ID is required to derive Mercado Pago fingerprint.');
+      throw new Error(
+        'Merchant ID is required to derive Mercado Pago fingerprint.',
+      );
     }
     return `mp_${credentials.merchantId}`;
   }

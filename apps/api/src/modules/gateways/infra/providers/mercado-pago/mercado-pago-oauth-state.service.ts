@@ -17,7 +17,8 @@ export class MercadoPagoOAuthStateService {
   private readonly expirationMinutes = 10;
 
   constructor(private readonly configService: ConfigService) {
-    const redisUrl = this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+    const redisUrl =
+      this.configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
     this.redis = new Redis(redisUrl, {
       maxRetriesPerRequest: 3,
       retryStrategy(times) {
@@ -36,7 +37,12 @@ export class MercadoPagoOAuthStateService {
     const data: OAuthStateData = { tenantId, userId, expiresAt };
     const key = `${this.prefix}${state}`;
 
-    await this.redis.set(key, JSON.stringify(data), 'EX', this.expirationMinutes * 60);
+    await this.redis.set(
+      key,
+      JSON.stringify(data),
+      'EX',
+      this.expirationMinutes * 60,
+    );
 
     return state;
   }
@@ -50,7 +56,9 @@ export class MercadoPagoOAuthStateService {
     const resultMulti = await this.redis.multi().get(key).del(key).exec();
 
     if (!resultMulti || !resultMulti[0] || resultMulti[0][0]) {
-      this.logger.warn(`Invalid, expired or already consumed OAuth state provided.`);
+      this.logger.warn(
+        `Invalid, expired or already consumed OAuth state provided.`,
+      );
       return null;
     }
 
@@ -64,12 +72,16 @@ export class MercadoPagoOAuthStateService {
     try {
       const data = JSON.parse(result) as OAuthStateData;
       if (Date.now() > data.expiresAt) {
-        this.logger.warn(`OAuth state expired logically for tenant ${data.tenantId}.`);
+        this.logger.warn(
+          `OAuth state expired logically for tenant ${data.tenantId}.`,
+        );
         return null;
       }
       return { tenantId: data.tenantId, userId: data.userId };
     } catch (e: unknown) {
-      this.logger.error(`Failed to parse OAuth state data: ${(e as Error).message}`);
+      this.logger.error(
+        `Failed to parse OAuth state data: ${(e as Error).message}`,
+      );
       return null;
     }
   }

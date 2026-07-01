@@ -65,13 +65,10 @@ export class AsaasWebhooksController {
               .createHash('sha256')
               .update(JSON.stringify(payloadData))
               .digest('hex');
-            this.logger.log(`asaas.webhook.received`, {
+            this.logger.log(`asaas.webhook.ingress.accepted`, {
               provider: 'ASAAS',
-              receivedTopLevelKeys: Object.keys(payloadData),
-              eventIdPresent: !!payloadData.id,
-              eventValuePresent: !!payloadData.event,
-              paymentIdPresent: !!payloadData.payment?.id,
-              externalReferencePresent: !!payloadData.payment?.externalReference,
+              eventId: payloadData.id,
+              eventType: payloadData.event,
               payloadHash,
             });
           })

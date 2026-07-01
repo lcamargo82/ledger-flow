@@ -29,7 +29,9 @@ export class WebhookIngressService {
     const adapter = this.adapterRegistry.getAdapter(provider);
 
     await adapter.authenticate(authInput);
-    this.logger.log(`[WebhookIngressService] webhook.ingress.authenticated provider=${provider}`);
+    this.logger.log(
+      `[WebhookIngressService] webhook.ingress.authenticated provider=${provider}`,
+    );
 
     const normalizedEvent = await adapter.normalize(payloadInput);
     this.logger.log(
@@ -57,12 +59,17 @@ export class WebhookIngressService {
           provider: normalizedEvent.provider,
           providerEventId: normalizedEvent.providerEventId,
           eventType: normalizedEvent.rawProviderEventType,
+          providerPaymentId: normalizedEvent.providerPaymentId,
+          externalReference: normalizedEvent.paymentReference,
+          providerPaymentStatus: normalizedEvent.providerStatus,
           payloadHash: normalizedEvent.payloadHash,
           payloadSummary: normalizedEvent.payloadSummary,
         },
         normalizedEvent.invalidReason ?? 'Invalid payload structure',
       );
-      this.logger.log(`[WebhookIngressService] webhook.ingress.invalid id=${inboxEvent.id}`);
+      this.logger.log(
+        `[WebhookIngressService] webhook.ingress.invalid id=${inboxEvent.id}`,
+      );
       return;
     }
 
@@ -99,12 +106,17 @@ export class WebhookIngressService {
             provider: normalizedEvent.provider,
             providerEventId: normalizedEvent.providerEventId,
             eventType: normalizedEvent.rawProviderEventType,
+            providerPaymentId: normalizedEvent.providerPaymentId,
+            externalReference: normalizedEvent.paymentReference,
+            providerPaymentStatus: normalizedEvent.providerStatus,
             payloadHash: normalizedEvent.payloadHash,
             payloadSummary: normalizedEvent.payloadSummary,
           },
           'Payment not found locally',
         );
-        this.logger.log(`[WebhookIngressService] webhook.ingress.unmatched id=${inboxEvent.id}`);
+        this.logger.log(
+          `[WebhookIngressService] webhook.ingress.unmatched id=${inboxEvent.id}`,
+        );
         return;
       }
     }
@@ -113,12 +125,17 @@ export class WebhookIngressService {
       provider: normalizedEvent.provider,
       providerEventId: normalizedEvent.providerEventId,
       eventType: normalizedEvent.rawProviderEventType,
+      providerPaymentId: normalizedEvent.providerPaymentId,
+      externalReference: normalizedEvent.paymentReference,
+      providerPaymentStatus: normalizedEvent.providerStatus,
       payloadHash: normalizedEvent.payloadHash,
       payloadSummary: normalizedEvent.payloadSummary,
       tenantId,
       paymentId,
     });
-    this.logger.log(`[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`);
+    this.logger.log(
+      `[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`,
+    );
 
     // Asynchronous processing enabled (Phase 8A)
     // The processor will be invoked by the worker via RabbitMQ and Outbox.

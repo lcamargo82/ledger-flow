@@ -7,7 +7,11 @@ import {
 } from '@nestjs/common';
 
 export class GatewayError extends HttpException {
-  constructor(message: string, provider: string, status = HttpStatus.INTERNAL_SERVER_ERROR) {
+  constructor(
+    message: string,
+    provider: string,
+    status = HttpStatus.INTERNAL_SERVER_ERROR,
+  ) {
     super(`[${provider}] ${message}`, status);
     this.name = 'GatewayError';
   }
@@ -29,14 +33,18 @@ export class GatewayNotSupportedError extends BadRequestException {
 
 export class GatewayOperationNotSupportedError extends BadRequestException {
   constructor(operation: string, provider: string) {
-    super(`Operation '${operation}' is not supported by provider '${provider}'.`);
+    super(
+      `Operation '${operation}' is not supported by provider '${provider}'.`,
+    );
     this.name = 'GatewayOperationNotSupportedError';
   }
 }
 
 export class GatewayNotImplementedError extends NotImplementedException {
   constructor(provider: string) {
-    super(`Gateway operation is not implemented for this provider yet (${provider}).`);
+    super(
+      `Gateway operation is not implemented for this provider yet (${provider}).`,
+    );
     this.name = 'GatewayNotImplementedError';
   }
 }

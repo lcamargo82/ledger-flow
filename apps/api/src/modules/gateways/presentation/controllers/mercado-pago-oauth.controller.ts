@@ -7,7 +7,11 @@ import { MercadoPagoOAuthService } from '../../infra/providers/mercado-pago/merc
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../auth/application/types/authenticated-user.type';
 import { GatewayConfigurationsRepository } from '../../domain/repositories/gateway-configurations.repository';
-import { PaymentProvider, GatewayEnvironment, GatewayConfigurationStatus } from '@prisma/client';
+import {
+  PaymentProvider,
+  GatewayEnvironment,
+  GatewayConfigurationStatus,
+} from '@prisma/client';
 
 @Controller('gateways')
 export class MercadoPagoOAuthController {
@@ -20,12 +24,19 @@ export class MercadoPagoOAuthController {
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @RequirePermissions('gateways:create')
   async connect(@CurrentUser() user: AuthenticatedUser) {
-    const authorizationUrl = await this.oauthService.generateAuthUrl(user.tenantId, user.id);
+    const authorizationUrl = await this.oauthService.generateAuthUrl(
+      user.tenantId,
+      user.id,
+    );
     return { authorizationUrl };
   }
 
   @Get('mercado-pago/oauth/callback')
-  async callback(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
+  async callback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
     try {
       if (!code || !state) {
         throw new Error('Code and state are required');
@@ -58,7 +69,9 @@ export class MercadoPagoOAuthController {
   @RequirePermissions('gateways:read')
   async getConnectionStatus(@CurrentUser() user: AuthenticatedUser) {
     const isTestMode = process.env.MERCADO_PAGO_TEST_MODE === 'true';
-    const environment = isTestMode ? GatewayEnvironment.TEST : GatewayEnvironment.LIVE;
+    const environment = isTestMode
+      ? GatewayEnvironment.TEST
+      : GatewayEnvironment.LIVE;
 
     const config = await this.gatewayConfigRepo.findActiveByTenantAndProvider(
       user.tenantId,

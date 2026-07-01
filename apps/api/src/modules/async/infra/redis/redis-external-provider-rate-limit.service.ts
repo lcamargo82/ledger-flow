@@ -3,7 +3,9 @@ import { ExternalProviderExecutionPolicy } from '../../domain/interfaces/externa
 
 @Injectable()
 export class RedisExternalProviderRateLimitService implements ExternalProviderExecutionPolicy {
-  private readonly logger = new Logger(RedisExternalProviderRateLimitService.name);
+  private readonly logger = new Logger(
+    RedisExternalProviderRateLimitService.name,
+  );
   private readonly defaultConcurrency =
     Number(process.env.EXTERNAL_PROVIDER_DEFAULT_CONCURRENCY) || 3;
   private readonly minIntervalMs =

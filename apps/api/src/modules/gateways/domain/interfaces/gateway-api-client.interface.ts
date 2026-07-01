@@ -1,5 +1,9 @@
 export interface IGatewayApiClient {
-  post(endpoint: string, payload: any, headers?: Record<string, string>): Promise<any>;
+  post(
+    endpoint: string,
+    payload: any,
+    headers?: Record<string, string>,
+  ): Promise<any>;
 
   get(
     endpoint: string,
