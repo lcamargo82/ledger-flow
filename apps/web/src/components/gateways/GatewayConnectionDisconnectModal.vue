@@ -1,49 +1,44 @@
 <template>
-  <div v-if="isOpen" class="lf-modal-backdrop" @click="close">
-    <div class="lf-modal" @click.stop>
-      <div class="lf-modal-header text-red-600">
-        <h3 class="text-lg font-medium text-red-600">{{ t('gateways.disconnect.title') }}</h3>
-        <button class="lf-btn-icon" @click="close">
-          <div class="i-ph-x"></div>
-        </button>
-      </div>
+  <AppModal
+    :model-value="isOpen"
+    @update:model-value="(val) => !val && close()"
+    :title="t('gateways.disconnect.title')"
+  >
+    <p class="lf-text-secondary lf-mb-4">
+      {{ t('gateways.disconnect.message') }}
+    </p>
 
-      <div class="lf-modal-body">
-        <p class="text-sm text-secondary mb-4">
-          {{ t('gateways.disconnect.message') }}
-        </p>
+    <AppInput
+      id="disconnect-confirm"
+      v-model="confirmText"
+      :label="t('gateways.disconnect.confirmLabel')"
+      :placeholder="t('gateways.disconnect.confirmValue')"
+    />
 
-        <div class="lf-form-group">
-          <label class="lf-label">{{ t('gateways.disconnect.confirmLabel') }}</label>
-          <input 
-            type="text" 
-            class="lf-input" 
-            v-model="confirmText"
-            :placeholder="t('gateways.disconnect.confirmValue')"
-          />
-        </div>
-      </div>
-
-      <div class="lf-modal-footer">
-        <button class="lf-btn lf-btn-secondary" @click="close" :disabled="isSubmitting">
+    <template #footer>
+      <div class="lf-flex lf-justify-end lf-gap-2">
+        <AppButton variant="secondary" @click="close" :disabled="isSubmitting">
           {{ t('common.cancel') }}
-        </button>
-        <button 
-          class="lf-btn lf-btn-danger" 
+        </AppButton>
+        <AppButton 
+          variant="danger" 
           @click="confirm" 
           :disabled="isSubmitting || !isConfirmed"
+          :loading="isSubmitting"
         >
-          <span v-if="isSubmitting" class="lf-spinner mr-2"></span>
           {{ t('gateways.actions.disconnect') }}
-        </button>
+        </AppButton>
       </div>
-    </div>
-  </div>
+    </template>
+  </AppModal>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from '@/composables/useI18n';
+import AppModal from '@components/common/AppModal.vue';
+import AppButton from '@components/common/AppButton.vue';
+import AppInput from '@components/common/AppInput.vue';
 import type { GatewayConnection } from '@/services/gateway-connections.service';
 
 const props = defineProps<{

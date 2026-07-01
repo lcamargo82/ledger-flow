@@ -110,7 +110,7 @@ const router = createRouter({
       }
     },
     {
-      path: '/settings/gateways',
+      path: '/settings/gateway-connections',
       name: 'gateway-connections',
       component: () => import('../views/settings/GatewayConnectionsView.vue'),
       meta: {
