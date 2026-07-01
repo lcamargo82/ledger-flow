@@ -9,7 +9,7 @@
         <button class="action-btn" @click="$emit('edit', connection)" :title="t('gateways.actions.edit')">
           <span class="material-symbols-outlined">edit</span>
         </button>
-        <button class="action-btn" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
+        <button v-if="connection.provider !== 'MERCADO_PAGO'" class="action-btn" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
           <span class="material-symbols-outlined">key</span>
         </button>
         <button v-if="isActive" class="action-btn action-warning" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">

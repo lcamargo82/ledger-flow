@@ -66,7 +66,7 @@
         </router-link>
         <router-link 
           v-if="authStore.checkAllPermissions(['gateways:read'])" 
-          to="/settings/gateways" 
+          to="/settings/gateway-connections" 
           class="lf-nav-item"
           active-class="lf-nav-item--active"
         >

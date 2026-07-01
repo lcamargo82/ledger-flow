@@ -5,5 +5,7 @@ export abstract class AsyncJobExecutionRepository {
     outboxEventId: string,
     consumerName: string,
   ): Promise<AsyncJobExecution | null>;
-  abstract createOrUpdate(data: Partial<AsyncJobExecution>): Promise<AsyncJobExecution>;
+  abstract createOrUpdate(
+    data: Partial<AsyncJobExecution>,
+  ): Promise<AsyncJobExecution>;
 }

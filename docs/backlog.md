@@ -1520,6 +1520,7 @@ Expandir o sistema para mais de um gateway real.
 
 ### Critérios de aceite
 
+* [x] OAuth Connection Foundation (ADR 0031)
 * Adapter deve implementar `IPaymentGateway`.
 * Status devem ser normalizados.
 * Payload bruto deve ser auditado.

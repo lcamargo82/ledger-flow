@@ -12,25 +12,40 @@ export const TENANT_FEATURES = {
   ADVANCED_REPORTS: 'advanced_reports',
 } as const;
 
-export type TenantFeature = (typeof TENANT_FEATURES)[keyof typeof TENANT_FEATURES];
+export type TenantFeature =
+  (typeof TENANT_FEATURES)[keyof typeof TENANT_FEATURES];
 
 export interface ITenantFeatureAccessService {
-  assertAccess(input: { tenantId: string; feature: TenantFeature }): Promise<void>;
-  hasAccess(input: { tenantId: string; feature: TenantFeature }): Promise<boolean>;
+  assertAccess(input: {
+    tenantId: string;
+    feature: TenantFeature;
+  }): Promise<void>;
+  hasAccess(input: {
+    tenantId: string;
+    feature: TenantFeature;
+  }): Promise<boolean>;
 }
 
 @Injectable()
 export class TenantFeatureAccessService implements ITenantFeatureAccessService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async assertAccess(input: { tenantId: string; feature: TenantFeature }): Promise<void> {
+  async assertAccess(input: {
+    tenantId: string;
+    feature: TenantFeature;
+  }): Promise<void> {
     const has = await this.hasAccess(input);
     if (!has) {
-      throw new ForbiddenException(`Feature ${input.feature} is not available for this tenant.`);
+      throw new ForbiddenException(
+        `Feature ${input.feature} is not available for this tenant.`,
+      );
     }
   }
 
-  async hasAccess(input: { tenantId: string; feature: TenantFeature }): Promise<boolean> {
+  async hasAccess(input: {
+    tenantId: string;
+    feature: TenantFeature;
+  }): Promise<boolean> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: input.tenantId },
     });

@@ -11,8 +11,17 @@ import {
 export class PrismaCustomersRepository implements CustomersRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findPaginated(params: ListCustomersParams): Promise<PaginatedCustomersResult> {
-    const { tenantId, page = 1, perPage = 10, search, status = 'all', type = 'all' } = params;
+  async findPaginated(
+    params: ListCustomersParams,
+  ): Promise<PaginatedCustomersResult> {
+    const {
+      tenantId,
+      page = 1,
+      perPage = 10,
+      search,
+      status = 'all',
+      type = 'all',
+    } = params;
 
     const skip = (page - 1) * perPage;
     const take = perPage > 100 ? 100 : perPage; // perPage máximo 100
@@ -59,31 +68,46 @@ export class PrismaCustomersRepository implements CustomersRepository {
     };
   }
 
-  async findByIdAndTenant(id: string, tenantId: string): Promise<Customer | null> {
+  async findByIdAndTenant(
+    id: string,
+    tenantId: string,
+  ): Promise<Customer | null> {
     return this.prisma.customer.findUnique({
       where: { id, tenantId }, // This works because id is a unique field, but tenantId restricts it
     });
   }
 
-  async findByEmailAndTenant(email: string, tenantId: string): Promise<Customer | null> {
+  async findByEmailAndTenant(
+    email: string,
+    tenantId: string,
+  ): Promise<Customer | null> {
     return this.prisma.customer.findUnique({
       where: { tenantId_email: { tenantId, email } },
     });
   }
 
-  async findByDocumentAndTenant(document: string, tenantId: string): Promise<Customer | null> {
+  async findByDocumentAndTenant(
+    document: string,
+    tenantId: string,
+  ): Promise<Customer | null> {
     return this.prisma.customer.findUnique({
       where: { tenantId_document: { tenantId, document } },
     });
   }
 
-  async create(data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>): Promise<Customer> {
+  async create(
+    data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Customer> {
     return this.prisma.customer.create({
       data,
     });
   }
 
-  async update(id: string, tenantId: string, data: Partial<Customer>): Promise<Customer> {
+  async update(
+    id: string,
+    tenantId: string,
+    data: Partial<Customer>,
+  ): Promise<Customer> {
     // We must ensure the customer belongs to the tenant before updating.
     // Prisma's update requires a unique identifier. We can use a transaction or updateMany returning.
     // Using findFirst to verify, then update.
@@ -101,7 +125,11 @@ export class PrismaCustomersRepository implements CustomersRepository {
     });
   }
 
-  async updateStatus(id: string, tenantId: string, active: boolean): Promise<Customer> {
+  async updateStatus(
+    id: string,
+    tenantId: string,
+    active: boolean,
+  ): Promise<Customer> {
     const customer = await this.prisma.customer.findFirst({
       where: { id, tenantId },
     });

@@ -69,4 +69,9 @@ export class GatewayConnectionsService {
     const { data } = await api.post<GatewayConnection>(`/gateways/connections/${id}/disconnect`);
     return data;
   }
+
+  static async getMercadoPagoAuthUrl(): Promise<string> {
+    const { data } = await api.post<{ authorizationUrl: string }>('/gateways/connections/mercado-pago/connect');
+    return data.authorizationUrl;
+  }
 }
