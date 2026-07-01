@@ -557,6 +557,8 @@ model WebhookInboxEvent {
   @@index([paymentId])
   @@index([gatewayConfigurationId])
   @@index([receivedAt])
+  @@index([providerPaymentId])
+  @@index([externalReference])
   @@map("webhook_inbox_events")
 }
 
