@@ -28,7 +28,7 @@ import {
 export class AsaasWebhooksController {
   private readonly logger = new Logger(AsaasWebhooksController.name);
 
-  constructor(private readonly ingressService: WebhookIngressService) {}
+  constructor(private readonly ingressService: WebhookIngressService) { }
 
   @Post()
   @Public()
@@ -65,12 +65,6 @@ export class AsaasWebhooksController {
               .createHash('sha256')
               .update(JSON.stringify(payloadData))
               .digest('hex');
-            this.logger.log(`asaas.webhook.ingress.accepted`, {
-              provider: 'ASAAS',
-              eventId: payloadData.id,
-              eventType: payloadData.event,
-              payloadHash,
-            });
           })
           .catch((err: Error) => {
             this.logger.error('Failed to hash payload', err.stack);
