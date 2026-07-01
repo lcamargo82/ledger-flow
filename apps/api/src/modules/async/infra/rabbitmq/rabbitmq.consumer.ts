@@ -43,7 +43,9 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
       this.consume('ledgerflow.payment.commands.q');
       this.consume('ledgerflow.webhooks.commands.q');
     } catch (err: any) {
-      this.logger.error(`Failed to connect to RabbitMQ consumer: ${err.message}`);
+      this.logger.error(
+        `Failed to connect to RabbitMQ consumer: ${err.message}`,
+      );
     }
   }
 
@@ -58,7 +60,9 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
       try {
         payload = JSON.parse(contentStr);
       } catch (e) {
-        this.logger.error(`Failed to parse message from ${queue}: ${contentStr}`);
+        this.logger.error(
+          `Failed to parse message from ${queue}: ${contentStr}`,
+        );
         this.channel.reject(msg, false); // DLQ
         return;
       }
@@ -66,7 +70,9 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
       const handlers = this.registry.getHandlers(payload.eventType);
 
       if (handlers.length === 0) {
-        this.logger.warn(`No handlers found for eventType: ${payload.eventType}`);
+        this.logger.warn(
+          `No handlers found for eventType: ${payload.eventType}`,
+        );
         this.channel.reject(msg, false);
         return;
       }
@@ -74,7 +80,9 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
       // Validations based on instructions
       const outboxEvent = await this.outboxRepo.findById(payload.messageId);
       if (!outboxEvent) {
-        this.logger.error(`OutboxEvent not found: ${payload.messageId}, ignoring payload.`);
+        this.logger.error(
+          `OutboxEvent not found: ${payload.messageId}, ignoring payload.`,
+        );
         this.channel.ack(msg); // Safely ack as permanent failure
         return;
       }
@@ -112,7 +120,9 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
             completedAt: new Date(),
           });
         } catch (e: any) {
-          this.logger.error(`Handler ${handler.consumerName} failed: ${e.message}`);
+          this.logger.error(
+            `Handler ${handler.consumerName} failed: ${e.message}`,
+          );
 
           await this.jobExecutionRepo.createOrUpdate({
             id: jobExecution.id,

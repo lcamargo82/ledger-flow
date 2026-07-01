@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Customer, GatewayConfiguration, PaymentProvider } from '@prisma/client';
+import {
+  Customer,
+  GatewayConfiguration,
+  PaymentProvider,
+} from '@prisma/client';
 import { IProviderCustomerReferenceRepository } from '../../domain/interfaces/provider-customer-reference.repository';
 import { AsaasApiClient } from '../../infra/clients/asaas-api.client';
 import { AsaasCustomerSyncError } from '../../domain/errors/asaas-errors';
@@ -25,10 +29,11 @@ export class GatewayCustomerSyncService {
       );
     }
 
-    const existingRef = await this.customerReferenceRepository.findByCustomerAndConfiguration(
-      customer.id,
-      gatewayConfiguration.id,
-    );
+    const existingRef =
+      await this.customerReferenceRepository.findByCustomerAndConfiguration(
+        customer.id,
+        gatewayConfiguration.id,
+      );
 
     if (existingRef) {
       this.logger.log(
@@ -43,7 +48,9 @@ export class GatewayCustomerSyncService {
 
     // Decrypt API key
     if (!gatewayConfiguration.encryptedCredentials) {
-      throw new AsaasCustomerSyncError('Credenciais não configuradas para o gateway.');
+      throw new AsaasCustomerSyncError(
+        'Credenciais não configuradas para o gateway.',
+      );
     }
 
     const credentials = this.credentialsEncryptionService.decrypt(
@@ -52,14 +59,20 @@ export class GatewayCustomerSyncService {
     const apiKey = credentials['apiKey'];
 
     if (!apiKey) {
-      throw new AsaasCustomerSyncError('Chave da API não encontrada nas credenciais.');
+      throw new AsaasCustomerSyncError(
+        'Chave da API não encontrada nas credenciais.',
+      );
     }
 
     const payload = {
       name: customer.name,
       email: customer.email || undefined,
-      cpfCnpj: customer.document ? this.normalizeDocument(customer.document) : undefined,
-      mobilePhone: customer.phone ? this.normalizePhone(customer.phone) : undefined,
+      cpfCnpj: customer.document
+        ? this.normalizeDocument(customer.document)
+        : undefined,
+      mobilePhone: customer.phone
+        ? this.normalizePhone(customer.phone)
+        : undefined,
     };
 
     const headers = {
@@ -68,12 +81,18 @@ export class GatewayCustomerSyncService {
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const response = await this.asaasApiClient.post('/customers', payload, headers);
+      const response = await this.asaasApiClient.post(
+        '/customers',
+        payload,
+        headers,
+      );
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const providerCustomerId = response.id as string;
 
       if (!providerCustomerId) {
-        throw new AsaasCustomerSyncError('Falha ao obter o ID do cliente retornado pelo provider.');
+        throw new AsaasCustomerSyncError(
+          'Falha ao obter o ID do cliente retornado pelo provider.',
+        );
       }
 
       await this.customerReferenceRepository.create({

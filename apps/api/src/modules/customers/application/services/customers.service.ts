@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { CUSTOMERS_REPOSITORY } from '../../domain/repositories/customers.repository';
 import type { CustomersRepository } from '../../domain/repositories/customers.repository';
 import { CreateCustomerDto } from '../dto/create-customer.dto';
@@ -18,7 +23,11 @@ export class CustomersService {
     private readonly prisma: PrismaService, // For audit logs primarily
   ) {}
 
-  async create(tenantId: string, actorUserId: string, createCustomerDto: CreateCustomerDto) {
+  async create(
+    tenantId: string,
+    actorUserId: string,
+    createCustomerDto: CreateCustomerDto,
+  ) {
     const { email, document } = createCustomerDto;
 
     if (email) {
@@ -29,19 +38,24 @@ export class CustomersService {
         tenantId,
       );
       if (existingEmail) {
-        throw new ConflictException('Customer email already exists for this tenant.');
+        throw new ConflictException(
+          'Customer email already exists for this tenant.',
+        );
       }
     }
 
     if (document) {
       const documentNormalized = document.replace(/\D/g, ''); // Simplest normalization
       createCustomerDto.document = documentNormalized;
-      const existingDoc = await this.customersRepository.findByDocumentAndTenant(
-        documentNormalized,
-        tenantId,
-      );
+      const existingDoc =
+        await this.customersRepository.findByDocumentAndTenant(
+          documentNormalized,
+          tenantId,
+        );
       if (existingDoc) {
-        throw new ConflictException('Customer document already exists for this tenant.');
+        throw new ConflictException(
+          'Customer document already exists for this tenant.',
+        );
       }
     }
 
@@ -64,13 +78,17 @@ export class CustomersService {
     return this.customersRepository.findPaginated({
       tenantId,
       ...query,
-      status: query.status === CustomerStatusQuery.ALL ? undefined : query.status,
+      status:
+        query.status === CustomerStatusQuery.ALL ? undefined : query.status,
       type: query.type === CustomerTypeQuery.ALL ? undefined : query.type,
     });
   }
 
   async findOne(id: string, tenantId: string) {
-    const customer = await this.customersRepository.findByIdAndTenant(id, tenantId);
+    const customer = await this.customersRepository.findByIdAndTenant(
+      id,
+      tenantId,
+    );
     if (!customer) {
       throw new NotFoundException('Customer not found.');
     }
@@ -95,37 +113,60 @@ export class CustomersService {
         tenantId,
       );
       if (existingEmail) {
-        throw new ConflictException('Customer email already exists for this tenant.');
+        throw new ConflictException(
+          'Customer email already exists for this tenant.',
+        );
       }
     }
 
     if (document && document !== customer.document) {
       const documentNormalized = document.replace(/\D/g, '');
       updateCustomerDto.document = documentNormalized;
-      const existingDoc = await this.customersRepository.findByDocumentAndTenant(
-        documentNormalized,
-        tenantId,
-      );
+      const existingDoc =
+        await this.customersRepository.findByDocumentAndTenant(
+          documentNormalized,
+          tenantId,
+        );
       if (existingDoc) {
-        throw new ConflictException('Customer document already exists for this tenant.');
+        throw new ConflictException(
+          'Customer document already exists for this tenant.',
+        );
       }
     }
 
-    const updatedCustomer = await this.customersRepository.update(id, tenantId, updateCustomerDto);
+    const updatedCustomer = await this.customersRepository.update(
+      id,
+      tenantId,
+      updateCustomerDto,
+    );
 
-    await this.auditLog(tenantId, actorUserId, 'customer.updated', updatedCustomer.id);
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'customer.updated',
+      updatedCustomer.id,
+    );
 
     return updatedCustomer;
   }
 
-  async updateStatus(id: string, tenantId: string, actorUserId: string, active: boolean) {
+  async updateStatus(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    active: boolean,
+  ) {
     const customer = await this.findOne(id, tenantId);
 
     if (customer.active === active) {
       return customer;
     }
 
-    const updatedCustomer = await this.customersRepository.updateStatus(id, tenantId, active);
+    const updatedCustomer = await this.customersRepository.updateStatus(
+      id,
+      tenantId,
+      active,
+    );
 
     const action = active ? 'customer.activated' : 'customer.deactivated';
     await this.auditLog(tenantId, actorUserId, action, updatedCustomer.id);
@@ -133,7 +174,12 @@ export class CustomersService {
     return updatedCustomer;
   }
 
-  private async auditLog(tenantId: string, actorUserId: string, action: string, entityId: string) {
+  private async auditLog(
+    tenantId: string,
+    actorUserId: string,
+    action: string,
+    entityId: string,
+  ) {
     await this.prisma.auditLog.create({
       data: {
         tenantId,

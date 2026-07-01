@@ -30,7 +30,9 @@ export class AsyncJobRetryService {
       nextRetryAt,
     });
 
-    this.logger.log(`Scheduled retry for execution ${executionId} at ${nextRetryAt}`);
+    this.logger.log(
+      `Scheduled retry for execution ${executionId} at ${nextRetryAt}`,
+    );
 
     // In a real system with delayed messages, we'd publish with a delay header.
     // For this foundation without external plugins, we might use a scheduler

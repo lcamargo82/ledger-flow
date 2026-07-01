@@ -528,6 +528,9 @@ model WebhookInboxEvent {
   provider               WebhookProvider
   providerEventId        String
   eventType              String
+  providerPaymentId      String?
+  externalReference      String?
+  providerPaymentStatus  String?
   tenantId               String?
   paymentId              String?
   gatewayConfigurationId String?

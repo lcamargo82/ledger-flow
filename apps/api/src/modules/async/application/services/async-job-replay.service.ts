@@ -15,8 +15,13 @@ export class AsyncJobReplayService {
   async replayEvent(eventId: string, tenantId: string): Promise<any> {
     const event = await this.outboxRepository.findById(eventId);
     if (!event) throw new BadRequestException('Event not found');
-    if (event.status !== OutboxEventStatus.FAILED && event.status !== OutboxEventStatus.CANCELED) {
-      throw new BadRequestException('Only failed or canceled events can be replayed');
+    if (
+      event.status !== OutboxEventStatus.FAILED &&
+      event.status !== OutboxEventStatus.CANCELED
+    ) {
+      throw new BadRequestException(
+        'Only failed or canceled events can be replayed',
+      );
     }
 
     const newEvent = await this.outboxRepository.create({
