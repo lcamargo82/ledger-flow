@@ -12,7 +12,7 @@ export interface MercadoPagoOAuthTokenResponse {
 export interface MercadoPagoCreatePaymentRequest {
   transaction_amount: number;
   description: string;
-  payment_method_id: 'pix' | 'bolbradesco' | string;
+  payment_method_id: string;
   payer: {
     email: string;
     first_name?: string;

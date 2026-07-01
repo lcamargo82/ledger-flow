@@ -454,7 +454,7 @@ A gestão de usuários (CRUD) possui regras restritas para garantir a estabilida
 
 # 6.1 Objetivo
 
-Permitir que o sistema trabalhe inicialmente com Stripe, mas possa receber novos gateways sem alterar o core da aplicação.
+Permitir que o sistema trabalhe com múltiplos gateways (Stripe, Asaas, Mercado Pago, etc.) sem alterar o core da aplicação. Utiliza AES-256-GCM para armazenamento de chaves de API e integrações via OAuth 2.0.
 
 ---
 

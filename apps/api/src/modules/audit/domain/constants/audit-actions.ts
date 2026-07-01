@@ -15,6 +15,12 @@ export const AuditActions = {
   GATEWAY_CONFIGURATION_ACTIVATED: 'gateway.configuration.activated',
   GATEWAY_CONFIGURATION_DEACTIVATED: 'gateway.configuration.deactivated',
   GATEWAY_CONFIGURATION_HEALTH_CHANGED: 'gateway.configuration.health_changed',
+  MERCADO_PAGO_OAUTH_CONNECTION_REQUESTED:
+    'mercado_pago.oauth.connection_requested',
+  MERCADO_PAGO_OAUTH_CONNECTION_SUCCEEDED:
+    'mercado_pago.oauth.connection_succeeded',
+  MERCADO_PAGO_OAUTH_CONNECTION_FAILED: 'mercado_pago.oauth.connection_failed',
+  MERCADO_PAGO_OAUTH_DISCONNECTED: 'mercado_pago.oauth.disconnected',
 
   // Payment
   PAYMENT_CREATED: 'payment.created',
@@ -44,7 +50,8 @@ export const AuditActions = {
 
   // Support
   PLATFORM_SUPPORT_NOTE_CREATED: 'platform.support.note_created',
-  PLATFORM_SUPPORT_TENANT_STATUS_REVIEWED: 'platform.support.tenant_status_reviewed',
+  PLATFORM_SUPPORT_TENANT_STATUS_REVIEWED:
+    'platform.support.tenant_status_reviewed',
 } as const;
 
 export type AuditAction = (typeof AuditActions)[keyof typeof AuditActions];

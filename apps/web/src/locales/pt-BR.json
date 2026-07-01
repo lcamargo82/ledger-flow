@@ -1035,7 +1035,11 @@
     "mercadoPago": {
       "title": "Mercado Pago",
       "description": "Conecte sua conta para receber pagamentos pelo Mercado Pago.",
-      "comingSoon": "Em breve"
+      "comingSoon": "Em breve",
+      "connect": "Conectar Mercado Pago",
+      "connecting": "Conectando...",
+      "connected": "Conectado",
+      "connectionFailed": "Falha na conexão"
     },
     "form": {
       "provider": "Provedor",
@@ -1100,7 +1104,8 @@
       "updated": "Configurações atualizadas.",
       "credentialsUpdated": "Credenciais atualizadas com segurança.",
       "statusUpdated": "Status da conexão alterado.",
-      "notConfigured": "Não configurado"
+      "notConfigured": "Não configurado",
+      "errorConnecting": "Erro ao conectar com gateway"
     }
   },
   "features": {

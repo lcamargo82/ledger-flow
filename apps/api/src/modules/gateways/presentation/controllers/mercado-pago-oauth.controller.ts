@@ -7,25 +7,36 @@ import { MercadoPagoOAuthService } from '../../infra/providers/mercado-pago/merc
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../auth/application/types/authenticated-user.type';
 import { GatewayConfigurationsRepository } from '../../domain/repositories/gateway-configurations.repository';
-import { PaymentProvider, GatewayEnvironment, GatewayConfigurationStatus } from '@prisma/client';
+import {
+  PaymentProvider,
+  GatewayEnvironment,
+  GatewayConfigurationStatus,
+} from '@prisma/client';
 
-@Controller('gateways/mercado-pago')
+@Controller('gateways')
 export class MercadoPagoOAuthController {
   constructor(
     private readonly oauthService: MercadoPagoOAuthService,
     private readonly gatewayConfigRepo: GatewayConfigurationsRepository,
   ) {}
 
-  @Post('connect')
+  @Post('connections/mercado-pago/connect')
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermissions('gateway:manage')
+  @RequirePermissions('gateways:create')
   async connect(@CurrentUser() user: AuthenticatedUser) {
-    const authorizationUrl = await this.oauthService.generateAuthUrl(user.tenantId, user.id);
+    const authorizationUrl = await this.oauthService.generateAuthUrl(
+      user.tenantId,
+      user.id,
+    );
     return { authorizationUrl };
   }
 
-  @Get('oauth/callback')
-  async callback(@Query('code') code: string, @Query('state') state: string, @Res() res: any) {
+  @Get('mercado-pago/oauth/callback')
+  async callback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
     try {
       if (!code || !state) {
         throw new Error('Code and state are required');
@@ -34,27 +45,33 @@ export class MercadoPagoOAuthController {
       await this.oauthService.handleCallback(code, state);
 
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5180';
-      return res.redirect(`${frontendUrl}/settings/gateways?success=true&provider=mercado-pago`);
-    } catch (error) {
+      return res.redirect(
+        `${frontendUrl}/settings/gateway-connections?success=true&provider=mercado-pago`,
+      );
+    } catch {
       const frontendUrl = process.env.CORS_ORIGIN || 'http://localhost:5180';
-      return res.redirect(`${frontendUrl}/settings/gateways?error=true&provider=mercado-pago`);
+      return res.redirect(
+        `${frontendUrl}/settings/gateway-connections?error=true&provider=mercado-pago`,
+      );
     }
   }
 
-  @Post('disconnect')
+  @Post('connections/mercado-pago/disconnect')
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermissions('gateway:manage')
+  @RequirePermissions('gateways:manage')
   async disconnect(@CurrentUser() user: AuthenticatedUser) {
     await this.oauthService.disconnect(user.tenantId, user.id);
     return { success: true };
   }
 
-  @Get('connection-status')
+  @Get('connections/mercado-pago/status')
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @RequirePermissions('gateway:read')
+  @RequirePermissions('gateways:read')
   async getConnectionStatus(@CurrentUser() user: AuthenticatedUser) {
     const isTestMode = process.env.MERCADO_PAGO_TEST_MODE === 'true';
-    const environment = isTestMode ? GatewayEnvironment.TEST : GatewayEnvironment.LIVE;
+    const environment = isTestMode
+      ? GatewayEnvironment.TEST
+      : GatewayEnvironment.LIVE;
 
     const config = await this.gatewayConfigRepo.findActiveByTenantAndProvider(
       user.tenantId,

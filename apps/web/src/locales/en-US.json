@@ -1035,7 +1035,11 @@
     "mercadoPago": {
       "title": "Mercado Pago",
       "description": "Connect your account to receive payments via Mercado Pago.",
-      "comingSoon": "Coming soon"
+      "comingSoon": "Coming soon",
+      "connect": "Connect Mercado Pago",
+      "connecting": "Connecting...",
+      "connected": "Connected",
+      "connectionFailed": "Connection Failed"
     },
     "form": {
       "provider": "Provider",
@@ -1099,8 +1103,9 @@
       "created": "Connection created successfully.",
       "updated": "Settings updated.",
       "credentialsUpdated": "Credentials securely updated.",
-      "statusUpdated": "Connection status changed.",
-      "notConfigured": "Not configured"
+      "statusUpdated": "Connection status updated.",
+      "notConfigured": "Not configured",
+      "errorConnecting": "Error connecting with gateway"
     }
   },
   "features": {

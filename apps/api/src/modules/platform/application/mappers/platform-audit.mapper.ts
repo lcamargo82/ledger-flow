@@ -2,7 +2,10 @@ import { AuditLog, Tenant } from '@prisma/client';
 import { PlatformAuditLogResponseDto } from '../dto/platform-audit-log-response.dto';
 
 export class PlatformAuditMapper {
-  static toResponse(auditLog: AuditLog, tenant?: Tenant | null): PlatformAuditLogResponseDto {
+  static toResponse(
+    auditLog: AuditLog,
+    tenant?: Tenant | null,
+  ): PlatformAuditLogResponseDto {
     return {
       id: auditLog.id,
       tenant: tenant
