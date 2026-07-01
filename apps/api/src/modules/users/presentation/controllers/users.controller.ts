@@ -78,10 +78,7 @@ export class UsersController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') userId: string,
   ): Promise<UserDetailsResponseDto> {
-    const userDetails = await this.usersService.getUserById(
-      user.tenantId,
-      userId,
-    );
+    const userDetails = await this.usersService.getUserById(user.tenantId, userId);
     return { user: userDetails };
   }
 

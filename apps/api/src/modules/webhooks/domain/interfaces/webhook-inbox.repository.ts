@@ -15,13 +15,10 @@ export interface IWebhookInboxRepository {
     provider: WebhookProvider,
     providerEventId: string,
   ): Promise<WebhookInboxEvent | null>;
-  createReceived(
-    data: CreateWebhookInboxEventInput,
-  ): Promise<WebhookInboxEvent>;
-  createIgnored(
-    data: CreateWebhookInboxEventInput,
-    reason: string,
-  ): Promise<WebhookInboxEvent>;
+  createReceived(data: CreateWebhookInboxEventInput): Promise<WebhookInboxEvent>;
+  createIgnored(data: CreateWebhookInboxEventInput, reason: string): Promise<WebhookInboxEvent>;
+  createInvalid(data: CreateWebhookInboxEventInput, reason: string): Promise<WebhookInboxEvent>;
+  createUnmatched(data: CreateWebhookInboxEventInput, reason: string): Promise<WebhookInboxEvent>;
   markProcessing(id: string): Promise<WebhookInboxEvent>;
   markProcessed(
     id: string,

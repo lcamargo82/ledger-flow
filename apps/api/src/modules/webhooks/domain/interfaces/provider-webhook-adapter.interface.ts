@@ -34,6 +34,8 @@ export interface NormalizedWebhookEvent {
   payloadSummary: Record<string, any>;
   rawProviderEventType: string;
   metadata?: Record<string, any>;
+  isInvalid?: boolean;
+  invalidReason?: string;
 }
 
 export interface ProviderWebhookAdapter {
@@ -41,9 +43,7 @@ export interface ProviderWebhookAdapter {
 
   authenticate(input: ProviderWebhookAuthenticationInput): Promise<void>;
 
-  normalize(
-    input: ProviderWebhookPayloadInput,
-  ): Promise<NormalizedWebhookEvent>;
+  normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent>;
 
   supportsEvent(eventType: string): boolean;
 }

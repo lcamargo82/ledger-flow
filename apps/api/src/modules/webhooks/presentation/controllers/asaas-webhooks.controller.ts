@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger';
@@ -25,6 +26,8 @@ import {
 @ApiTags('Webhooks')
 @Controller('webhooks/asaas')
 export class AsaasWebhooksController {
+  private readonly logger = new Logger(AsaasWebhooksController.name);
+
   constructor(private readonly ingressService: WebhookIngressService) {}
 
   @Post()
@@ -54,6 +57,29 @@ export class AsaasWebhooksController {
     @Req() request: Request,
   ) {
     try {
+      if (payload && typeof payload === 'object') {
+        const payloadData = payload as Record<string, any>;
+        void import('crypto')
+          .then((crypto) => {
+            const payloadHash = crypto
+              .createHash('sha256')
+              .update(JSON.stringify(payloadData))
+              .digest('hex');
+            this.logger.log(`asaas.webhook.received`, {
+              provider: 'ASAAS',
+              receivedTopLevelKeys: Object.keys(payloadData),
+              eventIdPresent: !!payloadData.id,
+              eventValuePresent: !!payloadData.event,
+              paymentIdPresent: !!payloadData.payment?.id,
+              externalReferencePresent: !!payloadData.payment?.externalReference,
+              payloadHash,
+            });
+          })
+          .catch((err: Error) => {
+            this.logger.error('Failed to hash payload', err.stack);
+          });
+      }
+
       await this.ingressService.handleWebhook(
         WebhookProvider.ASAAS,
         {

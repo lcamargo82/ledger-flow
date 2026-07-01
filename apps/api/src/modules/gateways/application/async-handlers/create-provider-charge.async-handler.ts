@@ -32,22 +32,17 @@ export class CreateProviderChargeAsyncHandler implements AsyncEventHandler {
     }
 
     if (payment.executionMode !== 'EXTERNAL_GATEWAY') {
-      this.logger.log(
-        `Payment ${paymentId} execution mode is ${payment.executionMode}. Skipping.`,
-      );
+      this.logger.log(`Payment ${paymentId} execution mode is ${payment.executionMode}. Skipping.`);
       return;
     }
 
     if (payment.providerPaymentId) {
-      this.logger.log(
-        `Payment ${paymentId} already processed (has provider ID)`,
-      );
+      this.logger.log(`Payment ${paymentId} already processed (has provider ID)`);
       return; // Safe idempotency
     }
 
     let gatewayConfigurationId =
-      payment.gatewayConfigurationId ||
-      (payload?.gatewayConfigurationId as string);
+      payment.gatewayConfigurationId || (payload?.gatewayConfigurationId as string);
 
     if (!gatewayConfigurationId) {
       // If payment has no explicit gateway, we might fallback to active config
@@ -79,8 +74,7 @@ export class CreateProviderChargeAsyncHandler implements AsyncEventHandler {
       );
     }
 
-    const allowedEnv =
-      process.env.PAYMENT_GATEWAY_ALLOWED_ENVIRONMENTS || 'SANDBOX';
+    const allowedEnv = process.env.PAYMENT_GATEWAY_ALLOWED_ENVIRONMENTS || 'SANDBOX';
     if (config.environment !== allowedEnv) {
       throw new NonRetryableAsyncJobError(
         `Gateway configuration environment (${config.environment}) is not allowed by process (${allowedEnv})`,

@@ -30,9 +30,7 @@ export class PlatformTenantMapper {
       _count: { users: number; customers: number; payments: number };
     },
   ): PlatformTenantDetailsResponseDto {
-    const response = this.toResponseDto(
-      tenant,
-    ) as PlatformTenantDetailsResponseDto;
+    const response = this.toResponseDto(tenant) as PlatformTenantDetailsResponseDto;
 
     if (tenant.subscription) {
       response.subscriptionDetails = {

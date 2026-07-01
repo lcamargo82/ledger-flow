@@ -6,9 +6,11 @@ export class AsaasWebhookStatusMapper {
     switch (asaasEvent) {
       case ASAAS_PAYMENT_EVENTS.PAYMENT_CONFIRMED:
       case ASAAS_PAYMENT_EVENTS.PAYMENT_RECEIVED:
+      case ASAAS_PAYMENT_EVENTS.PAYMENT_RECEIVED_IN_CASH:
         return PaymentStatus.APPROVED;
       case ASAAS_PAYMENT_EVENTS.PAYMENT_OVERDUE:
         return PaymentStatus.FAILED;
+      case ASAAS_PAYMENT_EVENTS.PAYMENT_REFUND_IN_PROGRESS:
       case ASAAS_PAYMENT_EVENTS.PAYMENT_REFUNDED:
         return PaymentStatus.REFUNDED;
       case ASAAS_PAYMENT_EVENTS.PAYMENT_DELETED:
@@ -23,8 +25,6 @@ export class AsaasWebhookStatusMapper {
   }
 
   static isTerminalStatus(status: PaymentStatus): boolean {
-    return (
-      status === PaymentStatus.REFUNDED || status === PaymentStatus.CANCELED
-    );
+    return status === PaymentStatus.REFUNDED || status === PaymentStatus.CANCELED;
   }
 }

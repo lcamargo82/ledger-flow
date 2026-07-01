@@ -519,6 +519,8 @@ enum WebhookProcessingStatus {
   PROCESSED
   IGNORED
   FAILED
+  UNMATCHED
+  INVALID
 }
 
 model WebhookInboxEvent {

@@ -37,9 +37,7 @@ export class PaymentsExternalProcessingService {
 
     const paymentIds = payments
       .filter(
-        (p) =>
-          p.executionMode === PaymentExecutionMode.EXTERNAL_GATEWAY &&
-          !p.providerPaymentId,
+        (p) => p.executionMode === PaymentExecutionMode.EXTERNAL_GATEWAY && !p.providerPaymentId,
       )
       .map((p) => p.id);
 
@@ -72,9 +70,7 @@ export class PaymentsExternalProcessingService {
       }
     }
 
-    const outboxIds = Array.from(latestOutboxPerPayment.values()).map(
-      (o) => o.id,
-    );
+    const outboxIds = Array.from(latestOutboxPerPayment.values()).map((o) => o.id);
 
     const jobs = outboxIds.length
       ? await this.prisma.asyncJobExecution.findMany({
@@ -90,9 +86,7 @@ export class PaymentsExternalProcessingService {
       }
     }
 
-    const configsMap = new Map<string, GatewayConfiguration>(
-      gatewayConfigs.map((c) => [c.id, c]),
-    );
+    const configsMap = new Map<string, GatewayConfiguration>(gatewayConfigs.map((c) => [c.id, c]));
 
     return payments.map((payment) => {
       if (payment.executionMode !== PaymentExecutionMode.EXTERNAL_GATEWAY) {
@@ -174,13 +168,9 @@ export class PaymentsExternalProcessingService {
     configsMap: Map<string, GatewayConfiguration>,
   ): boolean {
     if (payment.providerPaymentId) return false;
-    if (
-      payment.status !== PaymentStatus.PENDING &&
-      payment.status !== PaymentStatus.PROCESSING
-    )
+    if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.PROCESSING)
       return false;
-    if (payment.executionMode !== PaymentExecutionMode.EXTERNAL_GATEWAY)
-      return false;
+    if (payment.executionMode !== PaymentExecutionMode.EXTERNAL_GATEWAY) return false;
 
     if (!payment.gatewayConfigurationId) return false;
     const config = configsMap.get(payment.gatewayConfigurationId);
