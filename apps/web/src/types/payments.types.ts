@@ -38,6 +38,12 @@ export interface PaymentListItem {
   provider?: string | null;
   description?: string | null;
   createdAt: string;
+  externalProcessing?: {
+    status: string;
+    retryAvailable: boolean;
+    messageKey: string;
+    details?: any;
+  } | null;
 }
 
 export interface PaymentDetails extends PaymentListItem {
@@ -45,6 +51,7 @@ export interface PaymentDetails extends PaymentListItem {
   canceledAt?: string | null;
   refundedAt?: string | null;
   events: PaymentEvent[];
+  asyncChargeStatus?: string;
 }
 
 export interface PaginatedPaymentsMeta {

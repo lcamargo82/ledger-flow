@@ -32,19 +32,102 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
   async createReceived(
     data: CreateWebhookInboxEventInput,
   ): Promise<WebhookInboxEvent> {
+    return this.prisma.$transaction(async (tx) => {
+      const inboxEvent = await tx.webhookInboxEvent.create({
+        data: {
+          provider: data.provider,
+          providerEventId: data.providerEventId,
+          eventType: data.eventType,
+          providerPaymentId: data.providerPaymentId,
+          externalReference: data.externalReference,
+          providerPaymentStatus: data.providerPaymentStatus,
+          payloadHash: data.payloadHash,
+          payloadSummary:
+            (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+          status: WebhookProcessingStatus.RECEIVED,
+          tenantId: data.tenantId,
+          paymentId: data.paymentId,
+        },
+      });
+
+      await tx.outboxEvent.create({
+        data: {
+          tenantId: data.tenantId,
+          aggregateType: 'WebhookInboxEvent',
+          aggregateId: inboxEvent.id,
+          eventType: 'webhook.inbound_processing_requested',
+          eventVersion: 1,
+          payload: {}, // Summary is already in inboxEvent, payload is minimal
+          payloadHash: data.payloadHash,
+        },
+      });
+
+      return inboxEvent;
+    });
+  }
+
+  async createIgnored(
+    data: CreateWebhookInboxEventInput,
+    reason: string,
+  ): Promise<WebhookInboxEvent> {
     return this.prisma.webhookInboxEvent.create({
       data: {
         provider: data.provider,
         providerEventId: data.providerEventId,
         eventType: data.eventType,
+        providerPaymentId: data.providerPaymentId,
+        externalReference: data.externalReference,
+        providerPaymentStatus: data.providerPaymentStatus,
         payloadHash: data.payloadHash,
         payloadSummary:
           (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
-        status: WebhookProcessingStatus.RECEIVED,
+        status: WebhookProcessingStatus.IGNORED,
+        failureReason: reason,
       },
     });
   }
 
+  async createInvalid(
+    data: CreateWebhookInboxEventInput,
+    reason: string,
+  ): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.create({
+      data: {
+        provider: data.provider,
+        providerEventId: data.providerEventId,
+        eventType: data.eventType,
+        providerPaymentId: data.providerPaymentId,
+        externalReference: data.externalReference,
+        providerPaymentStatus: data.providerPaymentStatus,
+        payloadHash: data.payloadHash,
+        payloadSummary:
+          (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+        status: WebhookProcessingStatus.INVALID,
+        failureReason: reason,
+      },
+    });
+  }
+
+  async createUnmatched(
+    data: CreateWebhookInboxEventInput,
+    reason: string,
+  ): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.create({
+      data: {
+        provider: data.provider,
+        providerEventId: data.providerEventId,
+        eventType: data.eventType,
+        providerPaymentId: data.providerPaymentId,
+        externalReference: data.externalReference,
+        providerPaymentStatus: data.providerPaymentStatus,
+        payloadHash: data.payloadHash,
+        payloadSummary:
+          (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+        status: WebhookProcessingStatus.UNMATCHED,
+        failureReason: reason,
+      },
+    });
+  }
   async markProcessing(id: string): Promise<WebhookInboxEvent> {
     return this.prisma.webhookInboxEvent.update({
       where: { id },

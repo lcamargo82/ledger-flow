@@ -77,6 +77,7 @@ O LedgerFlow simula uma solução para esses problemas com uma arquitetura prepa
 * Gestão de pagamentos.
 * Gestão de Tenants (Provisionamento, Overview e Saúde Operacional).
 * Integração inicial com Asaas Sandbox (Fase 6.1).
+* Integração com Mercado Pago via OAuth (Fase 6.2A).
 * Arquitetura desacoplada para múltiplos gateways.
 * Webhooks inbound.
 * Webhooks outbound.
@@ -769,6 +770,7 @@ IPaymentGateway
 ```
 
 O Asaas (Sandbox) é o primeiro provider real implementado.
+As credenciais dos gateways não são expostas na interface frontend (write-only) e são armazenadas no banco de dados com criptografia forte (AES-256-GCM). A variável `.env` `ASAAS_SANDBOX_API_KEY` serve apenas para testes rápidos e locais; o LedgerFlow deve obter credenciais do banco por tenant.
 
 O core de pagamento não importa SDKs externos diretamente. Eles ficam isolados no adapter.
 

@@ -64,7 +64,12 @@ export const usePaymentsStore = defineStore('payments', () => {
         return 'payments.error.createFailed';
       }
       if (err.response?.status === 403) return 'payments.error.forbidden';
-      if (err.response?.status === 404) return 'payments.error.notFound';
+      if (err.response?.status === 404) {
+        if (err.response.data?.message?.toLowerCase().includes('gateway configuration')) {
+          return 'payments.error.gatewayNotFound';
+        }
+        return 'payments.error.notFound';
+      }
       if (err.response?.status === 409) return 'payments.error.invalidStatus';
     }
     return 'payments.error.default';
@@ -160,6 +165,20 @@ export const usePaymentsStore = defineStore('payments', () => {
     }
   };
 
+  const retryExternalCharge = async (id: string) => {
+    error.value = null;
+    try {
+      const response = await paymentsService.retryExternalCharge(id);
+      if (selectedPayment.value && selectedPayment.value.id === id) {
+        selectedPayment.value = response.payment;
+      }
+      return response.payment;
+    } catch (err) {
+      error.value = extractErrorMessage(err);
+      throw err;
+    }
+  };
+
   const setPage = (page: number) => {
     filters.value.page = page;
     fetchPayments();
@@ -249,6 +268,7 @@ export const usePaymentsStore = defineStore('payments', () => {
     fetchPaymentInstructions,
     createPayment,
     cancelPayment,
+    retryExternalCharge,
     setPage,
     setPerPage,
     setSearch,

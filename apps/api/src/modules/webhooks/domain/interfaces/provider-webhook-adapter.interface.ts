@@ -34,6 +34,8 @@ export interface NormalizedWebhookEvent {
   payloadSummary: Record<string, any>;
   rawProviderEventType: string;
   metadata?: Record<string, any>;
+  isInvalid?: boolean;
+  invalidReason?: string;
 }
 
 export interface ProviderWebhookAdapter {

@@ -110,6 +110,16 @@ const router = createRouter({
       }
     },
     {
+      path: '/settings/gateway-connections',
+      name: 'gateway-connections',
+      component: () => import('../views/settings/GatewayConnectionsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['gateways:read']
+      }
+    },
+    {
       path: '/customers',
       name: 'customers',
       component: CustomersView,
@@ -169,6 +179,28 @@ const router = createRouter({
         requiresAuth: true,
         platformAdminOnly: true,
         permissions: ['platform:audit:read']
+      }
+    },
+    {
+      path: '/platform/gateway-connections',
+      name: 'platform-gateway-connections',
+      component: () => import('../views/platform/PlatformGatewayConnectionsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:gateways:read']
+      }
+    },
+    {
+      path: '/platform/async-jobs',
+      name: 'platform-async-jobs',
+      component: () => import('../views/PlatformAsyncOperationsView.vue'),
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        platformAdminOnly: true,
+        permissions: ['platform:async:read']
       }
     },
     {

@@ -155,4 +155,25 @@ export class PaymentsController {
     );
     return { payment: PaymentMapper.toPublic(payment) };
   }
+
+  @Post(':id/retry-external-charge')
+  @RequirePermissions('payments:retry')
+  @ApiOperation({
+    summary: 'Reprocessar manualmente a criação de uma cobrança externa falha',
+  })
+  @ApiOkResponse({ description: 'Nova tentativa agendada com sucesso.' })
+  @ApiUnauthorizedResponse({ description: 'Não autenticado.' })
+  @ApiForbiddenResponse({ description: 'Sem permissão.' })
+  @ApiNotFoundResponse({ description: 'Pagamento não encontrado.' })
+  @ApiConflictResponse({
+    description: 'Pagamento não elegível para reprocessamento.',
+  })
+  async retryExternalCharge(@CurrentUser() user: any, @Param('id') id: string) {
+    const payment = await this.paymentsService.retryExternalCharge(
+      id,
+      user.tenantId,
+      user.userId,
+    );
+    return { payment: PaymentMapper.toPublicWithEvents(payment) };
+  }
 }

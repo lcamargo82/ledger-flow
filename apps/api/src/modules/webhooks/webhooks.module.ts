@@ -1,3 +1,6 @@
+import { AsyncModule } from '../async/async.module';
+import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
+import { AsaasWebhookProcessingAsyncHandler } from './application/async-handlers/asaas-webhook-processing.handler';
 import { Module, OnModuleInit } from '@nestjs/common';
 import { WebhookProvider } from '@prisma/client';
 import { PrismaWebhookInboxRepository } from './infra/repositories/prisma-webhook-inbox.repository';
@@ -20,9 +23,10 @@ import { PagBankWebhookAdapter } from './infra/providers/pagbank/pagbank-webhook
 import { PagarmeWebhookAdapter } from './infra/providers/pagarme/pagarme-webhook.adapter';
 
 @Module({
-  imports: [],
+  imports: [AsyncModule],
   controllers: [AsaasWebhooksController],
   providers: [
+    AsaasWebhookProcessingAsyncHandler,
     PrismaService,
     {
       provide: 'IWebhookInboxRepository',
@@ -46,6 +50,9 @@ import { PagarmeWebhookAdapter } from './infra/providers/pagarme/pagarme-webhook
 })
 export class WebhooksModule implements OnModuleInit {
   constructor(
+    private readonly asyncHandlerRegistry: AsyncHandlerRegistryService,
+    private readonly asaasWebhookHandler: AsaasWebhookProcessingAsyncHandler,
+
     private readonly adapterRegistry: WebhookAdapterRegistryService,
     private readonly processorRegistry: WebhookProcessorRegistryService,
 
@@ -59,6 +66,8 @@ export class WebhooksModule implements OnModuleInit {
   ) {}
 
   onModuleInit() {
+    this.asyncHandlerRegistry.register(this.asaasWebhookHandler);
+
     this.adapterRegistry.register(WebhookProvider.ASAAS, this.asaasAdapter);
     this.adapterRegistry.register(WebhookProvider.STRIPE, this.stripeAdapter);
     this.adapterRegistry.register(

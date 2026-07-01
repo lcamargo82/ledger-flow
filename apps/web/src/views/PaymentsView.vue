@@ -37,6 +37,7 @@ const columns = computed(() => [
   { key: 'amount', label: t('payments.table.amount') },
   { key: 'method', label: t('payments.table.method') },
   { key: 'status', label: t('payments.table.status') },
+  { key: 'integration', label: t('payments.table.integration') },
   { key: 'createdAt', label: t('payments.table.createdAt') },
   { key: 'actions', label: t('payments.table.actions'), align: 'right' as const }
 ]);
@@ -129,6 +130,19 @@ const getStatusVariant = (status: string) => {
     case 'FAILED': return 'danger';
     case 'CANCELED': return 'default';
     case 'REFUNDED': return 'default';
+    default: return 'default';
+  }
+};
+
+const getIntegrationVariant = (status: string) => {
+  switch (status) {
+    case 'NOT_REQUIRED': return 'default';
+    case 'NOT_STARTED': return 'default';
+    case 'PROCESSING': return 'info';
+    case 'RETRY_SCHEDULED': return 'warning';
+    case 'SUCCEEDED': return 'success';
+    case 'FAILED': return 'danger';
+    case 'DEAD_LETTERED': return 'danger';
     default: return 'default';
   }
 };
@@ -251,6 +265,13 @@ const canCancel = (status: string) => {
           <AppBadge :variant="getStatusVariant(item.status) as any">
             {{ t(`payments.status.${item.status}`) }}
           </AppBadge>
+        </template>
+
+        <template #integration="{ item }">
+          <AppBadge v-if="item.externalProcessing" :variant="getIntegrationVariant(item.externalProcessing.status) as any">
+            {{ t(`payments.externalProcessing.status.${item.externalProcessing.status}`) }}
+          </AppBadge>
+          <span v-else class="text-sm text-gray-400">-</span>
         </template>
 
         <template #createdAt="{ item }">

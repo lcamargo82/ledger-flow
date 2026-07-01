@@ -128,7 +128,10 @@
     "comingSoon": "Em breve",
     "roles": "Roles",
     "permissions": "Permissões",
-    "tenantSettings": "Organização"
+    "tenantSettings": "Organização",
+    "platformAsyncOperations": "Operações Assíncronas",
+    "gatewayConnections": "Integrações de Pagamento",
+    "platformGatewayConnections": "Integrações"
   },
   "users": {
     "title": "Usuários",
@@ -237,6 +240,7 @@
     }
   },
   "common": {
+    "all": "Todos",
     "logout": "Sair",
     "loggingOut": "Saindo...",
     "loading": "Carregando...",
@@ -292,15 +296,21 @@
     "description": "Lista de todas as permissões globais disponíveis no sistema.",
     "searchPlaceholder": "Buscar permissões...",
     "list": {
-      "auth": { "login": "Realizar login" },
+      "auth": {
+        "login": "Realizar login"
+      },
       "users": {
         "create": "Criar usuários",
         "read": "Visualizar usuários",
         "update": "Atualizar usuários",
         "delete": "Excluir usuários"
       },
-      "roles": { "manage": "Gerenciar papéis e permissões" },
-      "permissions": { "read": "Visualizar permissões" },
+      "roles": {
+        "manage": "Gerenciar papéis e permissões"
+      },
+      "permissions": {
+        "read": "Visualizar permissões"
+      },
       "customers": {
         "create": "Criar clientes",
         "read": "Visualizar clientes",
@@ -313,12 +323,24 @@
         "cancel": "Cancelar pagamentos",
         "refund": "Reembolsar pagamentos"
       },
-      "reports": { "export": "Exportar relatórios" },
-      "webhooks": { "manage": "Gerenciar webhooks" },
-      "api-keys": { "manage": "Gerenciar chaves de API" },
-      "gateways": { "manage": "Gerenciar gateways" },
-      "notifications": { "read": "Visualizar notificações" },
-      "audit": { "read": "Visualizar trilha de auditoria" },
+      "reports": {
+        "export": "Exportar relatórios"
+      },
+      "webhooks": {
+        "manage": "Gerenciar webhooks"
+      },
+      "api-keys": {
+        "manage": "Gerenciar chaves de API"
+      },
+      "gateways": {
+        "manage": "Gerenciar gateways"
+      },
+      "notifications": {
+        "read": "Visualizar notificações"
+      },
+      "audit": {
+        "read": "Visualizar trilha de auditoria"
+      },
       "tenant": {
         "read": "Visualizar dados básicos do tenant",
         "update": "Atualizar configurações do tenant"
@@ -331,15 +353,23 @@
           "update": "Atualizar tenants da plataforma",
           "status": "Alterar status de tenants da plataforma",
           "invite": "Convidar e reenviar convites para tenants",
-          "overview": { "read": "Visualizar resumo operacional de tenants da plataforma" },
-          "health": { "read": "Visualizar saúde operacional de tenants da plataforma" }
+          "overview": {
+            "read": "Visualizar resumo operacional de tenants da plataforma"
+          },
+          "health": {
+            "read": "Visualizar saúde operacional de tenants da plataforma"
+          }
         },
         "subscriptions": {
           "read": "Visualizar assinaturas da plataforma",
           "update": "Atualizar assinaturas da plataforma"
         },
-        "audit": { "read": "Visualizar logs de auditoria global da plataforma" },
-        "support": { "read": "Visualizar resumo de suporte dos tenants" }
+        "audit": {
+          "read": "Visualizar logs de auditoria global da plataforma"
+        },
+        "support": {
+          "read": "Visualizar resumo de suporte dos tenants"
+        }
       }
     },
     "table": {
@@ -366,11 +396,26 @@
     "title": "Gerenciamento de Papéis",
     "description": "Visualize os papéis de acesso do seu tenant.",
     "list": {
-      "OWNER": { "name": "Owner", "description": "Proprietário da conta com acesso total" },
-      "FINANCE_OPERATOR": { "name": "Financeiro", "description": "Operador financeiro" },
-      "SUPPORT_VIEWER": { "name": "Suporte", "description": "Acesso apenas leitura para suporte" },
-      "DEVELOPER": { "name": "Desenvolvedor", "description": "Gerenciamento técnico (API, Webhooks)" },
-      "PLATFORM_OWNER": { "name": "Platform Owner", "description": "Administrador geral da plataforma" }
+      "OWNER": {
+        "name": "Owner",
+        "description": "Proprietário da conta com acesso total"
+      },
+      "FINANCE_OPERATOR": {
+        "name": "Financeiro",
+        "description": "Operador financeiro"
+      },
+      "SUPPORT_VIEWER": {
+        "name": "Suporte",
+        "description": "Acesso apenas leitura para suporte"
+      },
+      "DEVELOPER": {
+        "name": "Desenvolvedor",
+        "description": "Gerenciamento técnico (API, Webhooks)"
+      },
+      "PLATFORM_OWNER": {
+        "name": "Platform Owner",
+        "description": "Administrador geral da plataforma"
+      }
     },
     "table": {
       "name": "Nome",
@@ -544,7 +589,11 @@
       "search": "Buscar",
       "clearFilters": "Limpar",
       "tryAgain": "Tentar novamente",
-      "close": "Fechar"
+      "close": "Fechar",
+      "retryExternalCharge": "Tentar Novamente",
+      "retryingExternalCharge": "Tentando...",
+      "openGatewaySettings": "Abrir integrações",
+      "refreshPayment": "Atualizar status"
     },
     "filters": {
       "searchLabel": "Buscar por referência, cliente...",
@@ -556,12 +605,36 @@
       "statusAll": "Todos",
       "methodAll": "Todos"
     },
+    "externalProcessing": {
+      "title": "Integração Externa",
+      "status": {
+        "NOT_REQUIRED": "Não Aplicável",
+        "NOT_STARTED": "Não Iniciada",
+        "PROCESSING": "Processando",
+        "RETRY_SCHEDULED": "Tentativa Agendada",
+        "SUCCEEDED": "Sucesso",
+        "FAILED": "Falha Externa",
+        "DEAD_LETTERED": "Falha Permanente"
+      },
+      "message": {
+        "processing": "A cobrança está sendo criada no gateway de pagamento.",
+        "retryScheduled": "Uma nova tentativa de criação está agendada.",
+        "succeeded": "Cobrança criada com sucesso no gateway.",
+        "failed": "A tentativa de criação no gateway falhou.",
+        "credentialInvalid": "As credenciais do gateway configuradas parecem inválidas.",
+        "gatewayNotConfigured": "Não há gateway configurado para este método.",
+        "methodNotSupported": "Este gateway não suporta o método selecionado.",
+        "environmentNotAllowed": "Este gateway não está permitido para o ambiente atual.",
+        "providerUnavailable": "O provedor de pagamento está temporariamente indisponível."
+      }
+    },
     "table": {
       "reference": "Referência",
       "customer": "Cliente",
       "amount": "Valor",
       "method": "Método",
       "status": "Status",
+      "integration": "Integração",
       "createdAt": "Criado em",
       "actions": "Ações"
     },
@@ -583,6 +656,8 @@
         "customerRequired": "Cliente é obrigatório.",
         "amountRequired": "Valor é obrigatório.",
         "amountInvalid": "Valor inválido.",
+        "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",
+        "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações.",
         "methodRequired": "Método é obrigatório.",
         "dateRangeInvalid": "Período inválido."
       }
@@ -609,7 +684,9 @@
       "expiresAt": "Expira em",
       "expiredWarning": "Expirado. Crie um novo pagamento.",
       "bankSlip": "Boleto bancário",
-      "bankSlipDescription": "Clique no botão abaixo para abrir seu boleto seguro.",
+      "bankSlipDescription": "Um boleto bancário foi gerado para este pagamento. Clique no botão abaixo para abri-re visualizar o boleto.",
+      "asyncProcessing": "Processando cobrança externa",
+      "asyncFailed": "Falha ao criar cobrança externa",
       "openBankSlip": "Abrir Boleto",
       "dueDate": "Vencimento",
       "noInstructions": "As instruções de pagamento ainda não estão disponíveis.",
@@ -673,11 +750,21 @@
       "cancelFailed": "Erro ao cancelar pagamento.",
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
       "customerRequired": "Cliente obrigatório.",
-      "amountInvalid": "Valor inválido."
+      "amountInvalid": "Valor inválido.",
+      "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",
+      "gatewayNotFound": "Não há uma configuração de gateway de pagamento ativa para este método no ambiente selecionado. Configure o gateway em Configurações > Plataforma > Integrações."
     },
     "toast": {
       "created": "Pagamento criado com sucesso.",
       "canceled": "Pagamento cancelado com sucesso."
+    },
+    "retry": {
+      "success": "Nova tentativa de cobrança agendada com sucesso.",
+      "failed": "Não foi possível reprocessar a cobrança externa.",
+      "notAvailable": "Este pagamento não é elegível para reprocessamento.",
+      "alreadyCreated": "A cobrança externa já foi criada com sucesso.",
+      "gatewayUnavailable": "O provedor de pagamento parece estar indisponível.",
+      "paymentFinalized": "Este pagamento já foi finalizado (aprovado, cancelado ou falhou permanentemente)."
     },
     "confirmCancel": {
       "title": "Cancelar pagamento",
@@ -696,6 +783,7 @@
       "operations": "Operação",
       "platform": "Plataforma",
       "tenants": "Tenants da Plataforma",
+      "gatewayConnections": "Integrações de Gateways",
       "audit": "Auditoria Global"
     },
     "audit": {
@@ -705,6 +793,13 @@
         "INFO": "Info",
         "WARNING": "Aviso",
         "CRITICAL": "Crítico"
+      },
+      "actorType": {
+        "USER": "Usuário",
+        "PLATFORM_ADMIN": "Administrador da Plataforma",
+        "SYSTEM": "Sistema",
+        "WEBHOOK": "Webhook",
+        "WORKER": "Worker"
       },
       "table": {
         "occurredAt": "Data/Hora",
@@ -766,6 +861,57 @@
       },
       "overviewEmpty": "A visão geral estará disponível em breve.",
       "recentAudit": "Auditoria Recente"
+    },
+    "async": {
+      "description": "Gerenciamento da fila de tarefas assíncronas do sistema",
+      "filters": {
+        "tenant": "Tenant ID",
+        "status": "Status",
+        "eventType": "Tipo de Evento",
+        "apply": "Filtrar"
+      },
+      "table": {
+        "occurredAt": "Criado Em",
+        "tenant": "Tenant",
+        "eventType": "Tipo",
+        "status": "Status",
+        "actions": "Ações"
+      },
+      "actions": {
+        "replay": "Replay"
+      },
+      "empty": {
+        "title": "Nenhuma operação assíncrona encontrada"
+      },
+      "replay": {
+        "title": "Reexecutar Operação",
+        "message": "Tem certeza que deseja recriar a operação {id}?",
+        "confirm": "Confirmar",
+        "success": "Operação adicionada à fila com sucesso",
+        "failed": "Falha ao solicitar o replay da operação"
+      }
+    },
+    "gateways": {
+      "title": "Integrações de Gateways",
+      "description": "Visão geral das conexões de gateway dos tenants.",
+      "table": {
+        "tenant": "Tenant",
+        "provider": "Provedor",
+        "environment": "Ambiente",
+        "status": "Status",
+        "methods": "Métodos",
+        "health": "Saúde",
+        "updatedAt": "Atualizado em"
+      },
+      "actions": {
+        "suspend": "Suspender",
+        "reactivate": "Reativar"
+      },
+      "suspend": {
+        "reason": "Motivo da Suspensão",
+        "success": "Conexão suspensa com sucesso.",
+        "failed": "Falha ao suspender a conexão."
+      }
     }
   },
   "platformTenants": {
@@ -870,5 +1016,106 @@
     "activity": {
       "empty": "Nenhuma atividade recente encontrada."
     }
+  },
+  "gateways": {
+    "title": "Integrações de Pagamento",
+    "description": "Gerencie as conexões de gateway da sua organização",
+    "empty": {
+      "title": "Nenhum gateway configurado",
+      "description": "Conecte um gateway para processar pagamentos externos."
+    },
+    "asaas": {
+      "title": "Asaas",
+      "sandbox": "Sandbox",
+      "connect": "Conectar Asaas Sandbox",
+      "connecting": "Conectando...",
+      "connected": "Conectado",
+      "connectionFailed": "Falha na conexão"
+    },
+    "mercadoPago": {
+      "title": "Mercado Pago",
+      "description": "Conecte sua conta para receber pagamentos pelo Mercado Pago.",
+      "comingSoon": "Em breve",
+      "connect": "Conectar Mercado Pago",
+      "connecting": "Conectando...",
+      "connected": "Conectado",
+      "connectionFailed": "Falha na conexão"
+    },
+    "form": {
+      "provider": "Provedor",
+      "displayName": "Nome de Exibição",
+      "environment": "Ambiente",
+      "priority": "Prioridade",
+      "supportedMethods": "Métodos Suportados",
+      "apiKey": "API Key",
+      "apiKeyHint": "Sua chave de API do Asaas",
+      "credentialsConfigured": "Credenciais Configuradas",
+      "save": "Salvar Configurações",
+      "updateCredentials": "Atualizar Credenciais"
+    },
+    "status": {
+      "ACTIVE": "Ativo",
+      "INACTIVE": "Inativo",
+      "DISABLED": "Desabilitado"
+    },
+    "connection": {
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "disabled": "Desabilitado"
+    },
+    "health": {
+      "UNKNOWN": "Desconhecido",
+      "HEALTHY": "Saudável",
+      "ATTENTION": "Atenção",
+      "CRITICAL": "Crítico"
+    },
+    "actions": {
+      "connect": "Conectar conta",
+      "edit": "Editar configuração",
+      "activate": "Reativar conexão",
+      "deactivate": "Desativar conexão",
+      "updateCredentials": "Atualizar API Key",
+      "disconnect": "Desconectar permanentemente"
+    },
+    "credentials": {
+      "updateTitle": "Atualizar credencial Asaas",
+      "newApiKey": "Nova API Key",
+      "confirmUpdate": "Confirmar atualização",
+      "updated": "Credenciais atualizadas com segurança.",
+      "validationFailed": "Não foi possível validar e proteger a credencial informada.",
+      "invalid": "Credencial inválida ou malformada.",
+      "configured": "Configuradas"
+    },
+    "deactivate": {
+      "title": "Desativar conexão",
+      "message": "Desativar esta integração impedirá novas cobranças externas por ela. Pagamentos, eventos e histórico existentes serão preservados.",
+      "confirm": "Desativar conexão",
+      "success": "Conexão desativada com sucesso."
+    },
+    "disconnect": {
+      "title": "Desconectar permanentemente",
+      "message": "Esta ação remove permanentemente a credencial armazenada. Novas cobranças não poderão ser criadas até que uma nova credencial seja configurada.",
+      "confirmLabel": "Digite DESCONECTAR para confirmar.",
+      "confirmValue": "DESCONECTAR",
+      "success": "Conexão desconectada permanentemente."
+    },
+    "messages": {
+      "created": "Conexão criada com sucesso.",
+      "updated": "Configurações atualizadas.",
+      "credentialsUpdated": "Credenciais atualizadas com segurança.",
+      "statusUpdated": "Status da conexão alterado.",
+      "notConfigured": "Não configurado",
+      "errorConnecting": "Erro ao conectar com gateway"
+    }
+  },
+  "features": {
+    "gatewayConnections": "Gateway Connections",
+    "asaasGateway": "Asaas Gateway",
+    "mercadoPagoGateway": "Mercado Pago Gateway",
+    "multiGateway": "Multi Gateway",
+    "inventoryManagement": "Inventory Management",
+    "commerceChannels": "Commerce Channels",
+    "reconciliation": "Reconciliation",
+    "advancedReports": "Advanced Reports"
   }
 }

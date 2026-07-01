@@ -129,7 +129,10 @@
     "comingSoon": "Coming Soon",
     "roles": "Roles",
     "permissions": "Permissions",
-    "tenantSettings": "Organization"
+    "tenantSettings": "Organization",
+    "platformAsyncOperations": "Async Operations",
+    "gatewayConnections": "Payment Integrations",
+    "platformGatewayConnections": "Integrations"
   },
   "users": {
     "title": "Users",
@@ -238,6 +241,7 @@
     }
   },
   "common": {
+    "all": "All",
     "logout": "Logout",
     "loggingOut": "Logging out...",
     "loading": "Loading...",
@@ -293,15 +297,21 @@
     "description": "List of all available global permissions in the system.",
     "searchPlaceholder": "Search permissions...",
     "list": {
-      "auth": { "login": "Perform login" },
+      "auth": {
+        "login": "Perform login"
+      },
       "users": {
         "create": "Create users",
         "read": "View users",
         "update": "Update users",
         "delete": "Delete users"
       },
-      "roles": { "manage": "Manage roles and permissions" },
-      "permissions": { "read": "View permissions" },
+      "roles": {
+        "manage": "Manage roles and permissions"
+      },
+      "permissions": {
+        "read": "View permissions"
+      },
       "customers": {
         "create": "Create customers",
         "read": "View customers",
@@ -314,12 +324,24 @@
         "cancel": "Cancel payments",
         "refund": "Refund payments"
       },
-      "reports": { "export": "Export reports" },
-      "webhooks": { "manage": "Manage webhooks" },
-      "api-keys": { "manage": "Manage API keys" },
-      "gateways": { "manage": "Manage gateways" },
-      "notifications": { "read": "View notifications" },
-      "audit": { "read": "View audit trail" },
+      "reports": {
+        "export": "Export reports"
+      },
+      "webhooks": {
+        "manage": "Manage webhooks"
+      },
+      "api-keys": {
+        "manage": "Manage API keys"
+      },
+      "gateways": {
+        "manage": "Manage gateways"
+      },
+      "notifications": {
+        "read": "View notifications"
+      },
+      "audit": {
+        "read": "View audit trail"
+      },
       "tenant": {
         "read": "View basic tenant data",
         "update": "Update tenant settings"
@@ -332,15 +354,23 @@
           "update": "Update platform tenants",
           "status": "Change status of platform tenants",
           "invite": "Invite and resend tenant invitations",
-          "overview": { "read": "View operational summary of platform tenants" },
-          "health": { "read": "View operational health of platform tenants" }
+          "overview": {
+            "read": "View operational summary of platform tenants"
+          },
+          "health": {
+            "read": "View operational health of platform tenants"
+          }
         },
         "subscriptions": {
           "read": "View platform subscriptions",
           "update": "Update platform subscriptions"
         },
-        "audit": { "read": "View global platform audit logs" },
-        "support": { "read": "View tenant support summary" }
+        "audit": {
+          "read": "View global platform audit logs"
+        },
+        "support": {
+          "read": "View tenant support summary"
+        }
       }
     },
     "table": {
@@ -367,11 +397,26 @@
     "title": "Roles Management",
     "description": "View the access roles for your tenant.",
     "list": {
-      "OWNER": { "name": "Owner", "description": "Full access account owner" },
-      "FINANCE_OPERATOR": { "name": "Finance", "description": "Financial operator" },
-      "SUPPORT_VIEWER": { "name": "Support", "description": "Read-only access for support" },
-      "DEVELOPER": { "name": "Developer", "description": "Technical management (API, Webhooks)" },
-      "PLATFORM_OWNER": { "name": "Platform Owner", "description": "General platform administrator" }
+      "OWNER": {
+        "name": "Owner",
+        "description": "Full access account owner"
+      },
+      "FINANCE_OPERATOR": {
+        "name": "Finance",
+        "description": "Financial operator"
+      },
+      "SUPPORT_VIEWER": {
+        "name": "Support",
+        "description": "Read-only access for support"
+      },
+      "DEVELOPER": {
+        "name": "Developer",
+        "description": "Technical management (API, Webhooks)"
+      },
+      "PLATFORM_OWNER": {
+        "name": "Platform Owner",
+        "description": "General platform administrator"
+      }
     },
     "table": {
       "name": "Name",
@@ -545,7 +590,11 @@
       "search": "Search",
       "clearFilters": "Clear",
       "tryAgain": "Try again",
-      "close": "Close"
+      "close": "Close",
+      "retryExternalCharge": "Try Again",
+      "retryingExternalCharge": "Trying...",
+      "openGatewaySettings": "Open Integrations",
+      "refreshPayment": "Refresh Status"
     },
     "filters": {
       "searchLabel": "Search by reference, customer...",
@@ -557,12 +606,36 @@
       "statusAll": "All",
       "methodAll": "All"
     },
+    "externalProcessing": {
+      "title": "External Integration",
+      "status": {
+        "NOT_REQUIRED": "Not Applicable",
+        "NOT_STARTED": "Not Started",
+        "PROCESSING": "Processing",
+        "RETRY_SCHEDULED": "Retry Scheduled",
+        "SUCCEEDED": "Succeeded",
+        "FAILED": "External Failure",
+        "DEAD_LETTERED": "Permanent Failure"
+      },
+      "message": {
+        "processing": "The charge is being created in the payment gateway.",
+        "retryScheduled": "A new creation attempt is scheduled.",
+        "succeeded": "Charge successfully created in the gateway.",
+        "failed": "The creation attempt in the gateway failed.",
+        "credentialInvalid": "The configured gateway credentials appear to be invalid.",
+        "gatewayNotConfigured": "There is no gateway configured for this method.",
+        "methodNotSupported": "This gateway does not support the selected method.",
+        "environmentNotAllowed": "This gateway is not allowed for the current environment.",
+        "providerUnavailable": "The payment provider is temporarily unavailable."
+      }
+    },
     "table": {
       "reference": "Reference",
       "customer": "Customer",
       "amount": "Amount",
       "method": "Method",
       "status": "Status",
+      "integration": "Integration",
       "createdAt": "Created At",
       "actions": "Actions"
     },
@@ -584,6 +657,8 @@
         "customerRequired": "Customer is required.",
         "amountRequired": "Amount is required.",
         "amountInvalid": "Invalid amount.",
+        "notFound": "There is no active gateway configured for Pix payments in this environment.",
+        "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations.",
         "methodRequired": "Method is required.",
         "dateRangeInvalid": "Invalid date range."
       }
@@ -609,8 +684,9 @@
       "pixCopyPaste": "Pix Copy and Paste",
       "expiresAt": "Expires at",
       "expiredWarning": "Expired. Please create a new payment.",
-      "bankSlip": "Bank Slip",
-      "bankSlipDescription": "Click the button below to open your secure bank slip.",
+      "bankSlipDescription": "A bank slip has been generated for this payment. Click the button below to open and view the slip.",
+      "asyncProcessing": "Processing external charge",
+      "asyncFailed": "Failed to create external charge",
       "openBankSlip": "Open Bank Slip",
       "dueDate": "Due Date",
       "noInstructions": "Payment instructions are not available yet.",
@@ -674,11 +750,21 @@
       "cancelFailed": "Failed to cancel payment.",
       "invalidStatus": "This payment can no longer be canceled in its current status.",
       "customerRequired": "Customer required.",
-      "amountInvalid": "Invalid amount."
+      "amountInvalid": "Invalid amount.",
+      "notFound": "There is no active gateway configured for Pix payments in this environment.",
+      "gatewayNotFound": "No active payment gateway configuration found for this method in the selected environment. Configure the gateway in Settings > Platform > Integrations."
     },
     "toast": {
       "created": "Payment created successfully.",
       "canceled": "Payment canceled successfully."
+    },
+    "retry": {
+      "success": "New charge attempt scheduled successfully.",
+      "failed": "Could not reprocess the external charge.",
+      "notAvailable": "This payment is not eligible for reprocessing.",
+      "alreadyCreated": "The external charge was already successfully created.",
+      "gatewayUnavailable": "The payment provider seems to be unavailable.",
+      "paymentFinalized": "This payment is already finalized (approved, canceled, or permanently failed)."
     },
     "confirmCancel": {
       "title": "Cancel payment",
@@ -697,6 +783,7 @@
       "operations": "Operations",
       "platform": "Platform",
       "tenants": "Platform Tenants",
+      "gatewayConnections": "Gateway Integrations",
       "audit": "Global Audit"
     },
     "audit": {
@@ -706,6 +793,13 @@
         "INFO": "Info",
         "WARNING": "Warning",
         "CRITICAL": "Critical"
+      },
+      "actorType": {
+        "USER": "User",
+        "PLATFORM_ADMIN": "Platform Admin",
+        "SYSTEM": "System",
+        "WEBHOOK": "Webhook",
+        "WORKER": "Worker"
       },
       "table": {
         "occurredAt": "Date/Time",
@@ -767,6 +861,57 @@
       },
       "overviewEmpty": "The overview will be available soon.",
       "recentAudit": "Recent Audit"
+    },
+    "async": {
+      "description": "System asynchronous task queue management",
+      "filters": {
+        "tenant": "Tenant ID",
+        "status": "Status",
+        "eventType": "Event Type",
+        "apply": "Filter"
+      },
+      "table": {
+        "occurredAt": "Created At",
+        "tenant": "Tenant",
+        "eventType": "Type",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "replay": "Replay"
+      },
+      "empty": {
+        "title": "No async operations found"
+      },
+      "replay": {
+        "title": "Replay Operation",
+        "message": "Are you sure you want to replay operation {id}?",
+        "confirm": "Confirm",
+        "success": "Operation queued successfully",
+        "failed": "Failed to replay operation"
+      }
+    },
+    "gateways": {
+      "title": "Gateway Integrations",
+      "description": "Overview of tenant gateway connections.",
+      "table": {
+        "tenant": "Tenant",
+        "provider": "Provider",
+        "environment": "Environment",
+        "status": "Status",
+        "methods": "Methods",
+        "health": "Health",
+        "updatedAt": "Updated At"
+      },
+      "actions": {
+        "suspend": "Suspend",
+        "reactivate": "Reactivate"
+      },
+      "suspend": {
+        "reason": "Suspension Reason",
+        "success": "Connection suspended successfully.",
+        "failed": "Failed to suspend connection."
+      }
     }
   },
   "platformTenants": {
@@ -871,5 +1016,106 @@
     "activity": {
       "empty": "No recent activity found."
     }
+  },
+  "gateways": {
+    "title": "Payment Integrations",
+    "description": "Manage your organization gateway connections",
+    "empty": {
+      "title": "No gateway configured",
+      "description": "Connect a gateway to process external payments."
+    },
+    "asaas": {
+      "title": "Asaas",
+      "sandbox": "Sandbox",
+      "connect": "Connect Asaas Sandbox",
+      "connecting": "Connecting...",
+      "connected": "Connected",
+      "connectionFailed": "Connection Failed"
+    },
+    "mercadoPago": {
+      "title": "Mercado Pago",
+      "description": "Connect your account to receive payments via Mercado Pago.",
+      "comingSoon": "Coming soon",
+      "connect": "Connect Mercado Pago",
+      "connecting": "Connecting...",
+      "connected": "Connected",
+      "connectionFailed": "Connection Failed"
+    },
+    "form": {
+      "provider": "Provider",
+      "displayName": "Display Name",
+      "environment": "Environment",
+      "priority": "Priority",
+      "supportedMethods": "Supported Methods",
+      "apiKey": "API Key",
+      "apiKeyHint": "Your Asaas API Key",
+      "credentialsConfigured": "Credentials Configured",
+      "save": "Save Settings",
+      "updateCredentials": "Update Credentials"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "DISABLED": "Disabled"
+    },
+    "connection": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "disabled": "Disabled"
+    },
+    "health": {
+      "UNKNOWN": "Unknown",
+      "HEALTHY": "Healthy",
+      "ATTENTION": "Attention",
+      "CRITICAL": "Critical"
+    },
+    "actions": {
+      "connect": "Connect account",
+      "edit": "Edit configuration",
+      "activate": "Reactivate connection",
+      "deactivate": "Deactivate connection",
+      "updateCredentials": "Update API Key",
+      "disconnect": "Disconnect permanently"
+    },
+    "credentials": {
+      "updateTitle": "Update Asaas credential",
+      "newApiKey": "New API Key",
+      "confirmUpdate": "Confirm update",
+      "updated": "Credentials securely updated.",
+      "validationFailed": "Could not validate and protect the provided credential.",
+      "invalid": "Invalid or malformed credential.",
+      "configured": "Configured"
+    },
+    "deactivate": {
+      "title": "Deactivate connection",
+      "message": "Deactivating this integration will prevent new external charges through it. Existing payments, events, and history will be preserved.",
+      "confirm": "Deactivate connection",
+      "success": "Connection successfully deactivated."
+    },
+    "disconnect": {
+      "title": "Disconnect permanently",
+      "message": "This action permanently removes the stored credential. New charges cannot be created until a new credential is configured.",
+      "confirmLabel": "Type DISCONNECT to confirm.",
+      "confirmValue": "DISCONNECT",
+      "success": "Connection permanently disconnected."
+    },
+    "messages": {
+      "created": "Connection created successfully.",
+      "updated": "Settings updated.",
+      "credentialsUpdated": "Credentials securely updated.",
+      "statusUpdated": "Connection status updated.",
+      "notConfigured": "Not configured",
+      "errorConnecting": "Error connecting with gateway"
+    }
+  },
+  "features": {
+    "gatewayConnections": "Gateway Connections",
+    "asaasGateway": "Asaas Gateway",
+    "mercadoPagoGateway": "Mercado Pago Gateway",
+    "multiGateway": "Multi Gateway",
+    "inventoryManagement": "Inventory Management",
+    "commerceChannels": "Commerce Channels",
+    "reconciliation": "Reconciliation",
+    "advancedReports": "Advanced Reports"
   }
 }

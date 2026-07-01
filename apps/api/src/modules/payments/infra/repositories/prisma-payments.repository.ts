@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { Payment, PaymentEvent, Prisma, PaymentStatus } from '@prisma/client';
@@ -12,9 +14,7 @@ import {
 export class PrismaPaymentsRepository implements IPaymentsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findPaginated(
-    params: ListPaymentsParams,
-  ): Promise<PaginatedResult<Payment>> {
+  async findPaginated(params: ListPaymentsParams): Promise<PaginatedResult<Payment>> {
     const {
       tenantId,
       page = 1,
@@ -78,10 +78,7 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
     };
   }
 
-  async findByIdAndTenant(
-    id: string,
-    tenantId: string,
-  ): Promise<Payment | null> {
+  async findByIdAndTenant(id: string, tenantId: string): Promise<Payment | null> {
     return this.prisma.payment
       .findUnique({
         where: { id },
@@ -137,7 +134,39 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
     });
   }
 
-  async create(data: Prisma.PaymentUncheckedCreateInput): Promise<Payment> {
+  async create(data: Prisma.PaymentUncheckedCreateInput, outboxEventData?: any): Promise<Payment> {
+    if (outboxEventData) {
+      return this.prisma.$transaction(async (tx) => {
+        const payment = await tx.payment.create({
+          data,
+          include: {
+            customer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        });
+
+        if (
+          outboxEventData.payload &&
+          outboxEventData.payload.paymentId === 'WILL_BE_REPLACED_IN_REPOSITORY_TRANSACTION'
+        ) {
+          outboxEventData.payload.paymentId = payment.id;
+        }
+
+        await tx.outboxEvent.create({
+          data: {
+            ...outboxEventData,
+            aggregateId: payment.id,
+          },
+        });
+
+        return payment;
+      });
+    }
+
     return this.prisma.payment.create({
       data,
       include: {
@@ -150,7 +179,6 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
       },
     });
   }
-
   async cancel(
     id: string,
     tenantId: string,
@@ -209,9 +237,7 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
     });
   }
 
-  async createEvent(
-    data: Prisma.PaymentEventUncheckedCreateInput,
-  ): Promise<PaymentEvent> {
+  async createEvent(data: Prisma.PaymentEventUncheckedCreateInput): Promise<PaymentEvent> {
     return this.prisma.paymentEvent.create({ data });
   }
 }

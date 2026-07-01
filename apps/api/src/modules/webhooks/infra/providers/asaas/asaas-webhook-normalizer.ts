@@ -17,14 +17,19 @@ export class AsaasWebhookNormalizer implements ProviderWebhookNormalizer {
   ): Promise<NormalizedWebhookEvent> {
     const { payload, receivedAt } = input;
 
-    if (!payload || !payload.id || !payload.event) {
-      throw new WebhookPayloadInvalidError(
-        'Payload Asaas inválido ou incompleto.',
-      );
+    if (!payload || !payload.id) {
+      throw new WebhookPayloadInvalidError('Payload Asaas sem id.');
     }
 
     const providerEventId = payload.id;
-    const rawProviderEventType = payload.event;
+    const rawProviderEventType = payload.event || 'INVALID_EVENT_TYPE';
+    let isInvalid = false;
+    let invalidReason: string | undefined = undefined;
+
+    if (!payload.event) {
+      isInvalid = true;
+      invalidReason = 'Payload Asaas sem event type';
+    }
 
     // Normalize status
     const normalizedPaymentStatus =
@@ -72,6 +77,8 @@ export class AsaasWebhookNormalizer implements ProviderWebhookNormalizer {
       payloadHash,
       payloadSummary,
       rawProviderEventType,
+      isInvalid,
+      invalidReason,
     };
   }
 }

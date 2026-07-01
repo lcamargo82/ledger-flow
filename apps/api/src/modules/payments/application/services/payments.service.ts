@@ -5,7 +5,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PaymentStatus } from '@prisma/client';
+import { PaymentStatus, PaymentExecutionMode } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { PrismaPaymentsRepository } from '../../infra/repositories/prisma-payments.repository';
@@ -15,6 +15,8 @@ import { CreatePaymentDto } from '../dto/create-payment.dto';
 import { ListPaymentsQueryDto } from '../dto/list-payments-query.dto';
 import { RefundPaymentDto } from '../dto/refund-payment.dto';
 import { GatewayPaymentOrchestrationService } from '../../../gateways/application/services/gateway-payment-orchestration.service';
+import { PaymentGatewayResolverService } from '../../../gateways/application/services/payment-gateway-resolver.service';
+import { PaymentsExternalProcessingService } from './payments-external-processing.service';
 
 @Injectable()
 export class PaymentsService {
@@ -23,6 +25,8 @@ export class PaymentsService {
     private readonly referenceService: PaymentReferenceService,
     private readonly prisma: PrismaService, // Needed for audit log outside the repository if not separated
     private readonly gatewayOrchestrator: GatewayPaymentOrchestrationService,
+    private readonly gatewayResolver: PaymentGatewayResolverService,
+    private readonly externalProcessingService: PaymentsExternalProcessingService,
   ) {}
 
   async createPayment(
@@ -68,11 +72,47 @@ export class PaymentsService {
       throw new NotFoundException('Customer not found or inactive.');
     }
 
+    const executionMode = data.executionMode || PaymentExecutionMode.EXTERNAL_GATEWAY;
+
+    let gatewayConfigurationId: string | undefined = undefined;
+    let provider: string | undefined = undefined;
+
+    if (executionMode === PaymentExecutionMode.EXTERNAL_GATEWAY) {
+      const resolved = await this.gatewayResolver.resolveByMethod(tenantId, data.method);
+      gatewayConfigurationId = resolved.configuration.id;
+      provider = resolved.configuration.provider;
+    }
+
     // Determine dueDate
     const dueDate = data.dueDate ? new Date(data.dueDate) : undefined;
 
     // Create Payment (starts as PENDING)
     const reference = this.referenceService.generateReference();
+    
+    let outboxEventData: any = undefined;
+
+    if (executionMode === PaymentExecutionMode.EXTERNAL_GATEWAY) {
+      // Prepare Outbox Event (Secure payload, only references)
+      const eventPayload = {
+        paymentId: 'WILL_BE_REPLACED_IN_REPOSITORY_TRANSACTION',
+        tenantId,
+        gatewayConfigurationId,
+        eventVersion: 1,
+      };
+      
+      const payloadHash = crypto.createHash('sha256').update(JSON.stringify(eventPayload)).digest('hex');
+
+      outboxEventData = {
+        tenantId,
+        aggregateType: 'Payment',
+        // aggregateId will be populated in repository
+        eventType: 'payment.provider_charge_creation_requested',
+        eventVersion: 1,
+        payload: eventPayload, // Repositories should replace paymentId
+        payloadHash,
+      };
+    }
+
     const payment = await this.paymentsRepository.create({
       tenantId,
       customerId: data.customerId,
@@ -80,6 +120,9 @@ export class PaymentsService {
       amount: data.amount,
       currency: data.currency || 'BRL',
       method: data.method,
+      executionMode,
+      gatewayConfigurationId,
+      provider: provider as any,
       description: data.description,
       dueDate,
       metadata: data.metadata as any,
@@ -93,10 +136,7 @@ export class PaymentsService {
           message: 'Payment created',
         },
       },
-    });
-
-    // Gateway Orchestration
-    const orchestratedPayment = await this.gatewayOrchestrator.orchestrate(tenantId, payment, customer, actorUserId);
+    }, outboxEventData);
 
     // Audit Log
     await this.auditLog(tenantId, actorUserId, 'payment.created', payment.id, {
@@ -107,14 +147,17 @@ export class PaymentsService {
       status: payment.status,
     });
 
-    return orchestratedPayment;
+    return payment;
   }
 
   async listPayments(tenantId: string, query: ListPaymentsQueryDto) {
-    return this.paymentsRepository.findPaginated({
+    const paginated = await this.paymentsRepository.findPaginated({
       tenantId,
       ...query,
     });
+
+    paginated.data = await this.externalProcessingService.enrichMany(tenantId, paginated.data);
+    return paginated;
   }
 
   async getPaymentDetails(id: string, tenantId: string) {
@@ -124,7 +167,8 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found.');
     }
 
-    return payment;
+    const [enriched] = await this.externalProcessingService.enrichMany(tenantId, [payment]);
+    return enriched;
   }
 
   async getPaymentInstructions(id: string, tenantId: string) {
@@ -225,6 +269,105 @@ export class PaymentsService {
     });
 
     return updatedPayment;
+  }
+
+  async retryExternalCharge(id: string, tenantId: string, actorUserId: string) {
+    const payment = await this.paymentsRepository.findByIdAndTenant(id, tenantId);
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found.');
+    }
+
+    if (payment.executionMode !== PaymentExecutionMode.EXTERNAL_GATEWAY) {
+      throw new BadRequestException('Apenas pagamentos de gateways externos podem ser reprocessados.');
+    }
+
+    if (payment.providerPaymentId) {
+      throw new ConflictException('A cobrança já foi criada no gateway com sucesso.');
+    }
+
+    if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.PROCESSING) {
+      throw new ConflictException(`Não é possível reprocessar um pagamento com status ${payment.status}.`);
+    }
+
+    const [enriched] = await this.externalProcessingService.enrichMany(tenantId, [payment]);
+    
+    if (!enriched.externalProcessing.retryAvailable) {
+      throw new ConflictException('O pagamento não está elegível para tentativa manual de reprocessamento no momento.');
+    }
+
+    const resolved = await this.gatewayResolver.resolveByMethod(tenantId, payment.method);
+    const config = resolved.configuration;
+    
+    if (config.id !== payment.gatewayConfigurationId || config.provider !== payment.provider) {
+      // Configuration might have changed, we update payment to match the active one
+      await this.prisma.payment.update({
+        where: { id: payment.id },
+        data: {
+          gatewayConfigurationId: config.id,
+          provider: config.provider as any,
+        }
+      });
+    }
+
+    // Find previous outbox event for replayOfEventId
+    const previousOutbox = await this.prisma.outboxEvent.findFirst({
+      where: { aggregateId: payment.id, aggregateType: 'Payment', eventType: 'payment.provider_charge_creation_requested' },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const eventPayload = {
+      paymentId: payment.id,
+      tenantId,
+      gatewayConfigurationId: config.id,
+      eventVersion: 1,
+    };
+    
+    const payloadHash = crypto.createHash('sha256').update(JSON.stringify(eventPayload)).digest('hex');
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.outboxEvent.create({
+        data: {
+          tenantId,
+          aggregateId: payment.id,
+          aggregateType: 'Payment',
+          eventType: 'payment.provider_charge_creation_requested',
+          eventVersion: 1,
+          payload: eventPayload,
+          payloadHash,
+          replayOfEventId: previousOutbox?.id,
+        },
+      });
+
+      await tx.paymentEvent.create({
+        data: {
+          paymentId: payment.id,
+          tenantId,
+          type: 'payment.provider_retry_requested',
+          currentStatus: payment.status,
+          message: 'Solicitado reprocessamento manual da criação de cobrança externa',
+        }
+      });
+      
+      await tx.auditLog.create({
+        data: {
+          tenantId,
+          actorUserId,
+          action: 'payment.provider_charge_retry_requested',
+          entityType: 'PAYMENT',
+          entityId: payment.id,
+          metadata: {
+            reference: payment.reference,
+            provider: config.provider,
+            gatewayConfigurationId: config.id,
+            replayOfEventId: previousOutbox?.id,
+          }
+        }
+      });
+    });
+
+    const [updatedEnriched] = await this.externalProcessingService.enrichMany(tenantId, [payment]);
+    return updatedEnriched;
   }
 
   private async auditLog(

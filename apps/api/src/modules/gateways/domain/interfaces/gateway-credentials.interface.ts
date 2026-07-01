@@ -10,5 +10,10 @@ export interface GatewayCredentials {
 }
 
 export interface EncryptedGatewayCredentials {
-  encryptedData: string;
+  version?: number;
+  algorithm?: string;
+  iv?: string;
+  authTag?: string;
+  ciphertext?: string;
+  encryptedData?: string; // Legacy format
 }

@@ -65,6 +65,15 @@
           <span class="text" v-show="!isCollapsed">{{ t('nav.tenantSettings') }}</span>
         </router-link>
         <router-link 
+          v-if="authStore.checkAllPermissions(['gateways:read'])" 
+          to="/settings/gateway-connections" 
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_balance_wallet</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.gatewayConnections') }}</span>
+        </router-link>
+        <router-link 
           v-if="authStore.checkAllPermissions(['payments:read'])" 
           to="/payments" 
           class="lf-nav-item"
@@ -90,6 +99,14 @@
           >
             <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">domain</span>
             <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.tenants') }}</span>
+          </router-link>
+          <router-link 
+            to="/platform/gateway-connections" 
+            class="lf-nav-item"
+            active-class="lf-nav-item--active"
+          >
+            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">settings_input_component</span>
+            <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.gatewayConnections') }}</span>
           </router-link>
           <router-link 
             v-if="authStore.checkAllPermissions(['platform:audit:read'])"

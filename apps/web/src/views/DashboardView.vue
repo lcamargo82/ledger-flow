@@ -3,13 +3,7 @@
     <AppPageHeader
       :title="t('nav.dashboard')"
       :description="t('dashboard.welcome', { name: authStore.userName })"
-    >
-      <template #actions>
-        <AppButton variant="primary" @click="handleNewPayment">
-          {{ t('dashboard.newPayment') }}
-        </AppButton>
-      </template>
-    </AppPageHeader>
+    />
 
     <div class="lf-dashboard-hero">
       <img :src="brandAssets.appHeader" alt="LedgerFlow Dashboard" class="lf-dashboard-hero-img" />
@@ -67,7 +61,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '../stores/auth.store';
 import { useI18n } from '../composables/useI18n';
-import { useToastStore } from '../stores/toast.store';
 import { brandAssets } from '../config/brand';
 
 import AppCard from '../components/common/AppCard.vue';
@@ -76,12 +69,7 @@ import AppBadge from '../components/common/AppBadge.vue';
 import AppButton from '../components/common/AppButton.vue';
 
 const authStore = useAuthStore();
-const toastStore = useToastStore();
 const { t } = useI18n();
-
-const handleNewPayment = () => {
-  toastStore.info(t('toast.actionNotImplemented'));
-};
 </script>
 
 <style scoped>

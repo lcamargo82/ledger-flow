@@ -1,3 +1,9 @@
+import { OnModuleInit } from '@nestjs/common';
+import { AsyncModule } from '../async/async.module';
+import { AuthModule } from '../auth/auth.module';
+
+import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
+import { CreateProviderChargeAsyncHandler } from './application/async-handlers/create-provider-charge.async-handler';
 import { Module } from '@nestjs/common';
 import { PaymentGatewayFactoryService } from './application/services/payment-gateway-factory.service';
 import { PaymentGatewayResolverService } from './application/services/payment-gateway-resolver.service';
@@ -5,19 +11,30 @@ import { GatewayConfigurationsRepository } from './domain/repositories/gateway-c
 import { PrismaGatewayConfigurationsRepository } from './infra/repositories/prisma-gateway-configurations.repository';
 import { StripePaymentGatewayAdapter } from './infra/adapters/stripe-payment-gateway.adapter';
 import { AsaasPaymentGatewayAdapter } from './infra/adapters/asaas-payment-gateway.adapter';
-import { MercadoPagoPaymentGatewayAdapter } from './infra/adapters/mercado-pago-payment-gateway.adapter';
+import { MercadoPagoPaymentGatewayAdapter } from './infra/providers/mercado-pago/mercado-pago-payment-gateway.adapter';
 import { PagBankPaymentGatewayAdapter } from './infra/adapters/pagbank-payment-gateway.adapter';
 import { PagarmePaymentGatewayAdapter } from './infra/adapters/pagarme-payment-gateway.adapter';
 import { GatewayCredentialsEncryptionService } from './application/services/gateway-credentials-encryption.service';
 import { Aes256GcmCredentialsEncryptionService } from './infra/crypto/aes-256-gcm-credentials-encryption.service';
+import { GatewayConnectionsService } from './application/services/gateway-connections.service';
+import { GatewayConnectionsController } from './presentation/controllers/gateway-connections.controller';
+import { TenantsModule } from '../tenants/tenants.module';
 import { IProviderCustomerReferenceRepository } from './domain/interfaces/provider-customer-reference.repository';
 import { PrismaGatewayCustomerReferenceRepository } from './infra/repositories/prisma-gateway-customer-reference.repository';
 import { AsaasApiClient } from './infra/clients/asaas-api.client';
 import { GatewayCustomerSyncService } from './application/services/gateway-customer-sync.service';
 import { GatewayPaymentOrchestrationService } from './application/services/gateway-payment-orchestration.service';
+import { MercadoPagoApiClient } from './infra/providers/mercado-pago/mercado-pago-api.client';
+import { MercadoPagoOAuthStateService } from './infra/providers/mercado-pago/mercado-pago-oauth-state.service';
+import { MercadoPagoOAuthService } from './infra/providers/mercado-pago/mercado-pago-oauth.service';
+import { MercadoPagoOAuthController } from './presentation/controllers/mercado-pago-oauth.controller';
 
 @Module({
+  imports: [AsyncModule, AuthModule, TenantsModule],
+  controllers: [MercadoPagoOAuthController, GatewayConnectionsController],
   providers: [
+    CreateProviderChargeAsyncHandler,
+    GatewayConnectionsService,
     {
       provide: GatewayConfigurationsRepository,
       useClass: PrismaGatewayConfigurationsRepository,
@@ -31,6 +48,7 @@ import { GatewayPaymentOrchestrationService } from './application/services/gatew
       useClass: PrismaGatewayCustomerReferenceRepository,
     },
     AsaasApiClient,
+    MercadoPagoApiClient,
     GatewayCustomerSyncService,
     GatewayPaymentOrchestrationService,
     PaymentGatewayFactoryService,
@@ -40,6 +58,8 @@ import { GatewayPaymentOrchestrationService } from './application/services/gatew
     MercadoPagoPaymentGatewayAdapter,
     PagBankPaymentGatewayAdapter,
     PagarmePaymentGatewayAdapter,
+    MercadoPagoOAuthStateService,
+    MercadoPagoOAuthService,
   ],
   exports: [
     PaymentGatewayResolverService,
@@ -47,4 +67,13 @@ import { GatewayPaymentOrchestrationService } from './application/services/gatew
     GatewayPaymentOrchestrationService,
   ],
 })
-export class GatewaysModule {}
+export class GatewaysModule implements OnModuleInit {
+  constructor(
+    private readonly registry: AsyncHandlerRegistryService,
+    private readonly createProviderChargeHandler: CreateProviderChargeAsyncHandler,
+  ) {}
+
+  onModuleInit() {
+    this.registry.register(this.createProviderChargeHandler);
+  }
+}

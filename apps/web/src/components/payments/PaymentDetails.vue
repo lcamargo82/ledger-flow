@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from '../../composables/useI18n';
 import type { PaymentDetails } from '../../types/payments.types';
 import { formatDateTime } from '../../utils/date-format';
@@ -65,7 +66,46 @@ const getEventTranslation = (type: string) => {
     case 'payment.canceled': return t('payments.events.paymentCanceled');
     case 'payment.refund_requested': return t('payments.events.paymentRefundRequested');
     case 'payment.refunded': return t('payments.events.paymentRefunded');
+    case 'payment.provider_retry_requested': return t('payments.events.providerRetryRequested');
     default: return t('payments.events.generic');
+  }
+};
+
+const router = useRouter();
+const isRetrying = ref(false);
+
+const handleRetry = async () => {
+  if (!props.payment.id) return;
+  isRetrying.value = true;
+  try {
+    await paymentsStore.retryExternalCharge(props.payment.id);
+    toastStore.success(t('payments.retry.success'));
+    await refreshStatus();
+  } catch (err: any) {
+    // Error is typically handled in the store/interceptor, but we can catch to reset loading
+  } finally {
+    isRetrying.value = false;
+  }
+};
+
+const openSettings = () => {
+  router.push('/platform/gateway-connections'); // Ou o caminho correto para tenant gateways se existir
+};
+
+const refreshStatus = async () => {
+  await paymentsStore.fetchPaymentById(props.payment.id);
+};
+
+const getIntegrationVariant = (status: string) => {
+  switch (status) {
+    case 'NOT_REQUIRED': return 'default';
+    case 'NOT_STARTED': return 'default';
+    case 'PROCESSING': return 'info';
+    case 'RETRY_SCHEDULED': return 'warning';
+    case 'SUCCEEDED': return 'success';
+    case 'FAILED': return 'danger';
+    case 'DEAD_LETTERED': return 'danger';
+    default: return 'default';
   }
 };
 </script>
@@ -117,6 +157,55 @@ const getEventTranslation = (type: string) => {
         <div v-if="payment.refundedAt">
           <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ t('payments.details.refundedAt') }}</h4>
           <p class="text-gray-900 dark:text-white text-sm">{{ formatDateTime(payment.refundedAt, currentLocale) }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- External Processing Section -->
+    <section v-if="payment.externalProcessing && payment.externalProcessing.status !== 'NOT_REQUIRED'">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">{{ t('payments.externalProcessing.title') }}</h3>
+        <AppButton 
+          variant="secondary" 
+          size="small" 
+          @click="refreshStatus"
+        >
+          {{ t('payments.actions.refreshPayment') }}
+        </AppButton>
+      </div>
+
+      <div class="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-lg border border-gray-100 dark:border-gray-700">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <AppBadge :variant="getIntegrationVariant(payment.externalProcessing.status) as any">
+                {{ t(`payments.externalProcessing.status.${payment.externalProcessing.status}`) }}
+              </AppBadge>
+            </div>
+            <p class="text-sm text-gray-700 dark:text-gray-300">
+              {{ t(payment.externalProcessing.messageKey) }}
+            </p>
+          </div>
+          
+          <div class="flex flex-col gap-2 min-w-[140px]">
+            <AppButton 
+              v-if="payment.externalProcessing.retryAvailable"
+              variant="primary" 
+              size="small"
+              :loading="isRetrying"
+              @click="handleRetry"
+            >
+              {{ t('payments.actions.retryExternalCharge') }}
+            </AppButton>
+            <AppButton 
+              v-if="payment.externalProcessing.status === 'FAILED' || payment.externalProcessing.status === 'DEAD_LETTERED'"
+              variant="secondary" 
+              size="small"
+              @click="openSettings"
+            >
+              {{ t('payments.actions.openGatewaySettings') }}
+            </AppButton>
+          </div>
         </div>
       </div>
     </section>

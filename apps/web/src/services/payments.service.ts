@@ -40,6 +40,11 @@ export class PaymentsService {
     const { data } = await httpClient.post<CancelPaymentResponse>(`${this.baseUrl}/${id}/cancel`);
     return data;
   }
+
+  async retryExternalCharge(id: string): Promise<PaymentDetailsResponse> {
+    const { data } = await httpClient.post<PaymentDetailsResponse>(`${this.baseUrl}/${id}/retry-external-charge`);
+    return data;
+  }
 }
 
 export const paymentsService = new PaymentsService();
