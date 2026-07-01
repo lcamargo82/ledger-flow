@@ -42,11 +42,14 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
           payloadSummary:
             (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
           status: WebhookProcessingStatus.RECEIVED,
+          tenantId: data.tenantId,
+          paymentId: data.paymentId,
         },
       });
 
       await tx.outboxEvent.create({
         data: {
+          tenantId: data.tenantId,
           aggregateType: 'WebhookInboxEvent',
           aggregateId: inboxEvent.id,
           eventType: 'webhook.inbound_processing_requested',
@@ -57,6 +60,24 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
       });
 
       return inboxEvent;
+    });
+  }
+
+  async createIgnored(
+    data: CreateWebhookInboxEventInput,
+    reason: string,
+  ): Promise<WebhookInboxEvent> {
+    return this.prisma.webhookInboxEvent.create({
+      data: {
+        provider: data.provider,
+        providerEventId: data.providerEventId,
+        eventType: data.eventType,
+        payloadHash: data.payloadHash,
+        payloadSummary:
+          (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+        status: WebhookProcessingStatus.IGNORED,
+        failureReason: reason,
+      },
     });
   }
   async markProcessing(id: string): Promise<WebhookInboxEvent> {

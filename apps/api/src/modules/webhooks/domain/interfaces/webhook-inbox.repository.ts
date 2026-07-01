@@ -6,6 +6,8 @@ export type CreateWebhookInboxEventInput = {
   eventType: string;
   payloadHash: string;
   payloadSummary?: any;
+  tenantId?: string;
+  paymentId?: string;
 };
 
 export interface IWebhookInboxRepository {
@@ -15,6 +17,10 @@ export interface IWebhookInboxRepository {
   ): Promise<WebhookInboxEvent | null>;
   createReceived(
     data: CreateWebhookInboxEventInput,
+  ): Promise<WebhookInboxEvent>;
+  createIgnored(
+    data: CreateWebhookInboxEventInput,
+    reason: string,
   ): Promise<WebhookInboxEvent>;
   markProcessing(id: string): Promise<WebhookInboxEvent>;
   markProcessed(

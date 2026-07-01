@@ -3,6 +3,8 @@ import * as amqp from 'amqplib';
 import { AsyncHandlerRegistryService } from '../../application/services/async-handler-registry.service';
 import { AsyncMessageEnvelope } from '../../domain/entities/async-message-envelope';
 import { AsyncJobExecutionRepository } from '../../domain/interfaces/async-job-execution.repository';
+import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { AsyncJobStatus } from '@prisma/client';
 import { RabbitMqTopologyService } from './rabbitmq-topology.service';
 
@@ -16,6 +18,8 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
     private readonly registry: AsyncHandlerRegistryService,
     private readonly jobExecutionRepo: AsyncJobExecutionRepository,
     private readonly topologyService: RabbitMqTopologyService,
+    private readonly outboxRepo: OutboxRepository,
+    private readonly prisma: PrismaService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -73,10 +77,34 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
         return;
       }
 
+      // Validations based on instructions
+      const outboxEvent = await this.outboxRepo.findById(payload.messageId);
+      if (!outboxEvent) {
+        this.logger.error(
+          `OutboxEvent not found: ${payload.messageId}, ignoring payload.`,
+        );
+        this.channel.ack(msg); // Safely ack as permanent failure
+        return;
+      }
+
+      if (outboxEvent.tenantId) {
+        const tenant = await this.prisma.tenant.findUnique({
+          where: { id: outboxEvent.tenantId },
+        });
+
+        if (!tenant) {
+          this.logger.error(
+            `Tenant not found for outbox event: ${outboxEvent.tenantId}, marking as failed.`,
+          );
+          this.channel.ack(msg); // Prevent infinite loop of P2003
+          return;
+        }
+      }
+
       for (const handler of handlers) {
         // Create job execution
         const jobExecution = await this.jobExecutionRepo.createOrUpdate({
-          tenantId: payload.tenantId || 'SYSTEM',
+          tenantId: outboxEvent.tenantId || null,
           outboxEventId: payload.messageId,
           consumerName: handler.consumerName,
           status: AsyncJobStatus.PROCESSING,
