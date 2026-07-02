@@ -121,6 +121,11 @@
     "dashboard": "Dashboard",
     "users": "Users",
     "payments": "Payments",
+    "catalog": "Catalog",
+    "inventory": "Inventory",
+    "orders": "Orders",
+    "channels": "Channels",
+    "analytics": "Analytics",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
     "reports": "Reports",
@@ -133,6 +138,233 @@
     "platformAsyncOperations": "Async Operations",
     "gatewayConnections": "Payment Integrations",
     "platformGatewayConnections": "Integrations"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "description": "Manage warehouses, stock adjustments, projected balances, and the auditable inventory ledger.",
+    "tabs": {
+      "warehouses": "Warehouses",
+      "balances": "Balances",
+      "movements": "Movements",
+      "reservations": "Reservations"
+    },
+    "actions": {
+      "createWarehouse": "New warehouse",
+      "adjust": "Record adjustment",
+      "reserve": "Reserve stock",
+      "releaseReservation": "Release reservation",
+      "consumeReservation": "Consume reservation",
+      "disable": "Disable",
+      "enable": "Enable"
+    },
+    "table": {
+      "code": "Code",
+      "name": "Name",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions",
+      "skuId": "SKU",
+      "warehouseId": "Warehouse",
+      "onHand": "On hand",
+      "reserved": "Reserved",
+      "available": "Available",
+      "updatedAt": "Updated at",
+      "occurredAt": "Occurred at",
+      "type": "Type",
+      "quantity": "Quantity",
+      "source": "Source",
+      "reason": "Reason"
+    },
+    "form": {
+      "warehouseTitle": "New warehouse",
+      "adjustmentTitle": "Record adjustment",
+      "reserveTitle": "Reserve stock",
+      "releaseTitle": "Release reservation",
+      "consumeTitle": "Consume reservation",
+      "reservationConfirmation": "The operation will be applied in full to {quantity} unit(s) of SKU {skuId}.",
+      "codeLabel": "Code",
+      "nameLabel": "Name",
+      "skuIdLabel": "SKU",
+      "warehouseLabel": "Warehouse",
+      "warehousePlaceholder": "Select a warehouse",
+      "typeLabel": "Type",
+      "quantityLabel": "Quantity",
+      "sourceTypeLabel": "Source type",
+      "sourceIdLabel": "Source ID",
+      "reasonCodeLabel": "Reason",
+      "notesLabel": "Notes"
+    },
+    "reservationStatus": {
+      "ACTIVE": "Active",
+      "RELEASED": "Released",
+      "CONSUMED": "Consumed"
+    },
+    "movementType": {
+      "RECEIPT": "Receipt",
+      "ADJUSTMENT_IN": "Adjustment in",
+      "ADJUSTMENT_OUT": "Adjustment out",
+      "RESERVATION": "Reservation",
+      "RESERVATION_RELEASE": "Reservation release",
+      "FULFILLMENT": "Fulfillment",
+      "RETURN": "Return",
+      "TRANSFER_OUT": "Transfer out",
+      "TRANSFER_IN": "Transfer in"
+    },
+    "empty": {
+      "warehousesTitle": "No warehouses yet",
+      "warehousesDescription": "Create the first warehouse to record stock adjustments.",
+      "balancesTitle": "No balances found",
+      "balancesDescription": "Balances appear after the first inventory adjustment.",
+      "movementsTitle": "No movements recorded",
+      "movementsDescription": "The ledger will be populated as adjustments are recorded.",
+      "reservationsTitle": "No reservations recorded",
+      "reservationsDescription": "Administrative reservations will appear here until they are released or consumed."
+    },
+    "errors": {
+      "title": "Could not load inventory",
+      "default": "Could not process the inventory operation.",
+      "warehouseCodeExists": "This warehouse code already exists for the current tenant.",
+      "notFound": "Inventory record not found.",
+      "forbidden": "You do not have inventory access.",
+      "invalid": "Review the inventory information."
+    }
+  },
+  "orders": {
+    "title": "Orders",
+    "description": "Create internal orders and control reservation, cancellation, and fulfillment with auditable inventory.",
+    "actions": {
+      "create": "New order",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "fulfill": "Fulfill",
+      "addItem": "Add item",
+      "removeItem": "Remove"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "All"
+    },
+    "table": {
+      "orderNumber": "Order",
+      "status": "Status",
+      "customer": "Customer",
+      "items": "Items",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "New internal order",
+      "confirmTitle": "Confirm order",
+      "cancelTitle": "Cancel order",
+      "fulfillTitle": "Fulfill order",
+      "transitionConfirmation": "The operation will be applied to order {orderNumber}.",
+      "customerNameLabel": "Customer",
+      "skuIdLabel": "SKU",
+      "warehouseIdLabel": "Warehouse",
+      "quantityLabel": "Quantity",
+      "reasonCodeLabel": "Reason",
+      "notesLabel": "Notes"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "CONFIRMED": "Confirmed",
+      "CANCELLED": "Cancelled",
+      "FULFILLED": "Fulfilled"
+    },
+    "empty": {
+      "title": "No internal orders found",
+      "description": "Create the first order to validate reservation, cancellation, and fulfillment."
+    },
+    "pagination": {
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "title": "Could not load orders",
+      "default": "Could not process the order operation.",
+      "notFound": "Order not found.",
+      "forbidden": "You do not have order access.",
+      "invalid": "Review the order information."
+    }
+  },
+  "catalog": {
+    "title": "Catalog",
+    "description": "Manage simple products, parent products, and sellable variants with SKU, cost, and unit of measure.",
+    "actions": {
+      "create": "New product",
+      "edit": "Edit",
+      "archive": "Archive",
+      "save": "Save",
+      "clearFilters": "Clear"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Name, brand, category, or SKU...",
+      "typeLabel": "Type",
+      "typeAll": "All types",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "table": {
+      "name": "Product",
+      "sku": "SKU",
+      "type": "Type",
+      "cost": "Cost",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "type": {
+      "SIMPLE": "Simple",
+      "PARENT": "Parent",
+      "VARIANT": "Variant"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
+    },
+    "form": {
+      "createTitle": "New product",
+      "editTitle": "Edit product",
+      "typeLabel": "Type",
+      "parentLabel": "Parent product",
+      "parentPlaceholder": "Select a parent product",
+      "nameLabel": "Name",
+      "namePlaceholder": "E.g. LedgerFlow T-shirt",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "brandLabel": "Brand",
+      "brandPlaceholder": "E.g. LedgerFlow",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "E.g. Apparel",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "ABC_1234",
+      "averageCostLabel": "Cost price",
+      "unitOfMeasureLabel": "Unit of measure",
+      "currencyLabel": "Currency",
+      "barcodeLabel": "Barcode",
+      "costChangeReasonLabel": "Cost change reason",
+      "costChangeReasonPlaceholder": "Explain the reason when changing cost",
+      "parentSkuNotice": "Parent products group variants and do not have their own SKU."
+    },
+    "empty": {
+      "title": "No products found",
+      "description": "Create a product or adjust filters to view the catalog."
+    },
+    "errors": {
+      "title": "Could not load catalog",
+      "default": "Could not process the catalog operation.",
+      "invalid": "Review the product and SKU information.",
+      "skuAlreadyExists": "This SKU already exists for the current tenant.",
+      "notFound": "Product not found.",
+      "forbidden": "You do not have catalog access."
+    },
+    "pagination": {
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next"
+    }
   },
   "users": {
     "title": "Users",
@@ -255,6 +487,7 @@
     "back": "Go Back",
     "goToDashboard": "Go to Dashboard",
     "tryAgain": "Try Again",
+    "retry": "Retry",
     "noData": "No data found",
     "error": "Error",
     "success": "Success",
@@ -713,6 +946,7 @@
       "paymentCanceled": "Payment canceled",
       "paymentRefundRequested": "Refund requested",
       "paymentRefunded": "Payment refunded",
+      "providerRetryRequested": "Provider retry requested",
       "generic": "Payment event updated"
     },
     "instructions": {
@@ -912,6 +1146,60 @@
         "success": "Connection suspended successfully.",
         "failed": "Failed to suspend connection."
       }
+    },
+    "tenants": {
+      "overview": {
+        "operations": "Operations",
+        "gateway": "Payment Gateway",
+        "webhooks": "Webhooks",
+        "activity": "Recent Activity"
+      },
+      "gateway": {
+        "noActiveConfiguration": "No active gateway configuration found.",
+        "status": "Status",
+        "healthStatus": "Health",
+        "lastHealthCheck": "Last check"
+      },
+      "metrics": {
+        "usersTitle": "Users",
+        "usersTotal": "Total",
+        "usersActive": "Active",
+        "customersTitle": "Customers",
+        "customersTotal": "Total",
+        "customersActive": "Active",
+        "paymentsTitle": "Payments",
+        "paymentsTotal": "Total",
+        "paymentsPending": "Pending",
+        "paymentsFailed": "Failed"
+      },
+      "activity": {
+        "empty": "No recent activity found."
+      },
+      "webhooks": {
+        "lastReceivedAt": "Last event",
+        "processedLast24Hours": "Processed (24h)",
+        "failedLast24Hours": "Failed (24h)",
+        "ignoredLast24Hours": "Ignored (24h)"
+      },
+      "create": {
+        "success": "Tenant provisioned successfully.",
+        "failed": "Failed to provision tenant."
+      },
+      "actions": {
+        "invitationSent": "Invitation sent"
+      }
+    },
+    "toast": {
+      "tenantUpdated": "Tenant updated successfully.",
+      "tenantActivated": "Tenant activated successfully.",
+      "tenantDeactivated": "Tenant deactivated successfully.",
+      "subscriptionUpdated": "Subscription updated successfully."
+    },
+    "error": {
+      "loadFailed": "Could not load platform data.",
+      "updateFailed": "Could not update tenant.",
+      "statusFailed": "Could not change tenant status.",
+      "subscriptionFailed": "Could not update subscription."
     }
   },
   "platformTenants": {
@@ -1101,11 +1389,18 @@
     },
     "messages": {
       "created": "Connection created successfully.",
+      "connectionCreated": "Connection created successfully.",
       "updated": "Settings updated.",
       "credentialsUpdated": "Credentials securely updated.",
       "statusUpdated": "Connection status updated.",
+      "mpConnected": "Mercado Pago connected successfully.",
       "notConfigured": "Not configured",
       "errorConnecting": "Error connecting with gateway"
+    },
+    "errors": {
+      "loadFailed": "Could not load integrations.",
+      "mpAuthFailed": "Mercado Pago authorization failed.",
+      "mpConnectionFailed": "Could not connect Mercado Pago."
     }
   },
   "features": {

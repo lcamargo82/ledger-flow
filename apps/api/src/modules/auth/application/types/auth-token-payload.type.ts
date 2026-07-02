@@ -7,5 +7,6 @@ export type AuthTokenPayload = {
   isPlatformAdmin: boolean;
   roles: string[];
   permissions: string[];
+  capabilities: string[];
   sessionId?: string;
 };

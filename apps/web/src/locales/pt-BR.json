@@ -120,6 +120,11 @@
     "dashboard": "Dashboard",
     "users": "Usuários",
     "payments": "Pagamentos",
+    "catalog": "Catálogo",
+    "inventory": "Estoque",
+    "orders": "Pedidos",
+    "channels": "Canais",
+    "analytics": "Analytics",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
     "reports": "Relatórios",
@@ -132,6 +137,233 @@
     "platformAsyncOperations": "Operações Assíncronas",
     "gatewayConnections": "Integrações de Pagamento",
     "platformGatewayConnections": "Integrações"
+  },
+  "inventory": {
+    "title": "Estoque",
+    "description": "Gerencie warehouses, ajustes de estoque, saldos projetados e ledger auditável.",
+    "tabs": {
+      "warehouses": "Warehouses",
+      "balances": "Saldos",
+      "movements": "Movimentações",
+      "reservations": "Reservas"
+    },
+    "actions": {
+      "createWarehouse": "Novo warehouse",
+      "adjust": "Registrar ajuste",
+      "reserve": "Reservar estoque",
+      "releaseReservation": "Liberar reserva",
+      "consumeReservation": "Consumir reserva",
+      "disable": "Desativar",
+      "enable": "Ativar"
+    },
+    "table": {
+      "code": "Código",
+      "name": "Nome",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações",
+      "skuId": "SKU",
+      "warehouseId": "Warehouse",
+      "onHand": "Disponível físico",
+      "reserved": "Reservado",
+      "available": "Disponível venda",
+      "updatedAt": "Atualizado em",
+      "occurredAt": "Ocorrido em",
+      "type": "Tipo",
+      "quantity": "Quantidade",
+      "source": "Origem",
+      "reason": "Motivo"
+    },
+    "form": {
+      "warehouseTitle": "Novo warehouse",
+      "adjustmentTitle": "Registrar ajuste",
+      "reserveTitle": "Reservar estoque",
+      "releaseTitle": "Liberar reserva",
+      "consumeTitle": "Consumir reserva",
+      "reservationConfirmation": "A operação será aplicada integralmente sobre {quantity} unidade(s) do SKU {skuId}.",
+      "codeLabel": "Código",
+      "nameLabel": "Nome",
+      "skuIdLabel": "SKU",
+      "warehouseLabel": "Warehouse",
+      "warehousePlaceholder": "Selecione um warehouse",
+      "typeLabel": "Tipo",
+      "quantityLabel": "Quantidade",
+      "sourceTypeLabel": "Tipo da origem",
+      "sourceIdLabel": "ID da origem",
+      "reasonCodeLabel": "Motivo",
+      "notesLabel": "Observações"
+    },
+    "reservationStatus": {
+      "ACTIVE": "Ativa",
+      "RELEASED": "Liberada",
+      "CONSUMED": "Consumida"
+    },
+    "movementType": {
+      "RECEIPT": "Recebimento",
+      "ADJUSTMENT_IN": "Ajuste de entrada",
+      "ADJUSTMENT_OUT": "Ajuste de saída",
+      "RESERVATION": "Reserva",
+      "RESERVATION_RELEASE": "Liberação de reserva",
+      "FULFILLMENT": "Baixa por fulfillment",
+      "RETURN": "Devolução",
+      "TRANSFER_OUT": "Transferência de saída",
+      "TRANSFER_IN": "Transferência de entrada"
+    },
+    "empty": {
+      "warehousesTitle": "Nenhum warehouse cadastrado",
+      "warehousesDescription": "Cadastre o primeiro warehouse para registrar ajustes de estoque.",
+      "balancesTitle": "Nenhum saldo encontrado",
+      "balancesDescription": "Os saldos aparecem após o primeiro ajuste de estoque.",
+      "movementsTitle": "Nenhuma movimentação registrada",
+      "movementsDescription": "O ledger será preenchido conforme ajustes forem registrados.",
+      "reservationsTitle": "Nenhuma reserva registrada",
+      "reservationsDescription": "Reservas administrativas aparecerão aqui até serem liberadas ou consumidas."
+    },
+    "errors": {
+      "title": "Não foi possível carregar o estoque",
+      "default": "Não foi possível processar a operação de estoque.",
+      "warehouseCodeExists": "Este código de warehouse já existe para o tenant atual.",
+      "notFound": "Registro de estoque não encontrado.",
+      "forbidden": "Você não possui acesso ao estoque.",
+      "invalid": "Revise as informações do estoque."
+    }
+  },
+  "orders": {
+    "title": "Pedidos",
+    "description": "Crie pedidos internos e controle reserva, cancelamento e fulfillment com estoque auditável.",
+    "actions": {
+      "create": "Novo pedido",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "fulfill": "Concluir",
+      "addItem": "Adicionar item",
+      "removeItem": "Remover"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "Todos"
+    },
+    "table": {
+      "orderNumber": "Pedido",
+      "status": "Status",
+      "customer": "Cliente",
+      "items": "Itens",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "form": {
+      "createTitle": "Novo pedido interno",
+      "confirmTitle": "Confirmar pedido",
+      "cancelTitle": "Cancelar pedido",
+      "fulfillTitle": "Concluir pedido",
+      "transitionConfirmation": "A operação será aplicada ao pedido {orderNumber}.",
+      "customerNameLabel": "Cliente",
+      "skuIdLabel": "SKU",
+      "warehouseIdLabel": "Warehouse",
+      "quantityLabel": "Quantidade",
+      "reasonCodeLabel": "Motivo",
+      "notesLabel": "Observações"
+    },
+    "status": {
+      "DRAFT": "Rascunho",
+      "CONFIRMED": "Confirmado",
+      "CANCELLED": "Cancelado",
+      "FULFILLED": "Concluído"
+    },
+    "empty": {
+      "title": "Nenhum pedido interno encontrado",
+      "description": "Crie o primeiro pedido para validar reserva, cancelamento e fulfillment."
+    },
+    "pagination": {
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Anterior",
+      "next": "Próxima"
+    },
+    "errors": {
+      "title": "Não foi possível carregar pedidos",
+      "default": "Não foi possível processar a operação de pedido.",
+      "notFound": "Pedido não encontrado.",
+      "forbidden": "Você não possui acesso a pedidos.",
+      "invalid": "Revise as informações do pedido."
+    }
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "description": "Gerencie produtos simples, produtos pai e variantes vendáveis com SKU, custo e unidade de medida.",
+    "actions": {
+      "create": "Novo produto",
+      "edit": "Editar",
+      "archive": "Arquivar",
+      "save": "Salvar",
+      "clearFilters": "Limpar"
+    },
+    "filters": {
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Nome, marca, categoria ou SKU...",
+      "typeLabel": "Tipo",
+      "typeAll": "Todos os tipos",
+      "statusLabel": "Status",
+      "statusAll": "Todos os status"
+    },
+    "table": {
+      "name": "Produto",
+      "sku": "SKU",
+      "type": "Tipo",
+      "cost": "Custo",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "type": {
+      "SIMPLE": "Simples",
+      "PARENT": "Pai",
+      "VARIANT": "Variante"
+    },
+    "status": {
+      "ACTIVE": "Ativo",
+      "ARCHIVED": "Arquivado"
+    },
+    "form": {
+      "createTitle": "Novo produto",
+      "editTitle": "Editar produto",
+      "typeLabel": "Tipo",
+      "parentLabel": "Produto pai",
+      "parentPlaceholder": "Selecione um produto pai",
+      "nameLabel": "Nome",
+      "namePlaceholder": "Ex: Camiseta LedgerFlow",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Descrição opcional",
+      "brandLabel": "Marca",
+      "brandPlaceholder": "Ex: LedgerFlow",
+      "categoryLabel": "Categoria",
+      "categoryPlaceholder": "Ex: Vestuário",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "ABC_1234",
+      "averageCostLabel": "Preço de custo",
+      "unitOfMeasureLabel": "Unidade de medida",
+      "currencyLabel": "Moeda",
+      "barcodeLabel": "Código de barras",
+      "costChangeReasonLabel": "Motivo da alteração de custo",
+      "costChangeReasonPlaceholder": "Informe o motivo ao alterar o custo",
+      "parentSkuNotice": "Produto pai agrupa variantes e não possui SKU próprio."
+    },
+    "empty": {
+      "title": "Nenhum produto encontrado",
+      "description": "Crie um produto ou ajuste os filtros para visualizar o catálogo."
+    },
+    "errors": {
+      "title": "Não foi possível carregar o catálogo",
+      "default": "Não foi possível processar a operação de catálogo.",
+      "invalid": "Revise as informações do produto e do SKU.",
+      "skuAlreadyExists": "Este SKU já está cadastrado para o tenant atual.",
+      "notFound": "Produto não encontrado.",
+      "forbidden": "Você não possui acesso ao catálogo."
+    },
+    "pagination": {
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
   },
   "users": {
     "title": "Usuários",
@@ -254,6 +486,7 @@
     "back": "Voltar",
     "goToDashboard": "Ir para o Dashboard",
     "tryAgain": "Tentar Novamente",
+    "retry": "Tentar novamente",
     "noData": "Nenhum dado encontrado",
     "error": "Erro",
     "success": "Sucesso",
@@ -713,6 +946,7 @@
       "paymentCanceled": "Pagamento cancelado",
       "paymentRefundRequested": "Estorno solicitado",
       "paymentRefunded": "Pagamento estornado",
+      "providerRetryRequested": "Nova tentativa solicitada ao provedor",
       "generic": "Evento de pagamento atualizado"
     },
     "instructions": {
@@ -912,6 +1146,60 @@
         "success": "Conexão suspensa com sucesso.",
         "failed": "Falha ao suspender a conexão."
       }
+    },
+    "tenants": {
+      "overview": {
+        "operations": "Operações",
+        "gateway": "Gateway de Pagamento",
+        "webhooks": "Webhooks",
+        "activity": "Atividade Recente"
+      },
+      "gateway": {
+        "noActiveConfiguration": "Nenhuma configuração de gateway ativa encontrada.",
+        "status": "Status",
+        "healthStatus": "Saúde",
+        "lastHealthCheck": "Última verificação"
+      },
+      "metrics": {
+        "usersTitle": "Usuários",
+        "usersTotal": "Total",
+        "usersActive": "Ativos",
+        "customersTitle": "Clientes",
+        "customersTotal": "Total",
+        "customersActive": "Ativos",
+        "paymentsTitle": "Pagamentos",
+        "paymentsTotal": "Total",
+        "paymentsPending": "Pendentes",
+        "paymentsFailed": "Falharam"
+      },
+      "activity": {
+        "empty": "Nenhuma atividade recente encontrada."
+      },
+      "webhooks": {
+        "lastReceivedAt": "Último evento",
+        "processedLast24Hours": "Processados (24h)",
+        "failedLast24Hours": "Falharam (24h)",
+        "ignoredLast24Hours": "Ignorados (24h)"
+      },
+      "create": {
+        "success": "Tenant provisionado com sucesso.",
+        "failed": "Erro ao provisionar o tenant."
+      },
+      "actions": {
+        "invitationSent": "Convite enviado"
+      }
+    },
+    "toast": {
+      "tenantUpdated": "Tenant atualizado com sucesso.",
+      "tenantActivated": "Tenant ativado com sucesso.",
+      "tenantDeactivated": "Tenant desativado com sucesso.",
+      "subscriptionUpdated": "Assinatura atualizada com sucesso."
+    },
+    "error": {
+      "loadFailed": "Não foi possível carregar os dados da plataforma.",
+      "updateFailed": "Não foi possível atualizar o tenant.",
+      "statusFailed": "Não foi possível alterar o status do tenant.",
+      "subscriptionFailed": "Não foi possível atualizar a assinatura."
     }
   },
   "platformTenants": {
@@ -1101,11 +1389,18 @@
     },
     "messages": {
       "created": "Conexão criada com sucesso.",
+      "connectionCreated": "Conexão criada com sucesso.",
       "updated": "Configurações atualizadas.",
       "credentialsUpdated": "Credenciais atualizadas com segurança.",
       "statusUpdated": "Status da conexão alterado.",
+      "mpConnected": "Mercado Pago conectado com sucesso.",
       "notConfigured": "Não configurado",
       "errorConnecting": "Erro ao conectar com gateway"
+    },
+    "errors": {
+      "loadFailed": "Não foi possível carregar as integrações.",
+      "mpAuthFailed": "Falha na autorização do Mercado Pago.",
+      "mpConnectionFailed": "Não foi possível conectar o Mercado Pago."
     }
   },
   "features": {

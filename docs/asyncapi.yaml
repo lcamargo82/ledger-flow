@@ -18,6 +18,20 @@ channels:
     messages:
       webhookCommand:
         $ref: '#/components/messages/WebhookInboundRequested'
+  inventory.events:
+    address: ledgerflow.inventory.events
+    messages:
+      reservationConsumed:
+        $ref: '#/components/messages/InventoryReservationConsumed'
+  orders.events:
+    address: ledgerflow.orders.events
+    messages:
+      orderConfirmed:
+        $ref: '#/components/messages/OrderConfirmed'
+      orderCancelled:
+        $ref: '#/components/messages/OrderCancelled'
+      orderFulfilled:
+        $ref: '#/components/messages/OrderFulfilled'
 components:
   messages:
     PaymentChargeRequested:
@@ -48,3 +62,60 @@ components:
             type: string
           aggregateId:
             type: string
+    InventoryReservationConsumed:
+      name: inventory.reservation.consumed
+      title: Inventory Reservation Consumed
+      summary: Event emitted when an active inventory reservation is fully consumed.
+      payload:
+        type: object
+        required:
+          - reservationId
+          - skuId
+          - warehouseId
+          - quantity
+          - movementId
+        properties:
+          reservationId:
+            type: string
+          skuId:
+            type: string
+          warehouseId:
+            type: string
+          quantity:
+            type: number
+            format: decimal
+          movementId:
+            type: string
+    OrderConfirmed:
+      name: orders.order.confirmed
+      title: Internal Order Confirmed
+      summary: Event emitted when an internal order reserves stock and becomes confirmed.
+      payload:
+        $ref: '#/components/schemas/InternalOrderStatusChangedPayload'
+    OrderCancelled:
+      name: orders.order.cancelled
+      title: Internal Order Cancelled
+      summary: Event emitted when an internal order is cancelled and reservations are released.
+      payload:
+        $ref: '#/components/schemas/InternalOrderStatusChangedPayload'
+    OrderFulfilled:
+      name: orders.order.fulfilled
+      title: Internal Order Fulfilled
+      summary: Event emitted when an internal order consumes reservations and is fulfilled.
+      payload:
+        $ref: '#/components/schemas/InternalOrderStatusChangedPayload'
+  schemas:
+    InternalOrderStatusChangedPayload:
+      type: object
+      required:
+        - orderId
+        - status
+      properties:
+        orderId:
+          type: string
+        status:
+          type: string
+          enum:
+            - CONFIRMED
+            - CANCELLED
+            - FULFILLED

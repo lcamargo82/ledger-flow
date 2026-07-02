@@ -18,6 +18,7 @@ import { AuthTokenPayload } from '../types/auth-token-payload.type';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { EmailService } from '../../../email/application/services/email.service';
+import { CapabilityPolicyService } from '../../../platform/application/services/capability-policy.service';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly capabilityPolicy: CapabilityPolicyService,
   ) {}
 
   async login(
@@ -113,6 +115,9 @@ export class AuthService {
         });
       });
       const permissions = Array.from(permissionsSet);
+      const capabilities = await this.capabilityPolicy.getCapabilitiesForTenant(
+        user.tenantId,
+      );
 
       const refreshTokenString = crypto.randomBytes(64).toString('hex');
       const refreshTokenHash = crypto
@@ -177,6 +182,7 @@ export class AuthService {
         isPlatformAdmin: user.isPlatformAdmin,
         roles,
         permissions,
+        capabilities,
         sessionId: sessionId!,
       };
 
@@ -195,6 +201,7 @@ export class AuthService {
           isPlatformAdmin: user.isPlatformAdmin,
           roles,
           permissions,
+          capabilities,
           sessionId: sessionId!,
         },
       };
@@ -269,6 +276,9 @@ export class AuthService {
         permissionsSet.add(rp.permission.key);
       });
     });
+    const capabilities = await this.capabilityPolicy.getCapabilitiesForTenant(
+      storedToken.user.tenantId,
+    );
 
     const payload: AuthTokenPayload = {
       sub: storedToken.user.id,
@@ -279,6 +289,7 @@ export class AuthService {
       isPlatformAdmin: storedToken.user.isPlatformAdmin,
       roles,
       permissions: Array.from(permissionsSet),
+      capabilities,
       sessionId: storedToken.session?.id,
     };
 

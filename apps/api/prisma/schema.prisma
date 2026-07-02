@@ -25,6 +25,42 @@ enum PermissionScope {
   PLATFORM
 }
 
+enum ProductType {
+  SIMPLE
+  PARENT
+  VARIANT
+}
+
+enum ProductStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum InventoryMovementType {
+  RECEIPT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  RESERVATION
+  RESERVATION_RELEASE
+  FULFILLMENT
+  RETURN
+  TRANSFER_OUT
+  TRANSFER_IN
+}
+
+enum InventoryReservationStatus {
+  ACTIVE
+  RELEASED
+  CONSUMED
+}
+
+enum InternalOrderStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+  FULFILLED
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -48,6 +84,14 @@ model Tenant {
   adminInvitations      TenantAdminInvitation[]
   outboxEvents          OutboxEvent[]
   asyncJobExecutions    AsyncJobExecution[]
+  products              Product[]
+  productSkus           ProductSku[]
+  warehouses            Warehouse[]
+  inventoryMovements    InventoryMovement[]
+  inventoryBalances     InventoryBalance[]
+  inventoryReservations InventoryReservation[]
+  internalOrders        InternalOrder[]
+  internalOrderItems    InternalOrderItem[]
 
   @@map("tenants")
 }
@@ -240,6 +284,207 @@ model Customer {
   @@index([tenantId, email])
   @@index([tenantId, document])
   @@map("customers")
+}
+
+model Product {
+  id              String        @id @default(uuid())
+  tenantId        String        @map("tenant_id")
+  type            ProductType
+  status          ProductStatus @default(ACTIVE)
+  parentProductId String?       @map("parent_product_id")
+  name            String
+  description     String?
+  brand           String?
+  category        String?
+  attributes      Json?         @map("attributes_json")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  archivedAt      DateTime?     @map("archived_at")
+
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parentProduct Product?    @relation("ProductHierarchy", fields: [parentProductId], references: [id], onDelete: Restrict)
+  childProducts Product[]   @relation("ProductHierarchy")
+  sku           ProductSku?
+
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@index([tenantId, parentProductId])
+  @@index([tenantId, name])
+  @@map("products")
+}
+
+model ProductSku {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  productId     String   @unique @map("product_id")
+  skuCanonical  String   @map("sku_canonical")
+  skuDisplay    String   @map("sku_display")
+  barcode       String?
+  unitOfMeasure String   @default("UN") @map("unit_of_measure")
+  costPolicy    String   @default("WEIGHTED_AVERAGE") @map("cost_policy")
+  averageCost   Decimal  @map("average_cost") @db.Decimal(18, 4)
+  currency      String   @default("BRL")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  product               Product                @relation(fields: [productId], references: [id], onDelete: Restrict)
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements    InventoryMovement[]
+  inventoryBalances     InventoryBalance[]
+  inventoryReservations InventoryReservation[]
+  internalOrderItems    InternalOrderItem[]
+
+  @@unique([tenantId, skuCanonical])
+  @@index([tenantId, barcode])
+  @@map("product_skus")
+}
+
+model Warehouse {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  code      String
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements    InventoryMovement[]
+  inventoryBalances     InventoryBalance[]
+  inventoryReservations InventoryReservation[]
+  internalOrderItems    InternalOrderItem[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("warehouses")
+}
+
+model InventoryMovement {
+  id              String                @id @default(uuid())
+  tenantId        String                @map("tenant_id")
+  skuId           String                @map("sku_id")
+  warehouseId     String                @map("warehouse_id")
+  type            InventoryMovementType
+  quantityDelta   Decimal               @map("quantity_delta") @db.Decimal(18, 6)
+  unitCost        Decimal?              @map("unit_cost") @db.Decimal(18, 4)
+  sourceType      String                @map("source_type")
+  sourceId        String                @map("source_id")
+  idempotencyKey  String                @map("idempotency_key")
+  reasonCode      String?               @map("reason_code")
+  notes           String?
+  occurredAt      DateTime              @map("occurred_at")
+  createdByUserId String?               @map("created_by_user_id")
+  createdAt       DateTime              @default(now()) @map("created_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, skuId, warehouseId, occurredAt])
+  @@index([tenantId, sourceType, sourceId])
+  @@index([tenantId, occurredAt])
+  @@map("inventory_movements")
+}
+
+model InventoryBalance {
+  id                String   @id @default(uuid())
+  tenantId          String   @map("tenant_id")
+  skuId             String   @map("sku_id")
+  warehouseId       String   @map("warehouse_id")
+  onHandQuantity    Decimal  @map("on_hand_quantity") @db.Decimal(18, 6)
+  reservedQuantity  Decimal  @default(0) @map("reserved_quantity") @db.Decimal(18, 6)
+  availableQuantity Decimal  @map("available_quantity") @db.Decimal(18, 6)
+  version           Int      @default(0)
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, skuId, warehouseId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, warehouseId])
+  @@map("inventory_balances")
+}
+
+model InventoryReservation {
+  id              String                     @id @default(uuid())
+  tenantId        String                     @map("tenant_id")
+  skuId           String                     @map("sku_id")
+  warehouseId     String                     @map("warehouse_id")
+  quantity        Decimal                    @db.Decimal(18, 6)
+  status          InventoryReservationStatus @default(ACTIVE)
+  sourceType      String                     @map("source_type")
+  sourceId        String                     @map("source_id")
+  idempotencyKey  String                     @map("idempotency_key")
+  reasonCode      String                     @map("reason_code")
+  notes           String?
+  createdByUserId String?                    @map("created_by_user_id")
+  releasedAt      DateTime?                  @map("released_at")
+  consumedAt      DateTime?                  @map("consumed_at")
+  createdAt       DateTime                   @default(now()) @map("created_at")
+  updatedAt       DateTime                   @updatedAt @map("updated_at")
+
+  tenant    Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku       ProductSku         @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse Warehouse          @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  orderItem InternalOrderItem?
+
+  @@unique([tenantId, sourceType, sourceId])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, skuId, warehouseId, status])
+  @@index([tenantId, status])
+  @@map("inventory_reservations")
+}
+
+model InternalOrder {
+  id              String              @id @default(uuid())
+  tenantId        String              @map("tenant_id")
+  orderNumber     String              @map("order_number")
+  status          InternalOrderStatus @default(DRAFT)
+  idempotencyKey  String              @map("idempotency_key")
+  customerName    String?             @map("customer_name")
+  notes           String?
+  confirmedAt     DateTime?           @map("confirmed_at")
+  cancelledAt     DateTime?           @map("cancelled_at")
+  fulfilledAt     DateTime?           @map("fulfilled_at")
+  createdByUserId String?             @map("created_by_user_id")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  tenant Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items  InternalOrderItem[]
+
+  @@unique([tenantId, orderNumber])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@map("internal_orders")
+}
+
+model InternalOrderItem {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  orderId       String   @map("order_id")
+  skuId         String   @map("sku_id")
+  warehouseId   String   @map("warehouse_id")
+  quantity      Decimal  @db.Decimal(18, 6)
+  reservationId String?  @unique @map("reservation_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  order       InternalOrder         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku         ProductSku            @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse   Warehouse             @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  reservation InventoryReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, orderId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, warehouseId])
+  @@map("internal_order_items")
 }
 
 model PasswordResetToken {
@@ -437,8 +682,8 @@ model Payment {
   providerPixExpiresAt   DateTime?
   providerPaymentUrl     String?
   gatewayConfigurationId String?
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
   canceledAt             DateTime?
   refundedAt             DateTime?
 

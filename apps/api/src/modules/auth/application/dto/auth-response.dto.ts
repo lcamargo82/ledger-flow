@@ -50,6 +50,12 @@ export class AuthenticatedUserResponseDto {
   permissions: string[];
 
   @ApiProperty({
+    example: ['catalog.manage', 'inventory.manage'],
+    description: 'Capabilities comerciais liberadas pelo plano do tenant',
+  })
+  capabilities: string[];
+
+  @ApiProperty({
     example: 'sess_1234567890',
     description: 'ID da sessão ativa',
   })
