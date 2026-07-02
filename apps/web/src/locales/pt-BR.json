@@ -293,12 +293,14 @@
     "tabs": {
       "integrations": "Integrações",
       "inbox": "Inbox",
-      "listings": "Malha fina"
+      "listings": "Malha fina",
+      "sync": "Sincronização"
     },
     "actions": {
       "createIntegration": "Nova integração",
       "importListings": "Importar anúncios",
-      "mapListing": "Mapear SKU"
+      "mapListing": "Mapear SKU",
+      "processSync": "Processar pendências"
     },
     "filters": {
       "statusLabel": "Status",
@@ -317,7 +319,12 @@
       "title": "Anúncio",
       "externalSku": "SKU externo",
       "candidates": "Candidatos",
-      "actions": "Ações"
+      "actions": "Ações",
+      "updatedAt": "Atualizado em",
+      "skuId": "SKU",
+      "targetAvailable": "Disponível alvo",
+      "circuit": "Circuito",
+      "nextAttemptAt": "Próxima tentativa"
     },
     "form": {
       "integrationTitle": "Nova integração de canal",
@@ -348,14 +355,29 @@
       "AMBIGUOUS": "Ambíguo",
       "IGNORED": "Ignorado"
     },
+    "syncStatus": {
+      "PENDING": "Pendente",
+      "SYNCED": "Sincronizado",
+      "RETRY_SCHEDULED": "Retry agendado",
+      "CIRCUIT_OPEN": "Circuito aberto",
+      "FAILED": "Falhou"
+    },
+    "circuitState": {
+      "CLOSED": "Fechado",
+      "OPEN": "Aberto",
+      "HALF_OPEN": "Meio aberto"
+    },
     "importSummary": "{imported} importados, {matched} vinculados, {unmatched} sem vínculo, {ambiguous} ambíguos.",
+    "syncSummary": "{processed} processados, {synced} sincronizados, {retry} retries, {circuit} circuitos abertos.",
     "empty": {
       "integrationsTitle": "Nenhuma integração de canal",
       "integrationsDescription": "Crie uma integração mock para testar intake autenticado.",
       "inboxTitle": "Nenhum webhook recebido",
       "inboxDescription": "Eventos válidos, duplicados e inválidos aparecerão aqui sem payload bruto.",
       "listingsTitle": "Nenhum anúncio na malha fina",
-      "listingsDescription": "Importe anúncios do provider mock para revisar vínculos de SKU."
+      "listingsDescription": "Importe anúncios do provider mock para revisar vínculos de SKU.",
+      "syncTitle": "Nenhum status de sincronização",
+      "syncDescription": "Mudanças de saldo em SKUs vinculados aparecerão aqui para sincronização mock."
     },
     "errors": {
       "title": "Não foi possível carregar canais",

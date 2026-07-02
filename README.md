@@ -1421,6 +1421,25 @@ GET /channels/listings/unmatched
 POST /channels/listings/:id/map
 ```
 
+## Fase 10.0.8 - Sincronizacao Egress e Protecoes
+
+A 10.0.8 adiciona sincronizacao egress de saldo para SKUs vinculados a listings do provider `MOCK`.
+
+- `inventory.balance.changed` e emitido quando ajustes, reservas, liberacoes ou consumos alteram `InventoryBalance`.
+- `ChannelInventorySyncState` coalesce varias mudancas rapidas por listing, mantendo a quantidade disponivel mais recente.
+- Processamento mock respeita politica de retry/backoff com jitter.
+- Retornos 429 simulados agendam retry; tentativas repetidas abrem circuito para evitar tempestade de chamadas.
+- Replay com mesma quantidade nao duplica efeito no provider mock; o estado e marcado como sincronizado.
+- UI `/channels` ganha aba de sincronizacao com status sanitizado, circuito e proxima tentativa.
+- Fora de escopo: adapter real Mercado Livre, envio real a marketplace, pedidos de canal e financeiro por pedido.
+
+Endpoints:
+
+```text
+GET /channels/inventory-sync/status
+POST /channels/inventory-sync/process-pending
+```
+
 ### Platform Admin as Internal Tenant User
 
 O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:

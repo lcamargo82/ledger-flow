@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
   ChannelIntegrationStatus,
+  ChannelInventorySyncStatus,
   ChannelListingMatchStatus,
   ChannelProvider,
   ChannelWebhookStatus,
@@ -13,7 +14,9 @@ import {
   CreateChannelWebhookInboxData,
   ListChannelInboxParams,
   ListChannelListingsParams,
+  ListInventorySyncStatesParams,
   UpsertChannelListingData,
+  UpsertInventorySyncStateData,
 } from '../../domain/repositories/channels.repository';
 
 @Injectable()
@@ -215,6 +218,146 @@ export class PrismaChannelsRepository implements ChannelsRepository {
           ignoredAt: null,
         },
       });
+    });
+  }
+
+  findSyncableListingsBySku(tenantId: string, skuId: string) {
+    return this.prisma.channelListing.findMany({
+      where: {
+        tenantId,
+        matchedSkuId: skuId,
+        matchStatus: ChannelListingMatchStatus.MATCHED,
+        integration: {
+          status: ChannelIntegrationStatus.ACTIVE,
+        },
+      },
+      select: {
+        id: true,
+        tenantId: true,
+        integrationId: true,
+        provider: true,
+        externalListingId: true,
+        matchedSkuId: true,
+      },
+    });
+  }
+
+  upsertInventorySyncState(data: UpsertInventorySyncStateData) {
+    return this.prisma.channelInventorySyncState.upsert({
+      where: { listingId: data.listingId },
+      update: {
+        targetAvailableQuantity: data.targetAvailableQuantity,
+        status: ChannelInventorySyncStatus.PENDING,
+        circuitState: 'CLOSED',
+        nextAttemptAt: null,
+        lastRequestedAt: new Date(),
+        lastErrorCode: null,
+        lastErrorSummary: null,
+      },
+      create: {
+        tenantId: data.tenantId,
+        listingId: data.listingId,
+        integrationId: data.integrationId,
+        provider: data.provider,
+        externalListingId: data.externalListingId,
+        skuId: data.skuId,
+        targetAvailableQuantity: data.targetAvailableQuantity,
+      },
+    });
+  }
+
+  async listInventorySyncStates(params: ListInventorySyncStatesParams) {
+    const { tenantId, page = 1, perPage = 10, provider, status } = params;
+    const take = Math.min(perPage, 100);
+    const skip = (page - 1) * take;
+    const where: Prisma.ChannelInventorySyncStateWhereInput = {
+      tenantId,
+      provider,
+      status,
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.channelInventorySyncState.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { updatedAt: 'desc' },
+      }),
+      this.prisma.channelInventorySyncState.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: { page, perPage: take, total, totalPages: Math.ceil(total / take) },
+    };
+  }
+
+  findPendingInventorySyncStates(params: { tenantId: string; limit: number; now: Date }) {
+    return this.prisma.channelInventorySyncState.findMany({
+      where: {
+        tenantId: params.tenantId,
+        status: {
+          in: [ChannelInventorySyncStatus.PENDING, ChannelInventorySyncStatus.RETRY_SCHEDULED],
+        },
+        OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: params.now } }],
+      },
+      take: params.limit,
+      orderBy: [{ nextAttemptAt: 'asc' }, { updatedAt: 'asc' }],
+    });
+  }
+
+  markInventorySyncSuccess(params: { id: string; quantity: number; now: Date }) {
+    return this.prisma.channelInventorySyncState.update({
+      where: { id: params.id },
+      data: {
+        status: ChannelInventorySyncStatus.SYNCED,
+        circuitState: 'CLOSED',
+        lastSyncedQuantity: params.quantity,
+        lastSyncedAt: params.now,
+        nextAttemptAt: null,
+        circuitOpenedUntil: null,
+        lastErrorCode: null,
+        lastErrorSummary: null,
+      },
+    });
+  }
+
+  markInventorySyncRetry(params: {
+    id: string;
+    nextAttemptAt: Date;
+    errorCode: string;
+    errorSummary: string;
+  }) {
+    return this.prisma.channelInventorySyncState.update({
+      where: { id: params.id },
+      data: {
+        status: ChannelInventorySyncStatus.RETRY_SCHEDULED,
+        circuitState: 'CLOSED',
+        attemptCount: { increment: 1 },
+        nextAttemptAt: params.nextAttemptAt,
+        lastErrorCode: params.errorCode,
+        lastErrorSummary: params.errorSummary,
+      },
+    });
+  }
+
+  markInventorySyncCircuitOpen(params: {
+    id: string;
+    circuitOpenedUntil: Date;
+    errorCode: string;
+    errorSummary: string;
+  }) {
+    return this.prisma.channelInventorySyncState.update({
+      where: { id: params.id },
+      data: {
+        status: ChannelInventorySyncStatus.CIRCUIT_OPEN,
+        circuitState: 'OPEN',
+        attemptCount: { increment: 1 },
+        nextAttemptAt: params.circuitOpenedUntil,
+        circuitOpenedUntil: params.circuitOpenedUntil,
+        lastErrorCode: params.errorCode,
+        lastErrorSummary: params.errorSummary,
+      },
     });
   }
 }

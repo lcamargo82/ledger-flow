@@ -4,10 +4,12 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { InventoryMovementType, Prisma } from '@prisma/client';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
+import { ChannelInventorySyncService } from '../../../channels/application/services/channel-inventory-sync.service';
 import { CreateWarehouseDto } from '../dto/create-warehouse.dto';
 import { ListInventoryQueryDto } from '../dto/list-inventory-query.dto';
 import { ListWarehousesQueryDto } from '../dto/list-warehouses-query.dto';
@@ -24,6 +26,8 @@ export class InventoryService {
     @Inject(INVENTORY_REPOSITORY)
     private readonly inventoryRepository: InventoryRepository,
     private readonly prisma: PrismaService,
+    @Optional()
+    private readonly channelInventorySyncService?: ChannelInventorySyncService,
   ) {}
 
   async createWarehouse(tenantId: string, actorUserId: string, dto: CreateWarehouseDto) {
@@ -130,6 +134,8 @@ export class InventoryService {
       },
     );
 
+    await this.publishBalanceChanged(result.balance.id, tenantId, result.balance);
+
     return result;
   }
 
@@ -186,6 +192,8 @@ export class InventoryService {
       },
     );
 
+    await this.publishBalanceChanged(result.balance.id, tenantId, result.balance);
+
     return result;
   }
 
@@ -221,6 +229,8 @@ export class InventoryService {
       },
     );
 
+    await this.publishBalanceChanged(result.balance.id, tenantId, result.balance);
+
     return result;
   }
 
@@ -253,6 +263,8 @@ export class InventoryService {
       },
     );
 
+    await this.publishBalanceChanged(result.balance.id, tenantId, result.balance);
+
     return result;
   }
 
@@ -279,6 +291,53 @@ export class InventoryService {
         entityId,
         metadata: (metadata as Prisma.InputJsonValue) ?? undefined,
       },
+    });
+  }
+
+  private async publishBalanceChanged(
+    balanceId: string,
+    tenantId: string,
+    balance: {
+      id?: string;
+      skuId: string;
+      warehouseId: string;
+      availableQuantity: Prisma.Decimal | string | number;
+      onHandQuantity?: Prisma.Decimal | string | number;
+      reservedQuantity?: Prisma.Decimal | string | number;
+      version?: number;
+    },
+  ) {
+    const payload = {
+      balanceId,
+      skuId: balance.skuId,
+      warehouseId: balance.warehouseId,
+      availableQuantity: Number(balance.availableQuantity),
+      onHandQuantity:
+        typeof balance.onHandQuantity === 'undefined' ? undefined : Number(balance.onHandQuantity),
+      reservedQuantity:
+        typeof balance.reservedQuantity === 'undefined'
+          ? undefined
+          : Number(balance.reservedQuantity),
+      version: balance.version,
+    };
+
+    await this.prisma.outboxEvent.create({
+      data: {
+        tenantId,
+        aggregateType: 'InventoryBalance',
+        aggregateId: balanceId,
+        eventType: 'inventory.balance.changed',
+        eventVersion: 1,
+        payload: payload as Prisma.InputJsonValue,
+        payloadHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
+      },
+    });
+
+    await this.channelInventorySyncService?.enqueueBalanceChanged({
+      tenantId,
+      skuId: balance.skuId,
+      availableQuantity: Number(balance.availableQuantity),
+      balanceId,
     });
   }
 }

@@ -5,6 +5,9 @@ import { channelsService } from '../services/channels.service'
 import type {
   ChannelInboxMeta,
   ChannelIntegration,
+  ChannelInventorySyncProcessSummary,
+  ChannelInventorySyncState,
+  ChannelInventorySyncStatus,
   ChannelListing,
   ChannelListingMatchStatus,
   ChannelListingsImportSummary,
@@ -19,9 +22,17 @@ export const useChannelsStore = defineStore('channels', () => {
   const integrations = ref<ChannelIntegration[]>([])
   const inboxEvents = ref<ChannelWebhookInboxEvent[]>([])
   const listings = ref<ChannelListing[]>([])
+  const inventorySyncStates = ref<ChannelInventorySyncState[]>([])
   const inboxMeta = ref<ChannelInboxMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const listingsMeta = ref<ChannelInboxMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
+  const inventorySyncMeta = ref<ChannelInboxMeta>({
+    page: 1,
+    perPage: 10,
+    total: 0,
+    totalPages: 1,
+  })
   const lastImportSummary = ref<ChannelListingsImportSummary | null>(null)
+  const lastSyncSummary = ref<ChannelInventorySyncProcessSummary | null>(null)
   const filters = ref<{
     page: number
     perPage: number
@@ -34,6 +45,12 @@ export const useChannelsStore = defineStore('channels', () => {
     provider?: ChannelProvider
     status?: ChannelListingMatchStatus
   }>({ page: 1, perPage: 10, status: 'UNMATCHED' })
+  const inventorySyncFilters = ref<{
+    page: number
+    perPage: number
+    provider?: ChannelProvider
+    status?: ChannelInventorySyncStatus
+  }>({ page: 1, perPage: 10 })
   const isLoading = ref(false)
   const isMutating = ref(false)
   const error = ref<string | null>(null)
@@ -80,6 +97,21 @@ export const useChannelsStore = defineStore('channels', () => {
     }
   }
 
+  const fetchInventorySyncStatus = async () => {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await channelsService.listInventorySyncStatus(inventorySyncFilters.value)
+      inventorySyncStates.value = response.data
+      inventorySyncMeta.value = response.meta
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const createIntegration = async (payload: CreateChannelIntegrationRequest) => {
     isMutating.value = true
     error.value = null
@@ -105,6 +137,12 @@ export const useChannelsStore = defineStore('channels', () => {
     listingFilters.value.status = status
     listingFilters.value.page = 1
     fetchListings()
+  }
+
+  const setInventorySyncStatus = (status?: ChannelInventorySyncStatus) => {
+    inventorySyncFilters.value.status = status
+    inventorySyncFilters.value.page = 1
+    fetchInventorySyncStatus()
   }
 
   const importListings = async (integrationId: string) => {
@@ -138,24 +176,47 @@ export const useChannelsStore = defineStore('channels', () => {
     }
   }
 
+  const processInventorySync = async () => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await channelsService.processInventorySync()
+      lastSyncSummary.value = response
+      await fetchInventorySyncStatus()
+      return response
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
   return {
     integrations,
     inboxEvents,
     listings,
+    inventorySyncStates,
     inboxMeta,
     listingsMeta,
+    inventorySyncMeta,
     lastImportSummary,
+    lastSyncSummary,
     filters,
     listingFilters,
+    inventorySyncFilters,
     isLoading,
     isMutating,
     error,
     fetchChannels,
     fetchListings,
+    fetchInventorySyncStatus,
     createIntegration,
     setInboxStatus,
     setListingStatus,
+    setInventorySyncStatus,
     importListings,
     mapListing,
+    processInventorySync,
   }
 })

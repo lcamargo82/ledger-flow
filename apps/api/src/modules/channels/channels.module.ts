@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma/prisma.module';
 import { ChannelsService } from './application/services/channels.service';
+import { ChannelInventorySyncService } from './application/services/channel-inventory-sync.service';
 import { ChannelWebhookIntakeService } from './application/services/channel-webhook-intake.service';
 import { CHANNELS_REPOSITORY } from './domain/repositories/channels.repository';
 import { PrismaChannelsRepository } from './infra/repositories/prisma-channels.repository';
@@ -13,11 +14,13 @@ import { ChannelsFoundationController } from './presentation/controllers/channel
   controllers: [ChannelsFoundationController, ChannelsController, ChannelWebhooksController],
   providers: [
     ChannelsService,
+    ChannelInventorySyncService,
     ChannelWebhookIntakeService,
     {
       provide: CHANNELS_REPOSITORY,
       useClass: PrismaChannelsRepository,
     },
   ],
+  exports: [ChannelInventorySyncService],
 })
 export class ChannelsModule {}

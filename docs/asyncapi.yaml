@@ -21,6 +21,8 @@ channels:
   inventory.events:
     address: ledgerflow.inventory.events
     messages:
+      balanceChanged:
+        $ref: '#/components/messages/InventoryBalanceChanged'
       reservationConsumed:
         $ref: '#/components/messages/InventoryReservationConsumed'
   orders.events:
@@ -43,6 +45,10 @@ channels:
         $ref: '#/components/messages/ChannelListingImportCompleted'
       channelListingMapped:
         $ref: '#/components/messages/ChannelListingMapped'
+      channelInventorySyncRequested:
+        $ref: '#/components/messages/ChannelInventorySyncRequested'
+      channelInventorySyncCompleted:
+        $ref: '#/components/messages/ChannelInventorySyncCompleted'
 components:
   messages:
     PaymentChargeRequested:
@@ -97,6 +103,35 @@ components:
             format: decimal
           movementId:
             type: string
+    InventoryBalanceChanged:
+      name: inventory.balance.changed
+      title: Inventory Balance Changed
+      summary: Event emitted when an inventory balance projection changes.
+      payload:
+        type: object
+        required:
+          - balanceId
+          - skuId
+          - warehouseId
+          - availableQuantity
+        properties:
+          balanceId:
+            type: string
+          skuId:
+            type: string
+          warehouseId:
+            type: string
+          availableQuantity:
+            type: number
+            format: decimal
+          onHandQuantity:
+            type: number
+            format: decimal
+          reservedQuantity:
+            type: number
+            format: decimal
+          version:
+            type: integer
     OrderConfirmed:
       name: orders.order.confirmed
       title: Internal Order Confirmed
@@ -139,6 +174,18 @@ components:
       summary: Event emitted when a channel listing is manually mapped to a ProductSku.
       payload:
         $ref: '#/components/schemas/ChannelListingMappedPayload'
+    ChannelInventorySyncRequested:
+      name: channel.inventory_sync.requested
+      title: Channel Inventory Sync Requested
+      summary: Event emitted when a mapped listing needs outbound inventory sync.
+      payload:
+        $ref: '#/components/schemas/ChannelInventorySyncPayload'
+    ChannelInventorySyncCompleted:
+      name: channel.inventory_sync.completed
+      title: Channel Inventory Sync Completed
+      summary: Event emitted when mock outbound inventory sync succeeds.
+      payload:
+        $ref: '#/components/schemas/ChannelInventorySyncPayload'
   schemas:
     InternalOrderStatusChangedPayload:
       type: object
@@ -221,3 +268,25 @@ components:
           type: string
         skuId:
           type: string
+    ChannelInventorySyncPayload:
+      type: object
+      required:
+        - listingId
+        - skuId
+        - provider
+        - targetAvailableQuantity
+      properties:
+        listingId:
+          type: string
+        skuId:
+          type: string
+        balanceId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - MOCK
+            - MERCADO_LIVRE
+        targetAvailableQuantity:
+          type: number
+          format: decimal
