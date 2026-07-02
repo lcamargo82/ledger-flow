@@ -78,6 +78,13 @@ enum ChannelWebhookStatus {
   DLQ
 }
 
+enum ChannelListingMatchStatus {
+  MATCHED
+  UNMATCHED
+  AMBIGUOUS
+  IGNORED
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -111,6 +118,8 @@ model Tenant {
   internalOrderItems    InternalOrderItem[]
   channelIntegrations   ChannelIntegration[]
   channelWebhookEvents  ChannelWebhookInboxEvent[]
+  channelListings       ChannelListing[]
+  listingSkuMappings    ListingSkuMapping[]
 
   @@map("tenants")
 }
@@ -352,6 +361,8 @@ model ProductSku {
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
   internalOrderItems    InternalOrderItem[]
+  channelListings       ChannelListing[]
+  listingSkuMappings    ListingSkuMapping[]
 
   @@unique([tenantId, skuCanonical])
   @@index([tenantId, barcode])
@@ -519,6 +530,7 @@ model ChannelIntegration {
 
   tenant        Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   webhookEvents ChannelWebhookInboxEvent[]
+  listings      ChannelListing[]
 
   @@unique([tenantId, provider, name])
   @@index([tenantId, provider, status])
@@ -551,6 +563,52 @@ model ChannelWebhookInboxEvent {
   @@index([integrationId])
   @@index([receivedAt])
   @@map("channel_webhook_inbox_events")
+}
+
+model ChannelListing {
+  id                String                    @id @default(uuid())
+  tenantId          String                    @map("tenant_id")
+  integrationId     String                    @map("integration_id")
+  provider          ChannelProvider
+  externalListingId String                    @map("external_listing_id")
+  title             String
+  externalSku       String?                   @map("external_sku")
+  matchStatus       ChannelListingMatchStatus @default(UNMATCHED) @map("match_status")
+  matchedSkuId      String?                   @map("matched_sku_id")
+  candidateSkuIds   Json?                     @map("candidate_sku_ids")
+  importedAt        DateTime                  @default(now()) @map("imported_at")
+  ignoredAt         DateTime?                 @map("ignored_at")
+  createdAt         DateTime                  @default(now()) @map("created_at")
+  updatedAt         DateTime                  @updatedAt @map("updated_at")
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  integration ChannelIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  matchedSku  ProductSku?        @relation(fields: [matchedSkuId], references: [id], onDelete: SetNull)
+  mappings    ListingSkuMapping[]
+
+  @@unique([tenantId, integrationId, externalListingId])
+  @@index([tenantId, matchStatus])
+  @@index([tenantId, integrationId])
+  @@index([tenantId, externalSku])
+  @@map("channel_listings")
+}
+
+model ListingSkuMapping {
+  id             String   @id @default(uuid())
+  tenantId       String   @map("tenant_id")
+  listingId      String   @map("listing_id")
+  skuId          String   @map("sku_id")
+  mappedByUserId String?  @map("mapped_by_user_id")
+  reason         String?  @map("reason")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  listing ChannelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  sku     ProductSku     @relation(fields: [skuId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, listingId])
+  @@index([tenantId, skuId])
+  @@map("listing_sku_mappings")
 }
 
 model PasswordResetToken {

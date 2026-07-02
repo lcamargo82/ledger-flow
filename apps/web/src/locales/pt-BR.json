@@ -292,10 +292,13 @@
     "description": "Configure integrações de canal e acompanhe o inbox sanitizado de webhooks.",
     "tabs": {
       "integrations": "Integrações",
-      "inbox": "Inbox"
+      "inbox": "Inbox",
+      "listings": "Malha fina"
     },
     "actions": {
-      "createIntegration": "Nova integração"
+      "createIntegration": "Nova integração",
+      "importListings": "Importar anúncios",
+      "mapListing": "Mapear SKU"
     },
     "filters": {
       "statusLabel": "Status",
@@ -309,13 +312,21 @@
       "receivedAt": "Recebido em",
       "eventType": "Evento",
       "providerEventId": "ID externo",
-      "summary": "Resumo"
+      "summary": "Resumo",
+      "importedAt": "Importado em",
+      "title": "Anúncio",
+      "externalSku": "SKU externo",
+      "candidates": "Candidatos",
+      "actions": "Ações"
     },
     "form": {
       "integrationTitle": "Nova integração de canal",
+      "mappingTitle": "Mapear anúncio",
       "providerLabel": "Provider",
       "nameLabel": "Nome",
-      "webhookSecretLabel": "Segredo do webhook"
+      "webhookSecretLabel": "Segredo do webhook",
+      "skuIdLabel": "ID do SKU",
+      "reasonLabel": "Motivo"
     },
     "provider": {
       "MOCK": "Mock",
@@ -331,11 +342,20 @@
       "INVALID": "Inválido",
       "DLQ": "DLQ"
     },
+    "listingStatus": {
+      "MATCHED": "Vinculado",
+      "UNMATCHED": "Sem vínculo",
+      "AMBIGUOUS": "Ambíguo",
+      "IGNORED": "Ignorado"
+    },
+    "importSummary": "{imported} importados, {matched} vinculados, {unmatched} sem vínculo, {ambiguous} ambíguos.",
     "empty": {
       "integrationsTitle": "Nenhuma integração de canal",
       "integrationsDescription": "Crie uma integração mock para testar intake autenticado.",
       "inboxTitle": "Nenhum webhook recebido",
-      "inboxDescription": "Eventos válidos, duplicados e inválidos aparecerão aqui sem payload bruto."
+      "inboxDescription": "Eventos válidos, duplicados e inválidos aparecerão aqui sem payload bruto.",
+      "listingsTitle": "Nenhum anúncio na malha fina",
+      "listingsDescription": "Importe anúncios do provider mock para revisar vínculos de SKU."
     },
     "errors": {
       "title": "Não foi possível carregar canais",

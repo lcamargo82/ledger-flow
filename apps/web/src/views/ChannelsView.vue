@@ -4,7 +4,11 @@ import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
 import { useChannelsStore } from '../stores/channels.store'
 import { formatDateTime } from '../utils/date-format'
-import type { ChannelWebhookStatus } from '../types/channels.types'
+import type {
+  ChannelListing,
+  ChannelListingMatchStatus,
+  ChannelWebhookStatus,
+} from '../types/channels.types'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppButton from '../components/common/AppButton.vue'
 import AppCard from '../components/common/AppCard.vue'
@@ -19,8 +23,10 @@ const { t, currentLocale } = useI18n()
 const authStore = useAuthStore()
 const channelsStore = useChannelsStore()
 
-const activeTab = ref<'integrations' | 'inbox'>('integrations')
+const activeTab = ref<'integrations' | 'inbox' | 'listings'>('integrations')
 const isCreateModalOpen = ref(false)
+const isMapModalOpen = ref(false)
+const selectedListing = ref<ChannelListing | null>(null)
 
 const integrationForm = reactive({
   provider: 'MOCK' as const,
@@ -28,11 +34,17 @@ const integrationForm = reactive({
   webhookSecret: '',
 })
 
+const mappingForm = reactive({
+  skuId: '',
+  reason: '',
+})
+
 const integrationColumns = computed(() => [
   { key: 'provider', label: t('channels.table.provider') },
   { key: 'name', label: t('channels.table.name') },
   { key: 'status', label: t('channels.table.status') },
   { key: 'createdAt', label: t('channels.table.createdAt') },
+  { key: 'actions', label: t('channels.table.actions') },
 ])
 
 const inboxColumns = computed(() => [
@@ -44,6 +56,16 @@ const inboxColumns = computed(() => [
   { key: 'summary', label: t('channels.table.summary') },
 ])
 
+const listingColumns = computed(() => [
+  { key: 'importedAt', label: t('channels.table.importedAt') },
+  { key: 'provider', label: t('channels.table.provider') },
+  { key: 'title', label: t('channels.table.title') },
+  { key: 'externalSku', label: t('channels.table.externalSku') },
+  { key: 'matchStatus', label: t('channels.table.status') },
+  { key: 'candidates', label: t('channels.table.candidates') },
+  { key: 'actions', label: t('channels.table.actions') },
+])
+
 const statusOptions = computed(() => [
   { value: '', label: t('channels.filters.statusAll') },
   { value: 'RECEIVED', label: t('channels.webhookStatus.RECEIVED') },
@@ -52,8 +74,17 @@ const statusOptions = computed(() => [
   { value: 'DLQ', label: t('channels.webhookStatus.DLQ') },
 ])
 
+const listingStatusOptions = computed(() => [
+  { value: '', label: t('channels.filters.statusAll') },
+  { value: 'UNMATCHED', label: t('channels.listingStatus.UNMATCHED') },
+  { value: 'AMBIGUOUS', label: t('channels.listingStatus.AMBIGUOUS') },
+  { value: 'MATCHED', label: t('channels.listingStatus.MATCHED') },
+  { value: 'IGNORED', label: t('channels.listingStatus.IGNORED') },
+])
+
 onMounted(() => {
   channelsStore.fetchChannels()
+  channelsStore.fetchListings()
 })
 
 const createIntegration = async () => {
@@ -71,6 +102,47 @@ const webhookStatusVariant = (status: ChannelWebhookStatus) => {
   if (status === 'RECEIVED') return 'success'
   if (status === 'INVALID' || status === 'DLQ') return 'danger'
   return 'warning'
+}
+
+const listingStatusVariant = (status: ChannelListingMatchStatus) => {
+  if (status === 'MATCHED') return 'success'
+  if (status === 'AMBIGUOUS') return 'warning'
+  if (status === 'IGNORED') return 'default'
+  return 'danger'
+}
+
+const canImportListings = computed(
+  () =>
+    authStore.checkAllPermissions(['channels:manage']) &&
+    authStore.checkCapability('channels.import_listings'),
+)
+
+const canMapListings = computed(
+  () =>
+    authStore.checkAllPermissions(['channels:manage']) &&
+    authStore.checkCapability('channels.mapping.manage'),
+)
+
+const importListings = async (integrationId: string) => {
+  await channelsStore.importListings(integrationId)
+  activeTab.value = 'listings'
+}
+
+const openMapModal = (listing: ChannelListing) => {
+  selectedListing.value = listing
+  mappingForm.skuId = listing.matchedSkuId || ''
+  mappingForm.reason = ''
+  isMapModalOpen.value = true
+}
+
+const mapListing = async () => {
+  if (!selectedListing.value) return
+  await channelsStore.mapListing(selectedListing.value.id, {
+    skuId: mappingForm.skuId,
+    reason: mappingForm.reason || undefined,
+  })
+  isMapModalOpen.value = false
+  selectedListing.value = null
 }
 </script>
 
@@ -110,6 +182,12 @@ const webhookStatusVariant = (status: ChannelWebhookStatus) => {
           >
             {{ t('channels.tabs.inbox') }}
           </AppButton>
+          <AppButton
+            :variant="activeTab === 'listings' ? 'primary' : 'secondary'"
+            @click="activeTab = 'listings'"
+          >
+            {{ t('channels.tabs.listings') }}
+          </AppButton>
         </div>
       </AppCard>
 
@@ -131,6 +209,17 @@ const webhookStatusVariant = (status: ChannelWebhookStatus) => {
         </template>
         <template #createdAt="{ item }">
           {{ formatDateTime(item.createdAt, currentLocale) }}
+        </template>
+        <template #actions="{ item }">
+          <AppButton
+            v-if="canImportListings && item.provider === 'MOCK' && item.status === 'ACTIVE'"
+            variant="secondary"
+            size="small"
+            :loading="channelsStore.isMutating"
+            @click="importListings(item.id)"
+          >
+            {{ t('channels.actions.importListings') }}
+          </AppButton>
         </template>
       </AppTable>
 
@@ -172,6 +261,75 @@ const webhookStatusVariant = (status: ChannelWebhookStatus) => {
           </template>
         </AppTable>
       </div>
+
+      <div v-if="activeTab === 'listings'" class="space-y-4">
+        <AppCard>
+          <div class="grid gap-4 md:grid-cols-[minmax(220px,320px)_1fr] md:items-end">
+            <AppSelect
+              id="channel-listing-status"
+              :model-value="channelsStore.listingFilters.status || ''"
+              :label="t('channels.filters.statusLabel')"
+              :options="listingStatusOptions"
+              @update:model-value="
+                channelsStore.setListingStatus(
+                  ($event || undefined) as ChannelListingMatchStatus | undefined,
+                )
+              "
+            />
+            <div
+              v-if="channelsStore.lastImportSummary"
+              class="text-sm text-[var(--lf-text-secondary)]"
+            >
+              {{
+                t('channels.importSummary', {
+                  imported: channelsStore.lastImportSummary.imported,
+                  matched: channelsStore.lastImportSummary.matched,
+                  unmatched: channelsStore.lastImportSummary.unmatched,
+                  ambiguous: channelsStore.lastImportSummary.ambiguous,
+                })
+              }}
+            </div>
+          </div>
+        </AppCard>
+
+        <AppTable
+          :columns="listingColumns"
+          :items="channelsStore.listings"
+          :is-loading="channelsStore.isLoading"
+          :empty-title="t('channels.empty.listingsTitle')"
+          :empty-description="t('channels.empty.listingsDescription')"
+        >
+          <template #importedAt="{ item }">
+            {{ formatDateTime(item.importedAt, currentLocale) }}
+          </template>
+          <template #provider="{ item }">
+            {{ t(`channels.provider.${item.provider}`) }}
+          </template>
+          <template #externalSku="{ item }">
+            <span class="font-mono text-xs">{{ item.externalSku || '-' }}</span>
+          </template>
+          <template #matchStatus="{ item }">
+            <AppBadge :variant="listingStatusVariant(item.matchStatus)">
+              {{ t(`channels.listingStatus.${item.matchStatus}`) }}
+            </AppBadge>
+          </template>
+          <template #candidates="{ item }">
+            <span class="font-mono text-xs">
+              {{ (item.candidateSkuIds || []).join(', ') || '-' }}
+            </span>
+          </template>
+          <template #actions="{ item }">
+            <AppButton
+              v-if="canMapListings && item.matchStatus !== 'IGNORED'"
+              variant="secondary"
+              size="small"
+              @click="openMapModal(item)"
+            >
+              {{ t('channels.actions.mapListing') }}
+            </AppButton>
+          </template>
+        </AppTable>
+      </div>
     </template>
 
     <AppModal v-model="isCreateModalOpen" :title="t('channels.form.integrationTitle')" size="md">
@@ -198,6 +356,32 @@ const webhookStatusVariant = (status: ChannelWebhookStatus) => {
           </AppButton>
           <AppButton type="submit" variant="primary" :loading="channelsStore.isMutating">
             {{ t('channels.actions.createIntegration') }}
+          </AppButton>
+        </div>
+      </form>
+    </AppModal>
+
+    <AppModal v-model="isMapModalOpen" :title="t('channels.form.mappingTitle')" size="md">
+      <form class="space-y-4" @submit.prevent="mapListing">
+        <p class="text-sm text-[var(--lf-text-secondary)]">
+          {{ selectedListing?.title }}
+        </p>
+        <AppInput
+          id="channel-mapping-sku"
+          v-model="mappingForm.skuId"
+          :label="t('channels.form.skuIdLabel')"
+        />
+        <AppInput
+          id="channel-mapping-reason"
+          v-model="mappingForm.reason"
+          :label="t('channels.form.reasonLabel')"
+        />
+        <div class="flex justify-end gap-2">
+          <AppButton type="button" variant="secondary" @click="isMapModalOpen = false">
+            {{ t('common.cancel') }}
+          </AppButton>
+          <AppButton type="submit" variant="primary" :loading="channelsStore.isMutating">
+            {{ t('channels.actions.mapListing') }}
           </AppButton>
         </div>
       </form>

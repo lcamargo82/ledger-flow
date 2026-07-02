@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChannelIntegrationStatus, ChannelProvider, ChannelWebhookStatus } from '@prisma/client';
+import {
+  ChannelIntegrationStatus,
+  ChannelListingMatchStatus,
+  ChannelProvider,
+  ChannelWebhookStatus,
+} from '@prisma/client';
 
 export class ChannelIntegrationResponseDto {
   @ApiProperty() id: string;
@@ -35,6 +40,39 @@ export class ChannelWebhookAcceptedResponseDto {
   @ApiPropertyOptional() duplicateOfId?: string;
 }
 
+export class ChannelListingResponseDto {
+  @ApiProperty() id: string;
+  @ApiProperty() tenantId: string;
+  @ApiProperty() integrationId: string;
+  @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
+  @ApiProperty() externalListingId: string;
+  @ApiProperty() title: string;
+  @ApiPropertyOptional() externalSku?: string;
+  @ApiProperty({ enum: ChannelListingMatchStatus }) matchStatus: ChannelListingMatchStatus;
+  @ApiPropertyOptional() matchedSkuId?: string;
+  @ApiPropertyOptional({ type: [String] }) candidateSkuIds?: string[];
+  @ApiProperty() importedAt: Date;
+  @ApiPropertyOptional() ignoredAt?: Date;
+  @ApiProperty() createdAt: Date;
+  @ApiProperty() updatedAt: Date;
+}
+
+export class ChannelListingsImportSummaryDto {
+  @ApiProperty() imported: number;
+  @ApiProperty() matched: number;
+  @ApiProperty() unmatched: number;
+  @ApiProperty() ambiguous: number;
+  @ApiProperty() ignored: number;
+}
+
+export class ChannelListingsImportResponseDto {
+  @ApiProperty({ type: ChannelListingsImportSummaryDto })
+  summary: ChannelListingsImportSummaryDto;
+
+  @ApiProperty({ type: [ChannelListingResponseDto] })
+  data: ChannelListingResponseDto[];
+}
+
 export class ChannelIntegrationMutationResponseDto {
   @ApiProperty({ type: ChannelIntegrationResponseDto })
   integration: ChannelIntegrationResponseDto;
@@ -50,6 +88,19 @@ export class ChannelInboxMetaDto {
   @ApiProperty() perPage: number;
   @ApiProperty() total: number;
   @ApiProperty() totalPages: number;
+}
+
+export class PaginatedChannelListingsResponseDto {
+  @ApiProperty({ type: [ChannelListingResponseDto] })
+  data: ChannelListingResponseDto[];
+
+  @ApiProperty({ type: ChannelInboxMetaDto })
+  meta: ChannelInboxMetaDto;
+}
+
+export class ChannelListingMutationResponseDto {
+  @ApiProperty({ type: ChannelListingResponseDto })
+  listing: ChannelListingResponseDto;
 }
 
 export class PaginatedChannelInboxResponseDto {

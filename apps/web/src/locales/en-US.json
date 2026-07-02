@@ -293,10 +293,13 @@
     "description": "Configure channel integrations and monitor the sanitized webhook inbox.",
     "tabs": {
       "integrations": "Integrations",
-      "inbox": "Inbox"
+      "inbox": "Inbox",
+      "listings": "Mapping review"
     },
     "actions": {
-      "createIntegration": "New integration"
+      "createIntegration": "New integration",
+      "importListings": "Import listings",
+      "mapListing": "Map SKU"
     },
     "filters": {
       "statusLabel": "Status",
@@ -310,13 +313,21 @@
       "receivedAt": "Received at",
       "eventType": "Event",
       "providerEventId": "External ID",
-      "summary": "Summary"
+      "summary": "Summary",
+      "importedAt": "Imported at",
+      "title": "Listing",
+      "externalSku": "External SKU",
+      "candidates": "Candidates",
+      "actions": "Actions"
     },
     "form": {
       "integrationTitle": "New channel integration",
+      "mappingTitle": "Map listing",
       "providerLabel": "Provider",
       "nameLabel": "Name",
-      "webhookSecretLabel": "Webhook secret"
+      "webhookSecretLabel": "Webhook secret",
+      "skuIdLabel": "SKU ID",
+      "reasonLabel": "Reason"
     },
     "provider": {
       "MOCK": "Mock",
@@ -332,11 +343,20 @@
       "INVALID": "Invalid",
       "DLQ": "DLQ"
     },
+    "listingStatus": {
+      "MATCHED": "Matched",
+      "UNMATCHED": "Unmatched",
+      "AMBIGUOUS": "Ambiguous",
+      "IGNORED": "Ignored"
+    },
+    "importSummary": "{imported} imported, {matched} matched, {unmatched} unmatched, {ambiguous} ambiguous.",
     "empty": {
       "integrationsTitle": "No channel integrations",
       "integrationsDescription": "Create a mock integration to test authenticated intake.",
       "inboxTitle": "No webhooks received",
-      "inboxDescription": "Valid, duplicate, and invalid events will appear here without raw payloads."
+      "inboxDescription": "Valid, duplicate, and invalid events will appear here without raw payloads.",
+      "listingsTitle": "No listings in mapping review",
+      "listingsDescription": "Import listings from the mock provider to review SKU mappings."
     },
     "errors": {
       "title": "Could not load channels",

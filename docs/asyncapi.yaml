@@ -39,6 +39,10 @@ channels:
         $ref: '#/components/messages/ChannelWebhookReceived'
       channelWebhookInvalid:
         $ref: '#/components/messages/ChannelWebhookInvalid'
+      channelListingImportCompleted:
+        $ref: '#/components/messages/ChannelListingImportCompleted'
+      channelListingMapped:
+        $ref: '#/components/messages/ChannelListingMapped'
 components:
   messages:
     PaymentChargeRequested:
@@ -123,6 +127,18 @@ components:
       summary: Event emitted when a channel webhook payload is structurally invalid.
       payload:
         $ref: '#/components/schemas/ChannelWebhookInboxPayload'
+    ChannelListingImportCompleted:
+      name: channel.listing.import.completed
+      title: Channel Listing Import Completed
+      summary: Event emitted when mock channel listings are imported and classified.
+      payload:
+        $ref: '#/components/schemas/ChannelListingImportCompletedPayload'
+    ChannelListingMapped:
+      name: channel.listing.mapped
+      title: Channel Listing Mapped
+      summary: Event emitted when a channel listing is manually mapped to a ProductSku.
+      payload:
+        $ref: '#/components/schemas/ChannelListingMappedPayload'
   schemas:
     InternalOrderStatusChangedPayload:
       type: object
@@ -162,3 +178,46 @@ components:
             - DUPLICATE
             - INVALID
             - DLQ
+    ChannelListingImportCompletedPayload:
+      type: object
+      required:
+        - integrationId
+        - provider
+        - summary
+      properties:
+        integrationId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - MOCK
+            - MERCADO_LIVRE
+        summary:
+          type: object
+          required:
+            - imported
+            - matched
+            - unmatched
+            - ambiguous
+            - ignored
+          properties:
+            imported:
+              type: integer
+            matched:
+              type: integer
+            unmatched:
+              type: integer
+            ambiguous:
+              type: integer
+            ignored:
+              type: integer
+    ChannelListingMappedPayload:
+      type: object
+      required:
+        - listingId
+        - skuId
+      properties:
+        listingId:
+          type: string
+        skuId:
+          type: string
