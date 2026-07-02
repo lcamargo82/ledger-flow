@@ -21,5 +21,6 @@ import { InventoryWarehousesController } from './presentation/controllers/invent
       useClass: PrismaInventoryRepository,
     },
   ],
+  exports: [InventoryService],
 })
 export class InventoryModule {}

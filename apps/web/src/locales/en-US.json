@@ -229,6 +229,122 @@
       "invalid": "Review the inventory information."
     }
   },
+  "orders": {
+    "title": "Orders",
+    "description": "Create internal orders and control reservation, cancellation, and fulfillment with auditable inventory.",
+    "actions": {
+      "create": "New order",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "fulfill": "Fulfill",
+      "addItem": "Add item",
+      "removeItem": "Remove"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "All"
+    },
+    "table": {
+      "orderNumber": "Order",
+      "status": "Status",
+      "customer": "Customer",
+      "items": "Items",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "form": {
+      "createTitle": "New internal order",
+      "confirmTitle": "Confirm order",
+      "cancelTitle": "Cancel order",
+      "fulfillTitle": "Fulfill order",
+      "transitionConfirmation": "The operation will be applied to order {orderNumber}.",
+      "customerNameLabel": "Customer",
+      "skuIdLabel": "SKU",
+      "warehouseIdLabel": "Warehouse",
+      "quantityLabel": "Quantity",
+      "reasonCodeLabel": "Reason",
+      "notesLabel": "Notes"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "CONFIRMED": "Confirmed",
+      "CANCELLED": "Cancelled",
+      "FULFILLED": "Fulfilled"
+    },
+    "empty": {
+      "title": "No internal orders found",
+      "description": "Create the first order to validate reservation, cancellation, and fulfillment."
+    },
+    "pagination": {
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "title": "Could not load orders",
+      "default": "Could not process the order operation.",
+      "notFound": "Order not found.",
+      "forbidden": "You do not have order access.",
+      "invalid": "Review the order information."
+    }
+  },
+  "channels": {
+    "title": "Channels",
+    "description": "Configure channel integrations and monitor the sanitized webhook inbox.",
+    "tabs": {
+      "integrations": "Integrations",
+      "inbox": "Inbox"
+    },
+    "actions": {
+      "createIntegration": "New integration"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "All"
+    },
+    "table": {
+      "provider": "Provider",
+      "name": "Name",
+      "status": "Status",
+      "createdAt": "Created at",
+      "receivedAt": "Received at",
+      "eventType": "Event",
+      "providerEventId": "External ID",
+      "summary": "Summary"
+    },
+    "form": {
+      "integrationTitle": "New channel integration",
+      "providerLabel": "Provider",
+      "nameLabel": "Name",
+      "webhookSecretLabel": "Webhook secret"
+    },
+    "provider": {
+      "MOCK": "Mock",
+      "MERCADO_LIVRE": "Mercado Livre"
+    },
+    "integrationStatus": {
+      "ACTIVE": "Active",
+      "DISABLED": "Disabled"
+    },
+    "webhookStatus": {
+      "RECEIVED": "Received",
+      "DUPLICATE": "Duplicate",
+      "INVALID": "Invalid",
+      "DLQ": "DLQ"
+    },
+    "empty": {
+      "integrationsTitle": "No channel integrations",
+      "integrationsDescription": "Create a mock integration to test authenticated intake.",
+      "inboxTitle": "No webhooks received",
+      "inboxDescription": "Valid, duplicate, and invalid events will appear here without raw payloads."
+    },
+    "errors": {
+      "title": "Could not load channels",
+      "default": "Could not process the channel operation.",
+      "forbidden": "You do not have channel access.",
+      "invalid": "Review the channel information."
+    }
+  },
   "catalog": {
     "title": "Catalog",
     "description": "Manage simple products, parent products, and sellable variants with SKU, cost, and unit of measure.",

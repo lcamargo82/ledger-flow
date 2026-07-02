@@ -132,6 +132,32 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Fora de escopo:** consumo parcial de reserva, pedidos, marketplace, malha fina e financeiro por pedido.
 - **i18n:** Namespace `inventory.*` em pt-BR e en-US.
 
+### Orders
+
+- **Rota:** `/orders`
+- **Status:** Implementada 10.0.5
+- **Permissões:** `orders:read`, `orders:manage`
+- **Capability:** `orders.manage`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
+- **Objetivo:** Criar pedidos internos e executar o ciclo confirmar, cancelar e concluir usando reservas de estoque.
+- **Fluxos:** criação de pedido em rascunho, confirmação com reserva por item, cancelamento com liberação de reserva e conclusão com consumo da reserva.
+- **Segurança:** O frontend oculta ações sem permissão; o backend valida `@RequirePermissions` e `@RequireCapabilities`.
+- **Fora de escopo:** marketplace, webhooks de canais, malha fina, backorder e financeiro por pedido.
+- **i18n:** Namespace `orders.*` em pt-BR e en-US.
+
+### Channels
+
+- **Rota:** `/channels`
+- **Status:** Implementada 10.0.6
+- **Permissões:** `channels:read`, `channels:manage`
+- **Capability:** `channels.connect`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
+- **Objetivo:** Configurar integrações de canal e visualizar o inbox sanitizado de webhooks.
+- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, filtro de inbox por status e exibição de resumo sem payload bruto.
+- **Segurança:** Webhook público autentica por segredo da integração; UI protegida por permissão/capability; segredos e payload bruto não são exibidos.
+- **Fora de escopo:** Mercado Livre real, importação de anúncios, malha fina, criação automática de pedido e financeiro por pedido.
+- **i18n:** Namespace `channels.*` em pt-BR e en-US.
+
 ### Catalog Products
 
 - **Rota:** `/catalog/products`

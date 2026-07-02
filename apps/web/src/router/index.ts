@@ -18,6 +18,8 @@ import NotFoundView from '../views/NotFoundView.vue'
 import PlatformTenantsView from '../views/PlatformTenantsView.vue'
 import InventoryFoundationView from '../views/InventoryFoundationView.vue'
 import CatalogProductsView from '../views/CatalogProductsView.vue'
+import OrdersView from '../views/OrdersView.vue'
+import ChannelsView from '../views/ChannelsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -194,6 +196,28 @@ const router = createRouter({
         requiresAuth: true,
         permissions: ['inventory:read'],
         capabilities: ['inventory.manage'],
+      },
+    },
+    {
+      path: '/orders',
+      name: 'orders',
+      component: OrdersView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['orders:read'],
+        capabilities: ['orders.manage'],
+      },
+    },
+    {
+      path: '/channels',
+      name: 'channels',
+      component: ChannelsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['channels:read'],
+        capabilities: ['channels.connect'],
       },
     },
     {

@@ -1354,6 +1354,52 @@ POST /inventory/reservations/:id/release
 POST /inventory/reservations/:id/consume
 ```
 
+## Fase 10.0.5 - Pedidos Internos e Reserva de Estoque
+
+A 10.0.5 introduz pedidos internos sem canal externo, reutilizando o serviço operacional de reservas criado na 10.0.4.
+
+- `InternalOrder` e `InternalOrderItem` com status `DRAFT`, `CONFIRMED`, `CANCELLED` e `FULFILLED`.
+- Criação de pedido interno em rascunho com `idempotencyKey` obrigatório.
+- Confirmação de pedido chama `reserveStock()` para cada item e vincula a `InventoryReservation`.
+- Cancelamento chama `releaseReservation()` para reservas vinculadas.
+- Fulfillment chama `consumeReservation()` e consome integralmente a reserva.
+- Eventos Outbox de pedido para confirmação, cancelamento e conclusão.
+- Auditoria para criação e transições de pedido.
+- UI `/orders` com lista paginada, criação de pedido, confirmação, cancelamento e conclusão com motivo.
+- Fora de escopo: canal externo, marketplace, malha fina, ingestão webhook e financeiro por pedido.
+
+Endpoints:
+
+```text
+POST /orders
+GET /orders
+GET /orders/:id
+POST /orders/:id/confirm
+POST /orders/:id/cancel
+POST /orders/:id/fulfill
+```
+
+## Fase 10.0.6 - Channel Integration Foundation e Inbound Intake
+
+A 10.0.6 cria a fundação de canais sem integrar Mercado Livre real ainda.
+
+- `ChannelIntegration` com provider `MOCK`/`MERCADO_LIVRE`, status e segredo de webhook armazenado apenas como hash.
+- `ChannelWebhookInboxEvent` como Inbox idempotente por `[provider, providerEventId]`.
+- Endpoint público autenticado por segredo: `POST /webhooks/channels/:provider`.
+- Payload bruto não é persistido; apenas `payloadHash` e `payloadSummary` sanitizado.
+- Payload válido fica `RECEIVED`; duplicado retorna `DUPLICATE` sem novo registro; payload inválido fica `INVALID`.
+- UI `/channels` lista integrações e inbox sanitizado.
+- Fora de escopo: adapter real Mercado Livre, importação de anúncios, malha fina, criação automática de pedido por webhook e financeiro por pedido.
+
+Endpoints:
+
+```text
+POST /channels/integrations
+GET /channels/integrations
+GET /channels/webhook-inbox
+POST /webhooks/channels/:provider
+```
+
 ### Platform Admin as Internal Tenant User
 
 O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:

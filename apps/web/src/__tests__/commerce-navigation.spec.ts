@@ -24,6 +24,20 @@ describe('commerce navigation foundation', () => {
     })
   })
 
+  it('registers orders route behind permission and capability metadata', () => {
+    const ordersRoute = router.getRoutes().find((item) => item.path === '/orders')
+
+    expect(ordersRoute?.meta.permissions).toEqual(['orders:read'])
+    expect(ordersRoute?.meta.capabilities).toEqual(['orders.manage'])
+  })
+
+  it('registers channels route behind permission and capability metadata', () => {
+    const channelsRoute = router.getRoutes().find((item) => item.path === '/channels')
+
+    expect(channelsRoute?.meta.permissions).toEqual(['channels:read'])
+    expect(channelsRoute?.meta.capabilities).toEqual(['channels.connect'])
+  })
+
   it('checks capabilities from the authenticated user session', () => {
     const authStore = useAuthStore()
     authStore.user = {
@@ -48,7 +62,11 @@ describe('commerce navigation foundation', () => {
     expect(ptBR.nav.inventory).toBe('Estoque')
     expect(enUS.nav.inventory).toBe('Inventory')
     expect(ptBR.nav.orders).toBe('Pedidos')
+    expect(ptBR.orders.actions.confirm).toBe('Confirmar')
+    expect(enUS.orders.status.FULFILLED).toBe('Fulfilled')
     expect(ptBR.nav.channels).toBe('Canais')
+    expect(ptBR.channels.tabs.inbox).toBe('Inbox')
+    expect(enUS.channels.webhookStatus.INVALID).toBe('Invalid')
     expect(ptBR.nav.analytics).toBe('Analytics')
   })
 })
