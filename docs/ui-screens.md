@@ -126,3 +126,14 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Objetivo:** Exibir uma tela operacional mínima enquanto as sprints 10.0.3 e 10.0.4 introduzem warehouses, ledger, saldos e reservas.
 - **Segurança:** O menu e a rota são ocultados/bloqueados no frontend apenas como UX; o backend valida `@RequirePermissions` e `@RequireCapabilities`.
 - **i18n:** `nav.inventory`, `inventory.title`, `inventory.description`, `inventory.emptyTitle`, `inventory.emptyDescription`.
+
+### Catalog Products
+- **Rota:** `/catalog/products`
+- **Status:** Implementada 10.0.2
+- **Permissões:** `catalog:read`, `catalog:manage`
+- **Capability:** `catalog.manage`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppInput`, `AppSelect`, `AppTable`, `AppModal`, `ProductForm`.
+- **Objetivo:** CRUD paginado de produto simples, produto pai e variante/filho com `ProductSku`, preço de custo, moeda e unidade de medida.
+- **Segurança:** O frontend esconde ações sem permissão/capability, mas o backend valida `@RequirePermissions` e `@RequireCapabilities`.
+- **Fora de escopo:** warehouses, saldos, movimentações, reservas, pedidos, marketplace, malha fina e financeiro por pedido.
+- **i18n:** Namespace `catalog.*` em pt-BR e en-US.

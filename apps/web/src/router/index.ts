@@ -17,6 +17,7 @@ import ForbiddenView from '../views/ForbiddenView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import PlatformTenantsView from '../views/PlatformTenantsView.vue'
 import InventoryFoundationView from '../views/InventoryFoundationView.vue'
+import CatalogProductsView from '../views/CatalogProductsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -138,6 +139,17 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         permissions: ['payments:read']
+      }
+    },
+    {
+      path: '/catalog/products',
+      name: 'catalog-products',
+      component: CatalogProductsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['catalog:read'],
+        capabilities: ['catalog.manage']
       }
     },
     {

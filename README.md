@@ -1249,6 +1249,29 @@ GET /channels/capabilities/status
 GET /financial-intelligence/capabilities/status
 ```
 
+## Fase 10.0.2 - Catálogo, Produto e SKU
+
+A base operacional de catálogo foi adicionada sem introduzir estoque, pedidos, marketplace ou fatos financeiros.
+
+- Produto simples, produto pai e variante/filho.
+- `ProductSku` para unidades vendáveis.
+- Regra central de SKU: maiúsculas, `^[A-Z0-9_-]+$`, 8 a 20 caracteres e bloqueio de numérico puro com zero à esquerda.
+- Preço de custo (`averageCost`), moeda e unidade de medida.
+- Arquivamento sem exclusão física.
+- CRUD paginado e filtrado por tipo/status/busca.
+- Auditoria para criação, atualização, alteração de custo e arquivamento.
+- UI de catálogo em `/catalog/products` com i18n pt-BR/en-US.
+
+Endpoints:
+
+```text
+POST /catalog/products
+GET /catalog/products
+GET /catalog/products/:id
+PATCH /catalog/products/:id
+POST /catalog/products/:id/archive
+```
+
 
 
 ### Platform Admin as Internal Tenant User

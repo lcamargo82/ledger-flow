@@ -121,6 +121,7 @@
     "dashboard": "Dashboard",
     "users": "Users",
     "payments": "Payments",
+    "catalog": "Catalog",
     "inventory": "Inventory",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
@@ -140,6 +141,84 @@
     "description": "Inventory module foundation is enabled. Warehouses, ledger, and balances arrive in the next sprints.",
     "emptyTitle": "Inventory foundation ready",
     "emptyDescription": "Routes, permissions, and commercial capabilities are prepared for Sprint 10.0.3."
+  },
+  "catalog": {
+    "title": "Catalog",
+    "description": "Manage simple products, parent products, and sellable variants with SKU, cost, and unit of measure.",
+    "actions": {
+      "create": "New product",
+      "edit": "Edit",
+      "archive": "Archive",
+      "save": "Save",
+      "clearFilters": "Clear"
+    },
+    "filters": {
+      "searchLabel": "Search",
+      "searchPlaceholder": "Name, brand, category, or SKU...",
+      "typeLabel": "Type",
+      "typeAll": "All types",
+      "statusLabel": "Status",
+      "statusAll": "All statuses"
+    },
+    "table": {
+      "name": "Product",
+      "sku": "SKU",
+      "type": "Type",
+      "cost": "Cost",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "type": {
+      "SIMPLE": "Simple",
+      "PARENT": "Parent",
+      "VARIANT": "Variant"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
+    },
+    "form": {
+      "createTitle": "New product",
+      "editTitle": "Edit product",
+      "typeLabel": "Type",
+      "parentLabel": "Parent product",
+      "parentPlaceholder": "Select a parent product",
+      "nameLabel": "Name",
+      "namePlaceholder": "E.g. LedgerFlow T-shirt",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "brandLabel": "Brand",
+      "brandPlaceholder": "E.g. LedgerFlow",
+      "categoryLabel": "Category",
+      "categoryPlaceholder": "E.g. Apparel",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "ABC_1234",
+      "averageCostLabel": "Cost price",
+      "unitOfMeasureLabel": "Unit of measure",
+      "currencyLabel": "Currency",
+      "barcodeLabel": "Barcode",
+      "costChangeReasonLabel": "Cost change reason",
+      "costChangeReasonPlaceholder": "Explain the reason when changing cost",
+      "parentSkuNotice": "Parent products group variants and do not have their own SKU."
+    },
+    "empty": {
+      "title": "No products found",
+      "description": "Create a product or adjust filters to view the catalog."
+    },
+    "errors": {
+      "title": "Could not load catalog",
+      "default": "Could not process the catalog operation.",
+      "invalid": "Review the product and SKU information.",
+      "skuAlreadyExists": "This SKU already exists for the current tenant.",
+      "notFound": "Product not found.",
+      "forbidden": "You do not have catalog access."
+    },
+    "pagination": {
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next"
+    }
   },
   "users": {
     "title": "Users",

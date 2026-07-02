@@ -25,6 +25,17 @@ enum PermissionScope {
   PLATFORM
 }
 
+enum ProductType {
+  SIMPLE
+  PARENT
+  VARIANT
+}
+
+enum ProductStatus {
+  ACTIVE
+  ARCHIVED
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -48,6 +59,8 @@ model Tenant {
   adminInvitations      TenantAdminInvitation[]
   outboxEvents          OutboxEvent[]
   asyncJobExecutions    AsyncJobExecution[]
+  products              Product[]
+  productSkus           ProductSku[]
 
   @@map("tenants")
 }
@@ -240,6 +253,55 @@ model Customer {
   @@index([tenantId, email])
   @@index([tenantId, document])
   @@map("customers")
+}
+
+model Product {
+  id              String        @id @default(uuid())
+  tenantId        String        @map("tenant_id")
+  type            ProductType
+  status          ProductStatus @default(ACTIVE)
+  parentProductId String?       @map("parent_product_id")
+  name            String
+  description     String?
+  brand           String?
+  category        String?
+  attributes      Json?         @map("attributes_json")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  archivedAt      DateTime?     @map("archived_at")
+
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parentProduct Product?     @relation("ProductHierarchy", fields: [parentProductId], references: [id], onDelete: Restrict)
+  childProducts Product[]    @relation("ProductHierarchy")
+  sku           ProductSku?
+
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@index([tenantId, parentProductId])
+  @@index([tenantId, name])
+  @@map("products")
+}
+
+model ProductSku {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  productId     String   @unique @map("product_id")
+  skuCanonical  String   @map("sku_canonical")
+  skuDisplay    String   @map("sku_display")
+  barcode       String?
+  unitOfMeasure String   @default("UN") @map("unit_of_measure")
+  costPolicy    String   @default("WEIGHTED_AVERAGE") @map("cost_policy")
+  averageCost   Decimal  @db.Decimal(18, 4) @map("average_cost")
+  currency      String   @default("BRL")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, skuCanonical])
+  @@index([tenantId, barcode])
+  @@map("product_skus")
 }
 
 model PasswordResetToken {

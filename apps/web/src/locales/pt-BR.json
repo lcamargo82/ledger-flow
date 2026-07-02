@@ -120,6 +120,7 @@
     "dashboard": "Dashboard",
     "users": "Usuários",
     "payments": "Pagamentos",
+    "catalog": "Catálogo",
     "inventory": "Estoque",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
@@ -139,6 +140,84 @@
     "description": "Fundação do módulo de estoque habilitada. Cadastro de warehouses, ledger e saldos entram nas próximas sprints.",
     "emptyTitle": "Fundação de estoque pronta",
     "emptyDescription": "As rotas, permissões e capabilities comerciais já estão preparadas para a Sprint 10.0.3."
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "description": "Gerencie produtos simples, produtos pai e variantes vendáveis com SKU, custo e unidade de medida.",
+    "actions": {
+      "create": "Novo produto",
+      "edit": "Editar",
+      "archive": "Arquivar",
+      "save": "Salvar",
+      "clearFilters": "Limpar"
+    },
+    "filters": {
+      "searchLabel": "Buscar",
+      "searchPlaceholder": "Nome, marca, categoria ou SKU...",
+      "typeLabel": "Tipo",
+      "typeAll": "Todos os tipos",
+      "statusLabel": "Status",
+      "statusAll": "Todos os status"
+    },
+    "table": {
+      "name": "Produto",
+      "sku": "SKU",
+      "type": "Tipo",
+      "cost": "Custo",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "type": {
+      "SIMPLE": "Simples",
+      "PARENT": "Pai",
+      "VARIANT": "Variante"
+    },
+    "status": {
+      "ACTIVE": "Ativo",
+      "ARCHIVED": "Arquivado"
+    },
+    "form": {
+      "createTitle": "Novo produto",
+      "editTitle": "Editar produto",
+      "typeLabel": "Tipo",
+      "parentLabel": "Produto pai",
+      "parentPlaceholder": "Selecione um produto pai",
+      "nameLabel": "Nome",
+      "namePlaceholder": "Ex: Camiseta LedgerFlow",
+      "descriptionLabel": "Descrição",
+      "descriptionPlaceholder": "Descrição opcional",
+      "brandLabel": "Marca",
+      "brandPlaceholder": "Ex: LedgerFlow",
+      "categoryLabel": "Categoria",
+      "categoryPlaceholder": "Ex: Vestuário",
+      "skuLabel": "SKU",
+      "skuPlaceholder": "ABC_1234",
+      "averageCostLabel": "Preço de custo",
+      "unitOfMeasureLabel": "Unidade de medida",
+      "currencyLabel": "Moeda",
+      "barcodeLabel": "Código de barras",
+      "costChangeReasonLabel": "Motivo da alteração de custo",
+      "costChangeReasonPlaceholder": "Informe o motivo ao alterar o custo",
+      "parentSkuNotice": "Produto pai agrupa variantes e não possui SKU próprio."
+    },
+    "empty": {
+      "title": "Nenhum produto encontrado",
+      "description": "Crie um produto ou ajuste os filtros para visualizar o catálogo."
+    },
+    "errors": {
+      "title": "Não foi possível carregar o catálogo",
+      "default": "Não foi possível processar a operação de catálogo.",
+      "invalid": "Revise as informações do produto e do SKU.",
+      "skuAlreadyExists": "Este SKU já está cadastrado para o tenant atual.",
+      "notFound": "Produto não encontrado.",
+      "forbidden": "Você não possui acesso ao catálogo."
+    },
+    "pagination": {
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
   },
   "users": {
     "title": "Usuários",

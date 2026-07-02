@@ -83,6 +83,15 @@
           <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
         </router-link>
         <router-link
+          v-if="authStore.checkAllPermissions(['catalog:read']) && authStore.checkAllCapabilities(['catalog.manage'])"
+          to="/catalog/products"
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">category</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.catalog') }}</span>
+        </router-link>
+        <router-link
           v-if="authStore.checkAllPermissions(['inventory:read']) && authStore.checkAllCapabilities(['inventory.manage'])"
           to="/inventory"
           class="lf-nav-item"

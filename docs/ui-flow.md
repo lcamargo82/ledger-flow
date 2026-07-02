@@ -31,6 +31,7 @@ Telas acessíveis após autenticação bem-sucedida, com verificação de roles/
 * **Organization / Tenant Settings** (`/settings/tenant`)
 * **Customers** (`/customers`)
 * **Payments** (`/payments`) - *Futura tela da Fase 5*
+* **Catalog** (`/catalog/products`) - Produtos, SKUs e arquivamento
 * **Inventory** (`/inventory`) - Fundação 10.0.1, gated por permissão e capability
 * **Reconciliation** (`/reconciliation`) - *Futura tela*
 * **Reports** (`/reports`) - *Futura tela*
@@ -53,6 +54,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/settings/tenant` | Parcial | `AppLayout` | `tenant:update` | Configuração da organização atual |
 | `/customers` | Implementada | `AppLayout` | `customers:read` | Gestão de clientes |
 | `/payments` | Implementada | `AppLayout` | `payments:read` | Visão de pagamentos |
+| `/catalog/products` | Implementada (10.0.2) | `AppLayout` | `catalog:read` + `catalog.manage` | CRUD paginado de produtos simples, pai, variantes e SKU |
 | `/inventory` | Fundação 10.0.1 | `AppLayout` | `inventory:read` + `inventory.manage` | Placeholder do módulo Inventory; warehouses/ledger entram nas próximas sprints |
 | `/reconciliation`| Futura | `AppLayout` | a definir | Conciliação financeira |
 | `/reports` | Futura | `AppLayout` | a definir | Relatórios de sistema |

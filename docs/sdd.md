@@ -1957,6 +1957,44 @@ GET /financial-intelligence/capabilities/status
 
 Não há alteração AsyncAPI nesta sprint porque nenhum evento novo foi publicado.
 
+## 5.15 Catalog Product and SKU Design
+
+A Sprint 10.0.2 implementa somente o bounded context `catalog`.
+
+Inclui:
+
+* `Product` com tipos `SIMPLE`, `PARENT` e `VARIANT`.
+* `ProductSku` para produtos vendáveis (`SIMPLE` e `VARIANT`).
+* Produto pai sem SKU próprio.
+* Variante vinculada a um produto pai.
+* SKU único por tenant, normalizado por `SkuPolicy`.
+* Preço de custo, moeda e unidade de medida no SKU.
+* Arquivamento por `POST /catalog/products/:id/archive`.
+* Auditoria de criação, atualização, alteração de custo e arquivamento.
+
+Não inclui nesta sprint:
+
+* Warehouse.
+* Saldo.
+* Movimentações.
+* Reservas.
+* Pedidos.
+* Integrações marketplace.
+* Malha fina.
+* Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /catalog/products
+GET /catalog/products
+GET /catalog/products/:id
+PATCH /catalog/products/:id
+POST /catalog/products/:id/archive
+```
+
+O frontend usa `/catalog/products`, `catalog:read`, `catalog:manage` e `catalog.manage`.
+
 
 ### Payments Notes
 * PaymentsView segue View -> Store -> Service -> HTTP Client.
