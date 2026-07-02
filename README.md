@@ -16,193 +16,198 @@ O projeto simula um sistema corporativo de grande escala, inspirado em plataform
 
 LedgerFlow uses a dark enterprise fintech identity focused on trust, security, auditability and operational clarity. The visual system is based on a deep slate/zinc palette with indigo, blue, cyan and emerald accents.
 
-* [Brand Identity](./docs/brand.md)
+- [Brand Identity](./docs/brand.md)
 
 ---
+
 # 1. Visão Geral
 
 O LedgerFlow permite que empresas gerenciem cobranças, clientes, pagamentos, integrações com gateways, webhooks, relatórios financeiros e permissões de usuários em uma única plataforma.
 
 O sistema começa com suporte ao **Stripe**, mas foi arquitetado para suportar múltiplos gateways de pagamento por tenant, como:
 
-* Stripe.
-* Asaas.
-* Mercado Pago.
-* Outros providers futuros.
+- Stripe.
+- Asaas.
+- Mercado Pago.
+- Outros providers futuros.
 
 O principal objetivo técnico é demonstrar uma arquitetura robusta usando:
 
-* NestJS.
-* Vue 3.
-* PostgreSQL.
-* MongoDB.
-* Redis.
-* RabbitMQ.
-* Prisma.
-* Docker.
-* OpenTelemetry.
-* Prometheus.
-* Grafana.
-* Datadog opcional.
+- NestJS.
+- Vue 3.
+- PostgreSQL.
+- MongoDB.
+- Redis.
+- RabbitMQ.
+- Prisma.
+- Docker.
+- OpenTelemetry.
+- Prometheus.
+- Grafana.
+- Datadog opcional.
 
 ---
+
 # 2. Problema de Negócio
 
 Empresas que recebem pagamentos por múltiplos canais enfrentam desafios como:
 
-* Forte dependência de um único gateway.
-* Dificuldade para migrar entre providers.
-* Falhas em webhooks sem rastreabilidade.
-* Falta de auditoria financeira.
-* Exportações lentas ou instáveis.
-* Controle frágil de permissões.
-* Baixa visibilidade de erros e gargalos.
-* Dificuldade para operar integrações externas.
-* Falta de observabilidade técnica e de negócio.
+- Forte dependência de um único gateway.
+- Dificuldade para migrar entre providers.
+- Falhas em webhooks sem rastreabilidade.
+- Falta de auditoria financeira.
+- Exportações lentas ou instáveis.
+- Controle frágil de permissões.
+- Baixa visibilidade de erros e gargalos.
+- Dificuldade para operar integrações externas.
+- Falta de observabilidade técnica e de negócio.
 
 O LedgerFlow simula uma solução para esses problemas com uma arquitetura preparada para ambientes corporativos.
 
 ---
+
 # 3. Funcionalidades Planejadas
 
 ## Core
 
-* Autenticação com JWT.
-* Refresh token seguro.
-* Multitenancy.
-* RBAC e preparação para ABAC.
-* Gestão de usuários.
-* Gestão de permissões.
-* Gestão de clientes.
-* Gestão de pagamentos.
-* Gestão de Tenants (Provisionamento, Overview e Saúde Operacional).
-* Integração inicial com Asaas Sandbox (Fase 6.1).
-* Integração com Mercado Pago via OAuth (Fase 6.2A).
-* Arquitetura desacoplada para múltiplos gateways.
-* Webhooks inbound.
-* Webhooks outbound.
-* API Keys por tenant.
-* Auditoria.
+- Autenticação com JWT.
+- Refresh token seguro.
+- Multitenancy.
+- RBAC e preparação para ABAC.
+- Gestão de usuários.
+- Gestão de permissões.
+- Gestão de clientes.
+- Gestão de pagamentos.
+- Gestão de Tenants (Provisionamento, Overview e Saúde Operacional).
+- Integração inicial com Asaas Sandbox (Fase 6.1).
+- Integração com Mercado Pago via OAuth (Fase 6.2A).
+- Arquitetura desacoplada para múltiplos gateways.
+- Webhooks inbound.
+- Webhooks outbound.
+- API Keys por tenant.
+- Auditoria.
 
 ## Segurança
 
-* Hash de senhas.
-* Hash de refresh tokens.
-* Hash de API Keys.
-* Criptografia de credenciais externas.
-* Validação de assinatura de webhooks.
-* Assinatura HMAC de webhooks outbound.
-* Rate limiting.
-* CORS restrito.
-* Helmet.
-* Sanitização de logs.
-* Isolamento por tenant.
+- Hash de senhas.
+- Hash de refresh tokens.
+- Hash de API Keys.
+- Criptografia de credenciais externas.
+- Validação de assinatura de webhooks.
+- Assinatura HMAC de webhooks outbound.
+- Rate limiting.
+- CORS restrito.
+- Helmet.
+- Sanitização de logs.
+- Isolamento por tenant.
 
 ## Assíncrono e Resiliência
 
-* RabbitMQ.
-* Outbox Pattern.
-* Inbox Pattern.
-* Retry.
-* Dead Letter Queue.
-* Workers.
-* Idempotência.
-* Locks distribuídos com Redis.
+- RabbitMQ.
+- Outbox Pattern.
+- Inbox Pattern.
+- Retry.
+- Dead Letter Queue.
+- Workers.
+- Idempotência.
+- Locks distribuídos com Redis.
 
 ## Relatórios
 
-* Exportação CSV.
-* Exportação XLSX.
-* Node.js Streams.
-* ExcelJS em modo streaming.
-* Jobs assíncronos.
-* Notificações de relatório pronto.
-* Expiração de arquivos.
+- Exportação CSV.
+- Exportação XLSX.
+- Node.js Streams.
+- ExcelJS em modo streaming.
+- Jobs assíncronos.
+- Notificações de relatório pronto.
+- Expiração de arquivos.
 
 ## Frontend
 
-* Vue 3.
-* TypeScript.
-* Pinia.
-* Tailwind CSS.
-* Heroicons.
-* Componentização reutilizável.
-* Toasts globais.
-* Modais de confirmação.
-* Internacionalização com JSON.
-* Paginação vinda do backend.
-* Lazy loading de rotas e componentes.
+- Vue 3.
+- TypeScript.
+- Pinia.
+- Tailwind CSS.
+- Heroicons.
+- Componentização reutilizável.
+- Toasts globais.
+- Modais de confirmação.
+- Internacionalização com JSON.
+- Paginação vinda do backend.
+- Lazy loading de rotas e componentes.
 
 ## Observabilidade
 
-* Logs estruturados com Pino.
-* TraceId por request.
-* OpenTelemetry.
-* Prometheus.
-* Grafana.
-* Métricas técnicas.
-* Métricas de negócio.
-* Datadog opcional.
+- Logs estruturados com Pino.
+- TraceId por request.
+- OpenTelemetry.
+- Prometheus.
+- Grafana.
+- Métricas técnicas.
+- Métricas de negócio.
+- Datadog opcional.
 
 ---
+
 # 4. Stack Técnica
 
 ## Backend
 
-* NestJS.
-* TypeScript.
-* Prisma.
-* PostgreSQL.
-* MongoDB.
-* Redis.
-* RabbitMQ.
-* JWT.
-* Pino.
-* OpenTelemetry.
-* Swagger.
-* Redoc.
-* AsyncAPI.
+- NestJS.
+- TypeScript.
+- Prisma.
+- PostgreSQL.
+- MongoDB.
+- Redis.
+- RabbitMQ.
+- JWT.
+- Pino.
+- OpenTelemetry.
+- Swagger.
+- Redoc.
+- AsyncAPI.
 
 ## Frontend
 
-* Vue 3.
-* TypeScript.
-* Vite.
-* Pinia.
-* Vue Router.
-* Tailwind CSS.
-* Heroicons.
-* Axios.
-* JSON-based i18n.
+- Vue 3.
+- TypeScript.
+- Vite.
+- Pinia.
+- Vue Router.
+- Tailwind CSS.
+- Heroicons.
+- Axios.
+- JSON-based i18n.
 
 ## Infraestrutura Local
 
-* Docker.
-* Docker Compose.
-* PostgreSQL.
-* MongoDB.
-* Redis.
-* RabbitMQ.
-* Mailpit.
-* Prometheus.
-* Grafana.
+- Docker.
+- Docker Compose.
+- PostgreSQL.
+- MongoDB.
+- Redis.
+- RabbitMQ.
+- Mailpit.
+- Prometheus.
+- Grafana.
 
 ## Testes e Qualidade
 
-* Testes unitários.
-* Testes de integração.
-* Testes E2E.
-* Testes de carga com k6.
-* ESLint.
-* Prettier.
-* Husky.
-* lint-staged.
-* Commitlint.
-* Dependabot ou Renovate.
-* CodeQL.
-* npm audit.
+- Testes unitários.
+- Testes de integração.
+- Testes E2E.
+- Testes de carga com k6.
+- ESLint.
+- Prettier.
+- Husky.
+- lint-staged.
+- Commitlint.
+- Dependabot ou Renovate.
+- CodeQL.
+- npm audit.
 
 ---
+
 # 5. Arquitetura
 
 O LedgerFlow será desenvolvido inicialmente como um **Monólito Modular Microservices-Ready**.
@@ -256,6 +261,7 @@ modules/payments/
 ```
 
 ---
+
 # 6. Estrutura do Projeto
 
 ```text
@@ -278,79 +284,83 @@ ledgerflow/
 ```
 
 ---
+
 # 7. Diagramas
 
 Os diagramas estão disponíveis em `docs/diagrams`.
 
 ## Arquitetura
 
-* [C4 Context](docs/diagrams/c4-context.md)
-* [C4 Container](docs/diagrams/c4-container.md)
-* [Database](docs/diagrams/database.md)
-* [Queues](docs/diagrams/queues.md)
-* [Observability](docs/diagrams/observability.md)
+- [C4 Context](docs/diagrams/c4-context.md)
+- [C4 Container](docs/diagrams/c4-container.md)
+- [Database](docs/diagrams/database.md)
+- [Queues](docs/diagrams/queues.md)
+- [Observability](docs/diagrams/observability.md)
 
 ## Fluxos
 
-* [Payment Flow](docs/diagrams/payment-flow.md)
-* [Webhook Flow](docs/diagrams/webhook-flow.md)
-* [Report Export Flow](docs/diagrams/report-export-flow.md)
-* [Auth Flow](docs/diagrams/auth-flow.md)
-* [Multitenancy Flow](docs/diagrams/multitenancy-flow.md)
-* [Frontend Architecture](docs/diagrams/frontend-architecture.md)
+- [Payment Flow](docs/diagrams/payment-flow.md)
+- [Webhook Flow](docs/diagrams/webhook-flow.md)
+- [Report Export Flow](docs/diagrams/report-export-flow.md)
+- [Auth Flow](docs/diagrams/auth-flow.md)
+- [Multitenancy Flow](docs/diagrams/multitenancy-flow.md)
+- [Frontend Architecture](docs/diagrams/frontend-architecture.md)
 
 ---
+
 # 8. Documentação
 
 ## Produto e Arquitetura
 
-* [PRD — Product Requirements Document](docs/prd.md)
-* [SDD — Software Design Document](docs/sdd.md)
-* [Implementation Plan](docs/implementation-plan.md)
-* [Technical Backlog](docs/backlog.md)
+- [PRD — Product Requirements Document](docs/prd.md)
+- [SDD — Software Design Document](docs/sdd.md)
+- [Implementation Plan](docs/implementation-plan.md)
+- [Technical Backlog](docs/backlog.md)
 
 ## Design e UI (Frontend)
 
-* [UI Flow & Navigation](docs/ui-flow.md)
-* [UI Screens Specification](docs/ui-screens.md)
-* [UI Component Library](docs/ui-components.md)
-* [UI Design System](docs/ui-design-system.md)
-* [UI Refactor Plan](docs/ui-refactor-plan.md)
-* [UI Reference Index](docs/reference/ui/README.md)
+- [UI Flow & Navigation](docs/ui-flow.md)
+- [UI Screens Specification](docs/ui-screens.md)
+- [UI Component Library](docs/ui-components.md)
+- [UI Design System](docs/ui-design-system.md)
+- [UI Refactor Plan](docs/ui-refactor-plan.md)
+- [UI Reference Index](docs/reference/ui/README.md)
 
 ## ADRs — Architecture Decision Records
 
-* [ADR-0001 — Architecture Style](docs/adr/0001-architecture-style.md)
-* [ADR-0002 — Payment Gateway Abstraction](docs/adr/0002-payment-gateway-abstraction.md)
-* [ADR-0003 — Outbox and Inbox Pattern](docs/adr/0003-outbox-inbox-pattern.md)
-* [ADR-0004 — Observability Stack](docs/adr/0004-observability-stack.md)
-* [ADR-0005 — Multitenancy Model](docs/adr/0005-multitenancy-model.md)
-* [ADR-0006 — PostgreSQL and MongoDB](docs/adr/0006-postgresql-and-mongodb.md)
-* [ADR-0007 — RabbitMQ for Async Processing](docs/adr/0007-rabbitmq-for-async-processing.md)
-* [ADR-0008 — Error Handling Strategy](docs/adr/0008-error-handling-strategy.md)
-* [ADR-0009 — Frontend Architecture](docs/adr/0009-frontend-architecture.md)
-* [ADR-0010 — Dependency Governance](docs/adr/0010-dependency-governance.md)
-* [ADR-0011 — Date and Timezone Strategy](docs/adr/0011-date-timezone-strategy.md)
-* [ADR-0012 — API Documentation Strategy](docs/adr/0012-api-documentation-strategy.md)
-* [ADR-0013 — Authentication and Authorization](docs/adr/0013-authentication-and-authorization.md)
-* [ADR-0014 — Report Export Strategy](docs/adr/0014-report-export-strategy.md)
-* [ADR-0015 — Email and Notification Strategy](docs/adr/0015-email-and-notification-strategy.md)
-* [ADR-0016 — Security and Secrets Management](docs/adr/0016-security-and-secrets-management.md)
-* [ADR-0017 — Testing Strategy](docs/adr/0017-testing-strategy.md)
-* [ADR-0018 — Docker Local Development](docs/adr/0018-docker-local-development.md)
+- [ADR-0001 — Architecture Style](docs/adr/0001-architecture-style.md)
+- [ADR-0002 — Payment Gateway Abstraction](docs/adr/0002-payment-gateway-abstraction.md)
+- [ADR-0003 — Outbox and Inbox Pattern](docs/adr/0003-outbox-inbox-pattern.md)
+- [ADR-0004 — Observability Stack](docs/adr/0004-observability-stack.md)
+- [ADR-0005 — Multitenancy Model](docs/adr/0005-multitenancy-model.md)
+- [ADR-0006 — PostgreSQL and MongoDB](docs/adr/0006-postgresql-and-mongodb.md)
+- [ADR-0007 — RabbitMQ for Async Processing](docs/adr/0007-rabbitmq-for-async-processing.md)
+- [ADR-0008 — Error Handling Strategy](docs/adr/0008-error-handling-strategy.md)
+- [ADR-0009 — Frontend Architecture](docs/adr/0009-frontend-architecture.md)
+- [ADR-0010 — Dependency Governance](docs/adr/0010-dependency-governance.md)
+- [ADR-0011 — Date and Timezone Strategy](docs/adr/0011-date-timezone-strategy.md)
+- [ADR-0012 — API Documentation Strategy](docs/adr/0012-api-documentation-strategy.md)
+- [ADR-0013 — Authentication and Authorization](docs/adr/0013-authentication-and-authorization.md)
+- [ADR-0014 — Report Export Strategy](docs/adr/0014-report-export-strategy.md)
+- [ADR-0015 — Email and Notification Strategy](docs/adr/0015-email-and-notification-strategy.md)
+- [ADR-0016 — Security and Secrets Management](docs/adr/0016-security-and-secrets-management.md)
+- [ADR-0017 — Testing Strategy](docs/adr/0017-testing-strategy.md)
+- [ADR-0018 — Docker Local Development](docs/adr/0018-docker-local-development.md)
 
 ---
+
 # 9. Como Rodar Localmente
 
 ## Pré-requisitos
 
-* Docker.
-* Docker Compose.
-* Node.js LTS.
-* npm ou pnpm.
-* Git.
+- Docker.
+- Docker Compose.
+- Node.js LTS.
+- npm ou pnpm.
+- Git.
 
 ---
+
 ## 1. Clonar o repositório
 
 HTTPS é recomendado para quem quer apenas clonar ou testar o projeto.
@@ -373,6 +383,7 @@ cd ledger-flow
 ```
 
 ---
+
 ## 2. Criar arquivo `.env`
 
 O projeto usa um único `.env` na raiz.
@@ -486,6 +497,7 @@ DATADOG_ENABLED=false
 Para a lista completa de variáveis, consulte o arquivo `.env.example`.
 
 ---
+
 ## 3. Subir e gerenciar ambiente local
 
 **Subir projeto:**
@@ -552,15 +564,16 @@ docker compose exec web npm run build
 ```
 
 ---
+
 ## 4. Acessar serviços locais
 
-| Serviço             | URL/Host               |
-| ------------------- | ---------------------- |
+| Serviço             | URL/Host                 |
+| ------------------- | ------------------------ |
 | Frontend            | <http://localhost:5180>  |
 | Backend API         | <http://localhost:3010>  |
-| PostgreSQL          | localhost:55432        |
-| MongoDB             | localhost:27018        |
-| Redis               | localhost:6380         |
+| PostgreSQL          | localhost:55432          |
+| MongoDB             | localhost:27018          |
+| Redis               | localhost:6380           |
 | RabbitMQ Management | <http://localhost:15682> |
 | Mailpit             | <http://localhost:8026>  |
 | Prometheus          | <http://localhost:9091>  |
@@ -579,35 +592,37 @@ curl <http://localhost:3010>/health/readiness
 
 **Credenciais:**
 
-* **RabbitMQ:** `ledgerflow` / `ledgerflow`
-* **Grafana:** `admin` / `admin`
-* **Usuário demo:** `owner@ledgerflow.local` / `ChangeMe123!`
+- **RabbitMQ:** `ledgerflow` / `ledgerflow`
+- **Grafana:** `admin` / `admin`
+- **Usuário demo:** `owner@ledgerflow.local` / `ChangeMe123!`
 
 ---
+
 ## 5. Autenticação local
 
 O projeto já possui fluxo inicial de autenticação com:
 
-* Login.
-* Access token JWT.
-* Refresh token com hash no banco.
-* Logout.
-* Sessão única por usuário.
-* Captura de IP e User-Agent.
-* Registro de AuthAttempt.
-* UserSession.
-* Proteção de rotas no frontend.
-* Router guards no Vue.
-* Pinia Auth Store.
-* Axios interceptor com refresh automático.
+- Login.
+- Access token JWT.
+- Refresh token com hash no banco.
+- Logout.
+- Sessão única por usuário.
+- Captura de IP e User-Agent.
+- Registro de AuthAttempt.
+- UserSession.
+- Proteção de rotas no frontend.
+- Router guards no Vue.
+- Pinia Auth Store.
+- Axios interceptor com refresh automático.
 
 ## Password Recovery
 
 A plataforma suporta recuperação de senha segura:
-* Rotas públicas no frontend (`/forgot-password`, `/reset-password?token=`).
-* Interação segura: respostas amigáveis sem expor se o e-mail existe na base de dados.
-* Token temporário: Não é logado nem persistido no localStorage/sessionStorage.
-* E-mails em ambiente de desenvolvimento podem ser inspecionados via Mailpit (`http://localhost:8026`).
+
+- Rotas públicas no frontend (`/forgot-password`, `/reset-password?token=`).
+- Interação segura: respostas amigáveis sem expor se o e-mail existe na base de dados.
+- Token temporário: Não é logado nem persistido no localStorage/sessionStorage.
+- E-mails em ambiente de desenvolvimento podem ser inspecionados via Mailpit (`http://localhost:8026`).
 
 **Credenciais demo (Tenant Cliente):**
 
@@ -636,11 +651,13 @@ Senha: ChangeMe123!
 7. Acessar `/dashboard` sem token redireciona para `/login`
 
 ---
+
 # 10. Variáveis de Ambiente
 
-*(Esta seção foi combinada com a etapa de criação do `.env` na seção de Como Rodar Localmente. Consulte a etapa 2 acima para mais detalhes.)*
+_(Esta seção foi combinada com a etapa de criação do `.env` na seção de Como Rodar Localmente. Consulte a etapa 2 acima para mais detalhes.)_
 
 ---
+
 # 11. Prisma
 
 Os comandos do Prisma devem ser executados via Docker:
@@ -670,6 +687,7 @@ docker compose exec api npx prisma studio --hostname 0.0.0.0 --port 5555
 > **Observação:** O Prisma Studio precisa ficar com o terminal aberto enquanto estiver sendo usado. Acesse em `<http://localhost:5555>`.
 
 ---
+
 # 12. API Documentation
 
 ## Swagger UI
@@ -715,26 +733,28 @@ docs/asyncapi/
 ```
 
 ---
+
 # 13. Segurança
 
 O projeto aplica práticas de segurança como:
 
-* JWT com access token curto.
-* Refresh token com hash.
-* Senhas com hash.
-* API Keys com hash.
-* Credenciais de gateways criptografadas.
-* Validação de assinatura de webhooks.
-* Assinatura HMAC de webhooks outbound.
-* Rate limiting.
-* CORS restrito.
-* Helmet.
-* Sanitização de logs.
-* Erros amigáveis sem stack trace.
-* Controle rígido de permissões.
-* Isolamento multitenant.
+- JWT com access token curto.
+- Refresh token com hash.
+- Senhas com hash.
+- API Keys com hash.
+- Credenciais de gateways criptografadas.
+- Validação de assinatura de webhooks.
+- Assinatura HMAC de webhooks outbound.
+- Rate limiting.
+- CORS restrito.
+- Helmet.
+- Sanitização de logs.
+- Erros amigáveis sem stack trace.
+- Controle rígido de permissões.
+- Isolamento multitenant.
 
 ---
+
 # 14. Multitenancy
 
 O LedgerFlow usa isolamento lógico por `tenantId`.
@@ -757,6 +777,7 @@ notifications.tenant_id
 O backend sempre deve usar o `tenantId` do contexto autenticado, nunca confiar em `tenantId` enviado livremente pelo frontend.
 
 ---
+
 # 15. Payment Gateway Abstraction
 
 O sistema usa Strategy + Factory para abstrair gateways de pagamento.
@@ -775,6 +796,7 @@ As credenciais dos gateways não são expostas na interface frontend (write-only
 O core de pagamento não importa SDKs externos diretamente. Eles ficam isolados no adapter.
 
 ---
+
 # 16. Outbox e Inbox
 
 ## Outbox Pattern
@@ -822,72 +844,75 @@ Atualiza entidades internas
 ```
 
 ---
+
 # 17. Observabilidade
 
 A stack de observabilidade inclui:
 
-* Logs estruturados com Pino.
-* TraceId por request.
-* OpenTelemetry.
-* Prometheus.
-* Grafana.
-* Datadog opcional.
+- Logs estruturados com Pino.
+- TraceId por request.
+- OpenTelemetry.
+- Prometheus.
+- Grafana.
+- Datadog opcional.
 
 ## Métricas técnicas
 
-* Latência HTTP.
-* Taxa de erro.
-* Tempo de queries.
-* Uso de memória.
-* Tamanho de filas.
-* Mensagens em DLQ.
-* Falhas de consumers.
+- Latência HTTP.
+- Taxa de erro.
+- Tempo de queries.
+- Uso de memória.
+- Tamanho de filas.
+- Mensagens em DLQ.
+- Falhas de consumers.
 
 ## Métricas de negócio
 
-* Pagamentos criados.
-* Pagamentos aprovados.
-* Pagamentos recusados.
-* TPV.
-* Taxa de aprovação.
-* Webhooks enviados.
-* Relatórios gerados.
+- Pagamentos criados.
+- Pagamentos aprovados.
+- Pagamentos recusados.
+- TPV.
+- Taxa de aprovação.
+- Webhooks enviados.
+- Relatórios gerados.
 
 ---
+
 # 18. Frontend Architecture
 
 O frontend segue uma arquitetura baseada em:
 
-* Views.
-* Components.
-* Services.
-* Stores.
-* Composables.
-* Utils.
-* Locales.
+- Views.
+- Components.
+- Services.
+- Stores.
+- Composables.
+- Utils.
+- Locales.
 
 ## Regras principais
 
-* Views não chamam Axios diretamente.
-* Services concentram chamadas HTTP.
-* Stores concentram estado global.
-* Componentes devem ser reutilizáveis.
-* Rotas usam lazy loading.
-* Componentes pesados carregam sob demanda.
-* Tabelas usam paginação backend.
-* Permissões controlam menus e botões.
-* Backend continua sendo a fonte real de autorização.
+- Views não chamam Axios diretamente.
+- Services concentram chamadas HTTP.
+- Stores concentram estado global.
+- Componentes devem ser reutilizáveis.
+- Rotas usam lazy loading.
+- Componentes pesados carregam sob demanda.
+- Tabelas usam paginação backend.
+- Permissões controlam menus e botões.
+- Backend continua sendo a fonte real de autorização.
 
 ---
+
 # 19. Internacionalização
 
 O sistema suporta traduções baseadas em arquivos JSON.
 
 Idiomas iniciais:
 
-* `pt-BR`
-* `en-US`
-* `es-ES`
+- `pt-BR`
+- `en-US`
+- `es-ES`
 
 Estrutura:
 
@@ -900,15 +925,16 @@ apps/web/src/locales/
 ```
 
 ---
+
 # 20. Datas e Timezones
 
 Estratégia:
 
-* Persistir datas em UTC.
-* Usar `TIMESTAMPTZ` no PostgreSQL.
-* Trafegar datas em ISO 8601.
-* Exibir datas conforme timezone do usuário ou tenant.
-* Relatórios devem informar timezone utilizado.
+- Persistir datas em UTC.
+- Usar `TIMESTAMPTZ` no PostgreSQL.
+- Trafegar datas em ISO 8601.
+- Exibir datas conforme timezone do usuário ou tenant.
+- Relatórios devem informar timezone utilizado.
 
 Prioridade de timezone:
 
@@ -921,270 +947,277 @@ Prioridade de timezone:
 ```
 
 ---
+
 # 21. Relatórios e Exportações
 
 O LedgerFlow suporta exportações:
 
-* CSV.
-* XLSX.
+- CSV.
+- XLSX.
 
 Estratégia:
 
-* CSV com Node.js Streams.
-* XLSX com ExcelJS streaming.
-* Exportações grandes como jobs assíncronos.
-* Notificação quando pronto.
-* Arquivos com expiração.
-* Respeito a tenant e permissões.
+- CSV com Node.js Streams.
+- XLSX com ExcelJS streaming.
+- Exportações grandes como jobs assíncronos.
+- Notificação quando pronto.
+- Arquivos com expiração.
+- Respeito a tenant e permissões.
 
 ---
+
 # 22. E-mails e Notificações
 
 ## E-mails
 
-* Envio via fila RabbitMQ.
-* Provider inicial: Mailpit/SMTP local.
-* Providers futuros: SendGrid, Resend ou AWS SES.
-* Templates por idioma.
-* Retry em falhas.
+- Envio via fila RabbitMQ.
+- Provider inicial: Mailpit/SMTP local.
+- Providers futuros: SendGrid, Resend ou AWS SES.
+- Templates por idioma.
+- Retry em falhas.
 
 ## Notificações In-App
 
-* Persistidas no PostgreSQL.
-* Exibidas no frontend.
-* Suporte a WebSocket.
-* Possibilidade de marcar como lida.
+- Persistidas no PostgreSQL.
+- Exibidas no frontend.
+- Suporte a WebSocket.
+- Possibilidade de marcar como lida.
 
 ---
+
 # 23. Testes
 
 Estratégia de testes:
 
-* Unitários.
-* Integração.
-* E2E.
-* Frontend component tests.
-* Testes de segurança.
-* Testes de multitenancy.
-* Testes de idempotência.
-* Testes de webhooks.
-* Testes de filas.
-* Testes de carga com k6.
+- Unitários.
+- Integração.
+- E2E.
+- Frontend component tests.
+- Testes de segurança.
+- Testes de multitenancy.
+- Testes de idempotência.
+- Testes de webhooks.
+- Testes de filas.
+- Testes de carga com k6.
 
 Fluxos prioritários:
 
-* Auth.
-* RBAC.
-* Multitenancy.
-* Payments.
-* Webhooks.
-* Idempotência.
-* Outbox.
-* Inbox.
-* Reports.
+- Auth.
+- RBAC.
+- Multitenancy.
+- Payments.
+- Webhooks.
+- Idempotência.
+- Outbox.
+- Inbox.
+- Reports.
 
 ---
+
 # 24. Qualidade e Governança de Dependências
 
 O projeto deve evitar bibliotecas:
 
-* Sem manutenção há mais de 12 meses.
-* Com vulnerabilidades high ou critical.
-* Sem documentação mínima.
-* Com baixa confiabilidade.
-* Desnecessárias.
+- Sem manutenção há mais de 12 meses.
+- Com vulnerabilidades high ou critical.
+- Sem documentação mínima.
+- Com baixa confiabilidade.
+- Desnecessárias.
 
 Ferramentas planejadas:
 
-* npm audit.
-* Dependabot ou Renovate.
-* CodeQL.
-* Secret scanning.
-* ESLint.
-* Prettier.
-* Husky.
-* lint-staged.
-* Commitlint.
+- npm audit.
+- Dependabot ou Renovate.
+- CodeQL.
+- Secret scanning.
+- ESLint.
+- Prettier.
+- Husky.
+- lint-staged.
+- Commitlint.
 
 ---
+
 # 25. Roadmap
 
 ## Fase 0 — Fundação (Concluída)
 
-* Estrutura do projeto.
-* NestJS.
-* Vue 3.
-* Docker Compose.
-* Prisma.
-* PostgreSQL.
-* Documentação inicial.
+- Estrutura do projeto.
+- NestJS.
+- Vue 3.
+- Docker Compose.
+- Prisma.
+- PostgreSQL.
+- Documentação inicial.
 
 ## Fase 1A — Database Foundation (Concluída)
 
-* Cadastro de tenant.
-* Owner inicial.
-* Isolamento por tenant.
+- Cadastro de tenant.
+- Owner inicial.
+- Isolamento por tenant.
 
 ## Fase 1B — Auth Schema Foundation (Concluída)
 
-* Esquema de banco de dados para autenticação.
-* Modelagem de usuários e sessões.
+- Esquema de banco de dados para autenticação.
+- Modelagem de usuários e sessões.
 
 ## Fase 2A — Backend Authentication Foundation (Concluída)
 
-* Login com accessToken e refreshToken.
-* Refresh de tokens e Logout.
-* Sessão única por usuário (revogação de tokens e sessões).
-* Captura de IP e User-Agent.
-* Auditoria de AuthAttempt e gestão de UserSession.
-* Bloqueio de conta por limite de tentativas (failedLoginAttempts).
+- Login com accessToken e refreshToken.
+- Refresh de tokens e Logout.
+- Sessão única por usuário (revogação de tokens e sessões).
+- Captura de IP e User-Agent.
+- Auditoria de AuthAttempt e gestão de UserSession.
+- Bloqueio de conta por limite de tentativas (failedLoginAttempts).
 
 ## Fase 2B — Auth Guards & RBAC Foundation (Concluída)
 
-* Proteção de rotas.
-* Controle de acesso baseado em Roles.
-* Permissões granulares.
+- Proteção de rotas.
+- Controle de acesso baseado em Roles.
+- Permissões granulares.
 
 ## Fase 2C — Frontend Authentication Foundation (Concluída)
 
-* Integração de login no Vue 3.
-* Axios interceptor para refresh token automático.
-* Auth Store no Pinia.
-* Router guards.
+- Integração de login no Vue 3.
+- Axios interceptor para refresh token automático.
+- Auth Store no Pinia.
+- Router guards.
 
 ## Fase 2D — API Documentation Foundation (Concluída)
 
-* Swagger UI.
-* Redoc.
-* OpenAPI JSON.
-* Documentação de endpoints auth e health.
+- Swagger UI.
+- Redoc.
+- OpenAPI JSON.
+- Documentação de endpoints auth e health.
 
 ## Fase 2E — UX Foundation (Concluída)
 
-* Tratamento global de erros.
-* Toasts.
-* Modais.
-* i18n.
-* Estados de loading, erro e vazio.
-* Rota de forgot-password adicionada.
-* Componentes base definitivos (AppButton, AppInput, etc).
+- Tratamento global de erros.
+- Toasts.
+- Modais.
+- i18n.
+- Estados de loading, erro e vazio.
+- Rota de forgot-password adicionada.
+- Componentes base definitivos (AppButton, AppInput, etc).
 
 ## Fase 3A — Users Listing Foundation (Concluída)
 
-* Listagem paginada de usuários.
-* Busca por nome/e-mail, filtro por status e role.
-* Service e Store integrados.
-* Componentes de UI atualizados.
-* Visualização detalhada (User Details).
+- Listagem paginada de usuários.
+- Busca por nome/e-mail, filtro por status e role.
+- Service e Store integrados.
+- Componentes de UI atualizados.
+- Visualização detalhada (User Details).
 
 ## Fase 3B — User Create/Update/Deactivate Foundation (Concluída)
 
-* Criação de usuário.
-* Atualização de dados básicos.
-* Ativação e desativação (soft delete).
-* Atribuição de roles.
-* Formulário e modais de confirmação no frontend.
+- Criação de usuário.
+- Atualização de dados básicos.
+- Ativação e desativação (soft delete).
+- Atribuição de roles.
+- Formulário e modais de confirmação no frontend.
 
 ## Fase 3C — Roles, Permissions & Tenant Settings Foundation (Concluída)
 
-* Leitura de roles do tenant atual.
-* Visualização detalhada de permissões associadas a roles.
-* Leitura de permissions globais.
-* Configurações básicas de tenant (name, timezone).
-* Telas administrativas protegidas por RBAC.
-* Atualização de Swagger/Redoc/OpenAPI.
+- Leitura de roles do tenant atual.
+- Visualização detalhada de permissões associadas a roles.
+- Leitura de permissions globais.
+- Configurações básicas de tenant (name, timezone).
+- Telas administrativas protegidas por RBAC.
+- Atualização de Swagger/Redoc/OpenAPI.
 
 ## Fase 4A — Customers Backend Foundation + Password Recovery Email (Concluída)
 
-* Customers backend com Tenant Isolation e RBAC.
-* Uso do Repository Pattern.
-* Swagger/Redoc documentado.
-* Recuperação de senha segura.
-* Integração com Mailpit local para e-mails (acesso em http://localhost:8026).
+- Customers backend com Tenant Isolation e RBAC.
+- Uso do Repository Pattern.
+- Swagger/Redoc documentado.
+- Recuperação de senha segura.
+- Integração com Mailpit local para e-mails (acesso em http://localhost:8026).
 
 ## Fase 3 — Payments MVP
 
-* Clientes.
-* Pagamentos.
-* Stripe Adapter.
-* Configuração de gateway.
-* Paginação backend.
+- Clientes.
+- Pagamentos.
+- Stripe Adapter.
+- Configuração de gateway.
+- Paginação backend.
 
 ## Fase 4 — Webhooks
 
-* Webhook Stripe.
-* Validação de assinatura.
-* Inbox Pattern.
-* Idempotência.
+- Webhook Stripe.
+- Validação de assinatura.
+- Inbox Pattern.
+- Idempotência.
 
 ## Fase 5 — Mensageria
 
-* RabbitMQ.
-* Outbox Pattern.
-* Workers.
-* Retry.
-* DLQ.
+- RabbitMQ.
+- Outbox Pattern.
+- Workers.
+- Retry.
+- DLQ.
 
 ## Fase 6 — E-mails e Notificações
 
-* Mailpit.
-* Email provider interface.
-* Templates.
-* Notificações in-app.
-* WebSocket.
+- Mailpit.
+- Email provider interface.
+- Templates.
+- Notificações in-app.
+- WebSocket.
 
 ## Fase 7 — Relatórios
 
-* ExportJob.
-* CSV stream.
-* XLSX streaming.
-* Notificação de relatório pronto.
+- ExportJob.
+- CSV stream.
+- XLSX streaming.
+- Notificação de relatório pronto.
 
 ## Fase 8 — Dashboard
 
-* KPIs financeiros.
-* Gráficos.
-* Componentização.
-* Área de desenvolvedor.
+- KPIs financeiros.
+- Gráficos.
+- Componentização.
+- Área de desenvolvedor.
 
 ## Fase 9 — Observabilidade
 
-* Logs estruturados.
-* TraceId.
-* Prometheus.
-* Grafana.
-* OpenTelemetry.
-* Datadog opcional.
+- Logs estruturados.
+- TraceId.
+- Prometheus.
+- Grafana.
+- OpenTelemetry.
+- Datadog opcional.
 
 ## Fase 10 — Enterprise Features
 
-* Webhooks outbound.
-* Asaas Adapter.
-* Mercado Pago Adapter.
-* k6.
-* README com prints.
-* ADRs finais.
-* Runbooks.
+- Webhooks outbound.
+- Asaas Adapter.
+- Mercado Pago Adapter.
+- k6.
+- README com prints.
+- ADRs finais.
+- Runbooks.
 
 ---
+
 # 26. Definition of Done
 
 Uma funcionalidade só será considerada pronta quando:
 
-* Código foi implementado.
-* Build passa.
-* Lint passa.
-* Erros são tratados.
-* Permissões são validadas.
-* Dados respeitam tenant.
-* Logs não expõem dados sensíveis.
-* Testes mínimos existem quando aplicável.
-* Documentação foi atualizada.
-* Fluxo foi validado localmente.
-* Nenhuma vulnerabilidade high ou critical foi introduzida.
-* Nenhuma dependência abandonada foi adicionada.
+- Código foi implementado.
+- Build passa.
+- Lint passa.
+- Erros são tratados.
+- Permissões são validadas.
+- Dados respeitam tenant.
+- Logs não expõem dados sensíveis.
+- Testes mínimos existem quando aplicável.
+- Documentação foi atualizada.
+- Fluxo foi validado localmente.
+- Nenhuma vulnerabilidade high ou critical foi introduzida.
+- Nenhuma dependência abandonada foi adicionada.
 
 ---
+
 # 27. Status do Projeto
 
 ```text
@@ -1195,6 +1228,7 @@ Próximo passo: Gestão de tenant e Payments MVP.
 ```
 
 ---
+
 # 28. Autor
 
 **Leandro Camargo Bahia**
@@ -1202,21 +1236,22 @@ Próximo passo: Gestão de tenant e Payments MVP.
 Projeto desenvolvido como estudo avançado de arquitetura backend/frontend, sistemas distribuídos, pagamentos, observabilidade, segurança e práticas enterprise.
 
 ---
+
 # 29. Licença
 
 Este projeto é destinado a estudo e portfólio.
 
 A licença será definida futuramente.
 
-
 ## Fase 5B - Payments Frontend
-* Listagem e filtros de pagamentos
-* Criação de pagamento interno
-* Conversão de valor para centavos
-* Geração de Idempotency-Key em memória
-* Detalhes e timeline
-* Cancelamento
-* Gateway real ainda futuro.
+
+- Listagem e filtros de pagamentos
+- Criação de pagamento interno
+- Conversão de valor para centavos
+- Geração de Idempotency-Key em memória
+- Detalhes e timeline
+- Cancelamento
+- Gateway real ainda futuro.
 
 ## Fase 7A - Asaas Inbound Webhooks
 
@@ -1272,10 +1307,33 @@ PATCH /catalog/products/:id
 POST /catalog/products/:id/archive
 ```
 
+## Fase 10.0.3 - Warehouse e Ledger de Estoque
 
+O estoque operacional foi iniciado sem reservas, pedidos, marketplace ou integrações financeiras por pedido.
+
+- `Warehouse` com código único por tenant e arquivamento lógico por `isActive`.
+- `InventoryMovement` como ledger auditável e imutável para ajustes manuais.
+- `InventoryBalance` como projeção atual por SKU + warehouse.
+- Ajustes de entrada/saída registram movimento e atualizam saldo na mesma transação.
+- Auditoria para criação/atualização de warehouse e registro de ajuste.
+- UI `/inventory`, `/inventory/warehouses` e `/inventory/movements` com abas de saldos, warehouses e movimentações, usando componentes reutilizáveis e i18n pt-BR/en-US.
+- Tenant interno `ledgerflow-platform` recebe assinatura `ENTERPRISE` ativa para liberar capabilities MASTER ao Admin Master.
+- Documentação API: endpoints aparecem no Swagger em `/api/docs`, no Redoc em `/api/reference` e no OpenAPI JSON em `/api/openapi.json`.
+
+Endpoints:
+
+```text
+POST /inventory/warehouses
+GET /inventory/warehouses
+PATCH /inventory/warehouses/:id
+POST /inventory/movements/adjustments
+GET /inventory/balances
+GET /inventory/movements
+```
 
 ### Platform Admin as Internal Tenant User
 
-O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (*Dual-Role*). Ele age simultaneamente como:
+O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:
+
 - **Usuário Operacional (Tenant)**: Dentro do tenant interno `LedgerFlow Platform`, o Platform Admin gerencia usuários, clientes e pagamentos da mesma forma que qualquer tenant padrão, utilizando a role `OWNER` com escopo `TENANT`.
 - **Administrador Global (Platform)**: Utilizando a role especial `PLATFORM_OWNER` com escopo `PLATFORM`, o Admin Master tem a capacidade de gerenciar todos os tenants do ecossistema a partir de uma interface separada na plataforma.

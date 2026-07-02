@@ -72,7 +72,10 @@ async function main() {
     { key: 'orders:manage', description: 'Gerenciar pedidos' },
     { key: 'channels:read', description: 'Visualizar canais de venda' },
     { key: 'channels:manage', description: 'Gerenciar canais de venda' },
-    { key: 'financial-intelligence:read', description: 'Visualizar inteligência financeira operacional' },
+    {
+      key: 'financial-intelligence:read',
+      description: 'Visualizar inteligência financeira operacional',
+    },
     { key: 'platform:access', description: 'Acesso à administração da plataforma' },
     { key: 'platform:tenants:create', description: 'Criar tenants da plataforma' },
     { key: 'platform:tenants:read', description: 'Visualizar tenants da plataforma' },
@@ -81,11 +84,26 @@ async function main() {
     { key: 'platform:tenants:invite', description: 'Convidar e reenviar convites para tenants' },
     { key: 'platform:subscriptions:read', description: 'Visualizar assinaturas da plataforma' },
     { key: 'platform:subscriptions:update', description: 'Atualizar assinaturas da plataforma' },
-    { key: 'platform:tenants:overview:read', description: 'Visualizar resumo operacional de tenants da plataforma' },
-    { key: 'platform:tenants:health:read', description: 'Visualizar saúde operacional de tenants da plataforma' },
-    { key: 'platform:gateways:read', description: 'Visualizar integrações de gateways dos tenants' },
-    { key: 'platform:gateways:status', description: 'Suspender ou reativar integrações de gateways' },
-    { key: 'platform:audit:read', description: 'Visualizar logs de auditoria global da plataforma' },
+    {
+      key: 'platform:tenants:overview:read',
+      description: 'Visualizar resumo operacional de tenants da plataforma',
+    },
+    {
+      key: 'platform:tenants:health:read',
+      description: 'Visualizar saúde operacional de tenants da plataforma',
+    },
+    {
+      key: 'platform:gateways:read',
+      description: 'Visualizar integrações de gateways dos tenants',
+    },
+    {
+      key: 'platform:gateways:status',
+      description: 'Suspender ou reativar integrações de gateways',
+    },
+    {
+      key: 'platform:audit:read',
+      description: 'Visualizar logs de auditoria global da plataforma',
+    },
     { key: 'platform:support:read', description: 'Visualizar resumo de suporte dos tenants' },
   ];
 
@@ -103,12 +121,48 @@ async function main() {
 
   // 3. Create Roles
   const rolesData = [
-    { key: 'OWNER', name: 'Owner', description: 'Proprietário da conta com acesso total', system: true, tenantId: tenant.id },
-    { key: 'OWNER', name: 'Owner', description: 'Proprietário da conta com acesso total', system: true, tenantId: platformTenant.id },
-    { key: 'FINANCE_OPERATOR', name: 'Financeiro', description: 'Operador financeiro', system: true, tenantId: tenant.id },
-    { key: 'SUPPORT_VIEWER', name: 'Suporte', description: 'Acesso apenas leitura para suporte', system: true, tenantId: tenant.id },
-    { key: 'DEVELOPER', name: 'Desenvolvedor', description: 'Gerenciamento técnico (API, Webhooks)', system: true, tenantId: tenant.id },
-    { key: 'PLATFORM_OWNER', name: 'Platform Owner', description: 'Administrador geral da plataforma', system: true, tenantId: platformTenant.id },
+    {
+      key: 'OWNER',
+      name: 'Owner',
+      description: 'Proprietário da conta com acesso total',
+      system: true,
+      tenantId: tenant.id,
+    },
+    {
+      key: 'OWNER',
+      name: 'Owner',
+      description: 'Proprietário da conta com acesso total',
+      system: true,
+      tenantId: platformTenant.id,
+    },
+    {
+      key: 'FINANCE_OPERATOR',
+      name: 'Financeiro',
+      description: 'Operador financeiro',
+      system: true,
+      tenantId: tenant.id,
+    },
+    {
+      key: 'SUPPORT_VIEWER',
+      name: 'Suporte',
+      description: 'Acesso apenas leitura para suporte',
+      system: true,
+      tenantId: tenant.id,
+    },
+    {
+      key: 'DEVELOPER',
+      name: 'Desenvolvedor',
+      description: 'Gerenciamento técnico (API, Webhooks)',
+      system: true,
+      tenantId: tenant.id,
+    },
+    {
+      key: 'PLATFORM_OWNER',
+      name: 'Platform Owner',
+      description: 'Administrador geral da plataforma',
+      system: true,
+      tenantId: platformTenant.id,
+    },
   ];
 
   const roles: Role[] = [];
@@ -143,8 +197,8 @@ async function main() {
     for (const p of permissions) {
       // Platform owner role should not get PLATFORM permissions implicitly? Wait.
       // The user instruction says: "Garantir que a role OWNER exista e possua todas as permissões normais de tenant já previstas no projeto."
-      // So OWNER gets TENANT permissions only, or both if it's the platform tenant? 
-      // User says: "Garantir que PLATFORM_OWNER tenha somente permissões `PLATFORM`." and "OWNER Responsável pelas permissões normais de tenant". 
+      // So OWNER gets TENANT permissions only, or both if it's the platform tenant?
+      // User says: "Garantir que PLATFORM_OWNER tenha somente permissões `PLATFORM`." and "OWNER Responsável pelas permissões normais de tenant".
       // So OWNER role gets ONLY TENANT permissions.
       if (p.scope === 'TENANT') {
         await prisma.rolePermission.upsert({
@@ -168,7 +222,7 @@ async function main() {
   // 4.5 Assign platform permissions to PLATFORM_OWNER role
   const platformOwnerRole = roles.find((r) => r.key === 'PLATFORM_OWNER');
   if (platformOwnerRole) {
-    const platformPerms = permissions.filter(p => p.key.startsWith('platform:'));
+    const platformPerms = permissions.filter((p) => p.key.startsWith('platform:'));
     for (const p of platformPerms) {
       await prisma.rolePermission.upsert({
         where: {
@@ -233,7 +287,10 @@ async function main() {
 
   // 6.5 Create Platform Owner user and assign role
   const platformOwnerEmail = process.env.PLATFORM_ADMIN_EMAIL || 'platform.owner@ledgerflow.local';
-  const platformPasswordHash = await bcrypt.hash(process.env.PLATFORM_ADMIN_PASSWORD || 'ChangeMe123!', 10);
+  const platformPasswordHash = await bcrypt.hash(
+    process.env.PLATFORM_ADMIN_PASSWORD || 'ChangeMe123!',
+    10,
+  );
 
   const platformOwnerUser = await prisma.user.upsert({
     where: {
@@ -274,7 +331,9 @@ async function main() {
     console.log('Assigned PLATFORM_OWNER role to Platform Admin user');
   }
 
-  const platformNormalOwnerRole = roles.find((r) => r.key === 'OWNER' && r.tenantId === platformTenant.id);
+  const platformNormalOwnerRole = roles.find(
+    (r) => r.key === 'OWNER' && r.tenantId === platformTenant.id,
+  );
   if (platformNormalOwnerRole) {
     await prisma.userRole.upsert({
       where: {
@@ -327,6 +386,23 @@ async function main() {
     },
   });
   console.log(`Demo Tenant Subscription created/verified`);
+
+  await prisma.tenantSubscription.upsert({
+    where: { tenantId: platformTenant.id },
+    update: {
+      plan: 'ENTERPRISE',
+      status: 'ACTIVE',
+    },
+    create: {
+      tenantId: platformTenant.id,
+      plan: 'ENTERPRISE',
+      status: 'ACTIVE',
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      notes: 'Platform tenant receives MASTER Commerce capabilities for internal validation.',
+    },
+  });
+  console.log(`Platform Tenant Subscription created/verified`);
 
   // 8. Create Demo Payments
   const paymentsData = [

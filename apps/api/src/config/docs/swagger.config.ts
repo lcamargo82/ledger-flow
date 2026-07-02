@@ -3,9 +3,7 @@ import { DocumentBuilder } from '@nestjs/swagger';
 export const getSwaggerConfig = () => {
   return new DocumentBuilder()
     .setTitle('LedgerFlow API')
-    .setDescription(
-      'Enterprise Payment, Reconciliation & Observability Platform API',
-    )
+    .setDescription('Enterprise Payment, Reconciliation & Observability Platform API')
     .setVersion('1.0.0')
     .addBearerAuth(
       {
@@ -22,5 +20,10 @@ export const getSwaggerConfig = () => {
     .addTag('App', 'Status básico da API')
     .addTag('Health', 'Endpoints de monitoramento e readiness')
     .addTag('Auth', 'Autenticação de usuários')
+    .addTag('Catalog', 'Catálogo de produtos, SKUs e arquivamento')
+    .addTag('Inventory', 'Warehouses, saldos projetados e ledger de estoque')
+    .addTag('Orders', 'Fundação do módulo de pedidos')
+    .addTag('Channels', 'Fundação de canais e marketplaces')
+    .addTag('Financial Intelligence', 'Fundação de inteligência financeira Commerce')
     .build();
 };

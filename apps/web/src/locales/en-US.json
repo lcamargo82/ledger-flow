@@ -123,6 +123,9 @@
     "payments": "Payments",
     "catalog": "Catalog",
     "inventory": "Inventory",
+    "orders": "Orders",
+    "channels": "Channels",
+    "analytics": "Analytics",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
     "reports": "Reports",
@@ -138,9 +141,75 @@
   },
   "inventory": {
     "title": "Inventory",
-    "description": "Inventory module foundation is enabled. Warehouses, ledger, and balances arrive in the next sprints.",
-    "emptyTitle": "Inventory foundation ready",
-    "emptyDescription": "Routes, permissions, and commercial capabilities are prepared for Sprint 10.0.3."
+    "description": "Manage warehouses, stock adjustments, projected balances, and the auditable inventory ledger.",
+    "tabs": {
+      "warehouses": "Warehouses",
+      "balances": "Balances",
+      "movements": "Movements"
+    },
+    "actions": {
+      "createWarehouse": "New warehouse",
+      "adjust": "Record adjustment",
+      "disable": "Disable",
+      "enable": "Enable"
+    },
+    "table": {
+      "code": "Code",
+      "name": "Name",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions",
+      "skuId": "SKU",
+      "warehouseId": "Warehouse",
+      "onHand": "On hand",
+      "reserved": "Reserved",
+      "available": "Available",
+      "updatedAt": "Updated at",
+      "occurredAt": "Occurred at",
+      "type": "Type",
+      "quantity": "Quantity",
+      "reason": "Reason"
+    },
+    "form": {
+      "warehouseTitle": "New warehouse",
+      "adjustmentTitle": "Record adjustment",
+      "codeLabel": "Code",
+      "nameLabel": "Name",
+      "skuIdLabel": "SKU",
+      "warehouseLabel": "Warehouse",
+      "warehousePlaceholder": "Select a warehouse",
+      "typeLabel": "Type",
+      "quantityLabel": "Quantity",
+      "reasonCodeLabel": "Reason",
+      "notesLabel": "Notes"
+    },
+    "movementType": {
+      "RECEIPT": "Receipt",
+      "ADJUSTMENT_IN": "Adjustment in",
+      "ADJUSTMENT_OUT": "Adjustment out",
+      "RESERVATION": "Reservation",
+      "RESERVATION_RELEASE": "Reservation release",
+      "FULFILLMENT": "Fulfillment",
+      "RETURN": "Return",
+      "TRANSFER_OUT": "Transfer out",
+      "TRANSFER_IN": "Transfer in"
+    },
+    "empty": {
+      "warehousesTitle": "No warehouses yet",
+      "warehousesDescription": "Create the first warehouse to record stock adjustments.",
+      "balancesTitle": "No balances found",
+      "balancesDescription": "Balances appear after the first inventory adjustment.",
+      "movementsTitle": "No movements recorded",
+      "movementsDescription": "The ledger will be populated as adjustments are recorded."
+    },
+    "errors": {
+      "title": "Could not load inventory",
+      "default": "Could not process the inventory operation.",
+      "warehouseCodeExists": "This warehouse code already exists for the current tenant.",
+      "notFound": "Inventory record not found.",
+      "forbidden": "You do not have inventory access.",
+      "invalid": "Review the inventory information."
+    }
   },
   "catalog": {
     "title": "Catalog",

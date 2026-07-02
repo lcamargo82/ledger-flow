@@ -11,10 +11,14 @@ describe('commerce navigation foundation', () => {
   })
 
   it('registers inventory route behind permission and capability metadata', () => {
-    const route = router.getRoutes().find(item => item.path === '/inventory')
+    const inventoryRoutes = ['/inventory', '/inventory/warehouses', '/inventory/movements'].map(
+      (path) => router.getRoutes().find((item) => item.path === path),
+    )
 
-    expect(route?.meta.permissions).toEqual(['inventory:read'])
-    expect(route?.meta.capabilities).toEqual(['inventory.manage'])
+    inventoryRoutes.forEach((route) => {
+      expect(route?.meta.permissions).toEqual(['inventory:read'])
+      expect(route?.meta.capabilities).toEqual(['inventory.manage'])
+    })
   })
 
   it('checks capabilities from the authenticated user session', () => {
@@ -40,5 +44,8 @@ describe('commerce navigation foundation', () => {
   it('defines inventory navigation labels for supported locales', () => {
     expect(ptBR.nav.inventory).toBe('Estoque')
     expect(enUS.nav.inventory).toBe('Inventory')
+    expect(ptBR.nav.orders).toBe('Pedidos')
+    expect(ptBR.nav.channels).toBe('Canais')
+    expect(ptBR.nav.analytics).toBe('Analytics')
   })
 })

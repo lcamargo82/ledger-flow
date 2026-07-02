@@ -25,17 +25,17 @@ A escolha inicial por monólito modular reduz complexidade operacional durante o
 
 A arquitetura seguirá princípios de:
 
-* Clean Architecture.
-* Domain-Driven Design pragmático.
-* Repository Pattern.
-* Strategy Pattern.
-* Factory Pattern.
-* Outbox Pattern.
-* Inbox Pattern.
-* Event-driven architecture.
-* API-first.
-* Observability-first.
-* Security by design.
+- Clean Architecture.
+- Domain-Driven Design pragmático.
+- Repository Pattern.
+- Strategy Pattern.
+- Factory Pattern.
+- Outbox Pattern.
+- Inbox Pattern.
+- Event-driven architecture.
+- API-first.
+- Observability-first.
+- Security by design.
 
 ---
 
@@ -56,7 +56,7 @@ Dados transacionais                 Auditoria, payloads brutos,
 tenants, usuários,                  logs de eventos externos
 permissões, pagamentos
         |
-        | 
+        |
         v
 [ Redis ]
 Cache, rate limit,
@@ -90,12 +90,12 @@ O backend será inicialmente um monólito modular.
 
 ## Justificativa
 
-* Menor complexidade inicial.
-* Mais fácil de rodar localmente.
-* Melhor para portfólio.
-* Permite demonstrar arquitetura limpa.
-* Facilita extração futura para microserviços.
-* Evita sobrecarga desnecessária de rede e deploy.
+- Menor complexidade inicial.
+- Mais fácil de rodar localmente.
+- Melhor para portfólio.
+- Permite demonstrar arquitetura limpa.
+- Facilita extração futura para microserviços.
+- Evita sobrecarga desnecessária de rede e deploy.
 
 ## Regra
 
@@ -232,15 +232,15 @@ O NestJS será a camada principal da API.
 
 ## Responsabilidades
 
-* Expor endpoints REST.
-* Autenticar usuários.
-* Autorizar permissões.
-* Executar regras de negócio.
-* Publicar eventos.
-* Consumir filas.
-* Registrar logs.
-* Expor métricas.
-* Integrar APIs externas.
+- Expor endpoints REST.
+- Autenticar usuários.
+- Autorizar permissões.
+- Executar regras de negócio.
+- Publicar eventos.
+- Consumir filas.
+- Registrar logs.
+- Expor métricas.
+- Integrar APIs externas.
 
 ---
 
@@ -264,12 +264,12 @@ Orquestra regras do domínio.
 
 Contém implementações técnicas:
 
-* Prisma repositories.
-* Stripe adapter.
-* MongoDB audit repository.
-* Redis service.
-* RabbitMQ publisher.
-* Email providers.
+- Prisma repositories.
+- Stripe adapter.
+- MongoDB audit repository.
+- Redis service.
+- RabbitMQ publisher.
+- Email providers.
 
 ### Presentation
 
@@ -303,8 +303,8 @@ export class PrismaPaymentRepository implements PaymentRepository {
     return this.prisma.payment.findFirst({
       where: {
         id,
-        tenantId
-      }
+        tenantId,
+      },
     });
   }
 }
@@ -318,12 +318,12 @@ O Prisma será utilizado para persistência no PostgreSQL.
 
 ## Regras
 
-* Usar migrations versionadas.
-* Não usar query solta em services.
-* Queries complexas devem ficar em repositories.
-* Todas as entidades sensíveis devem possuir `tenantId`.
-* Usar transações para operações financeiras.
-* Criar índices para campos de busca e filtros.
+- Usar migrations versionadas.
+- Não usar query solta em services.
+- Queries complexas devem ficar em repositories.
+- Todas as entidades sensíveis devem possuir `tenantId`.
+- Usar transações para operações financeiras.
+- Criar índices para campos de busca e filtros.
 
 ---
 
@@ -333,27 +333,27 @@ O PostgreSQL será a base relacional principal.
 
 ## Dados armazenados
 
-* Tenants.
-* Usuários.
-* Roles.
-* Permissions.
-* Clientes.
-* Pagamentos.
-* Assinaturas.
-* Credenciais criptografadas.
-* Webhooks configurados.
-* Outbox events.
-* Inbox events.
-* Export jobs.
-* Notificações.
-* API Keys com hash.
+- Tenants.
+- Usuários.
+- Roles.
+- Permissions.
+- Clientes.
+- Pagamentos.
+- Assinaturas.
+- Credenciais criptografadas.
+- Webhooks configurados.
+- Outbox events.
+- Inbox events.
+- Export jobs.
+- Notificações.
+- API Keys com hash.
 
 ## Datas
 
-* Usar `TIMESTAMPTZ`.
-* Persistir em UTC.
-* Trafegar em ISO 8601.
-* Exibir conforme timezone do usuário/tenant.
+- Usar `TIMESTAMPTZ`.
+- Persistir em UTC.
+- Trafegar em ISO 8601.
+- Exibir conforme timezone do usuário/tenant.
 
 ---
 
@@ -363,12 +363,12 @@ MongoDB será usado para dados semiestruturados e auditoria pesada.
 
 ## Dados armazenados
 
-* Payloads brutos de gateways.
-* Payloads de webhooks.
-* Histórico detalhado de eventos.
-* Snapshots de requests/responses externos.
-* Logs de auditoria ricos.
-* Metadados variáveis por provider.
+- Payloads brutos de gateways.
+- Payloads de webhooks.
+- Histórico detalhado de eventos.
+- Snapshots de requests/responses externos.
+- Logs de auditoria ricos.
+- Metadados variáveis por provider.
 
 ## Justificativa
 
@@ -380,20 +380,20 @@ Gateways diferentes possuem payloads diferentes. MongoDB permite armazenar essa 
 
 Redis será utilizado para:
 
-* Cache.
-* Rate limiting.
-* Idempotência.
-* Locks distribuídos.
-* Controle temporário de tentativas.
-* Sessões auxiliares, se necessário.
+- Cache.
+- Rate limiting.
+- Idempotência.
+- Locks distribuídos.
+- Controle temporário de tentativas.
+- Sessões auxiliares, se necessário.
 
 ## Exemplos
 
-* Chave idempotente para criação de pagamento.
-* Lock para evitar reembolso duplicado.
-* Rate limit em login.
-* Cache de permissões do usuário.
-* Cache de dashboard por curto período.
+- Chave idempotente para criação de pagamento.
+- Lock para evitar reembolso duplicado.
+- Rate limit em login.
+- Cache de permissões do usuário.
+- Cache de dashboard por curto período.
 
 ---
 
@@ -421,11 +421,11 @@ ledgerflow.dlx.exchange
 
 ## Regras
 
-* Toda tarefa demorada deve ir para fila.
-* Consumers devem ser idempotentes.
-* Falhas devem ter retry.
-* Falhas definitivas devem ir para DLQ.
-* Mensagens devem conter `traceId`, `tenantId` e `eventId`.
+- Toda tarefa demorada deve ir para fila.
+- Consumers devem ser idempotentes.
+- Falhas devem ter retry.
+- Falhas definitivas devem ir para DLQ.
+- Mensagens devem conter `traceId`, `tenantId` e `eventId`.
 
 ---
 
@@ -435,18 +435,18 @@ ledgerflow.dlx.exchange
 
 A gestão de usuários (CRUD) possui regras restritas para garantir a estabilidade e o isolamento dos tenants:
 
-* **Multitenancy**: Todas as queries e mutations filtram obrigatoriamente pelo `tenantId` do usuário logado (`@CurrentUser()`).
-* **Senhas Temporárias**: Na criação (Fase 3B), o usuário recebe uma `temporaryPassword` obrigatória (mínimo de 8 caracteres). Essa senha deve ser hasheada com bcrypt da mesma forma que senhas normais. Futuramente, pode haver um flag para forçar a troca no primeiro login.
-* **Proteção do Owner**: Nenhum usuário pode remover a role `OWNER` do próprio usuário logado caso seja um admin alterando a si mesmo (previne bloqueio do sistema).
-* **Soft Delete**: Não existem exclusões físicas (`DELETE`) para usuários. Operações de remoção alteram o status `active` para `false`.
-* **Revogação de Sessão em Cascata**: Ao desativar um usuário (`active: false`), o sistema revoga proativamente todos os seus `RefreshTokens` e `UserSessions` ativos no banco de dados.
+- **Multitenancy**: Todas as queries e mutations filtram obrigatoriamente pelo `tenantId` do usuário logado (`@CurrentUser()`).
+- **Senhas Temporárias**: Na criação (Fase 3B), o usuário recebe uma `temporaryPassword` obrigatória (mínimo de 8 caracteres). Essa senha deve ser hasheada com bcrypt da mesma forma que senhas normais. Futuramente, pode haver um flag para forçar a troca no primeiro login.
+- **Proteção do Owner**: Nenhum usuário pode remover a role `OWNER` do próprio usuário logado caso seja um admin alterando a si mesmo (previne bloqueio do sistema).
+- **Soft Delete**: Não existem exclusões físicas (`DELETE`) para usuários. Operações de remoção alteram o status `active` para `false`.
+- **Revogação de Sessão em Cascata**: Ao desativar um usuário (`active: false`), o sistema revoga proativamente todos os seus `RefreshTokens` e `UserSessions` ativos no banco de dados.
 
 ## Operações Suportadas
 
-* `POST /users`: Criação (requer `users:create`).
-* `PATCH /users/:id`: Edição de dados básicos como nome e e-mail (requer `users:update`).
-* `PATCH /users/:id/status`: Ativação/Desativação (requer `users:update`).
-* `PATCH /users/:id/roles`: Substituição das roles associadas (requer `users:update`).
+- `POST /users`: Criação (requer `users:create`).
+- `PATCH /users/:id`: Edição de dados básicos como nome e e-mail (requer `users:update`).
+- `PATCH /users/:id/status`: Ativação/Desativação (requer `users:update`).
+- `PATCH /users/:id/roles`: Substituição das roles associadas (requer `users:update`).
 
 ---
 
@@ -510,7 +510,7 @@ export class PaymentGatewayFactory {
   constructor(
     private readonly stripeAdapter: StripePaymentGateway,
     private readonly asaasAdapter: AsaasPaymentGateway,
-    private readonly mercadoPagoAdapter: MercadoPagoPaymentGateway
+    private readonly mercadoPagoAdapter: MercadoPagoPaymentGateway,
   ) {}
 
   getProvider(providerName: string): IPaymentGateway {
@@ -532,13 +532,13 @@ export class PaymentGatewayFactory {
 
 # 6.4 Regras importantes
 
-* SDK do Stripe só pode existir dentro do adapter Stripe.
-* Services de pagamento dependem da interface, não do provider.
-* Provider é definido por tenant.
-* Status externo deve ser convertido para status interno.
-* Payload bruto deve ser salvo no MongoDB.
-* Dados financeiros normalizados devem ficar no PostgreSQL.
-* Credenciais devem ser criptografadas.
+- SDK do Stripe só pode existir dentro do adapter Stripe.
+- Services de pagamento dependem da interface, não do provider.
+- Provider é definido por tenant.
+- Status externo deve ser convertido para status interno.
+- Payload bruto deve ser salvo no MongoDB.
+- Dados financeiros normalizados devem ficar no PostgreSQL.
+- Credenciais devem ser criptografadas.
 
 ---
 
@@ -547,10 +547,11 @@ export class PaymentGatewayFactory {
 A primeira integração real do sistema (implementada na Fase 6.1) foca exclusivamente no ambiente Sandbox do Asaas.
 
 ## Características:
-* **Isolamento Total:** Credenciais criptografadas via AES-256-GCM (nunca injetadas globalmente, apenas decriptadas em memória).
-* **Mapeamento de Customer:** Uso da entidade intermediária `GatewayCustomerReference` para evitar duplicidade de clientes no provedor.
-* **Idempotência Externa:** Validação via GET `/payments?externalReference={ref}` antes do POST de criação, blindando falhas de concorrência ou timeouts de resposta do provider.
-* **Orquestração Assíncrona-Like:** Embora síncrono no primeiro momento, a criação da fatura interna sempre prevalece (estado `PENDING`) e não bloqueia a continuidade caso o asaas apresente instabilidade - registrando na auditoria a falha e o adapter apenas interrompe a chamada, delegando re-tentativas para fluxos futuros (Webhooks/Filas).
+
+- **Isolamento Total:** Credenciais criptografadas via AES-256-GCM (nunca injetadas globalmente, apenas decriptadas em memória).
+- **Mapeamento de Customer:** Uso da entidade intermediária `GatewayCustomerReference` para evitar duplicidade de clientes no provedor.
+- **Idempotência Externa:** Validação via GET `/payments?externalReference={ref}` antes do POST de criação, blindando falhas de concorrência ou timeouts de resposta do provider.
+- **Orquestração Assíncrona-Like:** Embora síncrono no primeiro momento, a criação da fatura interna sempre prevalece (estado `PENDING`) e não bloqueia a continuidade caso o asaas apresente instabilidade - registrando na auditoria a falha e o adapter apenas interrompe a chamada, delegando re-tentativas para fluxos futuros (Webhooks/Filas).
 
 ---
 
@@ -558,24 +559,24 @@ A primeira integração real do sistema (implementada na Fase 6.1) foca exclusiv
 
 # 7.1 Autenticação
 
-* JWT para access token.
-* Refresh token seguro.
-* Refresh token armazenado com hash.
-* Expiração curta para access token.
-* Logout invalida refresh token.
-* Rate limiting no login.
-* Recuperação de senha segura: não informa existência de e-mail e não persiste token temporário no client.
+- JWT para access token.
+- Refresh token seguro.
+- Refresh token armazenado com hash.
+- Expiração curta para access token.
+- Logout invalida refresh token.
+- Rate limiting no login.
+- Recuperação de senha segura: não informa existência de e-mail e não persiste token temporário no client.
 
 ---
 
 # 7.2 Autorização
 
-* RBAC como base.
-* ABAC preparado para regras contextuais.
-* Guards no NestJS.
-* Decorators para permissões.
-* Frontend apenas melhora UX, não garante segurança.
-* Backend sempre valida permissão.
+- RBAC como base.
+- ABAC preparado para regras contextuais.
+- Guards no NestJS.
+- Decorators para permissões.
+- Frontend apenas melhora UX, não garante segurança.
+- Backend sempre valida permissão.
 
 Exemplo:
 
@@ -591,27 +592,27 @@ refundPayment() {}
 
 ## Segredos criptografados
 
-* Stripe Secret Key.
-* Asaas API Key.
-* Mercado Pago Access Token.
-* Webhook secrets.
-* Credenciais de integração.
+- Stripe Secret Key.
+- Asaas API Key.
+- Mercado Pago Access Token.
+- Webhook secrets.
+- Credenciais de integração.
 
 ## Algoritmo sugerido
 
-* AES-256-GCM para criptografia de segredos.
-* Chaves de criptografia vindas de variáveis de ambiente.
-* Nunca logar valores descriptografados.
+- AES-256-GCM para criptografia de segredos.
+- Chaves de criptografia vindas de variáveis de ambiente.
+- Nunca logar valores descriptografados.
 
 ---
 
 # 7.4 API Keys
 
-* API Keys devem ser exibidas apenas uma vez.
-* Armazenar somente hash.
-* Permitir revogação.
-* Registrar último uso.
-* Permitir escopos de acesso.
+- API Keys devem ser exibidas apenas uma vez.
+- Armazenar somente hash.
+- Permitir revogação.
+- Registrar último uso.
+- Permitir escopos de acesso.
 
 ---
 
@@ -619,32 +620,32 @@ refundPayment() {}
 
 ## Inbound
 
-* Validar assinatura do provider.
-* Stripe deve validar header `stripe-signature`.
-* Usar raw body para validação.
-* Rejeitar payload inválido.
-* Registrar evento em Inbox.
+- Validar assinatura do provider.
+- Stripe deve validar header `stripe-signature`.
+- Usar raw body para validação.
+- Rejeitar payload inválido.
+- Registrar evento em Inbox.
 
 ## Outbound
 
-* Assinar payload com HMAC.
-* Enviar timestamp.
-* Enviar eventId.
-* Permitir validação pelo cliente.
-* Retentar falhas.
-* Registrar tentativas.
+- Assinar payload com HMAC.
+- Enviar timestamp.
+- Enviar eventId.
+- Permitir validação pelo cliente.
+- Retentar falhas.
+- Registrar tentativas.
 
 ---
 
 # 7.6 Headers e proteção HTTP
 
-* Helmet.
-* CORS restrito.
-* Rate limit.
-* Body size limit.
-* Validação de DTOs.
-* Sanitização.
-* Não retornar stack trace ao frontend.
+- Helmet.
+- CORS restrito.
+- Rate limit.
+- Body size limit.
+- Validação de DTOs.
+- Sanitização.
+- Não retornar stack trace ao frontend.
 
 ---
 
@@ -683,7 +684,7 @@ export enum ErrorCode {
   WEBHOOK_ALREADY_PROCESSED = 'WEBHOOK_ALREADY_PROCESSED',
   EXPORT_TOO_LARGE_SYNC = 'EXPORT_TOO_LARGE_SYNC',
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR'
+  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
 }
 ```
 
@@ -693,12 +694,12 @@ export enum ErrorCode {
 
 Responsabilidades:
 
-* Capturar erros.
-* Normalizar resposta.
-* Adicionar `traceId`.
-* Esconder stack trace do usuário.
-* Logar erro completo internamente.
-* Converter erros externos em mensagens amigáveis.
+- Capturar erros.
+- Normalizar resposta.
+- Adicionar `traceId`.
+- Esconder stack trace do usuário.
+- Logar erro completo internamente.
+- Converter erros externos em mensagens amigáveis.
 
 ---
 
@@ -755,7 +756,7 @@ export const useLocaleStore = defineStore('locale', () => {
     currentLocale,
     translations,
     setLocale,
-    t
+    t,
   };
 });
 ```
@@ -775,24 +776,24 @@ E-mails devem usar templates por idioma.
 
 # 10.1 Persistência
 
-* PostgreSQL: `TIMESTAMPTZ`.
-* Armazenar em UTC.
-* Nunca armazenar data local sem timezone.
+- PostgreSQL: `TIMESTAMPTZ`.
+- Armazenar em UTC.
+- Nunca armazenar data local sem timezone.
 
 ---
 
 # 10.2 API
 
-* Trafegar datas em ISO 8601.
-* Exemplo: `2026-06-12T18:30:00.000Z`.
+- Trafegar datas em ISO 8601.
+- Exemplo: `2026-06-12T18:30:00.000Z`.
 
 ---
 
 # 10.3 Frontend
 
-* Exibir com `Intl.DateTimeFormat`.
-* Timezone preferencial vem do tenant ou usuário.
-* Fallback: timezone do navegador.
+- Exibir com `Intl.DateTimeFormat`.
+- Timezone preferencial vem do tenant ou usuário.
+- Fallback: timezone do navegador.
 
 Exemplo:
 
@@ -801,7 +802,7 @@ export function formatDateTime(date: string, timeZone = 'America/Sao_Paulo') {
   return new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short',
-    timeZone
+    timeZone,
   }).format(new Date(date));
 }
 ```
@@ -812,10 +813,10 @@ export function formatDateTime(date: string, timeZone = 'America/Sao_Paulo') {
 
 Relatórios devem informar:
 
-* Período filtrado.
-* Timezone usado no filtro.
-* Data de geração.
-* Timezone da geração.
+- Período filtrado.
+- Timezone usado no filtro.
+- Data de geração.
+- Timezone da geração.
 
 ---
 
@@ -825,33 +826,33 @@ Relatórios devem informar:
 
 O frontend será desenvolvido com:
 
-* Vue 3.
-* Composition API.
-* TypeScript.
-* Pinia.
-* Vue Router.
-* Tailwind CSS.
-* Heroicons.
-* Axios.
+- Vue 3.
+- Composition API.
+- TypeScript.
+- Pinia.
+- Vue Router.
+- Tailwind CSS.
+- Heroicons.
+- Axios.
 
 ---
 
 # 11.2 Regras
 
-* Views não chamam Axios diretamente.
-* Services concentram chamadas HTTP.
-* Stores concentram estado global.
-* Componentes devem ser reutilizáveis.
-* Rotas devem usar lazy loading.
-* Componentes pesados devem usar carregamento assíncrono.
-* Menus ocultos não devem renderizar componentes.
-* Tabelas usam paginação backend.
-* Estilos devem ser centralizados.
-* **UI Blueprint:** Todo o desenvolvimento visual deve se guiar pelo `docs/ui-design-system.md` e referências base.
-* **Componentização:** Nova interface deve ser baseada em componentes reutilizáveis (`AppButton`, `AppInput`, etc).
-* **Layout:** Adoção do `AppLayout` sem header global, utilizando a Sidebar como principal meio de navegação e controle da sessão.
-* **i18n:** Internacionalização obrigatória. Todo texto de interface deve possuir chaves de idioma.
-* **RBAC:** A restrição de acesso e renderização condicional (ex: `<PermissionGate>`) no frontend atua primariamente como melhoria de UX. O backend permanece sendo a **autoridade final**.
+- Views não chamam Axios diretamente.
+- Services concentram chamadas HTTP.
+- Stores concentram estado global.
+- Componentes devem ser reutilizáveis.
+- Rotas devem usar lazy loading.
+- Componentes pesados devem usar carregamento assíncrono.
+- Menus ocultos não devem renderizar componentes.
+- Tabelas usam paginação backend.
+- Estilos devem ser centralizados.
+- **UI Blueprint:** Todo o desenvolvimento visual deve se guiar pelo `docs/ui-design-system.md` e referências base.
+- **Componentização:** Nova interface deve ser baseada em componentes reutilizáveis (`AppButton`, `AppInput`, etc).
+- **Layout:** Adoção do `AppLayout` sem header global, utilizando a Sidebar como principal meio de navegação e controle da sessão.
+- **i18n:** Internacionalização obrigatória. Todo texto de interface deve possuir chaves de idioma.
+- **RBAC:** A restrição de acesso e renderização condicional (ex: `<PermissionGate>`) no frontend atua primariamente como melhoria de UX. O backend permanece sendo a **autoridade final**.
 
 ---
 
@@ -862,7 +863,7 @@ import axios from 'axios';
 
 export const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000
+  timeout: 10000,
 });
 
 httpClient.interceptors.request.use((config) => {
@@ -892,7 +893,7 @@ export const TransactionService = {
   async refund(paymentId: string) {
     const response = await httpClient.post(`/payments/${paymentId}/refund`);
     return response.data;
-  }
+  },
 };
 ```
 
@@ -904,12 +905,12 @@ export const TransactionService = {
 const routes = [
   {
     path: '/dashboard',
-    component: () => import('@/views/DashboardView.vue')
+    component: () => import('@/views/DashboardView.vue'),
   },
   {
     path: '/payments',
-    component: () => import('@/views/PaymentsView.vue')
-  }
+    component: () => import('@/views/PaymentsView.vue'),
+  },
 ];
 ```
 
@@ -920,8 +921,8 @@ const routes = [
 ```typescript
 import { defineAsyncComponent } from 'vue';
 
-const AsyncTransactionsTable = defineAsyncComponent(() =>
-  import('@/components/payments/TransactionsTable.vue')
+const AsyncTransactionsTable = defineAsyncComponent(
+  () => import('@/components/payments/TransactionsTable.vue'),
 );
 ```
 
@@ -985,11 +986,11 @@ Exemplo:
 
 Tipos:
 
-* Success.
-* Error.
-* Warning.
-* Info.
-* Loading.
+- Success.
+- Error.
+- Warning.
+- Info.
+- Loading.
 
 ## Store
 
@@ -1010,13 +1011,13 @@ interface Toast {
 
 Ações críticas devem usar modal:
 
-* Reembolsar pagamento.
-* Cancelar assinatura.
-* Excluir usuário.
-* Revogar API Key.
-* Alterar gateway.
-* Reprocessar webhook.
-* Exportar relatório pesado.
+- Reembolsar pagamento.
+- Cancelar assinatura.
+- Excluir usuário.
+- Revogar API Key.
+- Alterar gateway.
+- Reprocessar webhook.
+- Exportar relatório pesado.
 
 ---
 
@@ -1024,12 +1025,12 @@ Ações críticas devem usar modal:
 
 Criar componentes:
 
-* `LoadingState`
-* `ErrorState`
-* `EmptyState`
-* `ConfirmModal`
-* `ToastContainer`
-* `StatusBadge`
+- `LoadingState`
+- `ErrorState`
+- `EmptyState`
+- `ConfirmModal`
+- `ToastContainer`
+- `StatusBadge`
 
 ---
 
@@ -1057,13 +1058,13 @@ export interface IEmailProvider {
 
 Inicial:
 
-* SMTP com Mailpit.
+- SMTP com Mailpit.
 
 Futuros:
 
-* SendGrid.
-* Resend.
-* AWS SES.
+- SendGrid.
+- Resend.
+- AWS SES.
 
 ---
 
@@ -1126,7 +1127,7 @@ XLSX deve usar `ExcelJS.stream.xlsx.WorkbookWriter`.
 const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({
   stream: response,
   useStyles: true,
-  useSharedStrings: true
+  useSharedStrings: true,
 });
 ```
 
@@ -1164,7 +1165,7 @@ Usar logs estruturados em JSON.
 
 Biblioteca sugerida:
 
-* Pino.
+- Pino.
 
 Campos mínimos:
 
@@ -1187,12 +1188,12 @@ Campos mínimos:
 
 Instrumentar:
 
-* HTTP.
-* NestJS.
-* Prisma.
-* RabbitMQ.
-* Chamadas externas.
-* Workers.
+- HTTP.
+- NestJS.
+- Prisma.
+- RabbitMQ.
+- Chamadas externas.
+- Workers.
 
 Cada fluxo deve manter o `traceId`.
 
@@ -1202,29 +1203,29 @@ Cada fluxo deve manter o `traceId`.
 
 Expor métricas técnicas:
 
-* Latência HTTP.
-* Taxa de erro.
-* Número de requests.
-* Tempo de queries.
-* Tamanho de filas.
-* Mensagens em DLQ.
-* Uso de memória.
-* Uso de CPU.
+- Latência HTTP.
+- Taxa de erro.
+- Número de requests.
+- Tempo de queries.
+- Tamanho de filas.
+- Mensagens em DLQ.
+- Uso de memória.
+- Uso de CPU.
 
 ---
 
 # 15.4 Métricas de negócio
 
-* Pagamentos criados.
-* Pagamentos aprovados.
-* Pagamentos recusados.
-* TPV.
-* Taxa de aprovação.
-* Reembolsos.
-* Webhooks enviados.
-* Webhooks com falha.
-* Relatórios gerados.
-* Tempo médio de processamento.
+- Pagamentos criados.
+- Pagamentos aprovados.
+- Pagamentos recusados.
+- TPV.
+- Taxa de aprovação.
+- Reembolsos.
+- Webhooks enviados.
+- Webhooks com falha.
+- Relatórios gerados.
+- Tempo médio de processamento.
 
 ---
 
@@ -1232,13 +1233,13 @@ Expor métricas técnicas:
 
 Criar dashboards:
 
-* API Health.
-* RabbitMQ.
-* PostgreSQL.
-* Redis.
-* Payments Business Dashboard.
-* Webhook Delivery Dashboard.
-* Report Export Dashboard.
+- API Health.
+- RabbitMQ.
+- PostgreSQL.
+- Redis.
+- Payments Business Dashboard.
+- Webhook Delivery Dashboard.
+- Report Export Dashboard.
 
 ---
 
@@ -1248,9 +1249,9 @@ Datadog será integração opcional para simular ambiente corporativo com APM pr
 
 Regras:
 
-* Não depender do Datadog para rodar o projeto local.
-* Prometheus e Grafana serão a base local.
-* Datadog deve ser documentado como opcional.
+- Não depender do Datadog para rodar o projeto local.
+- Prometheus e Grafana serão a base local.
+- Datadog deve ser documentado como opcional.
 
 ---
 
@@ -1281,9 +1282,9 @@ outbox_events
 
 # 16.3 Status
 
-* `PENDING`
-* `PUBLISHED`
-* `FAILED`
+- `PENDING`
+- `PUBLISHED`
+- `FAILED`
 
 ---
 
@@ -1339,11 +1340,11 @@ inbox_events
 
 # 17.3 Status
 
-* `RECEIVED`
-* `PROCESSING`
-* `PROCESSED`
-* `FAILED`
-* `IGNORED`
+- `RECEIVED`
+- `PROCESSING`
+- `PROCESSED`
+- `FAILED`
+- `IGNORED`
 
 ---
 
@@ -1397,11 +1398,11 @@ Rota:
 
 Usado para documentar:
 
-* Eventos.
-* Filas.
-* Exchanges.
-* Routing keys.
-* Payloads assíncronos.
+- Eventos.
+- Filas.
+- Exchanges.
+- Routing keys.
+- Payloads assíncronos.
 
 ---
 
@@ -1426,26 +1427,26 @@ docs/adr/
 
 Criar:
 
-* C4 Context.
-* C4 Container.
-* Diagrama de banco.
-* Diagrama de filas.
-* Diagrama de observabilidade.
-* Fluxo de pagamentos.
-* Fluxo de webhooks.
-* Fluxo de exportação.
+- C4 Context.
+- C4 Container.
+- Diagrama de banco.
+- Diagrama de filas.
+- Diagrama de observabilidade.
+- Fluxo de pagamentos.
+- Fluxo de webhooks.
+- Fluxo de exportação.
 
 ---
 
 ### Webhook Inbox Pattern — Asaas
 
-O sistema utiliza a arquitetura de *Inbox Pattern* com a entidade `WebhookInboxEvent` para gerenciar as notificações do Asaas Sandbox com segurança e idempotência.
+O sistema utiliza a arquitetura de _Inbox Pattern_ com a entidade `WebhookInboxEvent` para gerenciar as notificações do Asaas Sandbox com segurança e idempotência.
 
 - **Idempotência:** A chave única engloba `provider` + `providerEventId`. Mensagens retransmitidas pelo Asaas geram `HTTP 200` automático caso a chave já exista, prevenindo atualizações duplas.
-- **Autenticação:** Ocorre comparando (em *timing-safe*) a chave secreta global do `asaas-access-token`.
+- **Autenticação:** Ocorre comparando (em _timing-safe_) a chave secreta global do `asaas-access-token`.
 - **Status Mapping:** Baseado no evento original, o LedgerFlow atualiza os status internos da engine (`PENDING`, `APPROVED`, `CANCELED`, etc).
 - **Audit e Eventos:** Transições significativas de status disparam `PaymentEvent` (Timeline do front-end) e registros imutáveis de `AuditLog`.
-- **Evolução:** Atualizações atualmente processadas de forma síncrona. O Inbox foi modelado de maneira a facilitar migração futura para infraestrutura com RabbitMQ e *Outbox Pattern*.
+- **Evolução:** Atualizações atualmente processadas de forma síncrona. O Inbox foi modelado de maneira a facilitar migração futura para infraestrutura com RabbitMQ e _Outbox Pattern_.
 
 ## 4. Banco de Dados — Modelo Inicial
 
@@ -1453,31 +1454,31 @@ O sistema utiliza a arquitetura de *Inbox Pattern* com a entidade `WebhookInboxE
 
 ## Relacionais — PostgreSQL
 
-* Tenant.
-* User.
-* Role.
-* Permission.
-* UserRole.
-* RolePermission.
-* Customer.
-* Payment.
-* PaymentEvent.
-* PaymentGatewayConfig.
-* WebhookEndpoint.
-* WebhookDelivery.
-* ApiKey.
-* ExportJob.
-* Notification.
-* OutboxEvent.
-* InboxEvent.
-* RefreshToken.
+- Tenant.
+- User.
+- Role.
+- Permission.
+- UserRole.
+- RolePermission.
+- Customer.
+- Payment.
+- PaymentEvent.
+- PaymentGatewayConfig.
+- WebhookEndpoint.
+- WebhookDelivery.
+- ApiKey.
+- ExportJob.
+- Notification.
+- OutboxEvent.
+- InboxEvent.
+- RefreshToken.
 
 ## Documentais — MongoDB
 
-* AuditLog.
-* GatewayRawPayload.
-* WebhookRawPayload.
-* ExternalRequestLog.
+- AuditLog.
+- GatewayRawPayload.
+- WebhookRawPayload.
+- ExternalRequestLog.
 
 ---
 
@@ -1527,11 +1528,11 @@ GET /payments?page=1&limit=20
 
 ## Regras
 
-* Limite padrão: 20.
-* Limite máximo: 50.
-* Filtros devem ser feitos no backend.
-* Ordenação deve ser explícita.
-* Consultas devem respeitar tenant.
+- Limite padrão: 20.
+- Limite máximo: 50.
+- Filtros devem ser feitos no backend.
+- Ordenação deve ser explícita.
+- Consultas devem respeitar tenant.
 
 ---
 
@@ -1541,16 +1542,16 @@ GET /payments?page=1&limit=20
 
 Tipos:
 
-* Unitários.
-* Integração.
-* E2E.
-* Testcontainers.
-* Testes de RBAC.
-* Testes multitenant.
-* Testes de idempotência.
-* Testes de webhooks.
-* Testes de filas.
-* Testes de exportação.
+- Unitários.
+- Integração.
+- E2E.
+- Testcontainers.
+- Testes de RBAC.
+- Testes multitenant.
+- Testes de idempotência.
+- Testes de webhooks.
+- Testes de filas.
+- Testes de exportação.
 
 ---
 
@@ -1558,14 +1559,14 @@ Tipos:
 
 Tipos:
 
-* Componentes.
-* Stores.
-* Services.
-* Guards de rota.
-* Renderização condicional.
-* i18n.
-* Modais.
-* Toasts.
+- Componentes.
+- Stores.
+- Services.
+- Guards de rota.
+- Renderização condicional.
+- i18n.
+- Modais.
+- Toasts.
 
 ---
 
@@ -1573,11 +1574,11 @@ Tipos:
 
 Usar k6 para simular:
 
-* Criação de pagamentos.
-* Listagem paginada.
-* Recebimento de webhooks.
-* Exportação.
-* Login.
+- Criação de pagamentos.
+- Listagem paginada.
+- Recebimento de webhooks.
+- Exportação.
+- Login.
 
 ---
 
@@ -1585,16 +1586,16 @@ Usar k6 para simular:
 
 # 22.1 Ferramentas sugeridas
 
-* ESLint.
-* Prettier.
-* Husky.
-* lint-staged.
-* Commitlint.
-* Conventional Commits.
-* Dependabot ou Renovate.
-* npm audit.
-* CodeQL.
-* Secret scanning.
+- ESLint.
+- Prettier.
+- Husky.
+- lint-staged.
+- Commitlint.
+- Conventional Commits.
+- Dependabot ou Renovate.
+- npm audit.
+- CodeQL.
+- Secret scanning.
 
 ---
 
@@ -1602,11 +1603,11 @@ Usar k6 para simular:
 
 Não instalar bibliotecas:
 
-* Sem manutenção há mais de 12 meses.
-* Com vulnerabilidade high ou critical.
-* Sem comunidade ativa.
-* Sem documentação mínima.
-* Com histórico problemático de segurança.
+- Sem manutenção há mais de 12 meses.
+- Com vulnerabilidade high ou critical.
+- Sem comunidade ativa.
+- Sem documentação mínima.
+- Com histórico problemático de segurança.
 
 Dependências importantes devem ser justificadas em ADR quando necessário.
 
@@ -1633,11 +1634,11 @@ services:
 
 # 23.2 Regras
 
-* `docker compose up --build` deve subir o ambiente.
-* `.env.example` deve ser completo.
-* README deve explicar portas.
-* Volumes devem ser usados para bancos.
-* Serviços de observabilidade devem ser opcionais, mas disponíveis.
+- `docker compose up --build` deve subir o ambiente.
+- `.env.example` deve ser completo.
+- README deve explicar portas.
+- Volumes devem ser usados para bancos.
+- Serviços de observabilidade devem ser opcionais, mas disponíveis.
 
 ---
 
@@ -1697,15 +1698,15 @@ DATADOG_ENABLED=false
 
 Não logar:
 
-* Senhas.
-* Tokens.
-* Refresh tokens.
-* API Keys.
-* Secret keys.
-* Dados completos de cartão.
-* Documentos pessoais completos.
-* Headers de autorização.
-* Payloads sensíveis sem mascaramento.
+- Senhas.
+- Tokens.
+- Refresh tokens.
+- API Keys.
+- Secret keys.
+- Dados completos de cartão.
+- Documentos pessoais completos.
+- Headers de autorização.
+- Payloads sensíveis sem mascaramento.
 
 ---
 
@@ -1713,18 +1714,18 @@ Não logar:
 
 Uma funcionalidade só será considerada pronta quando:
 
-* Código implementado.
-* Testes mínimos criados.
-* Permissões validadas.
-* Erros tratados.
-* Logs estruturados.
-* Auditoria criada, se aplicável.
-* Documentação atualizada.
-* Fluxo validado localmente.
-* Docker funcionando.
-* Lint passando.
-* Build passando.
-* Não houver vulnerabilidade high ou critical conhecida.
+- Código implementado.
+- Testes mínimos criados.
+- Permissões validadas.
+- Erros tratados.
+- Logs estruturados.
+- Auditoria criada, se aplicável.
+- Documentação atualizada.
+- Fluxo validado localmente.
+- Docker funcionando.
+- Lint passando.
+- Build passando.
+- Não houver vulnerabilidade high ou critical conhecida.
 
 ---
 
@@ -1734,78 +1735,80 @@ Uma funcionalidade só será considerada pronta quando:
 
 Mitigação:
 
-* Trabalhar por fases.
-* Priorizar MVP.
-* Não implementar todos os gateways no início.
+- Trabalhar por fases.
+- Priorizar MVP.
+- Não implementar todos os gateways no início.
 
 ## Risco 2 — Complexidade do multi-gateway
 
 Mitigação:
 
-* Começar com Stripe.
-* Manter interfaces pequenas.
-* Documentar diferenças por provider.
+- Começar com Stripe.
+- Manter interfaces pequenas.
+- Documentar diferenças por provider.
 
 ## Risco 3 — Exportações pesadas
 
 Mitigação:
 
-* Usar streams.
-* Processar assíncrono.
-* Definir limites por tenant.
+- Usar streams.
+- Processar assíncrono.
+- Definir limites por tenant.
 
 ## Risco 4 — Observabilidade excessiva no início
 
 Mitigação:
 
-* Começar com logs estruturados.
-* Depois adicionar OpenTelemetry.
-* Depois Prometheus/Grafana.
-* Datadog como opcional.
+- Começar com logs estruturados.
+- Depois adicionar OpenTelemetry.
+- Depois Prometheus/Grafana.
+- Datadog como opcional.
 
 ## Risco 5 — Segurança de webhooks
 
 Mitigação:
 
-* Validar assinatura.
-* Usar raw body.
-* Implementar Inbox.
-* Garantir idempotência.
+- Validar assinatura.
+- Usar raw body.
+- Implementar Inbox.
+- Garantir idempotência.
 
 ---
 
 # 29. Decisões Técnicas Consolidadas
 
-* Backend em NestJS.
-* Frontend em Vue 3.
-* TypeScript em toda a stack.
-* PostgreSQL para dados transacionais.
-* MongoDB para payloads e auditoria.
-* Redis para cache, lock, rate limit e idempotência.
-* RabbitMQ para mensageria.
-* Prisma como ORM.
-* Stripe como gateway inicial.
-* Gateway desacoplado por Strategy + Factory.
-* Docker Compose para ambiente local.
-* Prometheus/Grafana como observabilidade local.
-* Datadog opcional.
-* Pino para logs.
-* Tailwind para UI.
-* Heroicons para ícones.
-* Pinia para estado.
-* JSON para traduções.
-* Node.js Streams para CSV.
-* ExcelJS streaming para XLSX.
-* Swagger + Redoc + AsyncAPI para documentação.
-* Outbox e Inbox para confiabilidade.
+- Backend em NestJS.
+- Frontend em Vue 3.
+- TypeScript em toda a stack.
+- PostgreSQL para dados transacionais.
+- MongoDB para payloads e auditoria.
+- Redis para cache, lock, rate limit e idempotência.
+- RabbitMQ para mensageria.
+- Prisma como ORM.
+- Stripe como gateway inicial.
+- Gateway desacoplado por Strategy + Factory.
+- Docker Compose para ambiente local.
+- Prometheus/Grafana como observabilidade local.
+- Datadog opcional.
+- Pino para logs.
+- Tailwind para UI.
+- Heroicons para ícones.
+- Pinia para estado.
+- JSON para traduções.
+- Node.js Streams para CSV.
+- ExcelJS streaming para XLSX.
+- Swagger + Redoc + AsyncAPI para documentação.
+- Outbox e Inbox para confiabilidade.
 
 ---
 
 # 30. Implementation Notes
 
 ## Phase 2C
+
 Phase 2C — Frontend Authentication Foundation has been implemented.
 This included:
+
 - LoginView
 - AuthStore with Pinia
 - Token storage (localStorage)
@@ -1815,82 +1818,83 @@ This included:
 - PermissionGate component
 - Consumption of `/auth/me` and frontend logout.
 
-*Known Limitation*: Currently, tokens are stored in `localStorage` to simplify the local environment and portfolio setup. In a production environment, this should be evaluated and moved to HttpOnly, Secure, and SameSite cookies for refresh tokens.
+_Known Limitation_: Currently, tokens are stored in `localStorage` to simplify the local environment and portfolio setup. In a production environment, this should be evaluated and moved to HttpOnly, Secure, and SameSite cookies for refresh tokens.
 
 ---
 
 # 12. Database Foundation
 
-* **Tenant**: Entidade raiz do isolamento lógico multitenant.
-* **User**: Entidade que representa o usuário do sistema.
-* **Role**: Papel do usuário no sistema (ex: admin, manager, viewer).
-* **Permission**: Permissão granular (ex: payments:refund).
-* **UserRole**: Vínculo entre User e Role.
-* **RolePermission**: Vínculo entre Role e Permission.
-* **RefreshToken**: Armazenamento seguro do refresh token em formato hash.
-* **UserSession**: Registro de sessão ativa do usuário.
-* **AuthAttempt**: Auditoria de tentativas de login, útil para bloqueios temporários de segurança.
+- **Tenant**: Entidade raiz do isolamento lógico multitenant.
+- **User**: Entidade que representa o usuário do sistema.
+- **Role**: Papel do usuário no sistema (ex: admin, manager, viewer).
+- **Permission**: Permissão granular (ex: payments:refund).
+- **UserRole**: Vínculo entre User e Role.
+- **RolePermission**: Vínculo entre Role e Permission.
+- **RefreshToken**: Armazenamento seguro do refresh token em formato hash.
+- **UserSession**: Registro de sessão ativa do usuário.
+- **AuthAttempt**: Auditoria de tentativas de login, útil para bloqueios temporários de segurança.
 
 ---
 
 # 13. Authentication Design
 
-* **Login**: Realizado com e-mail e senha.
-* **Senha**: Hasheada com bcrypt.
-* **Access token JWT**: Curta duração para segurança.
-* **Refresh token**: Seguro com hash armazenado no banco.
-* **Sessão única por usuário**: Controlado via banco de dados e JWT sessionId.
-* **Revogação**: Revogação de sessões anteriores e refresh tokens anteriores ao novo login.
-* **Captura de IP e User-Agent**: Para fins de auditoria e segurança.
-* **Registro de AuthAttempt**: Para monitoramento.
-* **Bloqueio temporário**: Bloqueio após tentativas de login inválidas sequenciais.
-* **Validações**: Validação rigorosa de usuário ativo, tenant ativo e sessão ativa via sessionId no JWT.
+- **Login**: Realizado com e-mail e senha.
+- **Senha**: Hasheada com bcrypt.
+- **Access token JWT**: Curta duração para segurança.
+- **Refresh token**: Seguro com hash armazenado no banco.
+- **Sessão única por usuário**: Controlado via banco de dados e JWT sessionId.
+- **Revogação**: Revogação de sessões anteriores e refresh tokens anteriores ao novo login.
+- **Captura de IP e User-Agent**: Para fins de auditoria e segurança.
+- **Registro de AuthAttempt**: Para monitoramento.
+- **Bloqueio temporário**: Bloqueio após tentativas de login inválidas sequenciais.
+- **Validações**: Validação rigorosa de usuário ativo, tenant ativo e sessão ativa via sessionId no JWT.
 
 ---
 
 # 14. Authorization Design
 
-* **Roles e Permissions**: Implementados no banco de dados.
-* **JwtAuthGuard**: Protege rotas exigindo JWT válido.
-* **PermissionGuard**: Intercepta requisições e verifica permissões granulares.
-* **@RequirePermissions**: Decorator para definir permissões necessárias por rota.
-* **@CurrentUser**: Decorator para injetar dados do usuário autenticado no controller.
-* **@Public**: Decorator para liberar acesso anônimo em rotas específicas.
-* **RBAC inicial**: Baseado em permissões extraídas do token e banco.
-* **Fonte da Verdade**: Backend como fonte real e segura de autorização.
+- **Roles e Permissions**: Implementados no banco de dados.
+- **JwtAuthGuard**: Protege rotas exigindo JWT válido.
+- **PermissionGuard**: Intercepta requisições e verifica permissões granulares.
+- **@RequirePermissions**: Decorator para definir permissões necessárias por rota.
+- **@CurrentUser**: Decorator para injetar dados do usuário autenticado no controller.
+- **@Public**: Decorator para liberar acesso anônimo em rotas específicas.
+- **RBAC inicial**: Baseado em permissões extraídas do token e banco.
+- **Fonte da Verdade**: Backend como fonte real e segura de autorização.
 
 ---
 
 # 15. Frontend Authentication Design
 
-* **Views**: LoginView e Dashboard (como placeholder inicial).
-* **Layouts**: AuthLayout para páginas de login e AppLayout para a aplicação autenticada.
-* **Store**: AuthStore usando Pinia para gerenciar o estado global de autenticação.
-* **token-storage**: Módulo para centralizar persistência de tokens.
-* **auth.service**: Interage com a API REST.
-* **http-client (Axios)**: Cliente HTTP padronizado.
-* **Interceptors**: 
-  * Request interceptor para injetar o Bearer token.
-  * Response interceptor para refresh automático silencioso do token.
-* **Router guards**: Proteção de navegação. Rota `/login` é pública e `/dashboard` é privada.
-* **PermissionGate**: Componente para renderização condicional baseada em permissões do usuário.
-* **Persistência**: Manutenção de sessão entre reloads através de localStorage.
-* **Logout**: Limpeza de sessão no frontend e notificação de revogação no backend.
+- **Views**: LoginView e Dashboard (como placeholder inicial).
+- **Layouts**: AuthLayout para páginas de login e AppLayout para a aplicação autenticada.
+- **Store**: AuthStore usando Pinia para gerenciar o estado global de autenticação.
+- **token-storage**: Módulo para centralizar persistência de tokens.
+- **auth.service**: Interage com a API REST.
+- **http-client (Axios)**: Cliente HTTP padronizado.
+- **Interceptors**:
+  - Request interceptor para injetar o Bearer token.
+  - Response interceptor para refresh automático silencioso do token.
+- **Router guards**: Proteção de navegação. Rota `/login` é pública e `/dashboard` é privada.
+- **PermissionGate**: Componente para renderização condicional baseada em permissões do usuário.
+- **Persistência**: Manutenção de sessão entre reloads através de localStorage.
+- **Logout**: Limpeza de sessão no frontend e notificação de revogação no backend.
 
 ---
 
 # 16. API Documentation Design
 
-* **OpenAPI**: Contrato oficial da API gerado através dos decorators do NestJS.
-* **Swagger UI**: Disponível em `/api/docs` para testes em desenvolvimento.
-* **Redoc**: Disponível em `/api/reference` como referência técnica e B2B.
-* **OpenAPI JSON**: Disponível em `/api/openapi.json` para integrações.
-* **DTOs**: Tipagem estrita documentada com `@ApiProperty`.
-* **Controllers**: Organizados e agrupados usando `@ApiTags`.
-* **Proteção**: Rotas protegidas documentadas adequadamente com `@ApiBearerAuth`.
-* **Atualização**: Documentação atualizada lado a lado com cada nova feature.
+- **OpenAPI**: Contrato oficial da API gerado através dos decorators do NestJS.
+- **Swagger UI**: Disponível em `/api/docs` para testes em desenvolvimento.
+- **Redoc**: Disponível em `/api/reference` como referência técnica e B2B.
+- **OpenAPI JSON**: Disponível em `/api/openapi.json` para integrações.
+- **DTOs**: Tipagem estrita documentada com `@ApiProperty`.
+- **Controllers**: Organizados e agrupados usando `@ApiTags`.
+- **Proteção**: Rotas protegidas documentadas adequadamente com `@ApiBearerAuth`.
+- **Atualização**: Documentação atualizada lado a lado com cada nova feature.
 
 ## 5.10 Roles & Permissions Design
+
 O sistema utiliza permissões globais do sistema (`Permission`) atreladas aos perfis (`Role`), permitindo controle granular baseado em RBAC.
 A leitura de Roles é isolada pelo Tenant (`roles:manage`).
 A leitura de Permissões requer `permissions:read`.
@@ -1898,28 +1902,33 @@ O frontend espelha as permissões ocultando itens de menu, mas o backend continu
 Na Fase 3C, foi introduzido o endpoint `GET /roles` para listar roles do tenant logado e `GET /roles/:id` para detalhar suas permissões associadas. As permissões são acessíveis publicamente via `GET /permissions`.
 
 ## 5.11 Tenant Settings Design
+
 O sistema permite customizações e configurações básicas em nível de Tenant sem expor dados estruturais como `slug` e `active`.
 Endpoint introduzidos na Fase 3C:
-* `GET /tenants/current`: Busca a configuração atual de um tenant ativo a partir do `tenantId` contido no contexto seguro da sessão.
-* `PATCH /tenants/current`: Atualiza nome (`name`) e `timezone`. Exige permissão `tenant:update`.
+
+- `GET /tenants/current`: Busca a configuração atual de um tenant ativo a partir do `tenantId` contido no contexto seguro da sessão.
+- `PATCH /tenants/current`: Atualiza nome (`name`) e `timezone`. Exige permissão `tenant:update`.
 
 ## Brand Identity / UI System
 
-* assets oficiais em images/
-* assets públicos do frontend em apps/web/public/brand/
-* tokens visuais em main.css
-* README usa images/
-* frontend usa /brand/*
+- assets oficiais em images/
+- assets públicos do frontend em apps/web/public/brand/
+- tokens visuais em main.css
+- README usa images/
+- frontend usa /brand/\*
 
 ## 5.12 Customers Design
+
 O domínio de Customers é gerenciado com total tenant isolation e controle por RBAC (`customers:read`, `customers:create`, `customers:update`).
 Foi implementado o modelo `Customer`, além de usar o Repository Pattern para isolar as chamadas do Prisma.
 Endpoints incluem suporte nativo a paginação (`page`, `perPage`), busca (`search`) e filtros (`status`, `type`), todos sanitizados via DTOs.
-A deleção física de clientes não é permitida; a desativação se dá via *soft action* em `PATCH /customers/:id/status`.
+A deleção física de clientes não é permitida; a desativação se dá via _soft action_ em `PATCH /customers/:id/status`.
 Todas as operações de Customers registram auditorias (`AuditLog`) para `customer.created`, `customer.updated`, `customer.activated`, e `customer.deactivated`.
 
 ## 5.13 Password Recovery Design
+
 O sistema suporta a redefinição de senhas enviando um e-mail com link contendo um token único seguro.
+
 - O token puro NUNCA é salvo no banco nem nos logs; guarda-se apenas um hash SHA-256 no banco na tabela `PasswordResetToken`.
 - O endpoint `POST /auth/forgot-password` retorna mensagens genéricas para evitar a enumeração de usuários.
 - O endpoint `POST /auth/reset-password` exige o token original recebido por e-mail, revoga ativamente todos os `refresh tokens` e sessões (`UserSession`) do usuário logo após o reset bem-sucedido e zera bloqueios prévios.
@@ -1932,18 +1941,18 @@ A Sprint 10.0.1 introduz os bounded contexts `catalog`, `inventory`, `orders`, `
 
 Autorização passa a ter duas camadas para os novos módulos:
 
-* `@RequirePermissions`: RBAC por role do usuário.
-* `@RequireCapabilities`: entitlement comercial derivado da assinatura ativa do tenant.
+- `@RequirePermissions`: RBAC por role do usuário.
+- `@RequireCapabilities`: entitlement comercial derivado da assinatura ativa do tenant.
 
 O `CapabilityGuard` é executado no backend e consulta a policy central em `CapabilityPolicyService`. O frontend recebe `capabilities` no payload de autenticação para esconder menus e bloquear navegação como melhoria de UX, mas a autoridade final permanece no backend.
 
 Mapeamento inicial sobre os planos existentes:
 
-| Plano atual | Capabilities 10.0 iniciais |
-|---|---|
-| `FREE`, `STARTER` | nenhuma capability Commerce |
-| `PROFESSIONAL` | `catalog.manage`, `inventory.manage`, `inventory.adjust`, `orders.manage`, `inventory.reports.read` |
-| `ENTERPRISE`, `CUSTOM` | capabilities ERP Basic + channels + `financial.analytics.read` |
+| Plano atual            | Capabilities 10.0 iniciais                                                                          |
+| ---------------------- | --------------------------------------------------------------------------------------------------- |
+| `FREE`, `STARTER`      | nenhuma capability Commerce                                                                         |
+| `PROFESSIONAL`         | `catalog.manage`, `inventory.manage`, `inventory.adjust`, `orders.manage`, `inventory.reports.read` |
+| `ENTERPRISE`, `CUSTOM` | capabilities ERP Basic + channels + `financial.analytics.read`                                      |
 
 Endpoints foundation documentados no Swagger/Redoc/OpenAPI:
 
@@ -1963,25 +1972,25 @@ A Sprint 10.0.2 implementa somente o bounded context `catalog`.
 
 Inclui:
 
-* `Product` com tipos `SIMPLE`, `PARENT` e `VARIANT`.
-* `ProductSku` para produtos vendáveis (`SIMPLE` e `VARIANT`).
-* Produto pai sem SKU próprio.
-* Variante vinculada a um produto pai.
-* SKU único por tenant, normalizado por `SkuPolicy`.
-* Preço de custo, moeda e unidade de medida no SKU.
-* Arquivamento por `POST /catalog/products/:id/archive`.
-* Auditoria de criação, atualização, alteração de custo e arquivamento.
+- `Product` com tipos `SIMPLE`, `PARENT` e `VARIANT`.
+- `ProductSku` para produtos vendáveis (`SIMPLE` e `VARIANT`).
+- Produto pai sem SKU próprio.
+- Variante vinculada a um produto pai.
+- SKU único por tenant, normalizado por `SkuPolicy`.
+- Preço de custo, moeda e unidade de medida no SKU.
+- Arquivamento por `POST /catalog/products/:id/archive`.
+- Auditoria de criação, atualização, alteração de custo e arquivamento.
 
 Não inclui nesta sprint:
 
-* Warehouse.
-* Saldo.
-* Movimentações.
-* Reservas.
-* Pedidos.
-* Integrações marketplace.
-* Malha fina.
-* Financeiro por pedido.
+- Warehouse.
+- Saldo.
+- Movimentações.
+- Reservas.
+- Pedidos.
+- Integrações marketplace.
+- Malha fina.
+- Financeiro por pedido.
 
 Endpoints documentados via Swagger/Redoc/OpenAPI:
 
@@ -1995,11 +2004,52 @@ POST /catalog/products/:id/archive
 
 O frontend usa `/catalog/products`, `catalog:read`, `catalog:manage` e `catalog.manage`.
 
+## 5.16 Inventory Warehouse and Ledger Design
+
+A Sprint 10.0.3 implementa somente o primeiro fluxo operacional de estoque: warehouses, ledger de movimentos manuais e projeção de saldo.
+
+Inclui:
+
+- `Warehouse` com `code` normalizado em maiúsculas e único por tenant.
+- `InventoryMovement` como ledger append-only para ajustes manuais de entrada e saída.
+- `InventoryBalance` como projeção atual por `tenantId`, `skuId` e `warehouseId`.
+- Ajuste de estoque em transação única: cria movimento e atualiza/upserta saldo.
+- Bloqueio de ajuste que reduza `onHandQuantity` abaixo do reservado existente.
+- Auditoria para `inventory.warehouse.created`, `inventory.warehouse.updated` e `inventory.adjustment.recorded`.
+- UI `/inventory`, `/inventory/warehouses` e `/inventory/movements` com balances, warehouses, movements e modal de ajuste.
+- Assinatura `ENTERPRISE` ativa para o tenant interno `ledgerflow-platform`, liberando capabilities MASTER ao Admin Master.
+
+Não inclui nesta sprint:
+
+- Reservas.
+- Pedidos.
+- Movimentações automáticas por pedido.
+- Integrações de marketplace.
+- Malha fina.
+- Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /inventory/warehouses
+GET /inventory/warehouses
+PATCH /inventory/warehouses/:id
+POST /inventory/movements/adjustments
+GET /inventory/balances
+GET /inventory/movements
+```
+
+Autorização:
+
+- `inventory:read` + `inventory.manage`: listagem de warehouses, saldos e movimentos.
+- `inventory:manage` + `inventory.manage`: criação/atualização de warehouse.
+- `inventory:adjust` + `inventory.manage`: registro de ajustes manuais.
 
 ### Payments Notes
-* PaymentsView segue View -> Store -> Service -> HTTP Client.
-* Paginação vem do backend.
-* tenantId não é enviado pelo frontend.
-* amount é convertido para centavos antes do request.
-* Idempotency-Key é gerada somente em memória.
-* RBAC frontend é UX; backend é autoridade final.
+
+- PaymentsView segue View -> Store -> Service -> HTTP Client.
+- Paginação vem do backend.
+- tenantId não é enviado pelo frontend.
+- amount é convertido para centavos antes do request.
+- Idempotency-Key é gerada somente em memória.
+- RBAC frontend é UX; backend é autoridade final.

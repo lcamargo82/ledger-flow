@@ -36,6 +36,18 @@ enum ProductStatus {
   ARCHIVED
 }
 
+enum InventoryMovementType {
+  RECEIPT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  RESERVATION
+  RESERVATION_RELEASE
+  FULFILLMENT
+  RETURN
+  TRANSFER_OUT
+  TRANSFER_IN
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -61,6 +73,9 @@ model Tenant {
   asyncJobExecutions    AsyncJobExecution[]
   products              Product[]
   productSkus           ProductSku[]
+  warehouses            Warehouse[]
+  inventoryMovements    InventoryMovement[]
+  inventoryBalances     InventoryBalance[]
 
   @@map("tenants")
 }
@@ -270,9 +285,9 @@ model Product {
   updatedAt       DateTime      @updatedAt @map("updated_at")
   archivedAt      DateTime?     @map("archived_at")
 
-  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  parentProduct Product?     @relation("ProductHierarchy", fields: [parentProductId], references: [id], onDelete: Restrict)
-  childProducts Product[]    @relation("ProductHierarchy")
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parentProduct Product?    @relation("ProductHierarchy", fields: [parentProductId], references: [id], onDelete: Restrict)
+  childProducts Product[]   @relation("ProductHierarchy")
   sku           ProductSku?
 
   @@index([tenantId, status])
@@ -291,17 +306,87 @@ model ProductSku {
   barcode       String?
   unitOfMeasure String   @default("UN") @map("unit_of_measure")
   costPolicy    String   @default("WEIGHTED_AVERAGE") @map("cost_policy")
-  averageCost   Decimal  @db.Decimal(18, 4) @map("average_cost")
+  averageCost   Decimal  @map("average_cost") @db.Decimal(18, 4)
   currency      String   @default("BRL")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product            Product             @relation(fields: [productId], references: [id], onDelete: Restrict)
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements InventoryMovement[]
+  inventoryBalances  InventoryBalance[]
 
   @@unique([tenantId, skuCanonical])
   @@index([tenantId, barcode])
   @@map("product_skus")
+}
+
+model Warehouse {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  code      String
+  name      String
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements InventoryMovement[]
+  inventoryBalances  InventoryBalance[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+  @@map("warehouses")
+}
+
+model InventoryMovement {
+  id              String                @id @default(uuid())
+  tenantId        String                @map("tenant_id")
+  skuId           String                @map("sku_id")
+  warehouseId     String                @map("warehouse_id")
+  type            InventoryMovementType
+  quantityDelta   Decimal               @map("quantity_delta") @db.Decimal(18, 6)
+  unitCost        Decimal?              @map("unit_cost") @db.Decimal(18, 4)
+  sourceType      String                @map("source_type")
+  sourceId        String                @map("source_id")
+  idempotencyKey  String                @map("idempotency_key")
+  reasonCode      String?               @map("reason_code")
+  notes           String?
+  occurredAt      DateTime              @map("occurred_at")
+  createdByUserId String?               @map("created_by_user_id")
+  createdAt       DateTime              @default(now()) @map("created_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, skuId, warehouseId, occurredAt])
+  @@index([tenantId, sourceType, sourceId])
+  @@index([tenantId, occurredAt])
+  @@map("inventory_movements")
+}
+
+model InventoryBalance {
+  id                String   @id @default(uuid())
+  tenantId          String   @map("tenant_id")
+  skuId             String   @map("sku_id")
+  warehouseId       String   @map("warehouse_id")
+  onHandQuantity    Decimal  @map("on_hand_quantity") @db.Decimal(18, 6)
+  reservedQuantity  Decimal  @default(0) @map("reserved_quantity") @db.Decimal(18, 6)
+  availableQuantity Decimal  @map("available_quantity") @db.Decimal(18, 6)
+  version           Int      @default(0)
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, skuId, warehouseId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, warehouseId])
+  @@map("inventory_balances")
 }
 
 model PasswordResetToken {
@@ -499,8 +584,8 @@ model Payment {
   providerPixExpiresAt   DateTime?
   providerPaymentUrl     String?
   gatewayConfigurationId String?
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
   canceledAt             DateTime?
   refundedAt             DateTime?
 

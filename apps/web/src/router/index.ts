@@ -28,8 +28,8 @@ const router = createRouter({
       component: LoginView,
       meta: {
         layout: AuthLayout,
-        public: true
-      }
+        public: true,
+      },
     },
     {
       path: '/forgot-password',
@@ -37,8 +37,8 @@ const router = createRouter({
       component: ForgotPasswordView,
       meta: {
         layout: AuthLayout,
-        public: true
-      }
+        public: true,
+      },
     },
     {
       path: '/reset-password',
@@ -46,8 +46,8 @@ const router = createRouter({
       component: () => import('../views/ResetPasswordView.vue'),
       meta: {
         layout: AuthLayout,
-        public: true
-      }
+        public: true,
+      },
     },
     {
       path: '/accept-invitation',
@@ -55,12 +55,12 @@ const router = createRouter({
       component: () => import('../views/AcceptTenantInvitationView.vue'),
       meta: {
         layout: AuthLayout,
-        public: true
-      }
+        public: true,
+      },
     },
     {
       path: '/',
-      redirect: '/dashboard'
+      redirect: '/dashboard',
     },
     {
       path: '/dashboard',
@@ -68,8 +68,8 @@ const router = createRouter({
       component: DashboardView,
       meta: {
         layout: AppLayout,
-        requiresAuth: true
-      }
+        requiresAuth: true,
+      },
     },
     {
       path: '/users',
@@ -78,8 +78,8 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['users:read']
-      }
+        permissions: ['users:read'],
+      },
     },
     {
       path: '/roles',
@@ -88,8 +88,8 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['roles:manage']
-      }
+        permissions: ['roles:manage'],
+      },
     },
     {
       path: '/permissions',
@@ -98,8 +98,8 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['permissions:read']
-      }
+        permissions: ['permissions:read'],
+      },
     },
     {
       path: '/settings/tenant',
@@ -108,8 +108,8 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['tenant:update']
-      }
+        permissions: ['tenant:update'],
+      },
     },
     {
       path: '/settings/gateway-connections',
@@ -118,8 +118,8 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['gateways:read']
-      }
+        permissions: ['gateways:read'],
+      },
     },
     {
       path: '/customers',
@@ -128,8 +128,8 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['customers:read']
-      }
+        permissions: ['customers:read'],
+      },
     },
     {
       path: '/payments',
@@ -138,8 +138,8 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
-        permissions: ['payments:read']
-      }
+        permissions: ['payments:read'],
+      },
     },
     {
       path: '/catalog/products',
@@ -149,8 +149,8 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         permissions: ['catalog:read'],
-        capabilities: ['catalog.manage']
-      }
+        capabilities: ['catalog.manage'],
+      },
     },
     {
       path: '/inventory',
@@ -160,8 +160,30 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         permissions: ['inventory:read'],
-        capabilities: ['inventory.manage']
-      }
+        capabilities: ['inventory.manage'],
+      },
+    },
+    {
+      path: '/inventory/warehouses',
+      name: 'inventory-warehouses',
+      component: InventoryFoundationView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['inventory:read'],
+        capabilities: ['inventory.manage'],
+      },
+    },
+    {
+      path: '/inventory/movements',
+      name: 'inventory-movements',
+      component: InventoryFoundationView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['inventory:read'],
+        capabilities: ['inventory.manage'],
+      },
     },
     {
       path: '/forbidden',
@@ -169,8 +191,8 @@ const router = createRouter({
       component: ForbiddenView,
       meta: {
         layout: AppLayout,
-        requiresAuth: true
-      }
+        requiresAuth: true,
+      },
     },
     {
       path: '/platform/tenants',
@@ -180,8 +202,8 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         platformAdminOnly: true,
-        permissions: ['platform:tenants:read']
-      }
+        permissions: ['platform:tenants:read'],
+      },
     },
     {
       path: '/platform/tenants/:id',
@@ -191,8 +213,8 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         platformAdminOnly: true,
-        permissions: ['platform:tenants:read']
-      }
+        permissions: ['platform:tenants:read'],
+      },
     },
     {
       path: '/platform/audit',
@@ -202,8 +224,8 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         platformAdminOnly: true,
-        permissions: ['platform:audit:read']
-      }
+        permissions: ['platform:audit:read'],
+      },
     },
     {
       path: '/platform/gateway-connections',
@@ -213,8 +235,8 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         platformAdminOnly: true,
-        permissions: ['platform:gateways:read']
-      }
+        permissions: ['platform:gateways:read'],
+      },
     },
     {
       path: '/platform/async-jobs',
@@ -224,8 +246,8 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         platformAdminOnly: true,
-        permissions: ['platform:async:read']
-      }
+        permissions: ['platform:async:read'],
+      },
     },
     {
       path: '/dev/ui-kit',
@@ -233,7 +255,7 @@ const router = createRouter({
       component: () => import('../views/UIKitView.vue'),
       meta: {
         requiresAuth: false,
-        layout: AppLayout
+        layout: AppLayout,
       },
       beforeEnter: (to, from, next) => {
         if (import.meta.env.DEV) {
@@ -241,7 +263,7 @@ const router = createRouter({
         } else {
           next('/not-found')
         }
-      }
+      },
     },
     {
       path: '/platform/tenants/:id',
@@ -251,8 +273,8 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         platformAdminOnly: true,
-        permissions: ['platform:tenants:overview:read']
-      }
+        permissions: ['platform:tenants:overview:read'],
+      },
     },
     {
       path: '/:pathMatch(.*)*',
@@ -260,10 +282,10 @@ const router = createRouter({
       component: NotFoundView,
       meta: {
         // Can be either, let the guard decide layout or we just default to AppLayout if auth
-        public: true
-      }
-    }
-  ]
+        public: true,
+      },
+    },
+  ],
 })
 
 let bootstrapDone = false

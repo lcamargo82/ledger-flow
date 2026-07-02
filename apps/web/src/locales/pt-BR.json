@@ -122,6 +122,9 @@
     "payments": "Pagamentos",
     "catalog": "Catálogo",
     "inventory": "Estoque",
+    "orders": "Pedidos",
+    "channels": "Canais",
+    "analytics": "Analytics",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
     "reports": "Relatórios",
@@ -137,9 +140,75 @@
   },
   "inventory": {
     "title": "Estoque",
-    "description": "Fundação do módulo de estoque habilitada. Cadastro de warehouses, ledger e saldos entram nas próximas sprints.",
-    "emptyTitle": "Fundação de estoque pronta",
-    "emptyDescription": "As rotas, permissões e capabilities comerciais já estão preparadas para a Sprint 10.0.3."
+    "description": "Gerencie warehouses, ajustes de estoque, saldos projetados e ledger auditável.",
+    "tabs": {
+      "warehouses": "Warehouses",
+      "balances": "Saldos",
+      "movements": "Movimentações"
+    },
+    "actions": {
+      "createWarehouse": "Novo warehouse",
+      "adjust": "Registrar ajuste",
+      "disable": "Desativar",
+      "enable": "Ativar"
+    },
+    "table": {
+      "code": "Código",
+      "name": "Nome",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "actions": "Ações",
+      "skuId": "SKU",
+      "warehouseId": "Warehouse",
+      "onHand": "Disponível físico",
+      "reserved": "Reservado",
+      "available": "Disponível venda",
+      "updatedAt": "Atualizado em",
+      "occurredAt": "Ocorrido em",
+      "type": "Tipo",
+      "quantity": "Quantidade",
+      "reason": "Motivo"
+    },
+    "form": {
+      "warehouseTitle": "Novo warehouse",
+      "adjustmentTitle": "Registrar ajuste",
+      "codeLabel": "Código",
+      "nameLabel": "Nome",
+      "skuIdLabel": "SKU",
+      "warehouseLabel": "Warehouse",
+      "warehousePlaceholder": "Selecione um warehouse",
+      "typeLabel": "Tipo",
+      "quantityLabel": "Quantidade",
+      "reasonCodeLabel": "Motivo",
+      "notesLabel": "Observações"
+    },
+    "movementType": {
+      "RECEIPT": "Recebimento",
+      "ADJUSTMENT_IN": "Ajuste de entrada",
+      "ADJUSTMENT_OUT": "Ajuste de saída",
+      "RESERVATION": "Reserva",
+      "RESERVATION_RELEASE": "Liberação de reserva",
+      "FULFILLMENT": "Baixa por fulfillment",
+      "RETURN": "Devolução",
+      "TRANSFER_OUT": "Transferência de saída",
+      "TRANSFER_IN": "Transferência de entrada"
+    },
+    "empty": {
+      "warehousesTitle": "Nenhum warehouse cadastrado",
+      "warehousesDescription": "Cadastre o primeiro warehouse para registrar ajustes de estoque.",
+      "balancesTitle": "Nenhum saldo encontrado",
+      "balancesDescription": "Os saldos aparecem após o primeiro ajuste de estoque.",
+      "movementsTitle": "Nenhuma movimentação registrada",
+      "movementsDescription": "O ledger será preenchido conforme ajustes forem registrados."
+    },
+    "errors": {
+      "title": "Não foi possível carregar o estoque",
+      "default": "Não foi possível processar a operação de estoque.",
+      "warehouseCodeExists": "Este código de warehouse já existe para o tenant atual.",
+      "notFound": "Registro de estoque não encontrado.",
+      "forbidden": "Você não possui acesso ao estoque.",
+      "invalid": "Revise as informações do estoque."
+    }
   },
   "catalog": {
     "title": "Catálogo",
