@@ -288,6 +288,63 @@
       "invalid": "Review the order information."
     }
   },
+  "channels": {
+    "title": "Channels",
+    "description": "Configure channel integrations and monitor the sanitized webhook inbox.",
+    "tabs": {
+      "integrations": "Integrations",
+      "inbox": "Inbox"
+    },
+    "actions": {
+      "createIntegration": "New integration"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "All"
+    },
+    "table": {
+      "provider": "Provider",
+      "name": "Name",
+      "status": "Status",
+      "createdAt": "Created at",
+      "receivedAt": "Received at",
+      "eventType": "Event",
+      "providerEventId": "External ID",
+      "summary": "Summary"
+    },
+    "form": {
+      "integrationTitle": "New channel integration",
+      "providerLabel": "Provider",
+      "nameLabel": "Name",
+      "webhookSecretLabel": "Webhook secret"
+    },
+    "provider": {
+      "MOCK": "Mock",
+      "MERCADO_LIVRE": "Mercado Livre"
+    },
+    "integrationStatus": {
+      "ACTIVE": "Active",
+      "DISABLED": "Disabled"
+    },
+    "webhookStatus": {
+      "RECEIVED": "Received",
+      "DUPLICATE": "Duplicate",
+      "INVALID": "Invalid",
+      "DLQ": "DLQ"
+    },
+    "empty": {
+      "integrationsTitle": "No channel integrations",
+      "integrationsDescription": "Create a mock integration to test authenticated intake.",
+      "inboxTitle": "No webhooks received",
+      "inboxDescription": "Valid, duplicate, and invalid events will appear here without raw payloads."
+    },
+    "errors": {
+      "title": "Could not load channels",
+      "default": "Could not process the channel operation.",
+      "forbidden": "You do not have channel access.",
+      "invalid": "Review the channel information."
+    }
+  },
   "catalog": {
     "title": "Catalog",
     "description": "Manage simple products, parent products, and sellable variants with SKU, cost, and unit of measure.",

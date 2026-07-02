@@ -2127,6 +2127,44 @@ orders.order.cancelled
 orders.order.fulfilled
 ```
 
+## 5.19 Channel Inbound Intake Design
+
+A Sprint 10.0.6 adiciona a fundação de inbound de canais sem integração real com marketplace.
+
+Inclui:
+
+- `ChannelIntegration` com provider, nome, status e hash do segredo de webhook.
+- `ChannelWebhookInboxEvent` com idempotência por `[provider, providerEventId]`.
+- `POST /webhooks/channels/:provider` público, mas autenticado por `x-ledgerflow-channel-secret`.
+- Validação estrutural mínima do payload normalizado: `eventId` e `eventType`.
+- Persistência apenas de `payloadHash` e `payloadSummary` sanitizado; payload bruto e segredos não são armazenados.
+- Payload válido fica `RECEIVED`, duplicata retorna `DUPLICATE` sem criar novo registro e payload inválido fica `INVALID`.
+- UI `/channels` com integrações e inbox sanitizado.
+
+Não inclui nesta sprint:
+
+- Adapter real Mercado Livre.
+- Importação de anúncios.
+- Malha fina.
+- Criação automática de pedido por webhook.
+- Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /channels/integrations
+GET /channels/integrations
+GET /channels/webhook-inbox
+POST /webhooks/channels/:provider
+```
+
+Eventos AsyncAPI:
+
+```text
+channel.webhook.received
+channel.webhook.invalid
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.

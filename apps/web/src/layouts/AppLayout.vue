@@ -158,20 +158,20 @@
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.orders') }}</span>
         </router-link>
-        <a
+        <router-link
           v-if="
             authStore.checkAllPermissions(['channels:read']) &&
             authStore.checkAllCapabilities(['channels.connect'])
           "
-          href="#"
-          class="lf-nav-item lf-nav-item--disabled"
-          @click.prevent
+          to="/channels"
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
         >
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
             >storefront</span
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.channels') }}</span>
-        </a>
+        </router-link>
         <a
           v-if="
             authStore.checkAllPermissions(['financial-intelligence:read']) &&

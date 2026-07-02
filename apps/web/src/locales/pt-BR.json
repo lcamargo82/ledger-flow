@@ -287,6 +287,63 @@
       "invalid": "Revise as informações do pedido."
     }
   },
+  "channels": {
+    "title": "Canais",
+    "description": "Configure integrações de canal e acompanhe o inbox sanitizado de webhooks.",
+    "tabs": {
+      "integrations": "Integrações",
+      "inbox": "Inbox"
+    },
+    "actions": {
+      "createIntegration": "Nova integração"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "Todos"
+    },
+    "table": {
+      "provider": "Provider",
+      "name": "Nome",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "receivedAt": "Recebido em",
+      "eventType": "Evento",
+      "providerEventId": "ID externo",
+      "summary": "Resumo"
+    },
+    "form": {
+      "integrationTitle": "Nova integração de canal",
+      "providerLabel": "Provider",
+      "nameLabel": "Nome",
+      "webhookSecretLabel": "Segredo do webhook"
+    },
+    "provider": {
+      "MOCK": "Mock",
+      "MERCADO_LIVRE": "Mercado Livre"
+    },
+    "integrationStatus": {
+      "ACTIVE": "Ativa",
+      "DISABLED": "Desativada"
+    },
+    "webhookStatus": {
+      "RECEIVED": "Recebido",
+      "DUPLICATE": "Duplicado",
+      "INVALID": "Inválido",
+      "DLQ": "DLQ"
+    },
+    "empty": {
+      "integrationsTitle": "Nenhuma integração de canal",
+      "integrationsDescription": "Crie uma integração mock para testar intake autenticado.",
+      "inboxTitle": "Nenhum webhook recebido",
+      "inboxDescription": "Eventos válidos, duplicados e inválidos aparecerão aqui sem payload bruto."
+    },
+    "errors": {
+      "title": "Não foi possível carregar canais",
+      "default": "Não foi possível processar a operação de canais.",
+      "forbidden": "Você não possui acesso a canais.",
+      "invalid": "Revise as informações de canais."
+    }
+  },
   "catalog": {
     "title": "Catálogo",
     "description": "Gerencie produtos simples, produtos pai e variantes vendáveis com SKU, custo e unidade de medida.",

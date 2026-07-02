@@ -1379,6 +1379,27 @@ POST /orders/:id/cancel
 POST /orders/:id/fulfill
 ```
 
+## Fase 10.0.6 - Channel Integration Foundation e Inbound Intake
+
+A 10.0.6 cria a fundação de canais sem integrar Mercado Livre real ainda.
+
+- `ChannelIntegration` com provider `MOCK`/`MERCADO_LIVRE`, status e segredo de webhook armazenado apenas como hash.
+- `ChannelWebhookInboxEvent` como Inbox idempotente por `[provider, providerEventId]`.
+- Endpoint público autenticado por segredo: `POST /webhooks/channels/:provider`.
+- Payload bruto não é persistido; apenas `payloadHash` e `payloadSummary` sanitizado.
+- Payload válido fica `RECEIVED`; duplicado retorna `DUPLICATE` sem novo registro; payload inválido fica `INVALID`.
+- UI `/channels` lista integrações e inbox sanitizado.
+- Fora de escopo: adapter real Mercado Livre, importação de anúncios, malha fina, criação automática de pedido por webhook e financeiro por pedido.
+
+Endpoints:
+
+```text
+POST /channels/integrations
+GET /channels/integrations
+GET /channels/webhook-inbox
+POST /webhooks/channels/:provider
+```
+
 ### Platform Admin as Internal Tenant User
 
 O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:
