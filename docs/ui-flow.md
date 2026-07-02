@@ -62,7 +62,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/orders`               | Implementada (10.0.5) | `AppLayout`                | `orders:read` + `orders.manage`       | Pedidos internos, reserva, cancelamento e fulfillment   |
 | `/reconciliation`       | Futura                | `AppLayout`                | a definir                             | Conciliação financeira                                  |
 | `/reports`              | Futura                | `AppLayout`                | a definir                             | Relatórios de sistema                                   |
-| `/channels`             | Implementada (10.0.6) | `AppLayout`                | `channels:read` + `channels.connect`  | Integrações de canal e inbox sanitizado                 |
+| `/channels`             | Implementada (10.0.6), expandida (10.0.7) | `AppLayout`                | `channels:read` + `channels.connect`  | Integrações, inbox sanitizado e malha fina de listings  |
 | `/webhooks`             | Futura                | `AppLayout`                | a definir                             | Configuração e logs de webhooks                         |
 | `/audit-logs`           | Futura                | `AppLayout`                | a definir                             | Logs de auditoria geral                                 |
 | `/forbidden`            | Implementada          | `AppLayout` / `AuthLayout` | N/A                                   | Informar acesso negado por falta de permissão           |

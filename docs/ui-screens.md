@@ -148,14 +148,14 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 ### Channels
 
 - **Rota:** `/channels`
-- **Status:** Implementada 10.0.6
+- **Status:** Implementada 10.0.6; expandida 10.0.7 com malha fina.
 - **Permissões:** `channels:read`, `channels:manage`
-- **Capability:** `channels.connect`
+- **Capability:** `channels.connect`; importação exige `channels.import_listings`; mapping exige `channels.mapping.manage`.
 - **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
-- **Objetivo:** Configurar integrações de canal e visualizar o inbox sanitizado de webhooks.
-- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, filtro de inbox por status e exibição de resumo sem payload bruto.
+- **Objetivo:** Configurar integrações de canal, visualizar inbox sanitizado de webhooks e revisar vínculos de anúncios com SKU.
+- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, importação mock de anúncios, filtro de inbox/status de listing, exibição de candidatos e mapping manual auditado.
 - **Segurança:** Webhook público autentica por segredo da integração; UI protegida por permissão/capability; segredos e payload bruto não são exibidos.
-- **Fora de escopo:** Mercado Livre real, importação de anúncios, malha fina, criação automática de pedido e financeiro por pedido.
+- **Fora de escopo:** Mercado Livre real, criação automática de pedido, egress sync de saldo e financeiro por pedido.
 - **i18n:** Namespace `channels.*` em pt-BR e en-US.
 
 ### Catalog Products

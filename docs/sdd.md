@@ -2165,6 +2165,46 @@ channel.webhook.received
 channel.webhook.invalid
 ```
 
+## 5.20 Channel Listings and Mapping Review Design
+
+A Sprint 10.0.7 adiciona importacao de anuncios e malha fina de SKU ainda restrita ao provider `MOCK`.
+
+Inclui:
+
+- `ChannelListing` tenant-scoped por integracao, provider e `externalListingId`.
+- `ListingSkuMapping` como registro auditavel de vinculo manual entre anuncio e `ProductSku`.
+- Importacao mock via `POST /channels/integrations/:id/import-listings`.
+- Classificacao deterministica: `MATCHED`, `UNMATCHED`, `AMBIGUOUS`, `IGNORED`.
+- Match automatico apenas quando existe exatamente um candidato por SKU canonico, SKU display ou barcode.
+- Sem SKU externo ou SKU inexistente fica `UNMATCHED`.
+- Mais de um candidato fica `AMBIGUOUS`; o sistema nao escolhe automaticamente.
+- Mapping manual tenant-scoped com `channels:manage` + `channels.mapping.manage`.
+- Auditoria para `channels.listings.imported` e `channels.listing.mapped`.
+- Outbox para `channel.listing.import.completed` e `channel.listing.mapped`.
+- UI `/channels` com aba de malha fina, filtro por status, resumo de importacao e modal de mapping manual.
+
+Nao inclui nesta sprint:
+
+- Adapter real Mercado Livre.
+- Criacao automatica de pedido por anuncio/webhook.
+- Sincronizacao egress de saldo.
+- Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /channels/integrations/:id/import-listings
+GET /channels/listings/unmatched
+POST /channels/listings/:id/map
+```
+
+Eventos AsyncAPI:
+
+```text
+channel.listing.import.completed
+channel.listing.mapped
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.
