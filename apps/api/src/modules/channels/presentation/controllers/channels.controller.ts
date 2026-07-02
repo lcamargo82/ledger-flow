@@ -17,15 +17,19 @@ import { CreateChannelIntegrationDto } from '../../application/dto/create-channe
 import { ImportChannelListingsDto } from '../../application/dto/import-channel-listings.dto';
 import { ListChannelInboxQueryDto } from '../../application/dto/list-channel-inbox-query.dto';
 import { ListChannelListingsQueryDto } from '../../application/dto/list-channel-listings-query.dto';
+import { ListInventorySyncQueryDto } from '../../application/dto/list-inventory-sync-query.dto';
 import { MapChannelListingDto } from '../../application/dto/map-channel-listing.dto';
 import {
+  ChannelInventorySyncProcessSummaryDto,
   ChannelListingMutationResponseDto,
   ChannelListingsImportResponseDto,
   ChannelIntegrationMutationResponseDto,
   ChannelIntegrationsResponseDto,
+  PaginatedChannelInventorySyncResponseDto,
   PaginatedChannelListingsResponseDto,
   PaginatedChannelInboxResponseDto,
 } from '../../application/dto/channel-response.dto';
+import { ChannelInventorySyncService } from '../../application/services/channel-inventory-sync.service';
 import { ChannelsService } from '../../application/services/channels.service';
 
 @ApiTags('Channels')
@@ -33,7 +37,10 @@ import { ChannelsService } from '../../application/services/channels.service';
 @Controller('channels')
 @RequireCapabilities(CommerceCapabilities.ChannelsConnect)
 export class ChannelsController {
-  constructor(private readonly channelsService: ChannelsService) {}
+  constructor(
+    private readonly channelsService: ChannelsService,
+    private readonly inventorySyncService: ChannelInventorySyncService,
+  ) {}
 
   @Post('integrations')
   @RequirePermissions('channels:manage')
@@ -109,5 +116,30 @@ export class ChannelsController {
   ) {
     const listing = await this.channelsService.mapListing(id, user.tenantId, user.id, dto);
     return { listing };
+  }
+
+  @Get('inventory-sync/status')
+  @RequirePermissions('channels:read')
+  @RequireCapabilities(CommerceCapabilities.ChannelsSyncInventory)
+  @ApiOperation({ summary: 'Listar status sanitizado da sincronização de estoque com canais' })
+  @ApiOkResponse({ type: PaginatedChannelInventorySyncResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de sincronização' })
+  listInventorySyncStatus(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListInventorySyncQueryDto,
+  ) {
+    return this.inventorySyncService.listStatus(user.tenantId, query);
+  }
+
+  @Post('inventory-sync/process-pending')
+  @RequirePermissions('channels:manage')
+  @RequireCapabilities(CommerceCapabilities.ChannelsSyncInventory)
+  @ApiOperation({ summary: 'Processar pendências de sincronização de estoque do provider MOCK' })
+  @ApiCreatedResponse({ type: ChannelInventorySyncProcessSummaryDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de sincronização' })
+  processInventorySync(@CurrentUser() user: AuthenticatedUser) {
+    return this.inventorySyncService.processPending(user.tenantId);
   }
 }

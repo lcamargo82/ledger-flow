@@ -2205,6 +2205,46 @@ channel.listing.import.completed
 channel.listing.mapped
 ```
 
+## 5.21 Channel Inventory Egress Sync Design
+
+A Sprint 10.0.8 adiciona sincronizacao egress de saldo para listings vinculados, ainda restrita ao provider `MOCK`.
+
+Inclui:
+
+- Publicacao de `inventory.balance.changed` quando `InventoryBalance` muda por ajuste, reserva, liberacao ou consumo.
+- `ChannelInventorySyncState` como estado coalescido por listing.
+- Coalescencia por chave unica `listingId`: varias mudancas rapidas atualizam a quantidade alvo mais recente.
+- Processamento administrativo `POST /channels/inventory-sync/process-pending` para validar o ciclo sem worker externo.
+- Status sanitizado via `GET /channels/inventory-sync/status`.
+- Politica mock de retry/backoff com jitter.
+- Simulacao de 429 por provider mock, com retry agendado.
+- Circuit breaker abre apos tentativas repetidas para evitar tempestade de chamadas.
+- Replay com mesma quantidade nao duplica efeito de provider; estado e marcado como `SYNCED`.
+- UI `/channels` com aba de sincronizacao, filtro por status, circuito e proxima tentativa.
+
+Nao inclui nesta sprint:
+
+- Adapter real Mercado Livre.
+- Envio real a marketplace.
+- Worker assíncrono definitivo.
+- Pedidos de canal.
+- Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+GET /channels/inventory-sync/status
+POST /channels/inventory-sync/process-pending
+```
+
+Eventos AsyncAPI:
+
+```text
+inventory.balance.changed
+channel.inventory_sync.requested
+channel.inventory_sync.completed
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.

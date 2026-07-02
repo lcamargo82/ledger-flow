@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/auth.store'
 import { useChannelsStore } from '../stores/channels.store'
 import { formatDateTime } from '../utils/date-format'
 import type {
+  ChannelInventorySyncStatus,
   ChannelListing,
   ChannelListingMatchStatus,
   ChannelWebhookStatus,
@@ -23,7 +24,7 @@ const { t, currentLocale } = useI18n()
 const authStore = useAuthStore()
 const channelsStore = useChannelsStore()
 
-const activeTab = ref<'integrations' | 'inbox' | 'listings'>('integrations')
+const activeTab = ref<'integrations' | 'inbox' | 'listings' | 'sync'>('integrations')
 const isCreateModalOpen = ref(false)
 const isMapModalOpen = ref(false)
 const selectedListing = ref<ChannelListing | null>(null)
@@ -66,6 +67,17 @@ const listingColumns = computed(() => [
   { key: 'actions', label: t('channels.table.actions') },
 ])
 
+const syncColumns = computed(() => [
+  { key: 'updatedAt', label: t('channels.table.updatedAt') },
+  { key: 'provider', label: t('channels.table.provider') },
+  { key: 'externalListingId', label: t('channels.table.providerEventId') },
+  { key: 'skuId', label: t('channels.table.skuId') },
+  { key: 'quantity', label: t('channels.table.targetAvailable') },
+  { key: 'status', label: t('channels.table.status') },
+  { key: 'circuit', label: t('channels.table.circuit') },
+  { key: 'nextAttemptAt', label: t('channels.table.nextAttemptAt') },
+])
+
 const statusOptions = computed(() => [
   { value: '', label: t('channels.filters.statusAll') },
   { value: 'RECEIVED', label: t('channels.webhookStatus.RECEIVED') },
@@ -82,9 +94,19 @@ const listingStatusOptions = computed(() => [
   { value: 'IGNORED', label: t('channels.listingStatus.IGNORED') },
 ])
 
+const inventorySyncStatusOptions = computed(() => [
+  { value: '', label: t('channels.filters.statusAll') },
+  { value: 'PENDING', label: t('channels.syncStatus.PENDING') },
+  { value: 'SYNCED', label: t('channels.syncStatus.SYNCED') },
+  { value: 'RETRY_SCHEDULED', label: t('channels.syncStatus.RETRY_SCHEDULED') },
+  { value: 'CIRCUIT_OPEN', label: t('channels.syncStatus.CIRCUIT_OPEN') },
+  { value: 'FAILED', label: t('channels.syncStatus.FAILED') },
+])
+
 onMounted(() => {
   channelsStore.fetchChannels()
   channelsStore.fetchListings()
+  channelsStore.fetchInventorySyncStatus()
 })
 
 const createIntegration = async () => {
@@ -111,6 +133,12 @@ const listingStatusVariant = (status: ChannelListingMatchStatus) => {
   return 'danger'
 }
 
+const syncStatusVariant = (status: ChannelInventorySyncStatus) => {
+  if (status === 'SYNCED') return 'success'
+  if (status === 'RETRY_SCHEDULED' || status === 'PENDING') return 'warning'
+  return 'danger'
+}
+
 const canImportListings = computed(
   () =>
     authStore.checkAllPermissions(['channels:manage']) &&
@@ -121,6 +149,12 @@ const canMapListings = computed(
   () =>
     authStore.checkAllPermissions(['channels:manage']) &&
     authStore.checkCapability('channels.mapping.manage'),
+)
+
+const canSyncInventory = computed(
+  () =>
+    authStore.checkAllPermissions(['channels:manage']) &&
+    authStore.checkCapability('channels.sync_inventory'),
 )
 
 const importListings = async (integrationId: string) => {
@@ -187,6 +221,12 @@ const mapListing = async () => {
             @click="activeTab = 'listings'"
           >
             {{ t('channels.tabs.listings') }}
+          </AppButton>
+          <AppButton
+            :variant="activeTab === 'sync' ? 'primary' : 'secondary'"
+            @click="activeTab = 'sync'"
+          >
+            {{ t('channels.tabs.sync') }}
           </AppButton>
         </div>
       </AppCard>
@@ -327,6 +367,79 @@ const mapListing = async () => {
             >
               {{ t('channels.actions.mapListing') }}
             </AppButton>
+          </template>
+        </AppTable>
+      </div>
+
+      <div v-if="activeTab === 'sync'" class="space-y-4">
+        <AppCard>
+          <div class="grid gap-4 md:grid-cols-[minmax(220px,320px)_1fr_auto] md:items-end">
+            <AppSelect
+              id="channel-sync-status"
+              :model-value="channelsStore.inventorySyncFilters.status || ''"
+              :label="t('channels.filters.statusLabel')"
+              :options="inventorySyncStatusOptions"
+              @update:model-value="
+                channelsStore.setInventorySyncStatus(
+                  ($event || undefined) as ChannelInventorySyncStatus | undefined,
+                )
+              "
+            />
+            <div
+              v-if="channelsStore.lastSyncSummary"
+              class="text-sm text-[var(--lf-text-secondary)]"
+            >
+              {{
+                t('channels.syncSummary', {
+                  processed: channelsStore.lastSyncSummary.processed,
+                  synced: channelsStore.lastSyncSummary.synced,
+                  retry: channelsStore.lastSyncSummary.retryScheduled,
+                  circuit: channelsStore.lastSyncSummary.circuitOpened,
+                })
+              }}
+            </div>
+            <AppButton
+              v-if="canSyncInventory"
+              variant="secondary"
+              :loading="channelsStore.isMutating"
+              @click="channelsStore.processInventorySync()"
+            >
+              {{ t('channels.actions.processSync') }}
+            </AppButton>
+          </div>
+        </AppCard>
+
+        <AppTable
+          :columns="syncColumns"
+          :items="channelsStore.inventorySyncStates"
+          :is-loading="channelsStore.isLoading"
+          :empty-title="t('channels.empty.syncTitle')"
+          :empty-description="t('channels.empty.syncDescription')"
+        >
+          <template #updatedAt="{ item }">
+            {{ formatDateTime(item.updatedAt, currentLocale) }}
+          </template>
+          <template #provider="{ item }">
+            {{ t(`channels.provider.${item.provider}`) }}
+          </template>
+          <template #skuId="{ item }">
+            <span class="font-mono text-xs">{{ item.skuId }}</span>
+          </template>
+          <template #quantity="{ item }">
+            {{ item.targetAvailableQuantity }}
+          </template>
+          <template #status="{ item }">
+            <AppBadge :variant="syncStatusVariant(item.status)">
+              {{ t(`channels.syncStatus.${item.status}`) }}
+            </AppBadge>
+          </template>
+          <template #circuit="{ item }">
+            <AppBadge :variant="item.circuitState === 'OPEN' ? 'danger' : 'default'">
+              {{ t(`channels.circuitState.${item.circuitState}`) }}
+            </AppBadge>
+          </template>
+          <template #nextAttemptAt="{ item }">
+            {{ item.nextAttemptAt ? formatDateTime(item.nextAttemptAt, currentLocale) : '-' }}
           </template>
         </AppTable>
       </div>

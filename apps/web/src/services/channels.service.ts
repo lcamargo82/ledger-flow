@@ -1,6 +1,8 @@
 import { httpClient } from './http-client'
 import type {
   ChannelIntegration,
+  ChannelInventorySyncProcessSummary,
+  ChannelInventorySyncStatus,
   ChannelIntegrationsResponse,
   ChannelListing,
   ChannelListingsImportResponse,
@@ -9,6 +11,7 @@ import type {
   ChannelWebhookStatus,
   CreateChannelIntegrationRequest,
   MapChannelListingRequest,
+  PaginatedChannelInventorySyncResponse,
   PaginatedChannelListingsResponse,
   PaginatedChannelInboxResponse,
 } from '../types/channels.types'
@@ -70,6 +73,27 @@ export class ChannelsService {
     const { data } = await httpClient.post<{ listing: ChannelListing }>(
       `/channels/listings/${listingId}/map`,
       payload,
+    )
+    return data
+  }
+
+  async listInventorySyncStatus(params?: {
+    page?: number
+    perPage?: number
+    provider?: ChannelProvider
+    status?: ChannelInventorySyncStatus
+  }): Promise<PaginatedChannelInventorySyncResponse> {
+    const { data } = await httpClient.get<PaginatedChannelInventorySyncResponse>(
+      '/channels/inventory-sync/status',
+      { params },
+    )
+    return data
+  }
+
+  async processInventorySync(): Promise<ChannelInventorySyncProcessSummary> {
+    const { data } = await httpClient.post<ChannelInventorySyncProcessSummary>(
+      '/channels/inventory-sync/process-pending',
+      {},
     )
     return data
   }

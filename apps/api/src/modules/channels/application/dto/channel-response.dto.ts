@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ChannelIntegrationStatus,
+  ChannelInventorySyncStatus,
+  ChannelCircuitState,
   ChannelListingMatchStatus,
   ChannelProvider,
   ChannelWebhookStatus,
@@ -73,6 +75,36 @@ export class ChannelListingsImportResponseDto {
   data: ChannelListingResponseDto[];
 }
 
+export class ChannelInventorySyncStateResponseDto {
+  @ApiProperty() id: string;
+  @ApiProperty() tenantId: string;
+  @ApiProperty() listingId: string;
+  @ApiProperty() integrationId: string;
+  @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
+  @ApiProperty() externalListingId: string;
+  @ApiProperty() skuId: string;
+  @ApiProperty({ enum: ChannelInventorySyncStatus }) status: ChannelInventorySyncStatus;
+  @ApiProperty({ enum: ChannelCircuitState }) circuitState: ChannelCircuitState;
+  @ApiProperty() targetAvailableQuantity: string;
+  @ApiPropertyOptional() lastSyncedQuantity?: string;
+  @ApiProperty() attemptCount: number;
+  @ApiPropertyOptional() nextAttemptAt?: Date;
+  @ApiPropertyOptional() circuitOpenedUntil?: Date;
+  @ApiPropertyOptional() lastErrorCode?: string;
+  @ApiPropertyOptional() lastErrorSummary?: string;
+  @ApiProperty() lastRequestedAt: Date;
+  @ApiPropertyOptional() lastSyncedAt?: Date;
+  @ApiProperty() createdAt: Date;
+  @ApiProperty() updatedAt: Date;
+}
+
+export class ChannelInventorySyncProcessSummaryDto {
+  @ApiProperty() processed: number;
+  @ApiProperty() synced: number;
+  @ApiProperty() retryScheduled: number;
+  @ApiProperty() circuitOpened: number;
+}
+
 export class ChannelIntegrationMutationResponseDto {
   @ApiProperty({ type: ChannelIntegrationResponseDto })
   integration: ChannelIntegrationResponseDto;
@@ -93,6 +125,14 @@ export class ChannelInboxMetaDto {
 export class PaginatedChannelListingsResponseDto {
   @ApiProperty({ type: [ChannelListingResponseDto] })
   data: ChannelListingResponseDto[];
+
+  @ApiProperty({ type: ChannelInboxMetaDto })
+  meta: ChannelInboxMetaDto;
+}
+
+export class PaginatedChannelInventorySyncResponseDto {
+  @ApiProperty({ type: [ChannelInventorySyncStateResponseDto] })
+  data: ChannelInventorySyncStateResponseDto[];
 
   @ApiProperty({ type: ChannelInboxMetaDto })
   meta: ChannelInboxMetaDto;

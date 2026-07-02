@@ -148,14 +148,14 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 ### Channels
 
 - **Rota:** `/channels`
-- **Status:** Implementada 10.0.6; expandida 10.0.7 com malha fina.
+- **Status:** Implementada 10.0.6; expandida 10.0.7 com malha fina; expandida 10.0.8 com status de sincronização.
 - **Permissões:** `channels:read`, `channels:manage`
-- **Capability:** `channels.connect`; importação exige `channels.import_listings`; mapping exige `channels.mapping.manage`.
+- **Capability:** `channels.connect`; importação exige `channels.import_listings`; mapping exige `channels.mapping.manage`; sync exige `channels.sync_inventory`.
 - **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
-- **Objetivo:** Configurar integrações de canal, visualizar inbox sanitizado de webhooks e revisar vínculos de anúncios com SKU.
-- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, importação mock de anúncios, filtro de inbox/status de listing, exibição de candidatos e mapping manual auditado.
+- **Objetivo:** Configurar integrações de canal, visualizar inbox sanitizado de webhooks, revisar vínculos de anúncios com SKU e acompanhar sync mock de estoque.
+- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, importação mock de anúncios, filtro de inbox/status de listing, exibição de candidatos, mapping manual auditado, processamento mock de sync e status com retry/circuit breaker.
 - **Segurança:** Webhook público autentica por segredo da integração; UI protegida por permissão/capability; segredos e payload bruto não são exibidos.
-- **Fora de escopo:** Mercado Livre real, criação automática de pedido, egress sync de saldo e financeiro por pedido.
+- **Fora de escopo:** Mercado Livre real, criação automática de pedido, envio real a marketplace e financeiro por pedido.
 - **i18n:** Namespace `channels.*` em pt-BR e en-US.
 
 ### Catalog Products
