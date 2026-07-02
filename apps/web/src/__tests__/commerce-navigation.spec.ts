@@ -24,6 +24,13 @@ describe('commerce navigation foundation', () => {
     })
   })
 
+  it('registers orders route behind permission and capability metadata', () => {
+    const ordersRoute = router.getRoutes().find((item) => item.path === '/orders')
+
+    expect(ordersRoute?.meta.permissions).toEqual(['orders:read'])
+    expect(ordersRoute?.meta.capabilities).toEqual(['orders.manage'])
+  })
+
   it('checks capabilities from the authenticated user session', () => {
     const authStore = useAuthStore()
     authStore.user = {
@@ -48,6 +55,8 @@ describe('commerce navigation foundation', () => {
     expect(ptBR.nav.inventory).toBe('Estoque')
     expect(enUS.nav.inventory).toBe('Inventory')
     expect(ptBR.nav.orders).toBe('Pedidos')
+    expect(ptBR.orders.actions.confirm).toBe('Confirmar')
+    expect(enUS.orders.status.FULFILLED).toBe('Fulfilled')
     expect(ptBR.nav.channels).toBe('Canais')
     expect(ptBR.nav.analytics).toBe('Analytics')
   })

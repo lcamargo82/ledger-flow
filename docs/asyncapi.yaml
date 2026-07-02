@@ -23,6 +23,15 @@ channels:
     messages:
       reservationConsumed:
         $ref: '#/components/messages/InventoryReservationConsumed'
+  orders.events:
+    address: ledgerflow.orders.events
+    messages:
+      orderConfirmed:
+        $ref: '#/components/messages/OrderConfirmed'
+      orderCancelled:
+        $ref: '#/components/messages/OrderCancelled'
+      orderFulfilled:
+        $ref: '#/components/messages/OrderFulfilled'
 components:
   messages:
     PaymentChargeRequested:
@@ -77,3 +86,36 @@ components:
             format: decimal
           movementId:
             type: string
+    OrderConfirmed:
+      name: orders.order.confirmed
+      title: Internal Order Confirmed
+      summary: Event emitted when an internal order reserves stock and becomes confirmed.
+      payload:
+        $ref: '#/components/schemas/InternalOrderStatusChangedPayload'
+    OrderCancelled:
+      name: orders.order.cancelled
+      title: Internal Order Cancelled
+      summary: Event emitted when an internal order is cancelled and reservations are released.
+      payload:
+        $ref: '#/components/schemas/InternalOrderStatusChangedPayload'
+    OrderFulfilled:
+      name: orders.order.fulfilled
+      title: Internal Order Fulfilled
+      summary: Event emitted when an internal order consumes reservations and is fulfilled.
+      payload:
+        $ref: '#/components/schemas/InternalOrderStatusChangedPayload'
+  schemas:
+    InternalOrderStatusChangedPayload:
+      type: object
+      required:
+        - orderId
+        - status
+      properties:
+        orderId:
+          type: string
+        status:
+          type: string
+          enum:
+            - CONFIRMED
+            - CANCELLED
+            - FULFILLED

@@ -54,6 +54,13 @@ enum InventoryReservationStatus {
   CONSUMED
 }
 
+enum InternalOrderStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+  FULFILLED
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -83,6 +90,8 @@ model Tenant {
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
+  internalOrders        InternalOrder[]
+  internalOrderItems    InternalOrderItem[]
 
   @@map("tenants")
 }
@@ -323,6 +332,7 @@ model ProductSku {
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
+  internalOrderItems    InternalOrderItem[]
 
   @@unique([tenantId, skuCanonical])
   @@index([tenantId, barcode])
@@ -342,6 +352,7 @@ model Warehouse {
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
+  internalOrderItems    InternalOrderItem[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -416,15 +427,64 @@ model InventoryReservation {
   createdAt       DateTime                   @default(now()) @map("created_at")
   updatedAt       DateTime                   @updatedAt @map("updated_at")
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
-  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  tenant    Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku       ProductSku         @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse Warehouse          @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  orderItem InternalOrderItem?
 
   @@unique([tenantId, sourceType, sourceId])
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, skuId, warehouseId, status])
   @@index([tenantId, status])
   @@map("inventory_reservations")
+}
+
+model InternalOrder {
+  id              String              @id @default(uuid())
+  tenantId        String              @map("tenant_id")
+  orderNumber     String              @map("order_number")
+  status          InternalOrderStatus @default(DRAFT)
+  idempotencyKey  String              @map("idempotency_key")
+  customerName    String?             @map("customer_name")
+  notes           String?
+  confirmedAt     DateTime?           @map("confirmed_at")
+  cancelledAt     DateTime?           @map("cancelled_at")
+  fulfilledAt     DateTime?           @map("fulfilled_at")
+  createdByUserId String?             @map("created_by_user_id")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  tenant Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items  InternalOrderItem[]
+
+  @@unique([tenantId, orderNumber])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@map("internal_orders")
+}
+
+model InternalOrderItem {
+  id            String   @id @default(uuid())
+  tenantId      String   @map("tenant_id")
+  orderId       String   @map("order_id")
+  skuId         String   @map("sku_id")
+  warehouseId   String   @map("warehouse_id")
+  quantity      Decimal  @db.Decimal(18, 6)
+  reservationId String?  @unique @map("reservation_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  order       InternalOrder         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku         ProductSku            @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse   Warehouse             @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  reservation InventoryReservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, orderId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, warehouseId])
+  @@map("internal_order_items")
 }
 
 model PasswordResetToken {

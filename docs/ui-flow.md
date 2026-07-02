@@ -59,6 +59,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/inventory/warehouses` | Implementada (10.0.3) | `AppLayout`                | `inventory:read` + `inventory.manage` | Gestão de warehouses/depósitos                          |
 | `/inventory/movements`  | Implementada (10.0.3) | `AppLayout`                | `inventory:read` + `inventory.manage` | Histórico de movimentações do ledger                    |
 | `/inventory/reservations` | Implementada (10.0.4) | `AppLayout`              | `inventory:read` + `inventory.manage` | Reservas administrativas, liberação e consumo total     |
+| `/orders`               | Implementada (10.0.5) | `AppLayout`                | `orders:read` + `orders.manage`       | Pedidos internos, reserva, cancelamento e fulfillment   |
 | `/reconciliation`       | Futura                | `AppLayout`                | a definir                             | Conciliação financeira                                  |
 | `/reports`              | Futura                | `AppLayout`                | a definir                             | Relatórios de sistema                                   |
 | `/webhooks`             | Futura                | `AppLayout`                | a definir                             | Configuração e logs de webhooks                         |

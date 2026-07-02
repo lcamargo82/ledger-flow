@@ -228,6 +228,65 @@
       "invalid": "Revise as informações do estoque."
     }
   },
+  "orders": {
+    "title": "Pedidos",
+    "description": "Crie pedidos internos e controle reserva, cancelamento e fulfillment com estoque auditável.",
+    "actions": {
+      "create": "Novo pedido",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "fulfill": "Concluir",
+      "addItem": "Adicionar item",
+      "removeItem": "Remover"
+    },
+    "filters": {
+      "statusLabel": "Status",
+      "statusAll": "Todos"
+    },
+    "table": {
+      "orderNumber": "Pedido",
+      "status": "Status",
+      "customer": "Cliente",
+      "items": "Itens",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "form": {
+      "createTitle": "Novo pedido interno",
+      "confirmTitle": "Confirmar pedido",
+      "cancelTitle": "Cancelar pedido",
+      "fulfillTitle": "Concluir pedido",
+      "transitionConfirmation": "A operação será aplicada ao pedido {orderNumber}.",
+      "customerNameLabel": "Cliente",
+      "skuIdLabel": "SKU",
+      "warehouseIdLabel": "Warehouse",
+      "quantityLabel": "Quantidade",
+      "reasonCodeLabel": "Motivo",
+      "notesLabel": "Observações"
+    },
+    "status": {
+      "DRAFT": "Rascunho",
+      "CONFIRMED": "Confirmado",
+      "CANCELLED": "Cancelado",
+      "FULFILLED": "Concluído"
+    },
+    "empty": {
+      "title": "Nenhum pedido interno encontrado",
+      "description": "Crie o primeiro pedido para validar reserva, cancelamento e fulfillment."
+    },
+    "pagination": {
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Anterior",
+      "next": "Próxima"
+    },
+    "errors": {
+      "title": "Não foi possível carregar pedidos",
+      "default": "Não foi possível processar a operação de pedido.",
+      "notFound": "Pedido não encontrado.",
+      "forbidden": "Você não possui acesso a pedidos.",
+      "invalid": "Revise as informações do pedido."
+    }
+  },
   "catalog": {
     "title": "Catálogo",
     "description": "Gerencie produtos simples, produtos pai e variantes vendáveis com SKU, custo e unidade de medida.",

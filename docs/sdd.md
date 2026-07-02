@@ -2084,6 +2084,49 @@ Evento AsyncAPI:
 inventory.reservation.consumed
 ```
 
+## 5.18 Internal Orders Design
+
+A Sprint 10.0.5 adiciona pedidos internos manuais sem canal externo. O objetivo é validar o ciclo de pedido usando o mesmo application service de estoque criado na 10.0.4.
+
+Inclui:
+
+- `InternalOrder` com status `DRAFT`, `CONFIRMED`, `CANCELLED` e `FULFILLED`.
+- `InternalOrderItem` apontando para `ProductSku`, `Warehouse`, quantidade e reserva vinculada.
+- `POST /orders` cria pedido em rascunho com `idempotencyKey`.
+- `POST /orders/:id/confirm` reserva estoque por item via `InventoryService.reserveStock()`.
+- `POST /orders/:id/cancel` libera reservas via `InventoryService.releaseReservation()`.
+- `POST /orders/:id/fulfill` consome reservas via `InventoryService.consumeReservation()`.
+- Auditoria para `orders.order.created`, `orders.order.confirmed`, `orders.order.cancelled` e `orders.order.fulfilled`.
+- Outbox para `orders.order.confirmed`, `orders.order.cancelled` e `orders.order.fulfilled`.
+- UI `/orders` com criação, listagem, filtro por status e ações de transição com motivo obrigatório.
+
+Não inclui nesta sprint:
+
+- Pedidos externos de marketplace.
+- Webhooks de canais.
+- Malha fina.
+- Financeiro por pedido.
+- Backorder.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /orders
+GET /orders
+GET /orders/:id
+POST /orders/:id/confirm
+POST /orders/:id/cancel
+POST /orders/:id/fulfill
+```
+
+Eventos AsyncAPI:
+
+```text
+orders.order.confirmed
+orders.order.cancelled
+orders.order.fulfilled
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.

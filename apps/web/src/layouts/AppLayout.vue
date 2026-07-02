@@ -144,20 +144,20 @@
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.inventory') }}</span>
         </router-link>
-        <a
+        <router-link
           v-if="
             authStore.checkAllPermissions(['orders:read']) &&
             authStore.checkAllCapabilities(['orders.manage'])
           "
-          href="#"
-          class="lf-nav-item lf-nav-item--disabled"
-          @click.prevent
+          to="/orders"
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
         >
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
             >receipt_long</span
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.orders') }}</span>
-        </a>
+        </router-link>
         <a
           v-if="
             authStore.checkAllPermissions(['channels:read']) &&

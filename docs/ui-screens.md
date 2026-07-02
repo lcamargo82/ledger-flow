@@ -132,6 +132,19 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Fora de escopo:** consumo parcial de reserva, pedidos, marketplace, malha fina e financeiro por pedido.
 - **i18n:** Namespace `inventory.*` em pt-BR e en-US.
 
+### Orders
+
+- **Rota:** `/orders`
+- **Status:** Implementada 10.0.5
+- **Permissões:** `orders:read`, `orders:manage`
+- **Capability:** `orders.manage`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
+- **Objetivo:** Criar pedidos internos e executar o ciclo confirmar, cancelar e concluir usando reservas de estoque.
+- **Fluxos:** criação de pedido em rascunho, confirmação com reserva por item, cancelamento com liberação de reserva e conclusão com consumo da reserva.
+- **Segurança:** O frontend oculta ações sem permissão; o backend valida `@RequirePermissions` e `@RequireCapabilities`.
+- **Fora de escopo:** marketplace, webhooks de canais, malha fina, backorder e financeiro por pedido.
+- **i18n:** Namespace `orders.*` em pt-BR e en-US.
+
 ### Catalog Products
 
 - **Rota:** `/catalog/products`
