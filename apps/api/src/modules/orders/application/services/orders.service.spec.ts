@@ -18,6 +18,10 @@ describe('OrdersService', () => {
     consumeReservation: jest.fn(),
   };
 
+  const financialIntelligenceService = {
+    createFulfilledOrderFact: jest.fn(),
+  };
+
   const prisma = {
     auditLog: {
       create: jest.fn(),
@@ -51,6 +55,7 @@ describe('OrdersService', () => {
     service = new OrdersService(
       ordersRepository as never,
       inventoryService as never,
+      financialIntelligenceService as never,
       prisma as never,
     );
   });
@@ -206,6 +211,11 @@ describe('OrdersService', () => {
         idempotencyKey: 'fulfill-order-1:item-1',
         notes: undefined,
       },
+    );
+    expect(financialIntelligenceService.createFulfilledOrderFact).toHaveBeenCalledWith(
+      'order-1',
+      'tenant-1',
+      'user-1',
     );
     expect(result.order.status).toBe(InternalOrderStatus.FULFILLED);
   });

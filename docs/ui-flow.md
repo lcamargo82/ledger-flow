@@ -63,6 +63,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/reconciliation`       | Futura                | `AppLayout`                | a definir                             | Conciliação financeira                                  |
 | `/reports`              | Futura                | `AppLayout`                | a definir                             | Relatórios de sistema                                   |
 | `/channels`             | Implementada (10.0.6), expandida (10.0.7/10.0.8) | `AppLayout`                | `channels:read` + `channels.connect`  | Integrações, inbox sanitizado, malha fina e sync mock   |
+| `/analytics`            | Implementada (10.0.9) | `AppLayout`                | `financial-intelligence:read` + `financial.analytics.read` | Dashboard operacional de facts financeiros              |
 | `/webhooks`             | Futura                | `AppLayout`                | a definir                             | Configuração e logs de webhooks                         |
 | `/audit-logs`           | Futura                | `AppLayout`                | a definir                             | Logs de auditoria geral                                 |
 | `/forbidden`            | Implementada          | `AppLayout` / `AuthLayout` | N/A                                   | Informar acesso negado por falta de permissão           |

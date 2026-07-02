@@ -387,6 +387,40 @@
       "invalid": "Review the channel information."
     }
   },
+  "financialIntelligence": {
+    "title": "Analytics",
+    "description": "Track operational margin and COGS by order without mixing cash reconciliation.",
+    "internalChannel": "Internal",
+    "reconciliationNote": "Operational margin is not settlement, cash receipt, or financial reconciliation.",
+    "cards": {
+      "orders": "Orders with facts",
+      "revenue": "Operational revenue",
+      "cogs": "COGS",
+      "margin": "Gross margin"
+    },
+    "filters": {
+      "channel": "Channel",
+      "allChannels": "All channels"
+    },
+    "table": {
+      "calculatedAt": "Calculated at",
+      "orderNumber": "Order",
+      "channel": "Channel",
+      "revenue": "Revenue",
+      "cogs": "COGS",
+      "margin": "Margin"
+    },
+    "empty": {
+      "title": "No financial facts found",
+      "description": "Fulfill orders to generate COGS and operational margin snapshots."
+    },
+    "errors": {
+      "title": "Could not load analytics",
+      "default": "Could not process financial indicators.",
+      "forbidden": "You do not have financial analytics access.",
+      "invalid": "Review the filters."
+    }
+  },
   "catalog": {
     "title": "Catalog",
     "description": "Manage simple products, parent products, and sellable variants with SKU, cost, and unit of measure.",
