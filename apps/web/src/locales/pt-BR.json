@@ -120,6 +120,7 @@
     "dashboard": "Dashboard",
     "users": "Usuários",
     "payments": "Pagamentos",
+    "inventory": "Estoque",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
     "reports": "Relatórios",
@@ -132,6 +133,12 @@
     "platformAsyncOperations": "Operações Assíncronas",
     "gatewayConnections": "Integrações de Pagamento",
     "platformGatewayConnections": "Integrações"
+  },
+  "inventory": {
+    "title": "Estoque",
+    "description": "Fundação do módulo de estoque habilitada. Cadastro de warehouses, ledger e saldos entram nas próximas sprints.",
+    "emptyTitle": "Fundação de estoque pronta",
+    "emptyDescription": "As rotas, permissões e capabilities comerciais já estão preparadas para a Sprint 10.0.3."
   },
   "users": {
     "title": "Usuários",
@@ -254,6 +261,7 @@
     "back": "Voltar",
     "goToDashboard": "Ir para o Dashboard",
     "tryAgain": "Tentar Novamente",
+    "retry": "Tentar novamente",
     "noData": "Nenhum dado encontrado",
     "error": "Erro",
     "success": "Sucesso",
@@ -713,6 +721,7 @@
       "paymentCanceled": "Pagamento cancelado",
       "paymentRefundRequested": "Estorno solicitado",
       "paymentRefunded": "Pagamento estornado",
+      "providerRetryRequested": "Nova tentativa solicitada ao provedor",
       "generic": "Evento de pagamento atualizado"
     },
     "instructions": {
@@ -912,6 +921,60 @@
         "success": "Conexão suspensa com sucesso.",
         "failed": "Falha ao suspender a conexão."
       }
+    },
+    "tenants": {
+      "overview": {
+        "operations": "Operações",
+        "gateway": "Gateway de Pagamento",
+        "webhooks": "Webhooks",
+        "activity": "Atividade Recente"
+      },
+      "gateway": {
+        "noActiveConfiguration": "Nenhuma configuração de gateway ativa encontrada.",
+        "status": "Status",
+        "healthStatus": "Saúde",
+        "lastHealthCheck": "Última verificação"
+      },
+      "metrics": {
+        "usersTitle": "Usuários",
+        "usersTotal": "Total",
+        "usersActive": "Ativos",
+        "customersTitle": "Clientes",
+        "customersTotal": "Total",
+        "customersActive": "Ativos",
+        "paymentsTitle": "Pagamentos",
+        "paymentsTotal": "Total",
+        "paymentsPending": "Pendentes",
+        "paymentsFailed": "Falharam"
+      },
+      "activity": {
+        "empty": "Nenhuma atividade recente encontrada."
+      },
+      "webhooks": {
+        "lastReceivedAt": "Último evento",
+        "processedLast24Hours": "Processados (24h)",
+        "failedLast24Hours": "Falharam (24h)",
+        "ignoredLast24Hours": "Ignorados (24h)"
+      },
+      "create": {
+        "success": "Tenant provisionado com sucesso.",
+        "failed": "Erro ao provisionar o tenant."
+      },
+      "actions": {
+        "invitationSent": "Convite enviado"
+      }
+    },
+    "toast": {
+      "tenantUpdated": "Tenant atualizado com sucesso.",
+      "tenantActivated": "Tenant ativado com sucesso.",
+      "tenantDeactivated": "Tenant desativado com sucesso.",
+      "subscriptionUpdated": "Assinatura atualizada com sucesso."
+    },
+    "error": {
+      "loadFailed": "Não foi possível carregar os dados da plataforma.",
+      "updateFailed": "Não foi possível atualizar o tenant.",
+      "statusFailed": "Não foi possível alterar o status do tenant.",
+      "subscriptionFailed": "Não foi possível atualizar a assinatura."
     }
   },
   "platformTenants": {
@@ -1101,11 +1164,18 @@
     },
     "messages": {
       "created": "Conexão criada com sucesso.",
+      "connectionCreated": "Conexão criada com sucesso.",
       "updated": "Configurações atualizadas.",
       "credentialsUpdated": "Credenciais atualizadas com segurança.",
       "statusUpdated": "Status da conexão alterado.",
+      "mpConnected": "Mercado Pago conectado com sucesso.",
       "notConfigured": "Não configurado",
       "errorConnecting": "Erro ao conectar com gateway"
+    },
+    "errors": {
+      "loadFailed": "Não foi possível carregar as integrações.",
+      "mpAuthFailed": "Falha na autorização do Mercado Pago.",
+      "mpConnectionFailed": "Não foi possível conectar o Mercado Pago."
     }
   },
   "features": {

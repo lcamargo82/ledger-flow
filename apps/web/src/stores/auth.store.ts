@@ -32,6 +32,7 @@ export const useAuthStore = defineStore('auth', {
     userEmail: (state) => state.user?.email || '',
     roles: (state) => state.user?.roles || [],
     permissions: (state) => state.user?.permissions || [],
+    capabilities: (state) => state.user?.capabilities || [],
   },
 
   actions: {
@@ -176,6 +177,15 @@ export const useAuthStore = defineStore('auth', {
 
     checkAllPermissions(permissions: string[]) {
       return hasAllPermissions(this.permissions, permissions)
+    },
+
+    checkCapability(capability: string) {
+      return this.capabilities.includes(capability)
+    },
+
+    checkAllCapabilities(capabilities: string[]) {
+      if (!capabilities.length) return true
+      return capabilities.every(capability => this.capabilities.includes(capability))
     }
   }
 })

@@ -117,3 +117,12 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Componentes:** Tabela de listagem com paginação e filtros (Busca, Status, Método, Data), Modal de criação (`PaymentForm`), Modal de Detalhes com Resumo e Timeline, Confirmação de cancelamento (`AppConfirmDialog`).
 - **Segurança:** O valor é enviado em centavos, tenantId inferido, idempotency key gerada em memória para submit.
 
+### Inventory Foundation
+- **Rota:** `/inventory`
+- **Status:** Fundação 10.0.1
+- **Permissões:** `inventory:read`
+- **Capability:** `inventory.manage`
+- **Componentes:** `AppPageHeader`, `AppEmptyState`, item de menu no `AppLayout`.
+- **Objetivo:** Exibir uma tela operacional mínima enquanto as sprints 10.0.3 e 10.0.4 introduzem warehouses, ledger, saldos e reservas.
+- **Segurança:** O menu e a rota são ocultados/bloqueados no frontend apenas como UX; o backend valida `@RequirePermissions` e `@RequireCapabilities`.
+- **i18n:** `nav.inventory`, `inventory.title`, `inventory.description`, `inventory.emptyTitle`, `inventory.emptyDescription`.

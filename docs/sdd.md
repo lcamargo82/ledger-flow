@@ -1926,6 +1926,37 @@ O sistema suporta a redefinição de senhas enviando um e-mail com link contendo
 - A comunicação de e-mail é feita via Mailpit em desenvolvimento por meio de um `EmailService` e uma interface `EmailProvider`.
 - Auditorias registram os eventos `auth.password_recovery_requested` e `auth.password_reset_completed`.
 
+## 5.14 Commerce Foundation e Entitlements
+
+A Sprint 10.0.1 introduz os bounded contexts `catalog`, `inventory`, `orders`, `channels` e `financial-intelligence` como módulos Nest isolados, sem entidades de domínio operacional ainda.
+
+Autorização passa a ter duas camadas para os novos módulos:
+
+* `@RequirePermissions`: RBAC por role do usuário.
+* `@RequireCapabilities`: entitlement comercial derivado da assinatura ativa do tenant.
+
+O `CapabilityGuard` é executado no backend e consulta a policy central em `CapabilityPolicyService`. O frontend recebe `capabilities` no payload de autenticação para esconder menus e bloquear navegação como melhoria de UX, mas a autoridade final permanece no backend.
+
+Mapeamento inicial sobre os planos existentes:
+
+| Plano atual | Capabilities 10.0 iniciais |
+|---|---|
+| `FREE`, `STARTER` | nenhuma capability Commerce |
+| `PROFESSIONAL` | `catalog.manage`, `inventory.manage`, `inventory.adjust`, `orders.manage`, `inventory.reports.read` |
+| `ENTERPRISE`, `CUSTOM` | capabilities ERP Basic + channels + `financial.analytics.read` |
+
+Endpoints foundation documentados no Swagger/Redoc/OpenAPI:
+
+```text
+GET /catalog/capabilities/status
+GET /inventory/capabilities/status
+GET /orders/capabilities/status
+GET /channels/capabilities/status
+GET /financial-intelligence/capabilities/status
+```
+
+Não há alteração AsyncAPI nesta sprint porque nenhum evento novo foi publicado.
+
 
 ### Payments Notes
 * PaymentsView segue View -> Store -> Service -> HTTP Client.
@@ -1934,4 +1965,3 @@ O sistema suporta a redefinição de senhas enviando um e-mail com link contendo
 * amount é convertido para centavos antes do request.
 * Idempotency-Key é gerada somente em memória.
 * RBAC frontend é UX; backend é autoridade final.
-

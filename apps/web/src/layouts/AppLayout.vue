@@ -82,6 +82,15 @@
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">payments</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
         </router-link>
+        <router-link
+          v-if="authStore.checkAllPermissions(['inventory:read']) && authStore.checkAllCapabilities(['inventory.manage'])"
+          to="/inventory"
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">inventory_2</span>
+          <span class="text" v-show="!isCollapsed">{{ t('nav.inventory') }}</span>
+        </router-link>
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0;">account_tree</span>
           <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>

@@ -121,6 +121,7 @@
     "dashboard": "Dashboard",
     "users": "Users",
     "payments": "Payments",
+    "inventory": "Inventory",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
     "reports": "Reports",
@@ -133,6 +134,12 @@
     "platformAsyncOperations": "Async Operations",
     "gatewayConnections": "Payment Integrations",
     "platformGatewayConnections": "Integrations"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "description": "Inventory module foundation is enabled. Warehouses, ledger, and balances arrive in the next sprints.",
+    "emptyTitle": "Inventory foundation ready",
+    "emptyDescription": "Routes, permissions, and commercial capabilities are prepared for Sprint 10.0.3."
   },
   "users": {
     "title": "Users",
@@ -255,6 +262,7 @@
     "back": "Go Back",
     "goToDashboard": "Go to Dashboard",
     "tryAgain": "Try Again",
+    "retry": "Retry",
     "noData": "No data found",
     "error": "Error",
     "success": "Success",
@@ -713,6 +721,7 @@
       "paymentCanceled": "Payment canceled",
       "paymentRefundRequested": "Refund requested",
       "paymentRefunded": "Payment refunded",
+      "providerRetryRequested": "Provider retry requested",
       "generic": "Payment event updated"
     },
     "instructions": {
@@ -912,6 +921,60 @@
         "success": "Connection suspended successfully.",
         "failed": "Failed to suspend connection."
       }
+    },
+    "tenants": {
+      "overview": {
+        "operations": "Operations",
+        "gateway": "Payment Gateway",
+        "webhooks": "Webhooks",
+        "activity": "Recent Activity"
+      },
+      "gateway": {
+        "noActiveConfiguration": "No active gateway configuration found.",
+        "status": "Status",
+        "healthStatus": "Health",
+        "lastHealthCheck": "Last check"
+      },
+      "metrics": {
+        "usersTitle": "Users",
+        "usersTotal": "Total",
+        "usersActive": "Active",
+        "customersTitle": "Customers",
+        "customersTotal": "Total",
+        "customersActive": "Active",
+        "paymentsTitle": "Payments",
+        "paymentsTotal": "Total",
+        "paymentsPending": "Pending",
+        "paymentsFailed": "Failed"
+      },
+      "activity": {
+        "empty": "No recent activity found."
+      },
+      "webhooks": {
+        "lastReceivedAt": "Last event",
+        "processedLast24Hours": "Processed (24h)",
+        "failedLast24Hours": "Failed (24h)",
+        "ignoredLast24Hours": "Ignored (24h)"
+      },
+      "create": {
+        "success": "Tenant provisioned successfully.",
+        "failed": "Failed to provision tenant."
+      },
+      "actions": {
+        "invitationSent": "Invitation sent"
+      }
+    },
+    "toast": {
+      "tenantUpdated": "Tenant updated successfully.",
+      "tenantActivated": "Tenant activated successfully.",
+      "tenantDeactivated": "Tenant deactivated successfully.",
+      "subscriptionUpdated": "Subscription updated successfully."
+    },
+    "error": {
+      "loadFailed": "Could not load platform data.",
+      "updateFailed": "Could not update tenant.",
+      "statusFailed": "Could not change tenant status.",
+      "subscriptionFailed": "Could not update subscription."
     }
   },
   "platformTenants": {
@@ -1101,11 +1164,18 @@
     },
     "messages": {
       "created": "Connection created successfully.",
+      "connectionCreated": "Connection created successfully.",
       "updated": "Settings updated.",
       "credentialsUpdated": "Credentials securely updated.",
       "statusUpdated": "Connection status updated.",
+      "mpConnected": "Mercado Pago connected successfully.",
       "notConfigured": "Not configured",
       "errorConnecting": "Error connecting with gateway"
+    },
+    "errors": {
+      "loadFailed": "Could not load integrations.",
+      "mpAuthFailed": "Mercado Pago authorization failed.",
+      "mpConnectionFailed": "Could not connect Mercado Pago."
     }
   },
   "features": {

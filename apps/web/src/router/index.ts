@@ -16,6 +16,7 @@ import PaymentsView from '../views/PaymentsView.vue'
 import ForbiddenView from '../views/ForbiddenView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
 import PlatformTenantsView from '../views/PlatformTenantsView.vue'
+import InventoryFoundationView from '../views/InventoryFoundationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -137,6 +138,17 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         permissions: ['payments:read']
+      }
+    },
+    {
+      path: '/inventory',
+      name: 'inventory',
+      component: InventoryFoundationView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['inventory:read'],
+        capabilities: ['inventory.manage']
       }
     },
     {
@@ -268,6 +280,13 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.permissions) {
     const requiredPerms = to.meta.permissions as string[]
     if (!authStore.checkAllPermissions(requiredPerms)) {
+      return next({ path: '/forbidden' })
+    }
+  }
+
+  if (to.meta.capabilities) {
+    const requiredCapabilities = to.meta.capabilities as string[]
+    if (!authStore.checkAllCapabilities(requiredCapabilities)) {
       return next({ path: '/forbidden' })
     }
   }

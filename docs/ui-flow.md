@@ -31,6 +31,7 @@ Telas acessíveis após autenticação bem-sucedida, com verificação de roles/
 * **Organization / Tenant Settings** (`/settings/tenant`)
 * **Customers** (`/customers`)
 * **Payments** (`/payments`) - *Futura tela da Fase 5*
+* **Inventory** (`/inventory`) - Fundação 10.0.1, gated por permissão e capability
 * **Reconciliation** (`/reconciliation`) - *Futura tela*
 * **Reports** (`/reports`) - *Futura tela*
 * **Webhooks** (`/webhooks`) - *Futura tela*
@@ -51,7 +52,8 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/permissions` | Parcial | `AppLayout` | `permissions:read` | Listagem de permissões do sistema |
 | `/settings/tenant` | Parcial | `AppLayout` | `tenant:update` | Configuração da organização atual |
 | `/customers` | Implementada | `AppLayout` | `customers:read` | Gestão de clientes |
-| `/payments` | Futura (Fase 5) | `AppLayout` | `payments:read` | Visão de pagamentos |
+| `/payments` | Implementada | `AppLayout` | `payments:read` | Visão de pagamentos |
+| `/inventory` | Fundação 10.0.1 | `AppLayout` | `inventory:read` + `inventory.manage` | Placeholder do módulo Inventory; warehouses/ledger entram nas próximas sprints |
 | `/reconciliation`| Futura | `AppLayout` | a definir | Conciliação financeira |
 | `/reports` | Futura | `AppLayout` | a definir | Relatórios de sistema |
 | `/webhooks` | Futura | `AppLayout` | a definir | Configuração e logs de webhooks |

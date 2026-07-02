@@ -8,6 +8,7 @@ import { TenantInvitationService } from './application/services/tenant-invitatio
 import { PlatformAuditService } from './application/services/platform-audit.service';
 import { PlatformSupportService } from './application/services/platform-support.service';
 import { PlatformGatewayConnectionsService } from './application/services/platform-gateway-connections.service';
+import { CapabilityPolicyService } from './application/services/capability-policy.service';
 import { PlatformTenantsRepository } from './domain/repositories/platform-tenants.repository';
 import { TenantAdminInvitationsRepository } from './domain/repositories/tenant-admin-invitations.repository';
 import { PrismaPlatformTenantsRepository } from './infra/repositories/prisma-platform-tenants.repository';
@@ -32,6 +33,7 @@ import { TenantInvitationsController } from './presentation/controllers/tenant-i
     PlatformAuditService,
     PlatformSupportService,
     PlatformGatewayConnectionsService,
+    CapabilityPolicyService,
     {
       provide: PlatformTenantsRepository,
       useClass: PrismaPlatformTenantsRepository,
@@ -45,5 +47,6 @@ import { TenantInvitationsController } from './presentation/controllers/tenant-i
       useClass: PrismaPlatformAuditRepository,
     },
   ],
+  exports: [CapabilityPolicyService],
 })
 export class PlatformModule {}

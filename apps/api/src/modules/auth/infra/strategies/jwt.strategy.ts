@@ -74,6 +74,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       isPlatformAdmin: user.isPlatformAdmin,
       roles: payload.roles,
       permissions: payload.permissions,
+      capabilities: payload.capabilities ?? [],
       sessionId: payload.sessionId,
     };
   }

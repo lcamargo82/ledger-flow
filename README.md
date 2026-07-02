@@ -1228,6 +1228,27 @@ O LedgerFlow recebe atualizações síncronas de pagamentos emitidos pelo gatewa
 - Para receber webhooks do Sandbox num ambiente local, crie um túnel reverso, como `ngrok` ou `cloudflare tunnel`, e cadastre a URL HTTPS no painel de Webhooks do Asaas Sandbox.
 - O sistema não utiliza **Polling contínuo**, economizando rate-limits do Asaas e priorizando conexões assíncronas.
 
+## Fase 10.0.1 - Commerce Foundation e Entitlements
+
+A fundação modular de Commerce foi iniciada sem criar ainda produtos, estoque ou pedidos reais.
+
+- Backend: módulos Nest `catalog`, `inventory`, `orders`, `channels` e `financial-intelligence`.
+- Entitlements: `CapabilityGuard` avalia capabilities comerciais server-side a partir do plano ativo do tenant.
+- RBAC permanece obrigatório: rotas usam permissão e capability.
+- Frontend: rota `/inventory` e menu de estoque são exibidos apenas com `inventory:read` e `inventory.manage`.
+- Documentação API: os endpoints foundation aparecem no Swagger em `/api/docs`, no Redoc em `/api/reference` e no OpenAPI JSON em `/api/openapi.json`.
+- AsyncAPI: sem novos eventos nesta sprint.
+
+Endpoints foundation:
+
+```text
+GET /catalog/capabilities/status
+GET /inventory/capabilities/status
+GET /orders/capabilities/status
+GET /channels/capabilities/status
+GET /financial-intelligence/capabilities/status
+```
+
 
 
 ### Platform Admin as Internal Tenant User

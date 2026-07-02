@@ -18,7 +18,13 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { JwtAuthGuard } from './modules/auth/presentation/guards/jwt-auth.guard';
 import { PermissionGuard } from './modules/auth/presentation/guards/permission.guard';
 import { PlatformAdminGuard } from './modules/auth/presentation/guards/platform-admin.guard';
+import { CapabilityGuard } from './modules/auth/presentation/guards/capability.guard';
 import { PlatformModule } from './modules/platform/platform.module';
+import { CatalogModule } from './modules/catalog/catalog.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { ChannelsModule } from './modules/channels/channels.module';
+import { FinancialIntelligenceModule } from './modules/financial-intelligence/financial-intelligence.module';
 
 @Module({
   imports: [
@@ -35,6 +41,11 @@ import { PlatformModule } from './modules/platform/platform.module';
     PaymentsModule,
     WebhooksModule,
     PlatformModule,
+    CatalogModule,
+    InventoryModule,
+    OrdersModule,
+    ChannelsModule,
+    FinancialIntelligenceModule,
   ],
   controllers: [AppController],
   providers: [
@@ -50,6 +61,10 @@ import { PlatformModule } from './modules/platform/platform.module';
     {
       provide: APP_GUARD,
       useClass: PlatformAdminGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: CapabilityGuard,
     },
   ],
 })

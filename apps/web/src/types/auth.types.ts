@@ -8,6 +8,7 @@ export interface AuthenticatedUser {
   isPlatformAdmin: boolean
   roles: string[]
   permissions: string[]
+  capabilities?: string[]
   sessionId?: string
 }
 
