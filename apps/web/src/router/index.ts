@@ -186,6 +186,17 @@ const router = createRouter({
       },
     },
     {
+      path: '/inventory/reservations',
+      name: 'inventory-reservations',
+      component: InventoryFoundationView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['inventory:read'],
+        capabilities: ['inventory.manage'],
+      },
+    },
+    {
       path: '/forbidden',
       name: 'forbidden',
       component: ForbiddenView,

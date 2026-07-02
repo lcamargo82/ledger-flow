@@ -6,8 +6,11 @@ import type {
   CreateWarehouseRequest,
   InventoryBalance,
   InventoryMovement,
+  InventoryReservation,
   PaginatedMeta,
   RecordAdjustmentRequest,
+  ReservationTransitionRequest,
+  ReserveStockRequest,
   UpdateWarehouseRequest,
   Warehouse,
 } from '../types/inventory.types'
@@ -16,9 +19,11 @@ export const useInventoryStore = defineStore('inventory', () => {
   const warehouses = ref<Warehouse[]>([])
   const balances = ref<InventoryBalance[]>([])
   const movements = ref<InventoryMovement[]>([])
+  const reservations = ref<InventoryReservation[]>([])
   const warehouseMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const balanceMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const movementMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
+  const reservationMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
 
   const isLoading = ref(false)
   const isMutating = ref(false)
@@ -65,11 +70,17 @@ export const useInventoryStore = defineStore('inventory', () => {
     movementMeta.value = response.meta
   }
 
+  const fetchReservations = async () => {
+    const response = await inventoryService.listReservations()
+    reservations.value = response.data
+    reservationMeta.value = response.meta
+  }
+
   const fetchInventory = async () => {
     isLoading.value = true
     error.value = null
     try {
-      await Promise.all([fetchWarehouses(), fetchBalances(), fetchMovements()])
+      await Promise.all([fetchWarehouses(), fetchBalances(), fetchMovements(), fetchReservations()])
     } catch (err) {
       error.value = extractErrorMessage(err)
       throw err
@@ -123,13 +134,60 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
+  const reserveStock = async (payload: ReserveStockRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.reserveStock(payload)
+      await Promise.all([fetchBalances(), fetchMovements(), fetchReservations()])
+      return response
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const releaseReservation = async (id: string, payload: ReservationTransitionRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.releaseReservation(id, payload)
+      await Promise.all([fetchBalances(), fetchMovements(), fetchReservations()])
+      return response
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const consumeReservation = async (id: string, payload: ReservationTransitionRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.consumeReservation(id, payload)
+      await Promise.all([fetchBalances(), fetchMovements(), fetchReservations()])
+      return response
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
   return {
     warehouses,
     balances,
     movements,
+    reservations,
     warehouseMeta,
     balanceMeta,
     movementMeta,
+    reservationMeta,
     activeWarehouses,
     isLoading,
     isMutating,
@@ -138,8 +196,12 @@ export const useInventoryStore = defineStore('inventory', () => {
     fetchWarehouses,
     fetchBalances,
     fetchMovements,
+    fetchReservations,
     createWarehouse,
     updateWarehouse,
     recordAdjustment,
+    reserveStock,
+    releaseReservation,
+    consumeReservation,
   }
 })

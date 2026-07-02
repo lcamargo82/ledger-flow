@@ -4,8 +4,12 @@ import type {
   InventoryAdjustmentResponse,
   InventoryBalance,
   InventoryMovement,
+  InventoryReservation,
+  InventoryReservationOperationResponse,
   PaginatedResponse,
   RecordAdjustmentRequest,
+  ReservationTransitionRequest,
+  ReserveStockRequest,
   UpdateWarehouseRequest,
   Warehouse,
 } from '../types/inventory.types'
@@ -60,6 +64,46 @@ export class InventoryService {
   async recordAdjustment(payload: RecordAdjustmentRequest): Promise<InventoryAdjustmentResponse> {
     const { data } = await httpClient.post<InventoryAdjustmentResponse>(
       '/inventory/movements/adjustments',
+      payload,
+    )
+    return data
+  }
+
+  async listReservations(
+    params?: Record<string, unknown>,
+  ): Promise<PaginatedResponse<InventoryReservation>> {
+    const { data } = await httpClient.get<PaginatedResponse<InventoryReservation>>(
+      '/inventory/reservations',
+      { params },
+    )
+    return data
+  }
+
+  async reserveStock(payload: ReserveStockRequest): Promise<InventoryReservationOperationResponse> {
+    const { data } = await httpClient.post<InventoryReservationOperationResponse>(
+      '/inventory/reservations',
+      payload,
+    )
+    return data
+  }
+
+  async releaseReservation(
+    id: string,
+    payload: ReservationTransitionRequest,
+  ): Promise<InventoryReservationOperationResponse> {
+    const { data } = await httpClient.post<InventoryReservationOperationResponse>(
+      `/inventory/reservations/${id}/release`,
+      payload,
+    )
+    return data
+  }
+
+  async consumeReservation(
+    id: string,
+    payload: ReservationTransitionRequest,
+  ): Promise<InventoryReservationOperationResponse> {
+    const { data } = await httpClient.post<InventoryReservationOperationResponse>(
+      `/inventory/reservations/${id}/consume`,
       payload,
     )
     return data

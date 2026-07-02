@@ -1331,6 +1331,29 @@ GET /inventory/balances
 GET /inventory/movements
 ```
 
+## Fase 10.0.4 - Reservas Operacionais de Estoque
+
+A 10.0.4 introduz uma API operacional controlada para validar o ciclo completo de reserva sem antecipar o módulo de pedidos.
+
+- `InventoryReservation` com status `ACTIVE`, `RELEASED` e `CONSUMED`.
+- Reserva administrativa reduz `availableQuantity` e aumenta `reservedQuantity`.
+- Liberação recompõe `availableQuantity` e reduz `reservedQuantity`.
+- Consumo total cria movimento `FULFILLMENT`, reduz `onHandQuantity` e `reservedQuantity`, preserva `availableQuantity` coerente e marca a reserva como `CONSUMED`.
+- Operações de reserva usam transação, lock de linha sobre `InventoryBalance`, idempotência e auditoria.
+- `POST /inventory/reservations/:id/consume` exige `inventory:manage` + capability `inventory.manage`, `reasonCode` e `idempotencyKey`.
+- Consumo parcial segue fora de escopo nesta sprint; pedidos, marketplace, saldo por pedido e financeiro por pedido permanecem para fases posteriores.
+- UI `/inventory/reservations` exibe reservas e permite reservar, liberar ou consumir reserva ativa com confirmação e motivo obrigatório.
+- AsyncAPI documenta o evento `inventory.reservation.consumed` persistido via Outbox.
+
+Endpoints:
+
+```text
+POST /inventory/reservations
+GET /inventory/reservations
+POST /inventory/reservations/:id/release
+POST /inventory/reservations/:id/consume
+```
+
 ### Platform Admin as Internal Tenant User
 
 O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:

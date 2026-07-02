@@ -17,18 +17,12 @@ describe('Commerce foundation controllers', () => {
       'getStatus',
     );
 
-    expect(
-      Reflect.getMetadata(
-        REQUIRED_PERMISSIONS_KEY,
-        descriptor?.value,
-      ),
-    ).toEqual(['inventory:read']);
-    expect(
-      Reflect.getMetadata(
-        REQUIRED_CAPABILITIES_KEY,
-        descriptor?.value,
-      ),
-    ).toEqual([CommerceCapabilities.InventoryManage]);
+    expect(Reflect.getMetadata(REQUIRED_PERMISSIONS_KEY, descriptor?.value)).toEqual([
+      'inventory:read',
+    ]);
+    expect(Reflect.getMetadata(REQUIRED_CAPABILITIES_KEY, descriptor?.value)).toEqual([
+      CommerceCapabilities.InventoryManage,
+    ]);
   });
 
   it.each([
@@ -38,8 +32,6 @@ describe('Commerce foundation controllers', () => {
     [ChannelsFoundationController, 'Channels'],
     [FinancialIntelligenceFoundationController, 'Financial Intelligence'],
   ])('documents %s with an OpenAPI tag', (controller, tag) => {
-    expect(Reflect.getMetadata(API_TAGS_METADATA_KEY, controller)).toContain(
-      tag,
-    );
+    expect(Reflect.getMetadata(API_TAGS_METADATA_KEY, controller)).toContain(tag);
   });
 });

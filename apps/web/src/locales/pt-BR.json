@@ -144,11 +144,15 @@
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Saldos",
-      "movements": "Movimentações"
+      "movements": "Movimentações",
+      "reservations": "Reservas"
     },
     "actions": {
       "createWarehouse": "Novo warehouse",
       "adjust": "Registrar ajuste",
+      "reserve": "Reservar estoque",
+      "releaseReservation": "Liberar reserva",
+      "consumeReservation": "Consumir reserva",
       "disable": "Desativar",
       "enable": "Ativar"
     },
@@ -167,11 +171,16 @@
       "occurredAt": "Ocorrido em",
       "type": "Tipo",
       "quantity": "Quantidade",
+      "source": "Origem",
       "reason": "Motivo"
     },
     "form": {
       "warehouseTitle": "Novo warehouse",
       "adjustmentTitle": "Registrar ajuste",
+      "reserveTitle": "Reservar estoque",
+      "releaseTitle": "Liberar reserva",
+      "consumeTitle": "Consumir reserva",
+      "reservationConfirmation": "A operação será aplicada integralmente sobre {quantity} unidade(s) do SKU {skuId}.",
       "codeLabel": "Código",
       "nameLabel": "Nome",
       "skuIdLabel": "SKU",
@@ -179,8 +188,15 @@
       "warehousePlaceholder": "Selecione um warehouse",
       "typeLabel": "Tipo",
       "quantityLabel": "Quantidade",
+      "sourceTypeLabel": "Tipo da origem",
+      "sourceIdLabel": "ID da origem",
       "reasonCodeLabel": "Motivo",
       "notesLabel": "Observações"
+    },
+    "reservationStatus": {
+      "ACTIVE": "Ativa",
+      "RELEASED": "Liberada",
+      "CONSUMED": "Consumida"
     },
     "movementType": {
       "RECEIPT": "Recebimento",
@@ -199,7 +215,9 @@
       "balancesTitle": "Nenhum saldo encontrado",
       "balancesDescription": "Os saldos aparecem após o primeiro ajuste de estoque.",
       "movementsTitle": "Nenhuma movimentação registrada",
-      "movementsDescription": "O ledger será preenchido conforme ajustes forem registrados."
+      "movementsDescription": "O ledger será preenchido conforme ajustes forem registrados.",
+      "reservationsTitle": "Nenhuma reserva registrada",
+      "reservationsDescription": "Reservas administrativas aparecerão aqui até serem liberadas ou consumidas."
     },
     "errors": {
       "title": "Não foi possível carregar o estoque",

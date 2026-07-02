@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { InventoryMovementType } from '@prisma/client';
 import { InventoryService } from './inventory.service';
 
@@ -11,8 +11,12 @@ describe('InventoryService', () => {
     listWarehouses: jest.fn(),
     findSkuById: jest.fn(),
     recordAdjustment: jest.fn(),
+    reserveStock: jest.fn(),
+    releaseReservation: jest.fn(),
+    consumeReservation: jest.fn(),
     listBalances: jest.fn(),
     listMovements: jest.fn(),
+    listReservations: jest.fn(),
   };
 
   const prisma = {
@@ -115,5 +119,146 @@ describe('InventoryService', () => {
         reasonCode: 'COUNT',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('reserves available stock with source idempotency and audit log', async () => {
+    repository.findWarehouseById.mockResolvedValue({
+      id: 'warehouse-1',
+      isActive: true,
+    });
+    repository.findSkuById.mockResolvedValue({ id: 'sku-1' });
+    repository.reserveStock.mockResolvedValue({
+      reservation: {
+        id: 'reservation-1',
+        sourceType: 'ADMIN_HOLD',
+        sourceId: 'hold-1',
+        status: 'ACTIVE',
+      },
+      balance: {
+        onHandQuantity: '10',
+        reservedQuantity: '3',
+        availableQuantity: '7',
+      },
+      movement: { id: 'movement-1', type: InventoryMovementType.RESERVATION },
+    });
+
+    const result = await service.reserveStock('tenant-1', 'user-1', {
+      skuId: 'sku-1',
+      warehouseId: 'warehouse-1',
+      quantity: 3,
+      sourceType: 'ADMIN_HOLD',
+      sourceId: 'hold-1',
+      idempotencyKey: 'reserve-hold-1',
+      reasonCode: 'ALLOCATE',
+      notes: 'Reserva operacional',
+    });
+
+    expect(repository.reserveStock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        skuId: 'sku-1',
+        warehouseId: 'warehouse-1',
+        quantity: 3,
+        sourceType: 'ADMIN_HOLD',
+        sourceId: 'hold-1',
+        idempotencyKey: 'reserve-hold-1',
+        reasonCode: 'ALLOCATE',
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tenantId: 'tenant-1',
+        actorUserId: 'user-1',
+        action: 'inventory.reservation.created',
+        entityType: 'InventoryReservation',
+        entityId: 'reservation-1',
+      }),
+    });
+    expect(result.balance.availableQuantity).toBe('7');
+  });
+
+  it('releases an active reservation and audits the release', async () => {
+    repository.releaseReservation.mockResolvedValue({
+      reservation: {
+        id: 'reservation-1',
+        status: 'RELEASED',
+      },
+      balance: {
+        onHandQuantity: '10',
+        reservedQuantity: '0',
+        availableQuantity: '10',
+      },
+      movement: { id: 'movement-2', type: InventoryMovementType.RESERVATION_RELEASE },
+    });
+
+    const result = await service.releaseReservation('reservation-1', 'tenant-1', 'user-1', {
+      reasonCode: 'CANCELLED',
+      notes: 'Liberação administrativa',
+      idempotencyKey: 'release-reservation-1',
+    });
+
+    expect(repository.releaseReservation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reservationId: 'reservation-1',
+        tenantId: 'tenant-1',
+        reasonCode: 'CANCELLED',
+        idempotencyKey: 'release-reservation-1',
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.reservation.released',
+        entityId: 'reservation-1',
+      }),
+    });
+    expect(result.reservation.status).toBe('RELEASED');
+  });
+
+  it('consumes a full active reservation as fulfillment and audits the consumption', async () => {
+    repository.consumeReservation.mockResolvedValue({
+      reservation: {
+        id: 'reservation-1',
+        status: 'CONSUMED',
+      },
+      balance: {
+        onHandQuantity: '7',
+        reservedQuantity: '0',
+        availableQuantity: '7',
+      },
+      movement: { id: 'movement-3', type: InventoryMovementType.FULFILLMENT },
+      outboxEvent: { id: 'outbox-1', eventType: 'inventory.reservation.consumed' },
+    });
+
+    const result = await service.consumeReservation('reservation-1', 'tenant-1', 'user-1', {
+      reasonCode: 'FULFILLMENT',
+      notes: 'Consumo operacional',
+      idempotencyKey: 'consume-reservation-1',
+    });
+
+    expect(repository.consumeReservation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reservationId: 'reservation-1',
+        tenantId: 'tenant-1',
+        reasonCode: 'FULFILLMENT',
+        idempotencyKey: 'consume-reservation-1',
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.reservation.consumed',
+        entityId: 'reservation-1',
+      }),
+    });
+    expect(result.movement.type).toBe(InventoryMovementType.FULFILLMENT);
+    expect(result.balance.availableQuantity).toBe('7');
+  });
+
+  it('rejects consuming reservations without a reason', async () => {
+    await expect(
+      service.consumeReservation('reservation-1', 'tenant-1', 'user-1', {
+        reasonCode: '',
+        idempotencyKey: 'consume-reservation-1',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

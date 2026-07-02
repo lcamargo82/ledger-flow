@@ -2045,6 +2045,45 @@ Autorização:
 - `inventory:manage` + `inventory.manage`: criação/atualização de warehouse.
 - `inventory:adjust` + `inventory.manage`: registro de ajustes manuais.
 
+## 5.17 Inventory Reservations Design
+
+A Sprint 10.0.4 adiciona reservas administrativas de estoque para validar o ciclo `reserve -> release/consume` antes do módulo de pedidos.
+
+Inclui:
+
+- `InventoryReservation` com `ACTIVE`, `RELEASED` e `CONSUMED`.
+- `POST /inventory/reservations` cria reserva total por SKU/warehouse e reduz o disponível.
+- `POST /inventory/reservations/:id/release` libera somente reserva ativa e recompõe o disponível.
+- `POST /inventory/reservations/:id/consume` consome integralmente somente reserva ativa, cria movimento `FULFILLMENT`, reduz físico e reservado e cria `OutboxEvent`.
+- Todas as operações usam `inventory:manage` + `inventory.manage`, exceto listagem com `inventory:read` + `inventory.manage`.
+- `reasonCode` e `idempotencyKey` são obrigatórios nas mutações.
+- O repositório executa as alterações em uma transação com lock `FOR UPDATE` no saldo do SKU/warehouse.
+- Auditoria: `inventory.reservation.created`, `inventory.reservation.released` e `inventory.reservation.consumed`.
+- UI `/inventory/reservations` usa a mesma view de estoque, componentes reutilizáveis e traduções pt-BR/en-US.
+
+Não inclui nesta sprint:
+
+- Consumo parcial de reserva.
+- Pedido interno.
+- Marketplace.
+- Malha fina.
+- Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /inventory/reservations
+GET /inventory/reservations
+POST /inventory/reservations/:id/release
+POST /inventory/reservations/:id/consume
+```
+
+Evento AsyncAPI:
+
+```text
+inventory.reservation.consumed
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.

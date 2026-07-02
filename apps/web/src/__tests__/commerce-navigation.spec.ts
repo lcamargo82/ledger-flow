@@ -11,9 +11,12 @@ describe('commerce navigation foundation', () => {
   })
 
   it('registers inventory route behind permission and capability metadata', () => {
-    const inventoryRoutes = ['/inventory', '/inventory/warehouses', '/inventory/movements'].map(
-      (path) => router.getRoutes().find((item) => item.path === path),
-    )
+    const inventoryRoutes = [
+      '/inventory',
+      '/inventory/warehouses',
+      '/inventory/movements',
+      '/inventory/reservations',
+    ].map((path) => router.getRoutes().find((item) => item.path === path))
 
     inventoryRoutes.forEach((route) => {
       expect(route?.meta.permissions).toEqual(['inventory:read'])

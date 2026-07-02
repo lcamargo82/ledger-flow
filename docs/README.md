@@ -65,8 +65,8 @@ mkdir -p docs/{prd,sdd,specs,backlog,adr}
 10.0.1 — Commerce domain foundation, feature entitlements e contratos
 10.0.2 — Catálogo, produto pai/filho, SKU e custo
 10.0.3 — Warehouses e ledger de movimentações de estoque
-10.0.4 — Saldo disponível, reservado e físico; ajustes e inventário
-10.0.5 — Reserva e liberação de estoque para pedidos internos
+10.0.4 — Reservas administrativas, liberação e consumo total de estoque
+10.0.5 — Pedido interno reutilizando reserve/release/consume
 10.0.6 — Inbound channel webhooks / order intake foundation
 10.0.7 — Malha fina de anúncios e vínculo SKU
 10.0.8 — Egress sync, rate limiting, circuit breaker e observabilidade

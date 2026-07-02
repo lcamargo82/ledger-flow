@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { InventoryMovementType } from '@prisma/client';
+import { InventoryMovementType, InventoryReservationStatus } from '@prisma/client';
 
 export class WarehouseResponseDto {
   @ApiProperty() id: string;
@@ -41,6 +41,25 @@ export class InventoryBalanceResponseDto {
   @ApiProperty() updatedAt: Date;
 }
 
+export class InventoryReservationResponseDto {
+  @ApiProperty() id: string;
+  @ApiProperty() tenantId: string;
+  @ApiProperty() skuId: string;
+  @ApiProperty() warehouseId: string;
+  @ApiProperty() quantity: string;
+  @ApiProperty({ enum: InventoryReservationStatus }) status: InventoryReservationStatus;
+  @ApiProperty() sourceType: string;
+  @ApiProperty() sourceId: string;
+  @ApiProperty() idempotencyKey: string;
+  @ApiProperty() reasonCode: string;
+  @ApiPropertyOptional() notes?: string;
+  @ApiPropertyOptional() createdByUserId?: string;
+  @ApiPropertyOptional() releasedAt?: Date;
+  @ApiPropertyOptional() consumedAt?: Date;
+  @ApiProperty() createdAt: Date;
+  @ApiProperty() updatedAt: Date;
+}
+
 export class PaginatedMetaDto {
   @ApiProperty() page: number;
   @ApiProperty() perPage: number;
@@ -63,6 +82,13 @@ export class PaginatedBalancesResponseDto {
   @ApiProperty({ type: PaginatedMetaDto }) meta: PaginatedMetaDto;
 }
 
+export class PaginatedReservationsResponseDto {
+  @ApiProperty({ type: [InventoryReservationResponseDto] })
+  data: InventoryReservationResponseDto[];
+
+  @ApiProperty({ type: PaginatedMetaDto }) meta: PaginatedMetaDto;
+}
+
 export class WarehouseMutationResponseDto {
   @ApiProperty({ type: WarehouseResponseDto }) warehouse: WarehouseResponseDto;
 }
@@ -70,4 +96,15 @@ export class WarehouseMutationResponseDto {
 export class InventoryAdjustmentResponseDto {
   @ApiProperty({ type: InventoryMovementResponseDto }) movement: InventoryMovementResponseDto;
   @ApiProperty({ type: InventoryBalanceResponseDto }) balance: InventoryBalanceResponseDto;
+}
+
+export class InventoryReservationOperationResponseDto {
+  @ApiProperty({ type: InventoryReservationResponseDto })
+  reservation: InventoryReservationResponseDto;
+
+  @ApiProperty({ type: InventoryMovementResponseDto })
+  movement: InventoryMovementResponseDto;
+
+  @ApiProperty({ type: InventoryBalanceResponseDto })
+  balance: InventoryBalanceResponseDto;
 }

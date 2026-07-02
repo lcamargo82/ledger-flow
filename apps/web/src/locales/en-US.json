@@ -145,11 +145,15 @@
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Balances",
-      "movements": "Movements"
+      "movements": "Movements",
+      "reservations": "Reservations"
     },
     "actions": {
       "createWarehouse": "New warehouse",
       "adjust": "Record adjustment",
+      "reserve": "Reserve stock",
+      "releaseReservation": "Release reservation",
+      "consumeReservation": "Consume reservation",
       "disable": "Disable",
       "enable": "Enable"
     },
@@ -168,11 +172,16 @@
       "occurredAt": "Occurred at",
       "type": "Type",
       "quantity": "Quantity",
+      "source": "Source",
       "reason": "Reason"
     },
     "form": {
       "warehouseTitle": "New warehouse",
       "adjustmentTitle": "Record adjustment",
+      "reserveTitle": "Reserve stock",
+      "releaseTitle": "Release reservation",
+      "consumeTitle": "Consume reservation",
+      "reservationConfirmation": "The operation will be applied in full to {quantity} unit(s) of SKU {skuId}.",
       "codeLabel": "Code",
       "nameLabel": "Name",
       "skuIdLabel": "SKU",
@@ -180,8 +189,15 @@
       "warehousePlaceholder": "Select a warehouse",
       "typeLabel": "Type",
       "quantityLabel": "Quantity",
+      "sourceTypeLabel": "Source type",
+      "sourceIdLabel": "Source ID",
       "reasonCodeLabel": "Reason",
       "notesLabel": "Notes"
+    },
+    "reservationStatus": {
+      "ACTIVE": "Active",
+      "RELEASED": "Released",
+      "CONSUMED": "Consumed"
     },
     "movementType": {
       "RECEIPT": "Receipt",
@@ -200,7 +216,9 @@
       "balancesTitle": "No balances found",
       "balancesDescription": "Balances appear after the first inventory adjustment.",
       "movementsTitle": "No movements recorded",
-      "movementsDescription": "The ledger will be populated as adjustments are recorded."
+      "movementsDescription": "The ledger will be populated as adjustments are recorded.",
+      "reservationsTitle": "No reservations recorded",
+      "reservationsDescription": "Administrative reservations will appear here until they are released or consumed."
     },
     "errors": {
       "title": "Could not load inventory",

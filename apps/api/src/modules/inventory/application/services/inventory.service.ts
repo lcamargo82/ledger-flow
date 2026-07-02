@@ -12,6 +12,8 @@ import { CreateWarehouseDto } from '../dto/create-warehouse.dto';
 import { ListInventoryQueryDto } from '../dto/list-inventory-query.dto';
 import { ListWarehousesQueryDto } from '../dto/list-warehouses-query.dto';
 import { RecordAdjustmentDto } from '../dto/record-adjustment.dto';
+import { ReservationTransitionDto } from '../dto/reservation-transition.dto';
+import { ReserveStockDto } from '../dto/reserve-stock.dto';
 import { UpdateWarehouseDto } from '../dto/update-warehouse.dto';
 import { INVENTORY_REPOSITORY } from '../../domain/repositories/inventory.repository';
 import type { InventoryRepository } from '../../domain/repositories/inventory.repository';
@@ -137,6 +139,127 @@ export class InventoryService {
 
   listMovements(tenantId: string, query: ListInventoryQueryDto) {
     return this.inventoryRepository.listMovements({ tenantId, ...query });
+  }
+
+  async reserveStock(tenantId: string, actorUserId: string, dto: ReserveStockDto) {
+    this.assertReason(dto.reasonCode);
+
+    const [warehouse, sku] = await Promise.all([
+      this.inventoryRepository.findWarehouseById(dto.warehouseId, tenantId),
+      this.inventoryRepository.findSkuById(dto.skuId, tenantId),
+    ]);
+
+    if (!warehouse || !warehouse.isActive) {
+      throw new NotFoundException('Warehouse not found.');
+    }
+
+    if (!sku) {
+      throw new NotFoundException('SKU not found.');
+    }
+
+    const result = await this.inventoryRepository.reserveStock({
+      tenantId,
+      skuId: dto.skuId,
+      warehouseId: dto.warehouseId,
+      quantity: dto.quantity,
+      sourceType: dto.sourceType,
+      sourceId: dto.sourceId,
+      idempotencyKey: dto.idempotencyKey,
+      reasonCode: dto.reasonCode,
+      notes: dto.notes ?? null,
+      createdByUserId: actorUserId,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.reservation.created',
+      'InventoryReservation',
+      result.reservation.id,
+      {
+        skuId: dto.skuId,
+        warehouseId: dto.warehouseId,
+        quantity: dto.quantity,
+        sourceType: dto.sourceType,
+        sourceId: dto.sourceId,
+        reasonCode: dto.reasonCode,
+      },
+    );
+
+    return result;
+  }
+
+  listReservations(tenantId: string, query: ListInventoryQueryDto) {
+    return this.inventoryRepository.listReservations({ tenantId, ...query });
+  }
+
+  async releaseReservation(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: ReservationTransitionDto,
+  ) {
+    this.assertReason(dto.reasonCode);
+
+    const result = await this.inventoryRepository.releaseReservation({
+      reservationId: id,
+      tenantId,
+      reasonCode: dto.reasonCode,
+      idempotencyKey: dto.idempotencyKey,
+      notes: dto.notes ?? null,
+      actorUserId,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.reservation.released',
+      'InventoryReservation',
+      result.reservation.id,
+      {
+        reasonCode: dto.reasonCode,
+      },
+    );
+
+    return result;
+  }
+
+  async consumeReservation(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: ReservationTransitionDto,
+  ) {
+    this.assertReason(dto.reasonCode);
+
+    const result = await this.inventoryRepository.consumeReservation({
+      reservationId: id,
+      tenantId,
+      reasonCode: dto.reasonCode,
+      idempotencyKey: dto.idempotencyKey,
+      notes: dto.notes ?? null,
+      actorUserId,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.reservation.consumed',
+      'InventoryReservation',
+      result.reservation.id,
+      {
+        reasonCode: dto.reasonCode,
+        movementId: result.movement.id,
+      },
+    );
+
+    return result;
+  }
+
+  private assertReason(reasonCode: string) {
+    if (!reasonCode?.trim()) {
+      throw new BadRequestException('Reason code is required.');
+    }
   }
 
   private async auditLog(

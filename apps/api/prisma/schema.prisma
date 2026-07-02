@@ -48,6 +48,12 @@ enum InventoryMovementType {
   TRANSFER_IN
 }
 
+enum InventoryReservationStatus {
+  ACTIVE
+  RELEASED
+  CONSUMED
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -76,6 +82,7 @@ model Tenant {
   warehouses            Warehouse[]
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
+  inventoryReservations InventoryReservation[]
 
   @@map("tenants")
 }
@@ -311,10 +318,11 @@ model ProductSku {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  product            Product             @relation(fields: [productId], references: [id], onDelete: Restrict)
-  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  inventoryMovements InventoryMovement[]
-  inventoryBalances  InventoryBalance[]
+  product               Product                @relation(fields: [productId], references: [id], onDelete: Restrict)
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements    InventoryMovement[]
+  inventoryBalances     InventoryBalance[]
+  inventoryReservations InventoryReservation[]
 
   @@unique([tenantId, skuCanonical])
   @@index([tenantId, barcode])
@@ -330,9 +338,10 @@ model Warehouse {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  inventoryMovements InventoryMovement[]
-  inventoryBalances  InventoryBalance[]
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements    InventoryMovement[]
+  inventoryBalances     InventoryBalance[]
+  inventoryReservations InventoryReservation[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -387,6 +396,35 @@ model InventoryBalance {
   @@index([tenantId, skuId])
   @@index([tenantId, warehouseId])
   @@map("inventory_balances")
+}
+
+model InventoryReservation {
+  id              String                     @id @default(uuid())
+  tenantId        String                     @map("tenant_id")
+  skuId           String                     @map("sku_id")
+  warehouseId     String                     @map("warehouse_id")
+  quantity        Decimal                    @db.Decimal(18, 6)
+  status          InventoryReservationStatus @default(ACTIVE)
+  sourceType      String                     @map("source_type")
+  sourceId        String                     @map("source_id")
+  idempotencyKey  String                     @map("idempotency_key")
+  reasonCode      String                     @map("reason_code")
+  notes           String?
+  createdByUserId String?                    @map("created_by_user_id")
+  releasedAt      DateTime?                  @map("released_at")
+  consumedAt      DateTime?                  @map("consumed_at")
+  createdAt       DateTime                   @default(now()) @map("created_at")
+  updatedAt       DateTime                   @updatedAt @map("updated_at")
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, sourceType, sourceId])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, skuId, warehouseId, status])
+  @@index([tenantId, status])
+  @@map("inventory_reservations")
 }
 
 model PasswordResetToken {

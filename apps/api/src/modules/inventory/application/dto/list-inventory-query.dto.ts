@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { InventoryMovementType } from '@prisma/client';
+import { InventoryMovementType, InventoryReservationStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
@@ -32,4 +32,9 @@ export class ListInventoryQueryDto {
   @IsOptional()
   @IsEnum(InventoryMovementType)
   type?: InventoryMovementType;
+
+  @ApiPropertyOptional({ enum: InventoryReservationStatus })
+  @IsOptional()
+  @IsEnum(InventoryReservationStatus)
+  status?: InventoryReservationStatus;
 }

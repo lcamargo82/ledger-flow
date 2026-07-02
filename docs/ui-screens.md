@@ -121,15 +121,15 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 
 ### Inventory
 
-- **Rotas:** `/inventory`, `/inventory/warehouses`, `/inventory/movements`
-- **Status:** Implementada 10.0.3
+- **Rotas:** `/inventory`, `/inventory/warehouses`, `/inventory/movements`, `/inventory/reservations`
+- **Status:** Implementada 10.0.4
 - **Permissões:** `inventory:read`, `inventory:manage`, `inventory:adjust`
 - **Capability:** `inventory.manage`
 - **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
-- **Objetivo:** Gerenciar warehouses, consultar saldos projetados por SKU/warehouse e acompanhar o ledger de ajustes manuais.
-- **Fluxos:** visão de saldos por SKU e warehouse em `/inventory`, criação/ativação/desativação de warehouse em `/inventory/warehouses`, ajuste manual de entrada/saída com motivo e histórico em `/inventory/movements`.
+- **Objetivo:** Gerenciar warehouses, consultar saldos projetados por SKU/warehouse, acompanhar o ledger e operar reservas administrativas.
+- **Fluxos:** visão de saldos por SKU e warehouse em `/inventory`, criação/ativação/desativação de warehouse em `/inventory/warehouses`, ajuste manual de entrada/saída com motivo e histórico em `/inventory/movements`, reservas em `/inventory/reservations` com ações de criar, liberar e consumir reserva ativa.
 - **Segurança:** O menu e a rota são ocultados/bloqueados no frontend apenas como UX; o backend valida `@RequirePermissions` e `@RequireCapabilities`.
-- **Fora de escopo:** reservas, pedidos, movimentações automáticas por pedido, marketplace, malha fina e financeiro por pedido.
+- **Fora de escopo:** consumo parcial de reserva, pedidos, marketplace, malha fina e financeiro por pedido.
 - **i18n:** Namespace `inventory.*` em pt-BR e en-US.
 
 ### Catalog Products

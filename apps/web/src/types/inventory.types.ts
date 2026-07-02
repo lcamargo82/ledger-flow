@@ -9,6 +9,8 @@ export type InventoryMovementType =
   | 'TRANSFER_OUT'
   | 'TRANSFER_IN'
 
+export type InventoryReservationStatus = 'ACTIVE' | 'RELEASED' | 'CONSUMED'
+
 export interface Warehouse {
   id: string
   tenantId: string
@@ -49,6 +51,25 @@ export interface InventoryMovement {
   createdAt: string
 }
 
+export interface InventoryReservation {
+  id: string
+  tenantId: string
+  skuId: string
+  warehouseId: string
+  quantity: string
+  status: InventoryReservationStatus
+  sourceType: string
+  sourceId: string
+  idempotencyKey: string
+  reasonCode: string
+  notes?: string | null
+  createdByUserId?: string | null
+  releasedAt?: string | null
+  consumedAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export interface PaginatedMeta {
   page: number
   perPage: number
@@ -80,7 +101,30 @@ export interface RecordAdjustmentRequest {
   notes?: string
 }
 
+export interface ReserveStockRequest {
+  skuId: string
+  warehouseId: string
+  quantity: number
+  sourceType: string
+  sourceId: string
+  idempotencyKey: string
+  reasonCode: string
+  notes?: string
+}
+
+export interface ReservationTransitionRequest {
+  reasonCode: string
+  idempotencyKey: string
+  notes?: string
+}
+
 export interface InventoryAdjustmentResponse {
+  movement: InventoryMovement
+  balance: InventoryBalance
+}
+
+export interface InventoryReservationOperationResponse {
+  reservation: InventoryReservation
   movement: InventoryMovement
   balance: InventoryBalance
 }
