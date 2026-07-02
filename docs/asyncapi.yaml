@@ -49,6 +49,11 @@ channels:
         $ref: '#/components/messages/ChannelInventorySyncRequested'
       channelInventorySyncCompleted:
         $ref: '#/components/messages/ChannelInventorySyncCompleted'
+  financial.events:
+    address: ledgerflow.financial.events
+    messages:
+      orderFactCreated:
+        $ref: '#/components/messages/FinancialOrderFactCreated'
 components:
   messages:
     PaymentChargeRequested:
@@ -186,6 +191,12 @@ components:
       summary: Event emitted when mock outbound inventory sync succeeds.
       payload:
         $ref: '#/components/schemas/ChannelInventorySyncPayload'
+    FinancialOrderFactCreated:
+      name: financial.order_fact.created
+      title: Financial Order Fact Created
+      summary: Event emitted when an operational financial fact is created for an order.
+      payload:
+        $ref: '#/components/schemas/FinancialOrderFactPayload'
   schemas:
     InternalOrderStatusChangedPayload:
       type: object
@@ -290,3 +301,22 @@ components:
         targetAvailableQuantity:
           type: number
           format: decimal
+    FinancialOrderFactPayload:
+      type: object
+      required:
+        - factId
+        - orderId
+        - revenueAmount
+        - cogsAmount
+        - grossMarginAmount
+      properties:
+        factId:
+          type: string
+        orderId:
+          type: string
+        revenueAmount:
+          type: string
+        cogsAmount:
+          type: string
+        grossMarginAmount:
+          type: string

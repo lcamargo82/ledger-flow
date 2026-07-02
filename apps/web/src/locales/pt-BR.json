@@ -386,6 +386,40 @@
       "invalid": "Revise as informações de canais."
     }
   },
+  "financialIntelligence": {
+    "title": "Analytics",
+    "description": "Acompanhe margem operacional e CMV por pedido sem misturar conciliação de caixa.",
+    "internalChannel": "Interno",
+    "reconciliationNote": "Margem operacional não representa liquidação, recebimento ou conciliação financeira.",
+    "cards": {
+      "orders": "Pedidos com fato",
+      "revenue": "Receita operacional",
+      "cogs": "CMV",
+      "margin": "Margem bruta"
+    },
+    "filters": {
+      "channel": "Canal",
+      "allChannels": "Todos os canais"
+    },
+    "table": {
+      "calculatedAt": "Calculado em",
+      "orderNumber": "Pedido",
+      "channel": "Canal",
+      "revenue": "Receita",
+      "cogs": "CMV",
+      "margin": "Margem"
+    },
+    "empty": {
+      "title": "Nenhum fato financeiro encontrado",
+      "description": "Conclua pedidos para gerar snapshots de CMV e margem operacional."
+    },
+    "errors": {
+      "title": "Não foi possível carregar analytics",
+      "default": "Não foi possível processar os indicadores financeiros.",
+      "forbidden": "Você não possui acesso aos indicadores financeiros.",
+      "invalid": "Revise os filtros informados."
+    }
+  },
   "catalog": {
     "title": "Catálogo",
     "description": "Gerencie produtos simples, produtos pai e variantes vendáveis com SKU, custo e unidade de medida.",

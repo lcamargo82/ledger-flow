@@ -2245,6 +2245,42 @@ channel.inventory_sync.requested
 channel.inventory_sync.completed
 ```
 
+## 5.22 Financial Intelligence Initial Design
+
+A Sprint 10.0.9 adiciona fatos financeiros operacionais de pedidos internos, sem implementar conciliacao financeira.
+
+Inclui:
+
+- `OrderFinancialFact` tenant-scoped e versionado por `[tenantId, orderId, version]`.
+- Criacao automatica do fato quando `InternalOrder` passa para `FULFILLED`.
+- Snapshot de CMV usando `ProductSku.averageCost` no momento da criacao do fato.
+- Calculo com `Prisma.Decimal`: `grossMarginAmount = revenueAmount - cogsAmount - channelFeeAmount`.
+- Componentes explicaveis em `components_json`, incluindo itens, custo unitario, quantidade e formula.
+- Dashboard basico com contagem de pedidos, receita operacional, CMV e margem bruta.
+- Filtros por periodo e canal no contrato. Pedidos internos atuais ficam sem provider.
+- UI `/analytics` com cards, tabela de facts e aviso explicito de que margem operacional nao e recebimento liquidado nem conciliacao.
+
+Nao inclui nesta sprint:
+
+- Conciliacao 9A.
+- Settlement de gateway.
+- Recebiveis.
+- Taxas reais de marketplace.
+- Preco de venda por item, pois `InternalOrder` ainda nao captura esse dado.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+GET /financial-intelligence/dashboard
+GET /financial-intelligence/order-facts
+```
+
+Eventos AsyncAPI:
+
+```text
+financial.order_fact.created
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.

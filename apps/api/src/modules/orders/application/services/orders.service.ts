@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { InternalOrderItem, InternalOrderStatus, Prisma } from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
+import { FinancialIntelligenceService } from '../../../financial-intelligence/application/services/financial-intelligence.service';
 import { InventoryService } from '../../../inventory/application/services/inventory.service';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { ListOrdersQueryDto } from '../dto/list-orders-query.dto';
@@ -18,6 +19,7 @@ export class OrdersService {
     @Inject(ORDERS_REPOSITORY)
     private readonly ordersRepository: OrdersRepository,
     private readonly inventoryService: InventoryService,
+    private readonly financialIntelligenceService: FinancialIntelligenceService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -176,6 +178,11 @@ export class OrdersService {
       orderId: updatedOrder.id,
       status: updatedOrder.status,
     });
+    await this.financialIntelligenceService.createFulfilledOrderFact(
+      updatedOrder.id,
+      tenantId,
+      actorUserId,
+    );
 
     return { order: updatedOrder };
   }

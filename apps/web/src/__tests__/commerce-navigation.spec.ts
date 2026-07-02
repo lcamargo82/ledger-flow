@@ -38,6 +38,13 @@ describe('commerce navigation foundation', () => {
     expect(channelsRoute?.meta.capabilities).toEqual(['channels.connect'])
   })
 
+  it('registers analytics route behind permission and capability metadata', () => {
+    const analyticsRoute = router.getRoutes().find((item) => item.path === '/analytics')
+
+    expect(analyticsRoute?.meta.permissions).toEqual(['financial-intelligence:read'])
+    expect(analyticsRoute?.meta.capabilities).toEqual(['financial.analytics.read'])
+  })
+
   it('checks capabilities from the authenticated user session', () => {
     const authStore = useAuthStore()
     authStore.user = {
@@ -73,6 +80,8 @@ describe('commerce navigation foundation', () => {
     expect(enUS.channels.webhookStatus.INVALID).toBe('Invalid')
     expect(enUS.channels.actions.importListings).toBe('Import listings')
     expect(enUS.channels.actions.processSync).toBe('Process pending')
+    expect(ptBR.financialIntelligence.cards.cogs).toBe('CMV')
+    expect(enUS.financialIntelligence.table.margin).toBe('Margin')
     expect(ptBR.nav.analytics).toBe('Analytics')
   })
 })

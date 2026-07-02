@@ -130,6 +130,7 @@ model Tenant {
   inventoryReservations InventoryReservation[]
   internalOrders        InternalOrder[]
   internalOrderItems    InternalOrderItem[]
+  orderFinancialFacts   OrderFinancialFact[]
   channelIntegrations   ChannelIntegration[]
   channelWebhookEvents  ChannelWebhookInboxEvent[]
   channelListings       ChannelListing[]
@@ -501,6 +502,7 @@ model InternalOrder {
 
   tenant Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   items  InternalOrderItem[]
+  financialFacts OrderFinancialFact[]
 
   @@unique([tenantId, orderNumber])
   @@unique([tenantId, idempotencyKey])
@@ -530,6 +532,35 @@ model InternalOrderItem {
   @@index([tenantId, skuId])
   @@index([tenantId, warehouseId])
   @@map("internal_order_items")
+}
+
+model OrderFinancialFact {
+  id                String           @id @default(uuid())
+  tenantId          String           @map("tenant_id")
+  orderId           String           @map("order_id")
+  version           Int              @default(1)
+  orderNumber       String           @map("order_number")
+  orderStatus       InternalOrderStatus @map("order_status")
+  channelProvider   ChannelProvider? @map("channel_provider")
+  revenueAmount     Decimal          @default(0) @map("revenue_amount") @db.Decimal(18, 4)
+  cogsAmount        Decimal          @default(0) @map("cogs_amount") @db.Decimal(18, 4)
+  channelFeeAmount  Decimal          @default(0) @map("channel_fee_amount") @db.Decimal(18, 4)
+  grossMarginAmount Decimal          @default(0) @map("gross_margin_amount") @db.Decimal(18, 4)
+  currency          String           @default("BRL")
+  itemCount         Int              @default(0) @map("item_count")
+  fulfilledAt       DateTime?        @map("fulfilled_at")
+  calculatedAt      DateTime         @default(now()) @map("calculated_at")
+  components        Json             @map("components_json")
+  createdAt         DateTime         @default(now()) @map("created_at")
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order  InternalOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, orderId, version])
+  @@index([tenantId, calculatedAt])
+  @@index([tenantId, channelProvider, calculatedAt])
+  @@index([tenantId, orderStatus])
+  @@map("order_financial_facts")
 }
 
 model ChannelIntegration {

@@ -1440,6 +1440,26 @@ GET /channels/inventory-sync/status
 POST /channels/inventory-sync/process-pending
 ```
 
+## Fase 10.0.9 - Financial Intelligence Inicial
+
+A 10.0.9 adiciona fatos financeiros operacionais de pedidos e um dashboard inicial de margem.
+
+- `OrderFinancialFact` registra snapshot versionado por pedido concluido.
+- O snapshot e criado no fulfillment do pedido interno.
+- O CMV usa `ProductSku.averageCost * quantidade` com `Decimal`.
+- Como `InternalOrder` ainda nao captura preco de venda, `revenueAmount` inicia em `0` e a margem fica explicitamente explicavel.
+- O dashboard expõe pedidos com fato, receita operacional, CMV e margem bruta.
+- Filtros por periodo e canal existem no contrato; pedidos internos atuais aparecem como canal interno/nulo.
+- UI `/analytics` substitui o placeholder e mostra fatos + nota de que nao e conciliacao de caixa.
+- Fora de escopo: conciliacao 9A, recebiveis, liquidacao, gateway settlement e financeiro definitivo por marketplace.
+
+Endpoints:
+
+```text
+GET /financial-intelligence/dashboard
+GET /financial-intelligence/order-facts
+```
+
 ### Platform Admin as Internal Tenant User
 
 O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:

@@ -169,3 +169,16 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Segurança:** O frontend esconde ações sem permissão/capability, mas o backend valida `@RequirePermissions` e `@RequireCapabilities`.
 - **Fora de escopo:** warehouses, saldos, movimentações, reservas, pedidos, marketplace, malha fina e financeiro por pedido.
 - **i18n:** Namespace `catalog.*` em pt-BR e en-US.
+
+### Analytics
+
+- **Rota:** `/analytics`
+- **Status:** Implementada 10.0.9.
+- **Permissões:** `financial-intelligence:read`
+- **Capability:** `financial.analytics.read`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppSelect`, `AppTable`, `AppBadge`, `AppErrorState`.
+- **Objetivo:** Exibir indicadores operacionais de `OrderFinancialFact` e fatos financeiros por pedido concluído.
+- **Fluxos:** dashboard com contagem, receita operacional, CMV e margem; filtro por canal; tabela de facts com data, pedido, canal e componentes de margem.
+- **Segurança:** backend valida permissão/capability; frontend apenas esconde rota/menu sem acesso.
+- **Fora de escopo:** conciliação 9A, settlement de gateway, recebíveis e margem financeira conciliada.
+- **i18n:** Namespace `financialIntelligence.*` em pt-BR e en-US.
