@@ -61,6 +61,23 @@ enum InternalOrderStatus {
   FULFILLED
 }
 
+enum ChannelProvider {
+  MOCK
+  MERCADO_LIVRE
+}
+
+enum ChannelIntegrationStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum ChannelWebhookStatus {
+  RECEIVED
+  DUPLICATE
+  INVALID
+  DLQ
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -92,6 +109,8 @@ model Tenant {
   inventoryReservations InventoryReservation[]
   internalOrders        InternalOrder[]
   internalOrderItems    InternalOrderItem[]
+  channelIntegrations   ChannelIntegration[]
+  channelWebhookEvents  ChannelWebhookInboxEvent[]
 
   @@map("tenants")
 }
@@ -485,6 +504,53 @@ model InternalOrderItem {
   @@index([tenantId, skuId])
   @@index([tenantId, warehouseId])
   @@map("internal_order_items")
+}
+
+model ChannelIntegration {
+  id                String                   @id @default(uuid())
+  tenantId          String                   @map("tenant_id")
+  provider          ChannelProvider
+  name              String
+  status            ChannelIntegrationStatus @default(ACTIVE)
+  webhookSecretHash String                   @map("webhook_secret_hash")
+  createdByUserId   String?                  @map("created_by_user_id")
+  createdAt         DateTime                 @default(now()) @map("created_at")
+  updatedAt         DateTime                 @updatedAt @map("updated_at")
+
+  tenant        Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  webhookEvents ChannelWebhookInboxEvent[]
+
+  @@unique([tenantId, provider, name])
+  @@index([tenantId, provider, status])
+  @@index([provider, webhookSecretHash])
+  @@map("channel_integrations")
+}
+
+model ChannelWebhookInboxEvent {
+  id              String               @id @default(uuid())
+  tenantId        String               @map("tenant_id")
+  integrationId   String               @map("integration_id")
+  provider        ChannelProvider
+  providerEventId String               @map("provider_event_id")
+  eventType       String               @map("event_type")
+  status          ChannelWebhookStatus @default(RECEIVED)
+  payloadHash     String               @map("payload_hash")
+  payloadSummary  Json?                @map("payload_summary")
+  receivedAt      DateTime             @default(now()) @map("received_at")
+  processedAt     DateTime?            @map("processed_at")
+  failureReason   String?              @map("failure_reason")
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  integration ChannelIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerEventId])
+  @@index([tenantId, status])
+  @@index([tenantId, provider])
+  @@index([integrationId])
+  @@index([receivedAt])
+  @@map("channel_webhook_inbox_events")
 }
 
 model PasswordResetToken {

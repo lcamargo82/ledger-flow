@@ -32,6 +32,13 @@ channels:
         $ref: '#/components/messages/OrderCancelled'
       orderFulfilled:
         $ref: '#/components/messages/OrderFulfilled'
+  channel.events:
+    address: ledgerflow.channel.events
+    messages:
+      channelWebhookReceived:
+        $ref: '#/components/messages/ChannelWebhookReceived'
+      channelWebhookInvalid:
+        $ref: '#/components/messages/ChannelWebhookInvalid'
 components:
   messages:
     PaymentChargeRequested:
@@ -104,6 +111,18 @@ components:
       summary: Event emitted when an internal order consumes reservations and is fulfilled.
       payload:
         $ref: '#/components/schemas/InternalOrderStatusChangedPayload'
+    ChannelWebhookReceived:
+      name: channel.webhook.received
+      title: Channel Webhook Received
+      summary: Event emitted when a channel webhook is accepted into the sanitized inbox.
+      payload:
+        $ref: '#/components/schemas/ChannelWebhookInboxPayload'
+    ChannelWebhookInvalid:
+      name: channel.webhook.invalid
+      title: Channel Webhook Invalid
+      summary: Event emitted when a channel webhook payload is structurally invalid.
+      payload:
+        $ref: '#/components/schemas/ChannelWebhookInboxPayload'
   schemas:
     InternalOrderStatusChangedPayload:
       type: object
@@ -119,3 +138,27 @@ components:
             - CONFIRMED
             - CANCELLED
             - FULFILLED
+    ChannelWebhookInboxPayload:
+      type: object
+      required:
+        - inboxEventId
+        - provider
+        - providerEventId
+        - status
+      properties:
+        inboxEventId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - MOCK
+            - MERCADO_LIVRE
+        providerEventId:
+          type: string
+        status:
+          type: string
+          enum:
+            - RECEIVED
+            - DUPLICATE
+            - INVALID
+            - DLQ
