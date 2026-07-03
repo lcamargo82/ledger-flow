@@ -138,6 +138,8 @@ model Tenant {
   listingSkuMappings    ListingSkuMapping[]
   channelInventorySyncs ChannelInventorySyncState[]
   providerSettlementEvents ProviderSettlementEvent[]
+  reconciliationCases      ReconciliationCase[]
+  reconciliationPolicies   ReconciliationPolicy[]
 
   @@map("tenants")
 }
@@ -897,6 +899,7 @@ model Payment {
   gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
   events               PaymentEvent[]
   webhookInboxEvents   WebhookInboxEvent[]
+  reconciliationCases   ReconciliationCase[]
 
   @@unique([tenantId, reference])
   @@unique([tenantId, idempotencyKeyHash])
@@ -1086,6 +1089,28 @@ enum ExportJobType {
   CATALOG_PRODUCTS
 }
 
+enum ReconciliationCaseStatus {
+  PENDING
+  AUTO_MATCHED
+  MANUALLY_MATCHED
+  RECONCILED
+  UNMATCHED
+  AMBIGUOUS
+  AMOUNT_DIVERGENCE
+  CURRENCY_DIVERGENCE
+  STATUS_DIVERGENCE
+  IGNORED
+  RESOLVED_EXCEPTION
+}
+
+enum ReconciliationMatchType {
+  PROVIDER_PAYMENT_ID
+  EXTERNAL_REFERENCE
+  EXPLICIT_LINK
+  AMOUNT_CURRENCY_TIME_CANDIDATE
+  NONE
+}
+
 model ExportJob {
   id                String          @id @default(uuid())
   tenantId          String          @map("tenant_id")
@@ -1142,6 +1167,7 @@ model ProviderSettlementEvent {
 
   tenant                  Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   sourceWebhookInboxEvent WebhookInboxEvent?  @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
+  reconciliationCases     ReconciliationCase[]
 
   @@unique([provider, providerEventId])
   @@index([provider, providerSettlementId])
@@ -1150,6 +1176,56 @@ model ProviderSettlementEvent {
   @@index([tenantId, provider, occurredAt])
   @@index([sourceWebhookInboxEventId])
   @@map("provider_settlement_events")
+}
+
+model ReconciliationCase {
+  id                    String                   @id @default(uuid())
+  tenantId              String                   @map("tenant_id")
+  provider              WebhookProvider
+  status                ReconciliationCaseStatus @default(PENDING)
+  matchType             ReconciliationMatchType  @default(NONE) @map("match_type")
+  settlementEventId     String                   @map("settlement_event_id")
+  paymentId             String?                  @map("payment_id")
+  orderId               String?                  @map("order_id")
+  expectedAmountMinor   Decimal?                 @map("expected_amount_minor") @db.Decimal(18, 0)
+  receivedAmountMinor   Decimal?                 @map("received_amount_minor") @db.Decimal(18, 0)
+  differenceAmountMinor Decimal?                 @map("difference_amount_minor") @db.Decimal(18, 0)
+  currency              String                   @default("BRL")
+  currencyExponent      Int                      @default(2) @map("currency_exponent")
+  policyVersion         Int                      @default(1) @map("policy_version")
+  matchedAt             DateTime?                @map("matched_at")
+  reconciledAt          DateTime?                @map("reconciled_at")
+  createdAt             DateTime                 @default(now()) @map("created_at")
+  updatedAt             DateTime                 @updatedAt @map("updated_at")
+
+  tenant          Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  settlementEvent ProviderSettlementEvent @relation(fields: [settlementEventId], references: [id], onDelete: Restrict)
+  payment         Payment?                @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, settlementEventId])
+  @@index([tenantId, status])
+  @@index([tenantId, provider, createdAt])
+  @@index([paymentId])
+  @@map("reconciliation_cases")
+}
+
+model ReconciliationPolicy {
+  id                   String           @id @default(uuid())
+  tenantId             String           @map("tenant_id")
+  provider             WebhookProvider?
+  currency             String
+  currencyExponent     Int              @default(2) @map("currency_exponent")
+  amountToleranceMinor Decimal          @default(0) @map("amount_tolerance_minor") @db.Decimal(18, 0)
+  version              Int              @default(1)
+  isActive             Boolean          @default(true) @map("is_active")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, provider, currency, version])
+  @@index([tenantId, provider, currency, isActive])
+  @@map("reconciliation_policies")
 }
 
 model OutboxEvent {

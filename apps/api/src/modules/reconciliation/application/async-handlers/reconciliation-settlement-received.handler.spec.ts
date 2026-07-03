@@ -1,8 +1,13 @@
 import { ReconciliationSettlementReceivedAsyncHandler } from './reconciliation-settlement-received.handler';
 
 describe('ReconciliationSettlementReceivedAsyncHandler', () => {
-  it('accepts settlement received events without running matching yet', async () => {
-    const handler = new ReconciliationSettlementReceivedAsyncHandler();
+  it('runs matching for settlement received events', async () => {
+    const matchingService = {
+      matchSettlement: jest.fn().mockResolvedValue({ created: true }),
+    };
+    const handler = new ReconciliationSettlementReceivedAsyncHandler(
+      matchingService as never,
+    );
 
     await expect(
       handler.handle({
@@ -18,7 +23,6 @@ describe('ReconciliationSettlementReceivedAsyncHandler', () => {
         },
       }),
     ).resolves.toBeUndefined();
-    expect(handler.eventType).toBe('reconciliation.settlement_received');
-    expect(handler.consumerName).toBe('ReconciliationSettlementReceivedAsyncHandler');
+    expect(matchingService.matchSettlement).toHaveBeenCalledWith('settlement-1');
   });
 });
