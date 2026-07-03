@@ -21,6 +21,7 @@ docs/
 ├─ specs/9A-reconciliation-components-i18n.md
 ├─ specs/9A-reconciliation-sprint-plan.md
 ├─ backlog/9A-reconciliation-backlog.md
+├─ runbooks/9A-reconciliation-operational-readiness.md
 └─ adr/0034-reconciliation-domain-and-matching-strategy.md
 ```
 
@@ -31,6 +32,7 @@ Decisões de escopo inicial:
 - Valores conciliáveis serão comparados em unidade mínima (`amountMinor`), não em `number`.
 - CSV assíncrono via streams entra no aceite inicial; XLSX fica no backlog posterior.
 - Capabilities de conciliação ficam em grupo próprio, reutilizando o CapabilityGuard existente.
+- A 9A.8 fecha o fluxo com checklist operacional em `docs/runbooks/9A-reconciliation-operational-readiness.md`, OpenAPI revisado e AsyncAPI para `reconciliation.settlement_received` e `reconciliation.sync.completed`.
 
 Este pacote organiza a evolução do LedgerFlow para uma plataforma ERP omnichannel, sem transformar a primeira implementação em um módulo monolítico excessivamente grande.
 

@@ -69,9 +69,9 @@ export class AsaasReconciliationProviderAdapter implements ReconciliationProvide
 
   private sanitizePayload(
     event: NormalizedWebhookEvent,
-  ): Record<string, string> {
+  ): Record<string, unknown> {
     const summary = (event.payloadSummary ?? {}) as Record<string, unknown>;
-    return {
+    const sanitized: Record<string, unknown> = {
       ...(this.asString(summary.eventId) && {
         eventId: this.asString(summary.eventId),
       }),
@@ -94,6 +94,30 @@ export class AsaasReconciliationProviderAdapter implements ReconciliationProvide
         eventDate: this.asString(summary.eventDate),
       }),
     };
+    const redactedFields = this.findRedactedFields(summary);
+
+    if (redactedFields.length > 0) {
+      sanitized.redactedFields = redactedFields;
+    }
+
+    return sanitized;
+  }
+
+  private findRedactedFields(summary: Record<string, unknown>) {
+    const sensitiveKeys = new Set([
+      'accessToken',
+      'apiKey',
+      'authorization',
+      'billingAddress',
+      'creditCard',
+      'customer',
+      'token',
+      'webhookSecret',
+    ]);
+
+    return Object.keys(summary)
+      .filter((key) => sensitiveKeys.has(key))
+      .sort();
   }
 
   private asString(value: unknown) {

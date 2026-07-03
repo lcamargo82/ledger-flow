@@ -70,4 +70,7 @@ A fase 9A não deve ser renomeada para 8A. A fase 8A representa a confiabilidade
 ## 9A.8 — Hardening e fechamento
 
 - E2E, carga, métricas, LGPD, revisão docs/OpenAPI/AsyncAPI.
+- Runbook operacional em `docs/runbooks/9A-reconciliation-operational-readiness.md`.
+- AsyncAPI cobre `reconciliation.settlement_received` e `reconciliation.sync.completed`.
+- OpenAPI documenta o resumo de `POST /reconciliation/sync/asaas`.
 - Aceite: replay idempotente, worker resiliente e checklist operacional concluído.
