@@ -11,7 +11,7 @@ import { CapabilityPolicyService } from '../../../platform/application/services/
 import {
   REQUIRED_CAPABILITIES_KEY,
 } from '../decorators/require-capabilities.decorator';
-import type { CommerceCapability } from '../../../platform/domain/constants/platform-capabilities';
+import type { PlatformCapability } from '../../../platform/domain/constants/platform-capabilities';
 
 @Injectable()
 export class CapabilityGuard implements CanActivate {
@@ -22,7 +22,7 @@ export class CapabilityGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredCapabilities =
-      this.reflector.getAllAndOverride<CommerceCapability[]>(
+      this.reflector.getAllAndOverride<PlatformCapability[]>(
         REQUIRED_CAPABILITIES_KEY,
         [context.getHandler(), context.getClass()],
       );

@@ -1584,6 +1584,14 @@
       "mpConnectionFailed": "Could not connect Mercado Pago."
     }
   },
+  "reconciliation": {
+    "title": "Financial reconciliation",
+    "description": "Track settlements, matching, and financial divergences without changing payments to hide exceptions.",
+    "empty": {
+      "title": "No reconciliation cases yet",
+      "description": "The 9A foundation is ready. Settlement ingestion and automatic matching arrive in the next sprints."
+    }
+  },
   "features": {
     "gatewayConnections": "Gateway Connections",
     "asaasGateway": "Asaas Gateway",

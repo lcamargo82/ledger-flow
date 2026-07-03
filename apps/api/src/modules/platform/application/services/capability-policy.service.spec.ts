@@ -1,6 +1,9 @@
 import { SubscriptionPlan, TenantSubscriptionStatus } from '@prisma/client';
 import { CapabilityPolicyService } from './capability-policy.service';
-import { CommerceCapabilities } from '../../domain/constants/platform-capabilities';
+import {
+  CommerceCapabilities,
+  ReconciliationCapabilities,
+} from '../../domain/constants/platform-capabilities';
 
 describe('CapabilityPolicyService', () => {
   const prisma = {
@@ -42,6 +45,19 @@ describe('CapabilityPolicyService', () => {
     ).resolves.toBe(false);
   });
 
+  it('denies reconciliation capabilities for PROFESSIONAL tenants', async () => {
+    prisma.tenantSubscription.findUnique.mockResolvedValue({
+      plan: SubscriptionPlan.PROFESSIONAL,
+      status: TenantSubscriptionStatus.ACTIVE,
+    });
+
+    await expect(
+      service.hasCapabilities('tenant-1', [
+        ReconciliationCapabilities.Read,
+      ]),
+    ).resolves.toBe(false);
+  });
+
   it('denies capabilities for inactive subscriptions', async () => {
     prisma.tenantSubscription.findUnique.mockResolvedValue({
       plan: SubscriptionPlan.ENTERPRISE,
@@ -76,6 +92,7 @@ describe('CapabilityPolicyService', () => {
         CommerceCapabilities.InventoryManage,
         CommerceCapabilities.ChannelsConnect,
         CommerceCapabilities.FinancialAnalyticsRead,
+        ReconciliationCapabilities.Read,
       ]),
     );
   });

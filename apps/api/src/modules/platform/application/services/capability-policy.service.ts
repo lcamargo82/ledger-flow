@@ -6,10 +6,11 @@ import {
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import {
   CommerceCapabilities,
-  type CommerceCapability,
+  ReconciliationCapabilities,
+  type PlatformCapability,
 } from '../../domain/constants/platform-capabilities';
 
-const erpBasicCapabilities: CommerceCapability[] = [
+const erpBasicCapabilities: PlatformCapability[] = [
   CommerceCapabilities.CatalogManage,
   CommerceCapabilities.InventoryManage,
   CommerceCapabilities.InventoryAdjust,
@@ -17,7 +18,7 @@ const erpBasicCapabilities: CommerceCapability[] = [
   CommerceCapabilities.InventoryReportsRead,
 ];
 
-const commerceCapabilities: CommerceCapability[] = [
+const commerceCapabilities: PlatformCapability[] = [
   ...erpBasicCapabilities,
   CommerceCapabilities.ChannelsConnect,
   CommerceCapabilities.ChannelsImportListings,
@@ -26,12 +27,20 @@ const commerceCapabilities: CommerceCapability[] = [
   CommerceCapabilities.OrdersChannelIntake,
 ];
 
-const masterCapabilities: CommerceCapability[] = [
-  ...commerceCapabilities,
-  CommerceCapabilities.FinancialAnalyticsRead,
+const reconciliationCapabilities: PlatformCapability[] = [
+  ReconciliationCapabilities.Read,
+  ReconciliationCapabilities.Manage,
+  ReconciliationCapabilities.Export,
+  ReconciliationCapabilities.Sync,
 ];
 
-const capabilitiesByPlan: Record<SubscriptionPlan, CommerceCapability[]> = {
+const masterCapabilities: PlatformCapability[] = [
+  ...commerceCapabilities,
+  CommerceCapabilities.FinancialAnalyticsRead,
+  ...reconciliationCapabilities,
+];
+
+const capabilitiesByPlan: Record<SubscriptionPlan, PlatformCapability[]> = {
   [SubscriptionPlan.FREE]: [],
   [SubscriptionPlan.STARTER]: [],
   [SubscriptionPlan.PROFESSIONAL]: erpBasicCapabilities,
@@ -45,7 +54,7 @@ export class CapabilityPolicyService {
 
   async hasCapabilities(
     tenantId: string,
-    requiredCapabilities: CommerceCapability[],
+    requiredCapabilities: PlatformCapability[],
   ): Promise<boolean> {
     if (requiredCapabilities.length === 0) {
       return true;
@@ -70,13 +79,13 @@ export class CapabilityPolicyService {
     );
   }
 
-  getCapabilitiesForPlan(plan: SubscriptionPlan): CommerceCapability[] {
+  getCapabilitiesForPlan(plan: SubscriptionPlan): PlatformCapability[] {
     return capabilitiesByPlan[plan];
   }
 
   async getCapabilitiesForTenant(
     tenantId: string,
-  ): Promise<CommerceCapability[]> {
+  ): Promise<PlatformCapability[]> {
     const subscription = await this.prisma.tenantSubscription.findUnique({
       where: { tenantId },
       select: {

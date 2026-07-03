@@ -14,3 +14,15 @@ export const CommerceCapabilities = {
 
 export type CommerceCapability =
   (typeof CommerceCapabilities)[keyof typeof CommerceCapabilities];
+
+export const ReconciliationCapabilities = {
+  Read: 'reconciliation.read',
+  Manage: 'reconciliation.manage',
+  Export: 'reconciliation.export',
+  Sync: 'reconciliation.sync',
+} as const;
+
+export type ReconciliationCapability =
+  (typeof ReconciliationCapabilities)[keyof typeof ReconciliationCapabilities];
+
+export type PlatformCapability = CommerceCapability | ReconciliationCapability;

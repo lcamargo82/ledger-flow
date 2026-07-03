@@ -197,12 +197,20 @@
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.reports') }}</span>
         </router-link>
-        <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
+        <router-link
+          v-if="
+            authStore.checkAllPermissions(['reconciliation:read']) &&
+            authStore.checkAllCapabilities(['reconciliation.read'])
+          "
+          to="/reconciliation"
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
             >account_tree</span
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>
-        </a>
+        </router-link>
 
         <!-- Platform Admin Menu -->
         <div
