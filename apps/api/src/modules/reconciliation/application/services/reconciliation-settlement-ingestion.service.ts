@@ -31,6 +31,20 @@ export class ReconciliationSettlementIngestionService {
       return { settlementEvent: null, created: false };
     }
 
+    return this.ingestNormalizedSettlement(
+      inboxEvent.tenantId,
+      normalized,
+      inboxEvent.id,
+      inboxEvent.receivedAt,
+    );
+  }
+
+  async ingestNormalizedSettlement(
+    tenantId: string | null,
+    normalized: NormalizedSettlementEvent,
+    sourceWebhookInboxEventId?: string,
+    receivedAt = new Date(),
+  ): Promise<IngestionResult> {
     return this.prisma.$transaction(async (tx) => {
       const existing = await tx.providerSettlementEvent.findUnique({
         where: {
@@ -46,7 +60,12 @@ export class ReconciliationSettlementIngestionService {
       }
 
       const settlementEvent = await tx.providerSettlementEvent.create({
-        data: this.toCreateInput(normalized, inboxEvent),
+        data: this.toCreateInput(
+          normalized,
+          tenantId,
+          sourceWebhookInboxEventId,
+          receivedAt,
+        ),
       });
 
       const outboxPayload = {
@@ -94,10 +113,12 @@ export class ReconciliationSettlementIngestionService {
 
   private toCreateInput(
     normalized: NormalizedSettlementEvent,
-    inboxEvent: WebhookInboxEvent,
+    tenantId: string | null,
+    sourceWebhookInboxEventId: string | undefined,
+    receivedAt: Date,
   ): Prisma.ProviderSettlementEventUncheckedCreateInput {
     return {
-      tenantId: inboxEvent.tenantId,
+      tenantId,
       provider: normalized.provider,
       providerEventId: normalized.providerEventId,
       providerSettlementId: normalized.providerSettlementId,
@@ -114,8 +135,8 @@ export class ReconciliationSettlementIngestionService {
       availableAt: normalized.availableAt,
       payloadHash: normalized.payloadHash,
       normalizedPayload: normalized.normalizedPayload as Prisma.InputJsonValue,
-      sourceWebhookInboxEventId: inboxEvent.id,
-      receivedAt: inboxEvent.receivedAt,
+      sourceWebhookInboxEventId,
+      receivedAt,
     };
   }
 

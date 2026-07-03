@@ -1090,6 +1090,7 @@ enum ExportJobFormat {
 enum ExportJobType {
   ORDER_FINANCIAL_FACTS
   CATALOG_PRODUCTS
+  RECONCILIATION_CASES
 }
 
 enum ReconciliationCaseStatus {

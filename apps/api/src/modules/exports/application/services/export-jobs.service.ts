@@ -235,6 +235,28 @@ export class ExportJobsService {
       ]);
       rowCount = await this.streamOrderFinancialFacts(job, stream);
     }
+    if (job.type === ExportJobType.RECONCILIATION_CASES) {
+      await this.writeLine(stream, [
+        'case_id',
+        'provider',
+        'status',
+        'match_type',
+        'expected_amount_minor',
+        'received_amount_minor',
+        'difference_amount_minor',
+        'currency',
+        'policy_version',
+        'provider_event_id',
+        'provider_payment_id',
+        'external_reference',
+        'payment_reference',
+        'payment_provider_payment_id',
+        'created_at',
+        'matched_at',
+        'reconciled_at',
+      ]);
+      rowCount = await this.streamReconciliationCases(job, stream);
+    }
 
     stream.end();
     await once(stream, 'finish');
@@ -314,6 +336,85 @@ export class ExportJobsService {
 
     if (dateFrom || dateTo) {
       where.calculatedAt = {
+        ...(dateFrom && { gte: new Date(dateFrom) }),
+        ...(dateTo && { lte: new Date(dateTo) }),
+      };
+    }
+
+    return where;
+  }
+
+  private async streamReconciliationCases(job: ExportJob, stream: NodeJS.WritableStream) {
+    let cursor: string | undefined;
+    let rowCount = 0;
+    const where = this.buildReconciliationCasesWhere(job);
+
+    while (true) {
+      const rows = await this.prisma.reconciliationCase.findMany({
+        where,
+        orderBy: { id: 'asc' },
+        take: BATCH_SIZE,
+        ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+        include: {
+          settlementEvent: {
+            select: {
+              providerEventId: true,
+              providerPaymentId: true,
+              externalReference: true,
+            },
+          },
+          payment: {
+            select: {
+              reference: true,
+              providerPaymentId: true,
+            },
+          },
+        },
+      });
+
+      if (rows.length === 0) break;
+      for (const reconciliationCase of rows) {
+        await this.writeLine(stream, [
+          this.preserveAsSpreadsheetText(reconciliationCase.id),
+          reconciliationCase.provider,
+          reconciliationCase.status,
+          reconciliationCase.matchType,
+          reconciliationCase.expectedAmountMinor?.toString() ?? '',
+          reconciliationCase.receivedAmountMinor?.toString() ?? '',
+          reconciliationCase.differenceAmountMinor?.toString() ?? '',
+          reconciliationCase.currency,
+          reconciliationCase.policyVersion,
+          reconciliationCase.settlementEvent.providerEventId,
+          reconciliationCase.settlementEvent.providerPaymentId ?? '',
+          reconciliationCase.settlementEvent.externalReference ?? '',
+          reconciliationCase.payment?.reference ?? '',
+          reconciliationCase.payment?.providerPaymentId ?? '',
+          reconciliationCase.createdAt.toISOString(),
+          reconciliationCase.matchedAt?.toISOString() ?? '',
+          reconciliationCase.reconciledAt?.toISOString() ?? '',
+        ]);
+        rowCount += 1;
+      }
+      cursor = rows[rows.length - 1].id;
+    }
+
+    return rowCount;
+  }
+
+  private buildReconciliationCasesWhere(job: ExportJob): Prisma.ReconciliationCaseWhereInput {
+    const parameters = (job.parameters ?? {}) as Record<string, unknown>;
+    const where: Prisma.ReconciliationCaseWhereInput = { tenantId: job.tenantId };
+    const status = typeof parameters.status === 'string' ? parameters.status : undefined;
+    const provider = typeof parameters.provider === 'string' ? parameters.provider : undefined;
+    const currency = typeof parameters.currency === 'string' ? parameters.currency : undefined;
+    const dateFrom = typeof parameters.dateFrom === 'string' ? parameters.dateFrom : undefined;
+    const dateTo = typeof parameters.dateTo === 'string' ? parameters.dateTo : undefined;
+
+    if (status) where.status = status as never;
+    if (provider) where.provider = provider as never;
+    if (currency) where.currency = currency;
+    if (dateFrom || dateTo) {
+      where.createdAt = {
         ...(dateFrom && { gte: new Date(dateFrom) }),
         ...(dateTo && { lte: new Date(dateTo) }),
       };
