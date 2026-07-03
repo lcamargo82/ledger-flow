@@ -51,6 +51,13 @@ describe('commerce navigation foundation', () => {
     expect(exportsRoute?.meta.permissions).toEqual(['reports:export'])
   })
 
+  it('registers reconciliation route behind permission and capability metadata', () => {
+    const reconciliationRoute = router.getRoutes().find((item) => item.path === '/reconciliation')
+
+    expect(reconciliationRoute?.meta.permissions).toEqual(['reconciliation:read'])
+    expect(reconciliationRoute?.meta.capabilities).toEqual(['reconciliation.read'])
+  })
+
   it('checks capabilities from the authenticated user session', () => {
     const authStore = useAuthStore()
     authStore.user = {
@@ -91,5 +98,9 @@ describe('commerce navigation foundation', () => {
     expect(ptBR.nav.analytics).toBe('Analytics')
     expect(ptBR.exports.actions.create).toBe('Gerar CSV')
     expect(enUS.exports.status.COMPLETED).toBe('Completed')
+    expect(ptBR.nav.reconciliation).toBe('Conciliação')
+    expect(enUS.nav.reconciliation).toBe('Reconciliation')
+    expect(ptBR.reconciliation.title).toBe('Conciliação financeira')
+    expect(enUS.reconciliation.empty.title).toBe('No reconciliation cases yet')
   })
 })

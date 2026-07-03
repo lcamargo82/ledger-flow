@@ -3,6 +3,7 @@ import { AsyncHandlerRegistryService } from '../async/application/services/async
 import { AsaasWebhookProcessingAsyncHandler } from './application/async-handlers/asaas-webhook-processing.handler';
 import { Module, OnModuleInit } from '@nestjs/common';
 import { WebhookProvider } from '@prisma/client';
+import { ReconciliationModule } from '../reconciliation/reconciliation.module';
 import { PrismaWebhookInboxRepository } from './infra/repositories/prisma-webhook-inbox.repository';
 import { WebhookIngressService } from './application/services/webhook-ingress.service';
 import { PaymentWebhookSyncService } from './application/services/payment-webhook-sync.service';
@@ -23,7 +24,7 @@ import { PagBankWebhookAdapter } from './infra/providers/pagbank/pagbank-webhook
 import { PagarmeWebhookAdapter } from './infra/providers/pagarme/pagarme-webhook.adapter';
 
 @Module({
-  imports: [AsyncModule],
+  imports: [AsyncModule, ReconciliationModule],
   controllers: [AsaasWebhooksController],
   providers: [
     AsaasWebhookProcessingAsyncHandler,
@@ -70,10 +71,7 @@ export class WebhooksModule implements OnModuleInit {
 
     this.adapterRegistry.register(WebhookProvider.ASAAS, this.asaasAdapter);
     this.adapterRegistry.register(WebhookProvider.STRIPE, this.stripeAdapter);
-    this.adapterRegistry.register(
-      WebhookProvider.MERCADO_PAGO,
-      this.mercadoPagoAdapter,
-    );
+    this.adapterRegistry.register(WebhookProvider.MERCADO_PAGO, this.mercadoPagoAdapter);
     this.adapterRegistry.register(WebhookProvider.PAGBANK, this.pagBankAdapter);
     this.adapterRegistry.register(WebhookProvider.PAGARME, this.pagarmeAdapter);
 

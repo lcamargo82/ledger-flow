@@ -43,6 +43,14 @@ export class RabbitMqTopologyService {
         dlx,
         'webhook.dlq',
       );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.reconciliation.events.q',
+        exchange,
+        'reconciliation.event.*',
+        dlx,
+        'reconciliation.dlq',
+      );
 
       // Retry Queues
       const retryIntervals = [30000, 120000, 600000, 1800000]; // 30s, 2m, 10m, 30m
@@ -65,6 +73,13 @@ export class RabbitMqTopologyService {
           deadLetterRoutingKey: 'webhook.command.retry',
           messageTtl: ttl,
         });
+
+        await channel.assertQueue(`ledgerflow.reconciliation.retry.${name}.q`, {
+          durable: true,
+          deadLetterExchange: exchange,
+          deadLetterRoutingKey: 'reconciliation.event.retry',
+          messageTtl: ttl,
+        });
       }
 
       // DLQs
@@ -74,13 +89,16 @@ export class RabbitMqTopologyService {
       await channel.assertQueue('ledgerflow.webhooks.dlq', { durable: true });
       await channel.bindQueue('ledgerflow.webhooks.dlq', dlx, 'webhook.dlq');
 
+      await channel.assertQueue('ledgerflow.reconciliation.dlq', {
+        durable: true,
+      });
+      await channel.bindQueue('ledgerflow.reconciliation.dlq', dlx, 'reconciliation.dlq');
+
       await channel.close();
       await connection.close();
       this.logger.log('rabbitmq.topology.initialized');
     } catch (error: any) {
-      this.logger.error(
-        `Failed to initialize RabbitMQ topology: ${error.message}`,
-      );
+      this.logger.error(`Failed to initialize RabbitMQ topology: ${error.message}`);
       throw error;
     }
   }

@@ -1584,6 +1584,59 @@
       "mpConnectionFailed": "Could not connect Mercado Pago."
     }
   },
+  "reconciliation": {
+    "title": "Financial reconciliation",
+    "description": "Track settlements, matching, and financial divergences without changing payments to hide exceptions.",
+    "empty": {
+      "title": "No reconciliation cases yet",
+      "description": "The 9A foundation is ready. Settlement ingestion and automatic matching arrive in the next sprints."
+    },
+    "summary": {
+      "total": "Cases"
+    },
+    "dashboard": {
+      "expected": "Expected",
+      "reconciled": "Reconciled",
+      "pending": "Pending",
+      "divergent": "Divergent",
+      "cases": "cases",
+      "aging": "Aging",
+      "providers": "Providers",
+      "statuses": "Status",
+      "note": "Operational margin is not reconciled cash. These indicators only use financial reconciliation snapshots."
+    },
+    "table": {
+      "case": "Case",
+      "status": "Status",
+      "provider": "Provider",
+      "received": "Received",
+      "difference": "Difference",
+      "reference": "Reference",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "actions": {
+      "review": "Review",
+      "COMMENT": "Comment",
+      "MANUAL_MATCH": "Manual match",
+      "RESOLVE_EXCEPTION": "Resolve exception",
+      "IGNORE": "Ignore",
+      "REOPEN": "Reopen"
+    },
+    "decisionModal": {
+      "title": "Register decision",
+      "action": "Action",
+      "paymentId": "Payment ID",
+      "reasonCode": "Reason code",
+      "comment": "Comment",
+      "submit": "Register decision"
+    },
+    "errors": {
+      "default": "Could not load reconciliation.",
+      "forbidden": "You do not have access to reconciliation.",
+      "invalid": "Review the decision data."
+    }
+  },
   "features": {
     "gatewayConnections": "Gateway Connections",
     "asaasGateway": "Asaas Gateway",

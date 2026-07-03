@@ -61,6 +61,13 @@ channels:
         $ref: '#/components/messages/ExportJobCompleted'
       exportJobFailed:
         $ref: '#/components/messages/ExportJobFailed'
+  reconciliation.events:
+    address: ledgerflow.reconciliation.events
+    messages:
+      settlementReceived:
+        $ref: '#/components/messages/ReconciliationSettlementReceived'
+      syncCompleted:
+        $ref: '#/components/messages/ReconciliationSyncCompleted'
 components:
   messages:
     PaymentChargeRequested:
@@ -216,7 +223,73 @@ components:
       summary: Event emitted when an export job fails during generation.
       payload:
         $ref: '#/components/schemas/ExportJobFailedPayload'
+    ReconciliationSettlementReceived:
+      name: reconciliation.settlement_received
+      title: Reconciliation Settlement Received
+      summary: Event emitted when a provider settlement fact is normalized for reconciliation.
+      payload:
+        $ref: '#/components/schemas/ReconciliationSettlementPayload'
+    ReconciliationSyncCompleted:
+      name: reconciliation.sync.completed
+      title: Reconciliation Sync Completed
+      summary: Event emitted when a controlled provider settlement sync finishes.
+      payload:
+        $ref: '#/components/schemas/ReconciliationSyncCompletedPayload'
   schemas:
+    ReconciliationSyncCompletedPayload:
+      type: object
+      required:
+        - provider
+        - pagesFetched
+        - received
+        - created
+        - duplicates
+      properties:
+        provider:
+          type: string
+          enum:
+            - ASAAS
+            - STRIPE
+            - MERCADO_PAGO
+            - PAGBANK
+            - PAGARME
+        pagesFetched:
+          type: integer
+          minimum: 0
+        received:
+          type: integer
+          minimum: 0
+        created:
+          type: integer
+          minimum: 0
+        duplicates:
+          type: integer
+          minimum: 0
+    ReconciliationSettlementPayload:
+      type: object
+      required:
+        - providerSettlementEventId
+        - provider
+        - providerEventId
+      properties:
+        providerSettlementEventId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - ASAAS
+            - STRIPE
+            - MERCADO_PAGO
+            - PAGBANK
+            - PAGARME
+        providerEventId:
+          type: string
+        providerPaymentId:
+          type: string
+          nullable: true
+        externalReference:
+          type: string
+          nullable: true
     InternalOrderStatusChangedPayload:
       type: object
       required:

@@ -2,7 +2,16 @@ import { mkdtemp, readFile, rm } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { BadRequestException } from '@nestjs/common';
-import { ExportJobFormat, ExportJobStatus, ExportJobType, ProductStatus, ProductType } from '@prisma/client';
+import {
+  ExportJobFormat,
+  ExportJobStatus,
+  ExportJobType,
+  ProductStatus,
+  ProductType,
+  ReconciliationCaseStatus,
+  ReconciliationMatchType,
+  WebhookProvider,
+} from '@prisma/client';
 import { ExportJobsService } from './export-jobs.service';
 
 describe('ExportJobsService', () => {
@@ -23,6 +32,7 @@ describe('ExportJobsService', () => {
       },
       product: { findMany: jest.fn() },
       orderFinancialFact: { findMany: jest.fn() },
+      reconciliationCase: { findMany: jest.fn() },
       auditLog: { create: jest.fn() },
       outboxEvent: { create: jest.fn() },
     };
@@ -111,6 +121,99 @@ describe('ExportJobsService', () => {
           aggregateType: 'ExportJob',
           eventType: 'export.job.completed',
         }),
+      }),
+    );
+  });
+
+  it('streams reconciliation cases into CSV with tenant-scoped filters', async () => {
+    const pendingJob = {
+      id: 'job-reconciliation',
+      tenantId: 'tenant-1',
+      requestedByUserId: 'user-1',
+      type: ExportJobType.RECONCILIATION_CASES,
+      format: ExportJobFormat.CSV,
+      status: ExportJobStatus.PENDING,
+      parameters: {
+        status: ReconciliationCaseStatus.AMOUNT_DIVERGENCE,
+        provider: WebhookProvider.ASAAS,
+        dateFrom: '2026-07-01T00:00:00.000Z',
+        dateTo: '2026-07-03T23:59:59.999Z',
+      },
+      filePath: null,
+      fileName: null,
+      mimeType: null,
+      rowCount: 0,
+      errorCode: null,
+      errorSummary: null,
+      expiresAt: null,
+      startedAt: null,
+      completedAt: null,
+      cancelledAt: null,
+      createdAt: new Date('2026-07-03T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-03T10:00:00.000Z'),
+    };
+    const processingJob = {
+      ...pendingJob,
+      status: ExportJobStatus.PROCESSING,
+      startedAt: new Date('2026-07-03T10:01:00.000Z'),
+    };
+    let completedJob: any;
+
+    prisma.exportJob.findMany.mockResolvedValueOnce([pendingJob]);
+    prisma.exportJob.update.mockImplementation(({ data }: any) => {
+      if (data.status === ExportJobStatus.PROCESSING) return Promise.resolve(processingJob);
+      completedJob = { ...processingJob, ...data };
+      return Promise.resolve(completedJob);
+    });
+    prisma.reconciliationCase.findMany
+      .mockResolvedValueOnce([
+        {
+          id: 'case-001',
+          provider: WebhookProvider.ASAAS,
+          status: ReconciliationCaseStatus.AMOUNT_DIVERGENCE,
+          matchType: ReconciliationMatchType.PROVIDER_PAYMENT_ID,
+          expectedAmountMinor: { toString: () => '12345' },
+          receivedAmountMinor: { toString: () => '12000' },
+          differenceAmountMinor: { toString: () => '-345' },
+          currency: 'BRL',
+          policyVersion: 3,
+          settlementEvent: {
+            providerEventId: 'evt-001',
+            providerPaymentId: 'pay-001',
+            externalReference: 'LF-001',
+          },
+          payment: {
+            reference: 'LF-001',
+            providerPaymentId: 'pay-001',
+          },
+          createdAt: new Date('2026-07-03T10:00:00.000Z'),
+          matchedAt: null,
+          reconciledAt: null,
+        },
+      ])
+      .mockResolvedValueOnce([]);
+
+    await service.processPending('tenant-1', 'user-1');
+    expect(completedJob.filePath).toEqual(expect.any(String));
+    const file = await readFile(completedJob.filePath, 'utf8');
+
+    expect(completedJob.rowCount).toBe(1);
+    expect(file).toContain('"case_id","provider","status","match_type"');
+    expect(file).toContain('"=""case-001"""');
+    expect(file).toContain('"AMOUNT_DIVERGENCE"');
+    expect(prisma.reconciliationCase.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId: 'tenant-1',
+          status: ReconciliationCaseStatus.AMOUNT_DIVERGENCE,
+          provider: WebhookProvider.ASAAS,
+          createdAt: {
+            gte: new Date('2026-07-01T00:00:00.000Z'),
+            lte: new Date('2026-07-03T23:59:59.999Z'),
+          },
+        },
+        take: 100,
+        orderBy: { id: 'asc' },
       }),
     );
   });
