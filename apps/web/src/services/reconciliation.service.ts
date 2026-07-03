@@ -3,11 +3,19 @@ import type {
   CreateReconciliationDecisionPayload,
   ReconciliationCasesFilters,
   ReconciliationCasesResponse,
+  ReconciliationDashboard,
 } from '../types/reconciliation.types'
 
 export class ReconciliationService {
   async listCases(params?: ReconciliationCasesFilters): Promise<ReconciliationCasesResponse> {
     const { data } = await httpClient.get<ReconciliationCasesResponse>('/reconciliation/cases', {
+      params,
+    })
+    return data
+  }
+
+  async getDashboard(params?: ReconciliationCasesFilters): Promise<ReconciliationDashboard> {
+    const { data } = await httpClient.get<ReconciliationDashboard>('/reconciliation/dashboard', {
       params,
     })
     return data
