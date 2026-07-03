@@ -1,4 +1,36 @@
-# LedgerFlow — Documentação do Programa 10.0
+# LedgerFlow — Documentação dos Programas 9A e 10.0
+
+## Programa 9A — Conciliação Financeira
+
+A fase 9A cria o domínio de conciliação financeira. Ela usa a infraestrutura assíncrona da fase 8A, mas não faz parte dela.
+
+```text
+8A — confiabilidade assíncrona
+→ Outbox, RabbitMQ, Worker, Retry, DLQ, Replay, AsyncJobExecution
+
+9A — conciliação financeira
+→ settlement real, matching, divergências, decisions e malha fina
+```
+
+Arquivos do programa:
+
+```text
+docs/
+├─ prd/9A-reconciliation-foundation-prd.md
+├─ sdd/9A-reconciliation-foundation-sdd.md
+├─ specs/9A-reconciliation-components-i18n.md
+├─ specs/9A-reconciliation-sprint-plan.md
+├─ backlog/9A-reconciliation-backlog.md
+└─ adr/0034-reconciliation-domain-and-matching-strategy.md
+```
+
+Decisões de escopo inicial:
+
+- WebhookInboxEvent permanece como registro técnico de entrada; ProviderSettlementEvent será o fato financeiro normalizado da conciliação.
+- ProviderSettlementEvent terá `sourceWebhookInboxEventId` opcional para rastreabilidade.
+- Valores conciliáveis serão comparados em unidade mínima (`amountMinor`), não em `number`.
+- CSV assíncrono via streams entra no aceite inicial; XLSX fica no backlog posterior.
+- Capabilities de conciliação ficam em grupo próprio, reutilizando o CapabilityGuard existente.
 
 Este pacote organiza a evolução do LedgerFlow para uma plataforma ERP omnichannel, sem transformar a primeira implementação em um módulo monolítico excessivamente grande.
 
