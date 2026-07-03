@@ -61,6 +61,11 @@ channels:
         $ref: '#/components/messages/ExportJobCompleted'
       exportJobFailed:
         $ref: '#/components/messages/ExportJobFailed'
+  reconciliation.events:
+    address: ledgerflow.reconciliation.events
+    messages:
+      settlementReceived:
+        $ref: '#/components/messages/ReconciliationSettlementReceived'
 components:
   messages:
     PaymentChargeRequested:
@@ -216,7 +221,38 @@ components:
       summary: Event emitted when an export job fails during generation.
       payload:
         $ref: '#/components/schemas/ExportJobFailedPayload'
+    ReconciliationSettlementReceived:
+      name: reconciliation.settlement_received
+      title: Reconciliation Settlement Received
+      summary: Event emitted when a provider settlement fact is normalized for reconciliation.
+      payload:
+        $ref: '#/components/schemas/ReconciliationSettlementPayload'
   schemas:
+    ReconciliationSettlementPayload:
+      type: object
+      required:
+        - providerSettlementEventId
+        - provider
+        - providerEventId
+      properties:
+        providerSettlementEventId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - ASAAS
+            - STRIPE
+            - MERCADO_PAGO
+            - PAGBANK
+            - PAGARME
+        providerEventId:
+          type: string
+        providerPaymentId:
+          type: string
+          nullable: true
+        externalReference:
+          type: string
+          nullable: true
     InternalOrderStatusChangedPayload:
       type: object
       required:

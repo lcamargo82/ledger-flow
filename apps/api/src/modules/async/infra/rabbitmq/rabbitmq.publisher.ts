@@ -15,9 +15,7 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
       this.channel = await this.connection.createConfirmChannel();
 
       this.channel.on('return', (msg: any) => {
-        this.logger.warn(
-          `Message returned (no route found): ${msg.fields.routingKey}`,
-        );
+        this.logger.warn(`Message returned (no route found): ${msg.fields.routingKey}`);
         // Cannot directly fail the original promise here easily without tracking correlationIds,
         // but since we're tracking the failure, we might need a map of pending publishes.
       });
@@ -66,9 +64,7 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
         (err: any, ok: any) => {
           this.channel.removeListener('return', returnHandler);
           if (err !== null) {
-            this.logger.error(
-              `Publisher confirm failed for ${mappedRoutingKey}`,
-            );
+            this.logger.error(`Publisher confirm failed for ${mappedRoutingKey}`);
             resolve(false);
           } else {
             if (wasReturned) {
@@ -87,6 +83,8 @@ export class RabbitMQPublisher implements AsyncMessagePublisher {
       return 'payment.command.create-charge';
     if (eventType.startsWith('webhook.inbound_processing_requested'))
       return 'webhook.command.process';
+    if (eventType.startsWith('reconciliation.settlement_received'))
+      return 'reconciliation.event.settlement-received';
     return eventType;
   }
 }
