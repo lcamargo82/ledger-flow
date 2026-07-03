@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AsyncEventHandler } from '../../../async/domain/interfaces/async-event-handler.interface';
 import { AsyncMessageEnvelope } from '../../../async/domain/entities/async-message-envelope';
+import { ReconciliationMatchingService } from '../services/reconciliation-matching.service';
 
 @Injectable()
 export class ReconciliationSettlementReceivedAsyncHandler implements AsyncEventHandler {
@@ -8,8 +9,10 @@ export class ReconciliationSettlementReceivedAsyncHandler implements AsyncEventH
   readonly consumerName = 'ReconciliationSettlementReceivedAsyncHandler';
   private readonly logger = new Logger(ReconciliationSettlementReceivedAsyncHandler.name);
 
+  constructor(private readonly matchingService: ReconciliationMatchingService) {}
+
   handle(input: AsyncMessageEnvelope): Promise<void> {
     this.logger.log(`Settlement received for reconciliation foundation: ${input.aggregateId}`);
-    return Promise.resolve();
+    return this.matchingService.matchSettlement(input.aggregateId).then(() => undefined);
   }
 }
