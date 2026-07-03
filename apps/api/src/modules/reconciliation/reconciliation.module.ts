@@ -5,11 +5,13 @@ import { PrismaModule } from '../../database/prisma/prisma.module';
 import { ReconciliationSettlementReceivedAsyncHandler } from './application/async-handlers/reconciliation-settlement-received.handler';
 import { ReconciliationCasesService } from './application/services/reconciliation-cases.service';
 import { ReconciliationDecisionsService } from './application/services/reconciliation-decisions.service';
+import { ReconciliationDashboardService } from './application/services/reconciliation-dashboard.service';
 import { ReconciliationMatchingService } from './application/services/reconciliation-matching.service';
 import { ReconciliationPoliciesService } from './application/services/reconciliation-policies.service';
 import { ReconciliationSettlementIngestionService } from './application/services/reconciliation-settlement-ingestion.service';
 import { AsaasReconciliationProviderAdapter } from './infra/adapters/asaas-reconciliation-provider.adapter';
 import { ReconciliationCasesController } from './presentation/controllers/reconciliation-cases.controller';
+import { ReconciliationDashboardController } from './presentation/controllers/reconciliation-dashboard.controller';
 import { ReconciliationFoundationController } from './presentation/controllers/reconciliation-foundation.controller';
 import { ReconciliationPoliciesController } from './presentation/controllers/reconciliation-policies.controller';
 
@@ -18,11 +20,13 @@ import { ReconciliationPoliciesController } from './presentation/controllers/rec
   controllers: [
     ReconciliationFoundationController,
     ReconciliationCasesController,
+    ReconciliationDashboardController,
     ReconciliationPoliciesController,
   ],
   providers: [
     AsaasReconciliationProviderAdapter,
     ReconciliationCasesService,
+    ReconciliationDashboardService,
     ReconciliationDecisionsService,
     ReconciliationMatchingService,
     ReconciliationPoliciesService,

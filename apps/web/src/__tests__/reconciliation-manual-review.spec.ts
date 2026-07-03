@@ -7,6 +7,7 @@ import { reconciliationService } from '../services/reconciliation.service'
 vi.mock('../services/reconciliation.service', () => ({
   reconciliationService: {
     listCases: vi.fn(),
+    getDashboard: vi.fn(),
     createDecision: vi.fn(),
   },
 }))
@@ -41,6 +42,34 @@ describe('reconciliation manual review', () => {
         },
       ],
       meta: { page: 1, perPage: 20, total: 1, totalPages: 1 },
+    })
+    vi.mocked(reconciliationService.getDashboard).mockResolvedValue({
+      kpis: {
+        expectedAmountMinor: '12345',
+        reconciledAmountMinor: '0',
+        pendingAmountMinor: '12345',
+        divergentAmountMinor: '0',
+        totalCases: 1,
+        reconciledCases: 0,
+        pendingCases: 1,
+        divergentCases: 0,
+      },
+      byStatus: [{ status: 'AMBIGUOUS', count: 1, amountMinor: '12345' }],
+      byProvider: [
+        {
+          provider: 'ASAAS',
+          count: 1,
+          expectedAmountMinor: '12345',
+          receivedAmountMinor: '12345',
+        },
+      ],
+      agingBuckets: [
+        { key: '0_1', label: '0-1d', count: 1, amountMinor: '12345' },
+        { key: '2_3', label: '2-3d', count: 0, amountMinor: '0' },
+        { key: '4_7', label: '4-7d', count: 0, amountMinor: '0' },
+        { key: '8_plus', label: '8+d', count: 0, amountMinor: '0' },
+      ],
+      note: 'cash_reconciliation_not_operational_margin',
     })
   })
 

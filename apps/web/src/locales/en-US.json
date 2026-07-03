@@ -1594,6 +1594,17 @@
     "summary": {
       "total": "Cases"
     },
+    "dashboard": {
+      "expected": "Expected",
+      "reconciled": "Reconciled",
+      "pending": "Pending",
+      "divergent": "Divergent",
+      "cases": "cases",
+      "aging": "Aging",
+      "providers": "Providers",
+      "statuses": "Status",
+      "note": "Operational margin is not reconciled cash. These indicators only use financial reconciliation snapshots."
+    },
     "table": {
       "case": "Case",
       "status": "Status",

@@ -73,6 +73,45 @@ export interface ReconciliationCasesResponse {
   meta: ReconciliationCasesMeta
 }
 
+export interface ReconciliationDashboardKpis {
+  expectedAmountMinor: string
+  reconciledAmountMinor: string
+  pendingAmountMinor: string
+  divergentAmountMinor: string
+  totalCases: number
+  reconciledCases: number
+  pendingCases: number
+  divergentCases: number
+}
+
+export interface ReconciliationDashboardStatus {
+  status: ReconciliationCaseStatus
+  count: number
+  amountMinor: string
+}
+
+export interface ReconciliationDashboardProvider {
+  provider: string
+  count: number
+  expectedAmountMinor: string
+  receivedAmountMinor: string
+}
+
+export interface ReconciliationDashboardAgingBucket {
+  key: string
+  label: string
+  count: number
+  amountMinor: string
+}
+
+export interface ReconciliationDashboard {
+  kpis: ReconciliationDashboardKpis
+  byStatus: ReconciliationDashboardStatus[]
+  byProvider: ReconciliationDashboardProvider[]
+  agingBuckets: ReconciliationDashboardAgingBucket[]
+  note: string
+}
+
 export interface CreateReconciliationDecisionPayload {
   action: ReconciliationDecisionAction
   reasonCode: string
