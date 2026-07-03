@@ -137,6 +137,7 @@ model Tenant {
   channelListings       ChannelListing[]
   listingSkuMappings    ListingSkuMapping[]
   channelInventorySyncs ChannelInventorySyncState[]
+  providerSettlementEvents ProviderSettlementEvent[]
 
   @@map("tenants")
 }
@@ -997,6 +998,7 @@ model WebhookInboxEvent {
   tenant               Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   payment              Payment?              @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+  providerSettlementEvents ProviderSettlementEvent[]
 
   @@unique([provider, providerEventId])
   @@index([provider])
@@ -1112,6 +1114,42 @@ model ExportJob {
   @@index([tenantId, type])
   @@index([expiresAt])
   @@map("export_jobs")
+}
+
+model ProviderSettlementEvent {
+  id                         String          @id @default(uuid())
+  tenantId                   String?         @map("tenant_id")
+  provider                   WebhookProvider
+  providerEventId            String          @map("provider_event_id")
+  providerSettlementId       String?         @map("provider_settlement_id")
+  providerPaymentId          String?         @map("provider_payment_id")
+  externalReference          String?         @map("external_reference")
+  eventType                  String          @map("event_type")
+  providerStatus             String?         @map("provider_status")
+  amountMinor                Decimal?        @map("amount_minor") @db.Decimal(18, 0)
+  feeAmountMinor             Decimal?        @map("fee_amount_minor") @db.Decimal(18, 0)
+  netAmountMinor             Decimal?        @map("net_amount_minor") @db.Decimal(18, 0)
+  currency                   String          @default("BRL")
+  currencyExponent           Int             @default(2) @map("currency_exponent")
+  occurredAt                 DateTime?       @map("occurred_at")
+  availableAt                DateTime?       @map("available_at")
+  payloadHash                String          @map("payload_hash")
+  normalizedPayload          Json?           @map("normalized_payload")
+  sourceWebhookInboxEventId  String?         @map("source_webhook_inbox_event_id")
+  receivedAt                 DateTime        @default(now()) @map("received_at")
+  createdAt                  DateTime        @default(now()) @map("created_at")
+  updatedAt                  DateTime        @updatedAt @map("updated_at")
+
+  tenant                  Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  sourceWebhookInboxEvent WebhookInboxEvent?  @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([provider, providerSettlementId])
+  @@index([provider, providerPaymentId])
+  @@index([provider, externalReference])
+  @@index([tenantId, provider, occurredAt])
+  @@index([sourceWebhookInboxEventId])
+  @@map("provider_settlement_events")
 }
 
 model OutboxEvent {
