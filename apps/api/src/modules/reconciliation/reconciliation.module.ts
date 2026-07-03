@@ -6,19 +6,26 @@ import { ReconciliationSettlementReceivedAsyncHandler } from './application/asyn
 import { ReconciliationCasesService } from './application/services/reconciliation-cases.service';
 import { ReconciliationDecisionsService } from './application/services/reconciliation-decisions.service';
 import { ReconciliationMatchingService } from './application/services/reconciliation-matching.service';
+import { ReconciliationPoliciesService } from './application/services/reconciliation-policies.service';
 import { ReconciliationSettlementIngestionService } from './application/services/reconciliation-settlement-ingestion.service';
 import { AsaasReconciliationProviderAdapter } from './infra/adapters/asaas-reconciliation-provider.adapter';
 import { ReconciliationCasesController } from './presentation/controllers/reconciliation-cases.controller';
 import { ReconciliationFoundationController } from './presentation/controllers/reconciliation-foundation.controller';
+import { ReconciliationPoliciesController } from './presentation/controllers/reconciliation-policies.controller';
 
 @Module({
   imports: [PrismaModule, AsyncModule],
-  controllers: [ReconciliationFoundationController, ReconciliationCasesController],
+  controllers: [
+    ReconciliationFoundationController,
+    ReconciliationCasesController,
+    ReconciliationPoliciesController,
+  ],
   providers: [
     AsaasReconciliationProviderAdapter,
     ReconciliationCasesService,
     ReconciliationDecisionsService,
     ReconciliationMatchingService,
+    ReconciliationPoliciesService,
     ReconciliationSettlementIngestionService,
     ReconciliationSettlementReceivedAsyncHandler,
   ],

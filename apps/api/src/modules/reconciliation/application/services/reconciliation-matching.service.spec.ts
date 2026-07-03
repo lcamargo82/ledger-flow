@@ -103,6 +103,71 @@ describe('ReconciliationMatchingService', () => {
     });
   });
 
+  it('reconciles amount differences within the active policy tolerance and snapshots policy version', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({ providerPaymentId: 'pay_123', amountMinor: '12345' }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(
+      payment({ providerPaymentId: 'pay_123', amount: 12300 }),
+    );
+    prisma.reconciliationPolicy.findFirst.mockResolvedValue({
+      version: 7,
+      amountToleranceMinor: new Prisma.Decimal('50'),
+    });
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-tolerance' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.RECONCILED,
+        differenceAmountMinor: new Prisma.Decimal('45'),
+        policyVersion: 7,
+      }),
+    });
+  });
+
+  it('never tolerates currency divergence even when policy amount tolerance is high', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({ providerPaymentId: 'pay_123', amountMinor: '12345', currency: 'USD' }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(
+      payment({ providerPaymentId: 'pay_123', amount: 12300, currency: 'BRL' }),
+    );
+    prisma.reconciliationPolicy.findFirst.mockResolvedValue({
+      version: 8,
+      amountToleranceMinor: new Prisma.Decimal('100000'),
+    });
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-currency' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.CURRENCY_DIVERGENCE,
+        policyVersion: 8,
+      }),
+    });
+  });
+
+  it('creates a status divergence when provider and payment statuses disagree', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({ providerPaymentId: 'pay_123', providerStatus: 'REFUNDED' }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(
+      payment({ providerPaymentId: 'pay_123', status: PaymentStatus.APPROVED }),
+    );
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-status' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.STATUS_DIVERGENCE,
+      }),
+    });
+  });
+
   it('does not create a tenant-scoped case when settlement has no tenant', async () => {
     prisma.providerSettlementEvent.findUnique.mockResolvedValue(
       settlement({ tenantId: null }),
