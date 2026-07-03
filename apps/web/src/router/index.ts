@@ -22,6 +22,7 @@ import OrdersView from '../views/OrdersView.vue'
 import ChannelsView from '../views/ChannelsView.vue'
 import AnalyticsView from '../views/AnalyticsView.vue'
 import ExportsView from '../views/ExportsView.vue'
+import ReconciliationView from '../views/ReconciliationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -241,6 +242,17 @@ const router = createRouter({
         layout: AppLayout,
         requiresAuth: true,
         permissions: ['reports:export'],
+      },
+    },
+    {
+      path: '/reconciliation',
+      name: 'reconciliation',
+      component: ReconciliationView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['reconciliation:read'],
+        capabilities: ['reconciliation.read'],
       },
     },
     {

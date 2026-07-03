@@ -1584,6 +1584,14 @@
       "mpConnectionFailed": "Não foi possível conectar o Mercado Pago."
     }
   },
+  "reconciliation": {
+    "title": "Conciliação financeira",
+    "description": "Acompanhe settlements, matching e divergências financeiras sem alterar pagamentos para mascarar exceções.",
+    "empty": {
+      "title": "Nenhum caso de conciliação ainda",
+      "description": "A fundação 9A está pronta. A ingestão de settlements e o matching automático entram nas próximas sprints."
+    }
+  },
   "features": {
     "gatewayConnections": "Gateway Connections",
     "asaasGateway": "Asaas Gateway",
