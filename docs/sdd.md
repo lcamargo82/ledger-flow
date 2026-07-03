@@ -2281,6 +2281,49 @@ Eventos AsyncAPI:
 financial.order_fact.created
 ```
 
+## 5.23 Heavy Exports Initial Design
+
+A Sprint 10.0.10 adiciona exportacoes pesadas rastreaveis sem carregar datasets inteiros em memoria.
+
+Inclui:
+
+- `ExportJob` tenant-scoped com status `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`, `CANCELLED` e `EXPIRED`.
+- Criacao por `POST /exports` protegida por `reports:export`.
+- Processamento administrativo por `POST /exports/process-pending`, usando cursor e lotes de 100 registros.
+- CSV de produtos/SKUs e fatos financeiros operacionais.
+- Preservacao de SKU como texto no CSV para evitar perda de zeros em planilhas.
+- Storage temporario configuravel por `EXPORT_STORAGE_DIR`, com fallback em `/tmp/ledgerflow-exports`.
+- Download seguro de jobs concluidos e nao expirados por `GET /exports/:id/download`.
+- Cancelamento somente de jobs pendentes por `POST /exports/:id/cancel`.
+- AuditLog em criacao, cancelamento, conclusao, falha e download.
+- OutboxEvent `export.job.completed` e `export.job.failed`.
+- UI `/exports` com criacao de CSV, filtro de status, processamento de fila, cancelamento e download.
+
+Nao inclui nesta sprint:
+
+- Worker assíncrono definitivo.
+- XLSX real; o contrato reconhece o formato, mas a API recusa ate incluir writer de planilha.
+- Storage externo/S3.
+- Agendamento recorrente.
+- Exportacoes comerciais definitivas de marketplace ou pedidos externos.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /exports
+GET /exports
+POST /exports/process-pending
+POST /exports/:id/cancel
+GET /exports/:id/download
+```
+
+Eventos AsyncAPI:
+
+```text
+export.job.completed
+export.job.failed
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.

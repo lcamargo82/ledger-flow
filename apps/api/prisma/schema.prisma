@@ -131,6 +131,7 @@ model Tenant {
   internalOrders        InternalOrder[]
   internalOrderItems    InternalOrderItem[]
   orderFinancialFacts   OrderFinancialFact[]
+  exportJobs            ExportJob[]
   channelIntegrations   ChannelIntegration[]
   channelWebhookEvents  ChannelWebhookInboxEvent[]
   channelListings       ChannelListing[]
@@ -500,8 +501,8 @@ model InternalOrder {
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
 
-  tenant Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  items  InternalOrderItem[]
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items          InternalOrderItem[]
   financialFacts OrderFinancialFact[]
 
   @@unique([tenantId, orderNumber])
@@ -535,23 +536,23 @@ model InternalOrderItem {
 }
 
 model OrderFinancialFact {
-  id                String           @id @default(uuid())
-  tenantId          String           @map("tenant_id")
-  orderId           String           @map("order_id")
-  version           Int              @default(1)
-  orderNumber       String           @map("order_number")
+  id                String              @id @default(uuid())
+  tenantId          String              @map("tenant_id")
+  orderId           String              @map("order_id")
+  version           Int                 @default(1)
+  orderNumber       String              @map("order_number")
   orderStatus       InternalOrderStatus @map("order_status")
-  channelProvider   ChannelProvider? @map("channel_provider")
-  revenueAmount     Decimal          @default(0) @map("revenue_amount") @db.Decimal(18, 4)
-  cogsAmount        Decimal          @default(0) @map("cogs_amount") @db.Decimal(18, 4)
-  channelFeeAmount  Decimal          @default(0) @map("channel_fee_amount") @db.Decimal(18, 4)
-  grossMarginAmount Decimal          @default(0) @map("gross_margin_amount") @db.Decimal(18, 4)
-  currency          String           @default("BRL")
-  itemCount         Int              @default(0) @map("item_count")
-  fulfilledAt       DateTime?        @map("fulfilled_at")
-  calculatedAt      DateTime         @default(now()) @map("calculated_at")
-  components        Json             @map("components_json")
-  createdAt         DateTime         @default(now()) @map("created_at")
+  channelProvider   ChannelProvider?    @map("channel_provider")
+  revenueAmount     Decimal             @default(0) @map("revenue_amount") @db.Decimal(18, 4)
+  cogsAmount        Decimal             @default(0) @map("cogs_amount") @db.Decimal(18, 4)
+  channelFeeAmount  Decimal             @default(0) @map("channel_fee_amount") @db.Decimal(18, 4)
+  grossMarginAmount Decimal             @default(0) @map("gross_margin_amount") @db.Decimal(18, 4)
+  currency          String              @default("BRL")
+  itemCount         Int                 @default(0) @map("item_count")
+  fulfilledAt       DateTime?           @map("fulfilled_at")
+  calculatedAt      DateTime            @default(now()) @map("calculated_at")
+  components        Json                @map("components_json")
+  createdAt         DateTime            @default(now()) @map("created_at")
 
   tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   order  InternalOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -627,9 +628,9 @@ model ChannelListing {
   createdAt         DateTime                  @default(now()) @map("created_at")
   updatedAt         DateTime                  @updatedAt @map("updated_at")
 
-  tenant      Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  integration ChannelIntegration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  matchedSku  ProductSku?        @relation(fields: [matchedSkuId], references: [id], onDelete: SetNull)
+  tenant      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  integration ChannelIntegration         @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  matchedSku  ProductSku?                @relation(fields: [matchedSkuId], references: [id], onDelete: SetNull)
   mappings    ListingSkuMapping[]
   syncState   ChannelInventorySyncState?
 
@@ -1062,6 +1063,55 @@ enum AsyncJobStatus {
   RETRY_SCHEDULED
   DEAD_LETTERED
   FAILED
+}
+
+enum ExportJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum ExportJobFormat {
+  CSV
+  XLSX
+}
+
+enum ExportJobType {
+  ORDER_FINANCIAL_FACTS
+  CATALOG_PRODUCTS
+}
+
+model ExportJob {
+  id                String          @id @default(uuid())
+  tenantId          String          @map("tenant_id")
+  requestedByUserId String?         @map("requested_by_user_id")
+  type              ExportJobType
+  format            ExportJobFormat
+  status            ExportJobStatus @default(PENDING)
+  parameters        Json?           @map("parameters_json")
+  filePath          String?         @map("file_path")
+  fileName          String?         @map("file_name")
+  mimeType          String?         @map("mime_type")
+  rowCount          Int             @default(0) @map("row_count")
+  errorCode         String?         @map("error_code")
+  errorSummary      String?         @map("error_summary")
+  expiresAt         DateTime?       @map("expires_at")
+  startedAt         DateTime?       @map("started_at")
+  completedAt       DateTime?       @map("completed_at")
+  cancelledAt       DateTime?       @map("cancelled_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, type])
+  @@index([expiresAt])
+  @@map("export_jobs")
 }
 
 model OutboxEvent {

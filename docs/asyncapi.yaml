@@ -54,6 +54,13 @@ channels:
     messages:
       orderFactCreated:
         $ref: '#/components/messages/FinancialOrderFactCreated'
+  export.events:
+    address: ledgerflow.export.events
+    messages:
+      exportJobCompleted:
+        $ref: '#/components/messages/ExportJobCompleted'
+      exportJobFailed:
+        $ref: '#/components/messages/ExportJobFailed'
 components:
   messages:
     PaymentChargeRequested:
@@ -197,6 +204,18 @@ components:
       summary: Event emitted when an operational financial fact is created for an order.
       payload:
         $ref: '#/components/schemas/FinancialOrderFactPayload'
+    ExportJobCompleted:
+      name: export.job.completed
+      title: Export Job Completed
+      summary: Event emitted when an export job is completed and ready for secure download.
+      payload:
+        $ref: '#/components/schemas/ExportJobCompletedPayload'
+    ExportJobFailed:
+      name: export.job.failed
+      title: Export Job Failed
+      summary: Event emitted when an export job fails during generation.
+      payload:
+        $ref: '#/components/schemas/ExportJobFailedPayload'
   schemas:
     InternalOrderStatusChangedPayload:
       type: object
@@ -319,4 +338,53 @@ components:
         cogsAmount:
           type: string
         grossMarginAmount:
+          type: string
+    ExportJobCompletedPayload:
+      type: object
+      required:
+        - exportJobId
+        - type
+        - format
+        - rowCount
+      properties:
+        exportJobId:
+          type: string
+        type:
+          type: string
+          enum:
+            - ORDER_FINANCIAL_FACTS
+            - CATALOG_PRODUCTS
+        format:
+          type: string
+          enum:
+            - CSV
+            - XLSX
+        rowCount:
+          type: integer
+        expiresAt:
+          type: string
+          format: date-time
+    ExportJobFailedPayload:
+      type: object
+      required:
+        - exportJobId
+        - type
+        - format
+        - errorCode
+      properties:
+        exportJobId:
+          type: string
+        type:
+          type: string
+          enum:
+            - ORDER_FINANCIAL_FACTS
+            - CATALOG_PRODUCTS
+        format:
+          type: string
+          enum:
+            - CSV
+            - XLSX
+        errorCode:
+          type: string
+        errorSummary:
           type: string

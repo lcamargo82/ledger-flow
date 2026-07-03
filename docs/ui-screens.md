@@ -182,3 +182,15 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Segurança:** backend valida permissão/capability; frontend apenas esconde rota/menu sem acesso.
 - **Fora de escopo:** conciliação 9A, settlement de gateway, recebíveis e margem financeira conciliada.
 - **i18n:** Namespace `financialIntelligence.*` em pt-BR e en-US.
+
+### Exports
+
+- **Rota:** `/exports`
+- **Status:** Implementada 10.0.10.
+- **Permissões:** `reports:export`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppSelect`, `AppTable`, `AppBadge`, `AppButton`, `AppErrorState`.
+- **Objetivo:** Criar e acompanhar exportações CSV pesadas de catálogo e facts financeiros com job rastreável.
+- **Fluxos:** criação de job CSV, filtro por status, processamento manual de pendentes, cancelamento de pendentes e download de concluídos.
+- **Segurança:** backend valida `reports:export`; download exige tenant do JWT, job concluído e não expirado; UI apenas esconde menu sem permissão.
+- **Fora de escopo:** XLSX real, storage externo, agendamento recorrente e worker definitivo.
+- **i18n:** Namespace `exports.*` em pt-BR e en-US.
