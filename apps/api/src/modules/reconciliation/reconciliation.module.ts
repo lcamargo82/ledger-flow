@@ -9,11 +9,13 @@ import { ReconciliationDashboardService } from './application/services/reconcili
 import { ReconciliationMatchingService } from './application/services/reconciliation-matching.service';
 import { ReconciliationPoliciesService } from './application/services/reconciliation-policies.service';
 import { ReconciliationSettlementIngestionService } from './application/services/reconciliation-settlement-ingestion.service';
+import { ReconciliationSyncService } from './application/services/reconciliation-sync.service';
 import { AsaasReconciliationProviderAdapter } from './infra/adapters/asaas-reconciliation-provider.adapter';
 import { ReconciliationCasesController } from './presentation/controllers/reconciliation-cases.controller';
 import { ReconciliationDashboardController } from './presentation/controllers/reconciliation-dashboard.controller';
 import { ReconciliationFoundationController } from './presentation/controllers/reconciliation-foundation.controller';
 import { ReconciliationPoliciesController } from './presentation/controllers/reconciliation-policies.controller';
+import { ReconciliationSyncController } from './presentation/controllers/reconciliation-sync.controller';
 
 @Module({
   imports: [PrismaModule, AsyncModule],
@@ -22,6 +24,7 @@ import { ReconciliationPoliciesController } from './presentation/controllers/rec
     ReconciliationCasesController,
     ReconciliationDashboardController,
     ReconciliationPoliciesController,
+    ReconciliationSyncController,
   ],
   providers: [
     AsaasReconciliationProviderAdapter,
@@ -31,6 +34,7 @@ import { ReconciliationPoliciesController } from './presentation/controllers/rec
     ReconciliationMatchingService,
     ReconciliationPoliciesService,
     ReconciliationSettlementIngestionService,
+    ReconciliationSyncService,
     ReconciliationSettlementReceivedAsyncHandler,
   ],
   exports: [ReconciliationSettlementIngestionService],
