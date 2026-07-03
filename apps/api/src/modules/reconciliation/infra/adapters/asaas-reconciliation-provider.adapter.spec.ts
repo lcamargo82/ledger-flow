@@ -71,4 +71,50 @@ describe('AsaasReconciliationProviderAdapter', () => {
 
     expect(adapter.normalizeWebhook(event)).toBeNull();
   });
+
+  it('redacts sensitive provider fields from the normalized payload', () => {
+    const event: NormalizedWebhookEvent = {
+      provider: WebhookProvider.ASAAS,
+      providerEventId: 'evt_sensitive',
+      eventType: 'PAYMENT_RECEIVED',
+      rawProviderEventType: 'PAYMENT_RECEIVED',
+      providerPaymentId: 'pay_sensitive',
+      paymentReference: 'LF-SENSITIVE',
+      providerStatus: 'RECEIVED',
+      amountInCents: 9900,
+      currency: 'BRL',
+      occurredAt: new Date('2026-07-03T10:00:00.000Z'),
+      payloadHash: 'hash-sensitive',
+      payloadSummary: {
+        eventId: 'evt_sensitive',
+        eventType: 'PAYMENT_RECEIVED',
+        providerPaymentId: 'pay_sensitive',
+        externalReference: 'LF-SENSITIVE',
+        providerStatus: 'RECEIVED',
+        value: 99,
+        customer: {
+          name: 'Cliente Teste',
+          email: 'cliente@example.test',
+        },
+        creditCard: {
+          token: 'card-token',
+          lastDigits: '4242',
+        },
+        accessToken: 'asaas-secret-token',
+        authorization: 'Bearer secret',
+      },
+    };
+
+    const normalized = adapter.normalizeWebhook(event);
+
+    expect(normalized?.normalizedPayload).toEqual({
+      eventId: 'evt_sensitive',
+      eventType: 'PAYMENT_RECEIVED',
+      providerPaymentId: 'pay_sensitive',
+      externalReference: 'LF-SENSITIVE',
+      providerStatus: 'RECEIVED',
+      value: '99',
+      redactedFields: ['accessToken', 'authorization', 'creditCard', 'customer'],
+    });
+  });
 });

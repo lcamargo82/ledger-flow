@@ -17,7 +17,7 @@
 | REC-013 | 9A.6 | dashboard | KPIs corretos |
 | REC-014 | 9A.7 | export CSV | streams/audit |
 | REC-015 | 9A.7 | sync | rate-limit/retry |
-| REC-016 | 9A.8 | hardening | E2E/carga/docs |
+| REC-016 | 9A.8 | hardening | runbook operacional, LGPD, OpenAPI/AsyncAPI e validações finais |
 
 ## Futuro
 

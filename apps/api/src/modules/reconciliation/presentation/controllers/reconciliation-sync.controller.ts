@@ -13,6 +13,7 @@ import { RequireCapabilities } from '../../../auth/presentation/decorators/requi
 import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
 import { ReconciliationCapabilities } from '../../../platform/domain/constants/platform-capabilities';
 import { ReconciliationSyncRequestDto } from '../../application/dto/reconciliation-sync-request.dto';
+import { ReconciliationSyncResponseDto } from '../../application/dto/reconciliation-sync-response.dto';
 import { ReconciliationSyncService } from '../../application/services/reconciliation-sync.service';
 import { AsaasReconciliationProviderAdapter } from '../../infra/adapters/asaas-reconciliation-provider.adapter';
 
@@ -29,7 +30,10 @@ export class ReconciliationSyncController {
   @RequirePermissions('reconciliation:sync')
   @RequireCapabilities(ReconciliationCapabilities.Sync)
   @ApiOperation({ summary: 'Executar sync controlado de settlements Asaas' })
-  @ApiOkResponse({ description: 'Resumo do sync de conciliação' })
+  @ApiOkResponse({
+    description: 'Resumo do sync de conciliação',
+    type: ReconciliationSyncResponseDto,
+  })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem capability de sync de conciliação' })
   syncAsaas(
