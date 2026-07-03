@@ -20,6 +20,8 @@ import InventoryFoundationView from '../views/InventoryFoundationView.vue'
 import CatalogProductsView from '../views/CatalogProductsView.vue'
 import OrdersView from '../views/OrdersView.vue'
 import ChannelsView from '../views/ChannelsView.vue'
+import AnalyticsView from '../views/AnalyticsView.vue'
+import ExportsView from '../views/ExportsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -218,6 +220,27 @@ const router = createRouter({
         requiresAuth: true,
         permissions: ['channels:read'],
         capabilities: ['channels.connect'],
+      },
+    },
+    {
+      path: '/analytics',
+      name: 'analytics',
+      component: AnalyticsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['financial-intelligence:read'],
+        capabilities: ['financial.analytics.read'],
+      },
+    },
+    {
+      path: '/exports',
+      name: 'exports',
+      component: ExportsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['reports:export'],
       },
     },
     {

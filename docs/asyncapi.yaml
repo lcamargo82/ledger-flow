@@ -21,6 +21,8 @@ channels:
   inventory.events:
     address: ledgerflow.inventory.events
     messages:
+      balanceChanged:
+        $ref: '#/components/messages/InventoryBalanceChanged'
       reservationConsumed:
         $ref: '#/components/messages/InventoryReservationConsumed'
   orders.events:
@@ -39,6 +41,26 @@ channels:
         $ref: '#/components/messages/ChannelWebhookReceived'
       channelWebhookInvalid:
         $ref: '#/components/messages/ChannelWebhookInvalid'
+      channelListingImportCompleted:
+        $ref: '#/components/messages/ChannelListingImportCompleted'
+      channelListingMapped:
+        $ref: '#/components/messages/ChannelListingMapped'
+      channelInventorySyncRequested:
+        $ref: '#/components/messages/ChannelInventorySyncRequested'
+      channelInventorySyncCompleted:
+        $ref: '#/components/messages/ChannelInventorySyncCompleted'
+  financial.events:
+    address: ledgerflow.financial.events
+    messages:
+      orderFactCreated:
+        $ref: '#/components/messages/FinancialOrderFactCreated'
+  export.events:
+    address: ledgerflow.export.events
+    messages:
+      exportJobCompleted:
+        $ref: '#/components/messages/ExportJobCompleted'
+      exportJobFailed:
+        $ref: '#/components/messages/ExportJobFailed'
 components:
   messages:
     PaymentChargeRequested:
@@ -93,6 +115,35 @@ components:
             format: decimal
           movementId:
             type: string
+    InventoryBalanceChanged:
+      name: inventory.balance.changed
+      title: Inventory Balance Changed
+      summary: Event emitted when an inventory balance projection changes.
+      payload:
+        type: object
+        required:
+          - balanceId
+          - skuId
+          - warehouseId
+          - availableQuantity
+        properties:
+          balanceId:
+            type: string
+          skuId:
+            type: string
+          warehouseId:
+            type: string
+          availableQuantity:
+            type: number
+            format: decimal
+          onHandQuantity:
+            type: number
+            format: decimal
+          reservedQuantity:
+            type: number
+            format: decimal
+          version:
+            type: integer
     OrderConfirmed:
       name: orders.order.confirmed
       title: Internal Order Confirmed
@@ -123,6 +174,48 @@ components:
       summary: Event emitted when a channel webhook payload is structurally invalid.
       payload:
         $ref: '#/components/schemas/ChannelWebhookInboxPayload'
+    ChannelListingImportCompleted:
+      name: channel.listing.import.completed
+      title: Channel Listing Import Completed
+      summary: Event emitted when mock channel listings are imported and classified.
+      payload:
+        $ref: '#/components/schemas/ChannelListingImportCompletedPayload'
+    ChannelListingMapped:
+      name: channel.listing.mapped
+      title: Channel Listing Mapped
+      summary: Event emitted when a channel listing is manually mapped to a ProductSku.
+      payload:
+        $ref: '#/components/schemas/ChannelListingMappedPayload'
+    ChannelInventorySyncRequested:
+      name: channel.inventory_sync.requested
+      title: Channel Inventory Sync Requested
+      summary: Event emitted when a mapped listing needs outbound inventory sync.
+      payload:
+        $ref: '#/components/schemas/ChannelInventorySyncPayload'
+    ChannelInventorySyncCompleted:
+      name: channel.inventory_sync.completed
+      title: Channel Inventory Sync Completed
+      summary: Event emitted when mock outbound inventory sync succeeds.
+      payload:
+        $ref: '#/components/schemas/ChannelInventorySyncPayload'
+    FinancialOrderFactCreated:
+      name: financial.order_fact.created
+      title: Financial Order Fact Created
+      summary: Event emitted when an operational financial fact is created for an order.
+      payload:
+        $ref: '#/components/schemas/FinancialOrderFactPayload'
+    ExportJobCompleted:
+      name: export.job.completed
+      title: Export Job Completed
+      summary: Event emitted when an export job is completed and ready for secure download.
+      payload:
+        $ref: '#/components/schemas/ExportJobCompletedPayload'
+    ExportJobFailed:
+      name: export.job.failed
+      title: Export Job Failed
+      summary: Event emitted when an export job fails during generation.
+      payload:
+        $ref: '#/components/schemas/ExportJobFailedPayload'
   schemas:
     InternalOrderStatusChangedPayload:
       type: object
@@ -162,3 +255,136 @@ components:
             - DUPLICATE
             - INVALID
             - DLQ
+    ChannelListingImportCompletedPayload:
+      type: object
+      required:
+        - integrationId
+        - provider
+        - summary
+      properties:
+        integrationId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - MOCK
+            - MERCADO_LIVRE
+        summary:
+          type: object
+          required:
+            - imported
+            - matched
+            - unmatched
+            - ambiguous
+            - ignored
+          properties:
+            imported:
+              type: integer
+            matched:
+              type: integer
+            unmatched:
+              type: integer
+            ambiguous:
+              type: integer
+            ignored:
+              type: integer
+    ChannelListingMappedPayload:
+      type: object
+      required:
+        - listingId
+        - skuId
+      properties:
+        listingId:
+          type: string
+        skuId:
+          type: string
+    ChannelInventorySyncPayload:
+      type: object
+      required:
+        - listingId
+        - skuId
+        - provider
+        - targetAvailableQuantity
+      properties:
+        listingId:
+          type: string
+        skuId:
+          type: string
+        balanceId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - MOCK
+            - MERCADO_LIVRE
+        targetAvailableQuantity:
+          type: number
+          format: decimal
+    FinancialOrderFactPayload:
+      type: object
+      required:
+        - factId
+        - orderId
+        - revenueAmount
+        - cogsAmount
+        - grossMarginAmount
+      properties:
+        factId:
+          type: string
+        orderId:
+          type: string
+        revenueAmount:
+          type: string
+        cogsAmount:
+          type: string
+        grossMarginAmount:
+          type: string
+    ExportJobCompletedPayload:
+      type: object
+      required:
+        - exportJobId
+        - type
+        - format
+        - rowCount
+      properties:
+        exportJobId:
+          type: string
+        type:
+          type: string
+          enum:
+            - ORDER_FINANCIAL_FACTS
+            - CATALOG_PRODUCTS
+        format:
+          type: string
+          enum:
+            - CSV
+            - XLSX
+        rowCount:
+          type: integer
+        expiresAt:
+          type: string
+          format: date-time
+    ExportJobFailedPayload:
+      type: object
+      required:
+        - exportJobId
+        - type
+        - format
+        - errorCode
+      properties:
+        exportJobId:
+          type: string
+        type:
+          type: string
+          enum:
+            - ORDER_FINANCIAL_FACTS
+            - CATALOG_PRODUCTS
+        format:
+          type: string
+          enum:
+            - CSV
+            - XLSX
+        errorCode:
+          type: string
+        errorSummary:
+          type: string

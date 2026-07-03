@@ -78,6 +78,27 @@ enum ChannelWebhookStatus {
   DLQ
 }
 
+enum ChannelListingMatchStatus {
+  MATCHED
+  UNMATCHED
+  AMBIGUOUS
+  IGNORED
+}
+
+enum ChannelInventorySyncStatus {
+  PENDING
+  SYNCED
+  RETRY_SCHEDULED
+  CIRCUIT_OPEN
+  FAILED
+}
+
+enum ChannelCircuitState {
+  CLOSED
+  OPEN
+  HALF_OPEN
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -109,8 +130,13 @@ model Tenant {
   inventoryReservations InventoryReservation[]
   internalOrders        InternalOrder[]
   internalOrderItems    InternalOrderItem[]
+  orderFinancialFacts   OrderFinancialFact[]
+  exportJobs            ExportJob[]
   channelIntegrations   ChannelIntegration[]
   channelWebhookEvents  ChannelWebhookInboxEvent[]
+  channelListings       ChannelListing[]
+  listingSkuMappings    ListingSkuMapping[]
+  channelInventorySyncs ChannelInventorySyncState[]
 
   @@map("tenants")
 }
@@ -352,6 +378,8 @@ model ProductSku {
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
   internalOrderItems    InternalOrderItem[]
+  channelListings       ChannelListing[]
+  listingSkuMappings    ListingSkuMapping[]
 
   @@unique([tenantId, skuCanonical])
   @@index([tenantId, barcode])
@@ -473,8 +501,9 @@ model InternalOrder {
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
 
-  tenant Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  items  InternalOrderItem[]
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items          InternalOrderItem[]
+  financialFacts OrderFinancialFact[]
 
   @@unique([tenantId, orderNumber])
   @@unique([tenantId, idempotencyKey])
@@ -506,6 +535,35 @@ model InternalOrderItem {
   @@map("internal_order_items")
 }
 
+model OrderFinancialFact {
+  id                String              @id @default(uuid())
+  tenantId          String              @map("tenant_id")
+  orderId           String              @map("order_id")
+  version           Int                 @default(1)
+  orderNumber       String              @map("order_number")
+  orderStatus       InternalOrderStatus @map("order_status")
+  channelProvider   ChannelProvider?    @map("channel_provider")
+  revenueAmount     Decimal             @default(0) @map("revenue_amount") @db.Decimal(18, 4)
+  cogsAmount        Decimal             @default(0) @map("cogs_amount") @db.Decimal(18, 4)
+  channelFeeAmount  Decimal             @default(0) @map("channel_fee_amount") @db.Decimal(18, 4)
+  grossMarginAmount Decimal             @default(0) @map("gross_margin_amount") @db.Decimal(18, 4)
+  currency          String              @default("BRL")
+  itemCount         Int                 @default(0) @map("item_count")
+  fulfilledAt       DateTime?           @map("fulfilled_at")
+  calculatedAt      DateTime            @default(now()) @map("calculated_at")
+  components        Json                @map("components_json")
+  createdAt         DateTime            @default(now()) @map("created_at")
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order  InternalOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, orderId, version])
+  @@index([tenantId, calculatedAt])
+  @@index([tenantId, channelProvider, calculatedAt])
+  @@index([tenantId, orderStatus])
+  @@map("order_financial_facts")
+}
+
 model ChannelIntegration {
   id                String                   @id @default(uuid())
   tenantId          String                   @map("tenant_id")
@@ -519,6 +577,7 @@ model ChannelIntegration {
 
   tenant        Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   webhookEvents ChannelWebhookInboxEvent[]
+  listings      ChannelListing[]
 
   @@unique([tenantId, provider, name])
   @@index([tenantId, provider, status])
@@ -551,6 +610,85 @@ model ChannelWebhookInboxEvent {
   @@index([integrationId])
   @@index([receivedAt])
   @@map("channel_webhook_inbox_events")
+}
+
+model ChannelListing {
+  id                String                    @id @default(uuid())
+  tenantId          String                    @map("tenant_id")
+  integrationId     String                    @map("integration_id")
+  provider          ChannelProvider
+  externalListingId String                    @map("external_listing_id")
+  title             String
+  externalSku       String?                   @map("external_sku")
+  matchStatus       ChannelListingMatchStatus @default(UNMATCHED) @map("match_status")
+  matchedSkuId      String?                   @map("matched_sku_id")
+  candidateSkuIds   Json?                     @map("candidate_sku_ids")
+  importedAt        DateTime                  @default(now()) @map("imported_at")
+  ignoredAt         DateTime?                 @map("ignored_at")
+  createdAt         DateTime                  @default(now()) @map("created_at")
+  updatedAt         DateTime                  @updatedAt @map("updated_at")
+
+  tenant      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  integration ChannelIntegration         @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  matchedSku  ProductSku?                @relation(fields: [matchedSkuId], references: [id], onDelete: SetNull)
+  mappings    ListingSkuMapping[]
+  syncState   ChannelInventorySyncState?
+
+  @@unique([tenantId, integrationId, externalListingId])
+  @@index([tenantId, matchStatus])
+  @@index([tenantId, integrationId])
+  @@index([tenantId, externalSku])
+  @@map("channel_listings")
+}
+
+model ListingSkuMapping {
+  id             String   @id @default(uuid())
+  tenantId       String   @map("tenant_id")
+  listingId      String   @map("listing_id")
+  skuId          String   @map("sku_id")
+  mappedByUserId String?  @map("mapped_by_user_id")
+  reason         String?  @map("reason")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  listing ChannelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  sku     ProductSku     @relation(fields: [skuId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, listingId])
+  @@index([tenantId, skuId])
+  @@map("listing_sku_mappings")
+}
+
+model ChannelInventorySyncState {
+  id                      String                     @id @default(uuid())
+  tenantId                String                     @map("tenant_id")
+  listingId               String                     @unique @map("listing_id")
+  integrationId           String                     @map("integration_id")
+  provider                ChannelProvider
+  externalListingId       String                     @map("external_listing_id")
+  skuId                   String                     @map("sku_id")
+  status                  ChannelInventorySyncStatus @default(PENDING)
+  circuitState            ChannelCircuitState        @default(CLOSED) @map("circuit_state")
+  targetAvailableQuantity Decimal                    @map("target_available_quantity") @db.Decimal(18, 6)
+  lastSyncedQuantity      Decimal?                   @map("last_synced_quantity") @db.Decimal(18, 6)
+  attemptCount            Int                        @default(0) @map("attempt_count")
+  nextAttemptAt           DateTime?                  @map("next_attempt_at")
+  circuitOpenedUntil      DateTime?                  @map("circuit_opened_until")
+  lastErrorCode           String?                    @map("last_error_code")
+  lastErrorSummary        String?                    @map("last_error_summary")
+  lastRequestedAt         DateTime                   @default(now()) @map("last_requested_at")
+  lastSyncedAt            DateTime?                  @map("last_synced_at")
+  createdAt               DateTime                   @default(now()) @map("created_at")
+  updatedAt               DateTime                   @updatedAt @map("updated_at")
+
+  tenant  Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  listing ChannelListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, provider])
+  @@index([integrationId, status])
+  @@index([nextAttemptAt])
+  @@map("channel_inventory_sync_states")
 }
 
 model PasswordResetToken {
@@ -925,6 +1063,55 @@ enum AsyncJobStatus {
   RETRY_SCHEDULED
   DEAD_LETTERED
   FAILED
+}
+
+enum ExportJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum ExportJobFormat {
+  CSV
+  XLSX
+}
+
+enum ExportJobType {
+  ORDER_FINANCIAL_FACTS
+  CATALOG_PRODUCTS
+}
+
+model ExportJob {
+  id                String          @id @default(uuid())
+  tenantId          String          @map("tenant_id")
+  requestedByUserId String?         @map("requested_by_user_id")
+  type              ExportJobType
+  format            ExportJobFormat
+  status            ExportJobStatus @default(PENDING)
+  parameters        Json?           @map("parameters_json")
+  filePath          String?         @map("file_path")
+  fileName          String?         @map("file_name")
+  mimeType          String?         @map("mime_type")
+  rowCount          Int             @default(0) @map("row_count")
+  errorCode         String?         @map("error_code")
+  errorSummary      String?         @map("error_summary")
+  expiresAt         DateTime?       @map("expires_at")
+  startedAt         DateTime?       @map("started_at")
+  completedAt       DateTime?       @map("completed_at")
+  cancelledAt       DateTime?       @map("cancelled_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, type])
+  @@index([expiresAt])
+  @@map("export_jobs")
 }
 
 model OutboxEvent {

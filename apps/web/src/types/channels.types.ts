@@ -1,6 +1,14 @@
 export type ChannelProvider = 'MOCK' | 'MERCADO_LIVRE'
 export type ChannelIntegrationStatus = 'ACTIVE' | 'DISABLED'
 export type ChannelWebhookStatus = 'RECEIVED' | 'DUPLICATE' | 'INVALID' | 'DLQ'
+export type ChannelListingMatchStatus = 'MATCHED' | 'UNMATCHED' | 'AMBIGUOUS' | 'IGNORED'
+export type ChannelInventorySyncStatus =
+  | 'PENDING'
+  | 'SYNCED'
+  | 'RETRY_SCHEDULED'
+  | 'CIRCUIT_OPEN'
+  | 'FAILED'
+export type ChannelCircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN'
 
 export interface ChannelIntegration {
   id: string
@@ -37,6 +45,61 @@ export interface ChannelInboxMeta {
   totalPages: number
 }
 
+export interface ChannelListing {
+  id: string
+  tenantId: string
+  integrationId: string
+  provider: ChannelProvider
+  externalListingId: string
+  title: string
+  externalSku?: string | null
+  matchStatus: ChannelListingMatchStatus
+  matchedSkuId?: string | null
+  candidateSkuIds?: string[] | null
+  importedAt: string
+  ignoredAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ChannelListingsImportSummary {
+  imported: number
+  matched: number
+  unmatched: number
+  ambiguous: number
+  ignored: number
+}
+
+export interface ChannelInventorySyncState {
+  id: string
+  tenantId: string
+  listingId: string
+  integrationId: string
+  provider: ChannelProvider
+  externalListingId: string
+  skuId: string
+  status: ChannelInventorySyncStatus
+  circuitState: ChannelCircuitState
+  targetAvailableQuantity: string
+  lastSyncedQuantity?: string | null
+  attemptCount: number
+  nextAttemptAt?: string | null
+  circuitOpenedUntil?: string | null
+  lastErrorCode?: string | null
+  lastErrorSummary?: string | null
+  lastRequestedAt: string
+  lastSyncedAt?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ChannelInventorySyncProcessSummary {
+  processed: number
+  synced: number
+  retryScheduled: number
+  circuitOpened: number
+}
+
 export interface ChannelIntegrationsResponse {
   data: ChannelIntegration[]
 }
@@ -46,8 +109,28 @@ export interface PaginatedChannelInboxResponse {
   meta: ChannelInboxMeta
 }
 
+export interface PaginatedChannelListingsResponse {
+  data: ChannelListing[]
+  meta: ChannelInboxMeta
+}
+
+export interface PaginatedChannelInventorySyncResponse {
+  data: ChannelInventorySyncState[]
+  meta: ChannelInboxMeta
+}
+
+export interface ChannelListingsImportResponse {
+  summary: ChannelListingsImportSummary
+  data: ChannelListing[]
+}
+
 export interface CreateChannelIntegrationRequest {
   provider: ChannelProvider
   name: string
   webhookSecret: string
+}
+
+export interface MapChannelListingRequest {
+  skuId: string
+  reason?: string
 }

@@ -2165,6 +2165,165 @@ channel.webhook.received
 channel.webhook.invalid
 ```
 
+## 5.20 Channel Listings and Mapping Review Design
+
+A Sprint 10.0.7 adiciona importacao de anuncios e malha fina de SKU ainda restrita ao provider `MOCK`.
+
+Inclui:
+
+- `ChannelListing` tenant-scoped por integracao, provider e `externalListingId`.
+- `ListingSkuMapping` como registro auditavel de vinculo manual entre anuncio e `ProductSku`.
+- Importacao mock via `POST /channels/integrations/:id/import-listings`.
+- Classificacao deterministica: `MATCHED`, `UNMATCHED`, `AMBIGUOUS`, `IGNORED`.
+- Match automatico apenas quando existe exatamente um candidato por SKU canonico, SKU display ou barcode.
+- Sem SKU externo ou SKU inexistente fica `UNMATCHED`.
+- Mais de um candidato fica `AMBIGUOUS`; o sistema nao escolhe automaticamente.
+- Mapping manual tenant-scoped com `channels:manage` + `channels.mapping.manage`.
+- Auditoria para `channels.listings.imported` e `channels.listing.mapped`.
+- Outbox para `channel.listing.import.completed` e `channel.listing.mapped`.
+- UI `/channels` com aba de malha fina, filtro por status, resumo de importacao e modal de mapping manual.
+
+Nao inclui nesta sprint:
+
+- Adapter real Mercado Livre.
+- Criacao automatica de pedido por anuncio/webhook.
+- Sincronizacao egress de saldo.
+- Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /channels/integrations/:id/import-listings
+GET /channels/listings/unmatched
+POST /channels/listings/:id/map
+```
+
+Eventos AsyncAPI:
+
+```text
+channel.listing.import.completed
+channel.listing.mapped
+```
+
+## 5.21 Channel Inventory Egress Sync Design
+
+A Sprint 10.0.8 adiciona sincronizacao egress de saldo para listings vinculados, ainda restrita ao provider `MOCK`.
+
+Inclui:
+
+- Publicacao de `inventory.balance.changed` quando `InventoryBalance` muda por ajuste, reserva, liberacao ou consumo.
+- `ChannelInventorySyncState` como estado coalescido por listing.
+- Coalescencia por chave unica `listingId`: varias mudancas rapidas atualizam a quantidade alvo mais recente.
+- Processamento administrativo `POST /channels/inventory-sync/process-pending` para validar o ciclo sem worker externo.
+- Status sanitizado via `GET /channels/inventory-sync/status`.
+- Politica mock de retry/backoff com jitter.
+- Simulacao de 429 por provider mock, com retry agendado.
+- Circuit breaker abre apos tentativas repetidas para evitar tempestade de chamadas.
+- Replay com mesma quantidade nao duplica efeito de provider; estado e marcado como `SYNCED`.
+- UI `/channels` com aba de sincronizacao, filtro por status, circuito e proxima tentativa.
+
+Nao inclui nesta sprint:
+
+- Adapter real Mercado Livre.
+- Envio real a marketplace.
+- Worker assíncrono definitivo.
+- Pedidos de canal.
+- Financeiro por pedido.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+GET /channels/inventory-sync/status
+POST /channels/inventory-sync/process-pending
+```
+
+Eventos AsyncAPI:
+
+```text
+inventory.balance.changed
+channel.inventory_sync.requested
+channel.inventory_sync.completed
+```
+
+## 5.22 Financial Intelligence Initial Design
+
+A Sprint 10.0.9 adiciona fatos financeiros operacionais de pedidos internos, sem implementar conciliacao financeira.
+
+Inclui:
+
+- `OrderFinancialFact` tenant-scoped e versionado por `[tenantId, orderId, version]`.
+- Criacao automatica do fato quando `InternalOrder` passa para `FULFILLED`.
+- Snapshot de CMV usando `ProductSku.averageCost` no momento da criacao do fato.
+- Calculo com `Prisma.Decimal`: `grossMarginAmount = revenueAmount - cogsAmount - channelFeeAmount`.
+- Componentes explicaveis em `components_json`, incluindo itens, custo unitario, quantidade e formula.
+- Dashboard basico com contagem de pedidos, receita operacional, CMV e margem bruta.
+- Filtros por periodo e canal no contrato. Pedidos internos atuais ficam sem provider.
+- UI `/analytics` com cards, tabela de facts e aviso explicito de que margem operacional nao e recebimento liquidado nem conciliacao.
+
+Nao inclui nesta sprint:
+
+- Conciliacao 9A.
+- Settlement de gateway.
+- Recebiveis.
+- Taxas reais de marketplace.
+- Preco de venda por item, pois `InternalOrder` ainda nao captura esse dado.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+GET /financial-intelligence/dashboard
+GET /financial-intelligence/order-facts
+```
+
+Eventos AsyncAPI:
+
+```text
+financial.order_fact.created
+```
+
+## 5.23 Heavy Exports Initial Design
+
+A Sprint 10.0.10 adiciona exportacoes pesadas rastreaveis sem carregar datasets inteiros em memoria.
+
+Inclui:
+
+- `ExportJob` tenant-scoped com status `PENDING`, `PROCESSING`, `COMPLETED`, `FAILED`, `CANCELLED` e `EXPIRED`.
+- Criacao por `POST /exports` protegida por `reports:export`.
+- Processamento administrativo por `POST /exports/process-pending`, usando cursor e lotes de 100 registros.
+- CSV de produtos/SKUs e fatos financeiros operacionais.
+- Preservacao de SKU como texto no CSV para evitar perda de zeros em planilhas.
+- Storage temporario configuravel por `EXPORT_STORAGE_DIR`, com fallback em `/tmp/ledgerflow-exports`.
+- Download seguro de jobs concluidos e nao expirados por `GET /exports/:id/download`.
+- Cancelamento somente de jobs pendentes por `POST /exports/:id/cancel`.
+- AuditLog em criacao, cancelamento, conclusao, falha e download.
+- OutboxEvent `export.job.completed` e `export.job.failed`.
+- UI `/exports` com criacao de CSV, filtro de status, processamento de fila, cancelamento e download.
+
+Nao inclui nesta sprint:
+
+- Worker assíncrono definitivo.
+- XLSX real; o contrato reconhece o formato, mas a API recusa ate incluir writer de planilha.
+- Storage externo/S3.
+- Agendamento recorrente.
+- Exportacoes comerciais definitivas de marketplace ou pedidos externos.
+
+Endpoints documentados via Swagger/Redoc/OpenAPI:
+
+```text
+POST /exports
+GET /exports
+POST /exports/process-pending
+POST /exports/:id/cancel
+GET /exports/:id/download
+```
+
+Eventos AsyncAPI:
+
+```text
+export.job.completed
+export.job.failed
+```
+
 ### Payments Notes
 
 - PaymentsView segue View -> Store -> Service -> HTTP Client.

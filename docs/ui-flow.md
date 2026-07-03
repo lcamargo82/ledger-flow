@@ -61,8 +61,9 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/inventory/reservations` | Implementada (10.0.4) | `AppLayout`              | `inventory:read` + `inventory.manage` | Reservas administrativas, liberação e consumo total     |
 | `/orders`               | Implementada (10.0.5) | `AppLayout`                | `orders:read` + `orders.manage`       | Pedidos internos, reserva, cancelamento e fulfillment   |
 | `/reconciliation`       | Futura                | `AppLayout`                | a definir                             | Conciliação financeira                                  |
-| `/reports`              | Futura                | `AppLayout`                | a definir                             | Relatórios de sistema                                   |
-| `/channels`             | Implementada (10.0.6) | `AppLayout`                | `channels:read` + `channels.connect`  | Integrações de canal e inbox sanitizado                 |
+| `/exports`              | Implementada (10.0.10) | `AppLayout`              | `reports:export`                     | Exportações CSV rastreáveis com fila operacional        |
+| `/channels`             | Implementada (10.0.6), expandida (10.0.7/10.0.8) | `AppLayout`                | `channels:read` + `channels.connect`  | Integrações, inbox sanitizado, malha fina e sync mock   |
+| `/analytics`            | Implementada (10.0.9) | `AppLayout`                | `financial-intelligence:read` + `financial.analytics.read` | Dashboard operacional de facts financeiros              |
 | `/webhooks`             | Futura                | `AppLayout`                | a definir                             | Configuração e logs de webhooks                         |
 | `/audit-logs`           | Futura                | `AppLayout`                | a definir                             | Logs de auditoria geral                                 |
 | `/forbidden`            | Implementada          | `AppLayout` / `AuthLayout` | N/A                                   | Informar acesso negado por falta de permissão           |

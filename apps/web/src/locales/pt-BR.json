@@ -292,10 +292,15 @@
     "description": "Configure integrações de canal e acompanhe o inbox sanitizado de webhooks.",
     "tabs": {
       "integrations": "Integrações",
-      "inbox": "Inbox"
+      "inbox": "Inbox",
+      "listings": "Malha fina",
+      "sync": "Sincronização"
     },
     "actions": {
-      "createIntegration": "Nova integração"
+      "createIntegration": "Nova integração",
+      "importListings": "Importar anúncios",
+      "mapListing": "Mapear SKU",
+      "processSync": "Processar pendências"
     },
     "filters": {
       "statusLabel": "Status",
@@ -309,13 +314,26 @@
       "receivedAt": "Recebido em",
       "eventType": "Evento",
       "providerEventId": "ID externo",
-      "summary": "Resumo"
+      "summary": "Resumo",
+      "importedAt": "Importado em",
+      "title": "Anúncio",
+      "externalSku": "SKU externo",
+      "candidates": "Candidatos",
+      "actions": "Ações",
+      "updatedAt": "Atualizado em",
+      "skuId": "SKU",
+      "targetAvailable": "Disponível alvo",
+      "circuit": "Circuito",
+      "nextAttemptAt": "Próxima tentativa"
     },
     "form": {
       "integrationTitle": "Nova integração de canal",
+      "mappingTitle": "Mapear anúncio",
       "providerLabel": "Provider",
       "nameLabel": "Nome",
-      "webhookSecretLabel": "Segredo do webhook"
+      "webhookSecretLabel": "Segredo do webhook",
+      "skuIdLabel": "ID do SKU",
+      "reasonLabel": "Motivo"
     },
     "provider": {
       "MOCK": "Mock",
@@ -331,17 +349,123 @@
       "INVALID": "Inválido",
       "DLQ": "DLQ"
     },
+    "listingStatus": {
+      "MATCHED": "Vinculado",
+      "UNMATCHED": "Sem vínculo",
+      "AMBIGUOUS": "Ambíguo",
+      "IGNORED": "Ignorado"
+    },
+    "syncStatus": {
+      "PENDING": "Pendente",
+      "SYNCED": "Sincronizado",
+      "RETRY_SCHEDULED": "Retry agendado",
+      "CIRCUIT_OPEN": "Circuito aberto",
+      "FAILED": "Falhou"
+    },
+    "circuitState": {
+      "CLOSED": "Fechado",
+      "OPEN": "Aberto",
+      "HALF_OPEN": "Meio aberto"
+    },
+    "importSummary": "{imported} importados, {matched} vinculados, {unmatched} sem vínculo, {ambiguous} ambíguos.",
+    "syncSummary": "{processed} processados, {synced} sincronizados, {retry} retries, {circuit} circuitos abertos.",
     "empty": {
       "integrationsTitle": "Nenhuma integração de canal",
       "integrationsDescription": "Crie uma integração mock para testar intake autenticado.",
       "inboxTitle": "Nenhum webhook recebido",
-      "inboxDescription": "Eventos válidos, duplicados e inválidos aparecerão aqui sem payload bruto."
+      "inboxDescription": "Eventos válidos, duplicados e inválidos aparecerão aqui sem payload bruto.",
+      "listingsTitle": "Nenhum anúncio na malha fina",
+      "listingsDescription": "Importe anúncios do provider mock para revisar vínculos de SKU.",
+      "syncTitle": "Nenhum status de sincronização",
+      "syncDescription": "Mudanças de saldo em SKUs vinculados aparecerão aqui para sincronização mock."
     },
     "errors": {
       "title": "Não foi possível carregar canais",
       "default": "Não foi possível processar a operação de canais.",
       "forbidden": "Você não possui acesso a canais.",
       "invalid": "Revise as informações de canais."
+    }
+  },
+  "financialIntelligence": {
+    "title": "Analytics",
+    "description": "Acompanhe margem operacional e CMV por pedido sem misturar conciliação de caixa.",
+    "internalChannel": "Interno",
+    "reconciliationNote": "Margem operacional não representa liquidação, recebimento ou conciliação financeira.",
+    "cards": {
+      "orders": "Pedidos com fato",
+      "revenue": "Receita operacional",
+      "cogs": "CMV",
+      "margin": "Margem bruta"
+    },
+    "filters": {
+      "channel": "Canal",
+      "allChannels": "Todos os canais"
+    },
+    "table": {
+      "calculatedAt": "Calculado em",
+      "orderNumber": "Pedido",
+      "channel": "Canal",
+      "revenue": "Receita",
+      "cogs": "CMV",
+      "margin": "Margem"
+    },
+    "empty": {
+      "title": "Nenhum fato financeiro encontrado",
+      "description": "Conclua pedidos para gerar snapshots de CMV e margem operacional."
+    },
+    "errors": {
+      "title": "Não foi possível carregar analytics",
+      "default": "Não foi possível processar os indicadores financeiros.",
+      "forbidden": "Você não possui acesso aos indicadores financeiros.",
+      "invalid": "Revise os filtros informados."
+    }
+  },
+  "exports": {
+    "title": "Relatórios",
+    "description": "Gere arquivos CSV rastreáveis para relatórios operacionais.",
+    "form": {
+      "type": "Relatório"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "Todos os status"
+    },
+    "actions": {
+      "create": "Gerar CSV",
+      "process": "Processar fila",
+      "cancel": "Cancelar",
+      "download": "Baixar"
+    },
+    "types": {
+      "CATALOG_PRODUCTS": "Produtos e SKUs",
+      "ORDER_FINANCIAL_FACTS": "Fatos financeiros"
+    },
+    "status": {
+      "PENDING": "Pendente",
+      "PROCESSING": "Processando",
+      "COMPLETED": "Concluído",
+      "FAILED": "Falhou",
+      "CANCELLED": "Cancelado",
+      "EXPIRED": "Expirado"
+    },
+    "table": {
+      "createdAt": "Criado em",
+      "type": "Relatório",
+      "format": "Formato",
+      "status": "Status",
+      "rows": "Linhas",
+      "expiresAt": "Expira em",
+      "actions": "Ações"
+    },
+    "empty": {
+      "title": "Nenhuma exportação encontrada",
+      "description": "Gere um arquivo para acompanhar o processamento."
+    },
+    "errors": {
+      "title": "Não foi possível carregar exportações",
+      "default": "Não foi possível processar a exportação.",
+      "forbidden": "Você não possui permissão para exportar relatórios.",
+      "invalid": "Revise os dados da exportação."
     }
   },
   "catalog": {

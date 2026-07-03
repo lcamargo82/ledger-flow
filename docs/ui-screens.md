@@ -148,14 +148,14 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 ### Channels
 
 - **Rota:** `/channels`
-- **Status:** Implementada 10.0.6
+- **Status:** Implementada 10.0.6; expandida 10.0.7 com malha fina; expandida 10.0.8 com status de sincronização.
 - **Permissões:** `channels:read`, `channels:manage`
-- **Capability:** `channels.connect`
+- **Capability:** `channels.connect`; importação exige `channels.import_listings`; mapping exige `channels.mapping.manage`; sync exige `channels.sync_inventory`.
 - **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
-- **Objetivo:** Configurar integrações de canal e visualizar o inbox sanitizado de webhooks.
-- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, filtro de inbox por status e exibição de resumo sem payload bruto.
+- **Objetivo:** Configurar integrações de canal, visualizar inbox sanitizado de webhooks, revisar vínculos de anúncios com SKU e acompanhar sync mock de estoque.
+- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, importação mock de anúncios, filtro de inbox/status de listing, exibição de candidatos, mapping manual auditado, processamento mock de sync e status com retry/circuit breaker.
 - **Segurança:** Webhook público autentica por segredo da integração; UI protegida por permissão/capability; segredos e payload bruto não são exibidos.
-- **Fora de escopo:** Mercado Livre real, importação de anúncios, malha fina, criação automática de pedido e financeiro por pedido.
+- **Fora de escopo:** Mercado Livre real, criação automática de pedido, envio real a marketplace e financeiro por pedido.
 - **i18n:** Namespace `channels.*` em pt-BR e en-US.
 
 ### Catalog Products
@@ -169,3 +169,28 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Segurança:** O frontend esconde ações sem permissão/capability, mas o backend valida `@RequirePermissions` e `@RequireCapabilities`.
 - **Fora de escopo:** warehouses, saldos, movimentações, reservas, pedidos, marketplace, malha fina e financeiro por pedido.
 - **i18n:** Namespace `catalog.*` em pt-BR e en-US.
+
+### Analytics
+
+- **Rota:** `/analytics`
+- **Status:** Implementada 10.0.9.
+- **Permissões:** `financial-intelligence:read`
+- **Capability:** `financial.analytics.read`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppSelect`, `AppTable`, `AppBadge`, `AppErrorState`.
+- **Objetivo:** Exibir indicadores operacionais de `OrderFinancialFact` e fatos financeiros por pedido concluído.
+- **Fluxos:** dashboard com contagem, receita operacional, CMV e margem; filtro por canal; tabela de facts com data, pedido, canal e componentes de margem.
+- **Segurança:** backend valida permissão/capability; frontend apenas esconde rota/menu sem acesso.
+- **Fora de escopo:** conciliação 9A, settlement de gateway, recebíveis e margem financeira conciliada.
+- **i18n:** Namespace `financialIntelligence.*` em pt-BR e en-US.
+
+### Exports
+
+- **Rota:** `/exports`
+- **Status:** Implementada 10.0.10.
+- **Permissões:** `reports:export`
+- **Componentes:** `AppPageHeader`, `AppCard`, `AppSelect`, `AppTable`, `AppBadge`, `AppButton`, `AppErrorState`.
+- **Objetivo:** Criar e acompanhar exportações CSV pesadas de catálogo e facts financeiros com job rastreável.
+- **Fluxos:** criação de job CSV, filtro por status, processamento manual de pendentes, cancelamento de pendentes e download de concluídos.
+- **Segurança:** backend valida `reports:export`; download exige tenant do JWT, job concluído e não expirado; UI apenas esconde menu sem permissão.
+- **Fora de escopo:** XLSX real, storage externo, agendamento recorrente e worker definitivo.
+- **i18n:** Namespace `exports.*` em pt-BR e en-US.

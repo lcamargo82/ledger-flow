@@ -293,10 +293,15 @@
     "description": "Configure channel integrations and monitor the sanitized webhook inbox.",
     "tabs": {
       "integrations": "Integrations",
-      "inbox": "Inbox"
+      "inbox": "Inbox",
+      "listings": "Mapping review",
+      "sync": "Sync"
     },
     "actions": {
-      "createIntegration": "New integration"
+      "createIntegration": "New integration",
+      "importListings": "Import listings",
+      "mapListing": "Map SKU",
+      "processSync": "Process pending"
     },
     "filters": {
       "statusLabel": "Status",
@@ -310,13 +315,26 @@
       "receivedAt": "Received at",
       "eventType": "Event",
       "providerEventId": "External ID",
-      "summary": "Summary"
+      "summary": "Summary",
+      "importedAt": "Imported at",
+      "title": "Listing",
+      "externalSku": "External SKU",
+      "candidates": "Candidates",
+      "actions": "Actions",
+      "updatedAt": "Updated at",
+      "skuId": "SKU",
+      "targetAvailable": "Target available",
+      "circuit": "Circuit",
+      "nextAttemptAt": "Next attempt"
     },
     "form": {
       "integrationTitle": "New channel integration",
+      "mappingTitle": "Map listing",
       "providerLabel": "Provider",
       "nameLabel": "Name",
-      "webhookSecretLabel": "Webhook secret"
+      "webhookSecretLabel": "Webhook secret",
+      "skuIdLabel": "SKU ID",
+      "reasonLabel": "Reason"
     },
     "provider": {
       "MOCK": "Mock",
@@ -332,17 +350,123 @@
       "INVALID": "Invalid",
       "DLQ": "DLQ"
     },
+    "listingStatus": {
+      "MATCHED": "Matched",
+      "UNMATCHED": "Unmatched",
+      "AMBIGUOUS": "Ambiguous",
+      "IGNORED": "Ignored"
+    },
+    "syncStatus": {
+      "PENDING": "Pending",
+      "SYNCED": "Synced",
+      "RETRY_SCHEDULED": "Retry scheduled",
+      "CIRCUIT_OPEN": "Circuit open",
+      "FAILED": "Failed"
+    },
+    "circuitState": {
+      "CLOSED": "Closed",
+      "OPEN": "Open",
+      "HALF_OPEN": "Half-open"
+    },
+    "importSummary": "{imported} imported, {matched} matched, {unmatched} unmatched, {ambiguous} ambiguous.",
+    "syncSummary": "{processed} processed, {synced} synced, {retry} retries, {circuit} circuits open.",
     "empty": {
       "integrationsTitle": "No channel integrations",
       "integrationsDescription": "Create a mock integration to test authenticated intake.",
       "inboxTitle": "No webhooks received",
-      "inboxDescription": "Valid, duplicate, and invalid events will appear here without raw payloads."
+      "inboxDescription": "Valid, duplicate, and invalid events will appear here without raw payloads.",
+      "listingsTitle": "No listings in mapping review",
+      "listingsDescription": "Import listings from the mock provider to review SKU mappings.",
+      "syncTitle": "No sync status",
+      "syncDescription": "Balance changes for mapped SKUs will appear here for mock inventory sync."
     },
     "errors": {
       "title": "Could not load channels",
       "default": "Could not process the channel operation.",
       "forbidden": "You do not have channel access.",
       "invalid": "Review the channel information."
+    }
+  },
+  "financialIntelligence": {
+    "title": "Analytics",
+    "description": "Track operational margin and COGS by order without mixing cash reconciliation.",
+    "internalChannel": "Internal",
+    "reconciliationNote": "Operational margin is not settlement, cash receipt, or financial reconciliation.",
+    "cards": {
+      "orders": "Orders with facts",
+      "revenue": "Operational revenue",
+      "cogs": "COGS",
+      "margin": "Gross margin"
+    },
+    "filters": {
+      "channel": "Channel",
+      "allChannels": "All channels"
+    },
+    "table": {
+      "calculatedAt": "Calculated at",
+      "orderNumber": "Order",
+      "channel": "Channel",
+      "revenue": "Revenue",
+      "cogs": "COGS",
+      "margin": "Margin"
+    },
+    "empty": {
+      "title": "No financial facts found",
+      "description": "Fulfill orders to generate COGS and operational margin snapshots."
+    },
+    "errors": {
+      "title": "Could not load analytics",
+      "default": "Could not process financial indicators.",
+      "forbidden": "You do not have financial analytics access.",
+      "invalid": "Review the filters."
+    }
+  },
+  "exports": {
+    "title": "Reports",
+    "description": "Generate traceable CSV files for operational reports.",
+    "form": {
+      "type": "Report"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "actions": {
+      "create": "Generate CSV",
+      "process": "Process queue",
+      "cancel": "Cancel",
+      "download": "Download"
+    },
+    "types": {
+      "CATALOG_PRODUCTS": "Products and SKUs",
+      "ORDER_FINANCIAL_FACTS": "Financial facts"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "type": "Report",
+      "format": "Format",
+      "status": "Status",
+      "rows": "Rows",
+      "expiresAt": "Expires at",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No exports found",
+      "description": "Generate a file to track processing."
+    },
+    "errors": {
+      "title": "Could not load exports",
+      "default": "Could not process the export.",
+      "forbidden": "You do not have report export permission.",
+      "invalid": "Review the export data."
     }
   },
   "catalog": {

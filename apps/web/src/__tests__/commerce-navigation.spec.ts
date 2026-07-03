@@ -38,6 +38,19 @@ describe('commerce navigation foundation', () => {
     expect(channelsRoute?.meta.capabilities).toEqual(['channels.connect'])
   })
 
+  it('registers analytics route behind permission and capability metadata', () => {
+    const analyticsRoute = router.getRoutes().find((item) => item.path === '/analytics')
+
+    expect(analyticsRoute?.meta.permissions).toEqual(['financial-intelligence:read'])
+    expect(analyticsRoute?.meta.capabilities).toEqual(['financial.analytics.read'])
+  })
+
+  it('registers exports route behind report export permission', () => {
+    const exportsRoute = router.getRoutes().find((item) => item.path === '/exports')
+
+    expect(exportsRoute?.meta.permissions).toEqual(['reports:export'])
+  })
+
   it('checks capabilities from the authenticated user session', () => {
     const authStore = useAuthStore()
     authStore.user = {
@@ -66,7 +79,17 @@ describe('commerce navigation foundation', () => {
     expect(enUS.orders.status.FULFILLED).toBe('Fulfilled')
     expect(ptBR.nav.channels).toBe('Canais')
     expect(ptBR.channels.tabs.inbox).toBe('Inbox')
+    expect(ptBR.channels.tabs.listings).toBe('Malha fina')
+    expect(ptBR.channels.tabs.sync).toBe('Sincronização')
+    expect(ptBR.channels.listingStatus.AMBIGUOUS).toBe('Ambíguo')
+    expect(ptBR.channels.syncStatus.CIRCUIT_OPEN).toBe('Circuito aberto')
     expect(enUS.channels.webhookStatus.INVALID).toBe('Invalid')
+    expect(enUS.channels.actions.importListings).toBe('Import listings')
+    expect(enUS.channels.actions.processSync).toBe('Process pending')
+    expect(ptBR.financialIntelligence.cards.cogs).toBe('CMV')
+    expect(enUS.financialIntelligence.table.margin).toBe('Margin')
     expect(ptBR.nav.analytics).toBe('Analytics')
+    expect(ptBR.exports.actions.create).toBe('Gerar CSV')
+    expect(enUS.exports.status.COMPLETED).toBe('Completed')
   })
 })

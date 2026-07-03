@@ -172,20 +172,31 @@
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.channels') }}</span>
         </router-link>
-        <a
+        <router-link
           v-if="
             authStore.checkAllPermissions(['financial-intelligence:read']) &&
             authStore.checkAllCapabilities(['financial.analytics.read'])
           "
-          href="#"
-          class="lf-nav-item lf-nav-item--disabled"
-          @click.prevent
+          to="/analytics"
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
         >
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
             >analytics</span
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.analytics') }}</span>
-        </a>
+        </router-link>
+        <router-link
+          v-if="authStore.checkAllPermissions(['reports:export'])"
+          to="/exports"
+          class="lf-nav-item"
+          active-class="lf-nav-item--active"
+        >
+          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+            >file_download</span
+          >
+          <span class="text" v-show="!isCollapsed">{{ t('nav.reports') }}</span>
+        </router-link>
         <a href="#" class="lf-nav-item lf-nav-item--disabled" @click.prevent>
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
             >account_tree</span

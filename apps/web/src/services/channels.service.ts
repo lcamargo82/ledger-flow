@@ -1,10 +1,18 @@
 import { httpClient } from './http-client'
 import type {
   ChannelIntegration,
+  ChannelInventorySyncProcessSummary,
+  ChannelInventorySyncStatus,
   ChannelIntegrationsResponse,
+  ChannelListing,
+  ChannelListingsImportResponse,
+  ChannelListingMatchStatus,
   ChannelProvider,
   ChannelWebhookStatus,
   CreateChannelIntegrationRequest,
+  MapChannelListingRequest,
+  PaginatedChannelInventorySyncResponse,
+  PaginatedChannelListingsResponse,
   PaginatedChannelInboxResponse,
 } from '../types/channels.types'
 
@@ -33,6 +41,59 @@ export class ChannelsService {
     const { data } = await httpClient.get<PaginatedChannelInboxResponse>(
       '/channels/webhook-inbox',
       { params },
+    )
+    return data
+  }
+
+  async importListings(integrationId: string): Promise<ChannelListingsImportResponse> {
+    const { data } = await httpClient.post<ChannelListingsImportResponse>(
+      `/channels/integrations/${integrationId}/import-listings`,
+      {},
+    )
+    return data
+  }
+
+  async listListings(params?: {
+    page?: number
+    perPage?: number
+    provider?: ChannelProvider
+    status?: ChannelListingMatchStatus
+  }): Promise<PaginatedChannelListingsResponse> {
+    const { data } = await httpClient.get<PaginatedChannelListingsResponse>(
+      '/channels/listings/unmatched',
+      { params },
+    )
+    return data
+  }
+
+  async mapListing(
+    listingId: string,
+    payload: MapChannelListingRequest,
+  ): Promise<{ listing: ChannelListing }> {
+    const { data } = await httpClient.post<{ listing: ChannelListing }>(
+      `/channels/listings/${listingId}/map`,
+      payload,
+    )
+    return data
+  }
+
+  async listInventorySyncStatus(params?: {
+    page?: number
+    perPage?: number
+    provider?: ChannelProvider
+    status?: ChannelInventorySyncStatus
+  }): Promise<PaginatedChannelInventorySyncResponse> {
+    const { data } = await httpClient.get<PaginatedChannelInventorySyncResponse>(
+      '/channels/inventory-sync/status',
+      { params },
+    )
+    return data
+  }
+
+  async processInventorySync(): Promise<ChannelInventorySyncProcessSummary> {
+    const { data } = await httpClient.post<ChannelInventorySyncProcessSummary>(
+      '/channels/inventory-sync/process-pending',
+      {},
     )
     return data
   }

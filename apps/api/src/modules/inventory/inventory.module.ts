@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma/prisma.module';
+import { ChannelsModule } from '../channels/channels.module';
 import { InventoryService } from './application/services/inventory.service';
 import { INVENTORY_REPOSITORY } from './domain/repositories/inventory.repository';
 import { PrismaInventoryRepository } from './infra/repositories/prisma-inventory.repository';
@@ -8,7 +9,7 @@ import { InventoryLedgerController } from './presentation/controllers/inventory-
 import { InventoryWarehousesController } from './presentation/controllers/inventory-warehouses.controller';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, ChannelsModule],
   controllers: [
     InventoryFoundationController,
     InventoryWarehousesController,

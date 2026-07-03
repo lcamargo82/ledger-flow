@@ -25,6 +25,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ChannelsModule } from './modules/channels/channels.module';
 import { FinancialIntelligenceModule } from './modules/financial-intelligence/financial-intelligence.module';
+import { ExportsModule } from './modules/exports/exports.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { FinancialIntelligenceModule } from './modules/financial-intelligence/fi
     OrdersModule,
     ChannelsModule,
     FinancialIntelligenceModule,
+    ExportsModule,
   ],
   controllers: [AppController],
   providers: [

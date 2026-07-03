@@ -1400,6 +1400,91 @@ GET /channels/webhook-inbox
 POST /webhooks/channels/:provider
 ```
 
+## Fase 10.0.7 - Listings, Importacao e Malha Fina
+
+A 10.0.7 adiciona a malha fina de anuncios de canal com provider `MOCK`, sem ainda criar pedidos por canal ou sincronizar saldos para marketplace.
+
+- `ChannelListing` representa anuncio importado por integracao de canal.
+- `ListingSkuMapping` registra vinculo manual tenant-scoped entre anuncio e `ProductSku`.
+- Importacao mock classifica anuncios como `MATCHED`, `UNMATCHED`, `AMBIGUOUS` ou `IGNORED`.
+- Sem SKU externo ou SKU inexistente fica `UNMATCHED`.
+- Mais de um candidato fica `AMBIGUOUS`; nao ocorre vinculo automatico inseguro.
+- Mapping manual exige `channels:manage` + capability `channels.mapping.manage`, gera AuditLog e Outbox.
+- UI `/channels` ganha aba de malha fina, importacao mock e acao de mapping manual.
+- Fora de escopo: adapter real Mercado Livre, criacao automatica de pedido, egress sync de saldo e financeiro por pedido.
+
+Endpoints:
+
+```text
+POST /channels/integrations/:id/import-listings
+GET /channels/listings/unmatched
+POST /channels/listings/:id/map
+```
+
+## Fase 10.0.8 - Sincronizacao Egress e Protecoes
+
+A 10.0.8 adiciona sincronizacao egress de saldo para SKUs vinculados a listings do provider `MOCK`.
+
+- `inventory.balance.changed` e emitido quando ajustes, reservas, liberacoes ou consumos alteram `InventoryBalance`.
+- `ChannelInventorySyncState` coalesce varias mudancas rapidas por listing, mantendo a quantidade disponivel mais recente.
+- Processamento mock respeita politica de retry/backoff com jitter.
+- Retornos 429 simulados agendam retry; tentativas repetidas abrem circuito para evitar tempestade de chamadas.
+- Replay com mesma quantidade nao duplica efeito no provider mock; o estado e marcado como sincronizado.
+- UI `/channels` ganha aba de sincronizacao com status sanitizado, circuito e proxima tentativa.
+- Fora de escopo: adapter real Mercado Livre, envio real a marketplace, pedidos de canal e financeiro por pedido.
+
+Endpoints:
+
+```text
+GET /channels/inventory-sync/status
+POST /channels/inventory-sync/process-pending
+```
+
+## Fase 10.0.9 - Financial Intelligence Inicial
+
+A 10.0.9 adiciona fatos financeiros operacionais de pedidos e um dashboard inicial de margem.
+
+- `OrderFinancialFact` registra snapshot versionado por pedido concluido.
+- O snapshot e criado no fulfillment do pedido interno.
+- O CMV usa `ProductSku.averageCost * quantidade` com `Decimal`.
+- Como `InternalOrder` ainda nao captura preco de venda, `revenueAmount` inicia em `0` e a margem fica explicitamente explicavel.
+- O dashboard expõe pedidos com fato, receita operacional, CMV e margem bruta.
+- Filtros por periodo e canal existem no contrato; pedidos internos atuais aparecem como canal interno/nulo.
+- UI `/analytics` substitui o placeholder e mostra fatos + nota de que nao e conciliacao de caixa.
+- Fora de escopo: conciliacao 9A, recebiveis, liquidacao, gateway settlement e financeiro definitivo por marketplace.
+
+Endpoints:
+
+```text
+GET /financial-intelligence/dashboard
+GET /financial-intelligence/order-facts
+```
+
+## Fase 10.0.10 - Exportacoes Pesadas
+
+A 10.0.10 adiciona jobs de exportacao CSV para relatorios operacionais sem carregar o dataset inteiro em memoria.
+
+- `ExportJob` registra tipo, formato, status, arquivo, quantidade de linhas, expiracao e erro.
+- `POST /exports` cria jobs protegidos por `reports:export`.
+- `POST /exports/process-pending` processa pendentes por cursor/lotes de 100 registros.
+- CSV de catalogo preserva SKU como texto para evitar perda de zeros em planilhas.
+- Download exige job concluido, tenant correto e arquivo ainda nao expirado.
+- Cancelamento e permitido somente para jobs pendentes.
+- AuditLog cobre criacao, cancelamento, conclusao, falha e download.
+- Outbox publica `export.job.completed` e `export.job.failed`.
+- UI `/exports` permite gerar CSV, filtrar status, processar fila, cancelar e baixar.
+- Fora de escopo: XLSX real, worker definitivo, storage externo e agendamento recorrente.
+
+Endpoints:
+
+```text
+POST /exports
+GET /exports
+POST /exports/process-pending
+POST /exports/:id/cancel
+GET /exports/:id/download
+```
+
 ### Platform Admin as Internal Tenant User
 
 O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:

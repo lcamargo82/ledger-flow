@@ -1,9 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ChannelIntegrationStatus, Prisma } from '@prisma/client';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ChannelIntegrationStatus,
+  ChannelListing,
+  ChannelListingMatchStatus,
+  ChannelProvider,
+  Prisma,
+} from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { CreateChannelIntegrationDto } from '../dto/create-channel-integration.dto';
 import { ListChannelInboxQueryDto } from '../dto/list-channel-inbox-query.dto';
+import { ImportChannelListingsDto, MockChannelListingDto } from '../dto/import-channel-listings.dto';
+import { ListChannelListingsQueryDto } from '../dto/list-channel-listings-query.dto';
+import { MapChannelListingDto } from '../dto/map-channel-listing.dto';
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
 
@@ -53,8 +62,201 @@ export class ChannelsService {
     return this.channelsRepository.listInbox({ tenantId, ...query });
   }
 
+  listListings(tenantId: string, query: ListChannelListingsQueryDto) {
+    return this.channelsRepository.listListings({ tenantId, ...query });
+  }
+
+  async importListings(
+    integrationId: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: ImportChannelListingsDto,
+  ) {
+    const integration = await this.channelsRepository.findIntegrationById(integrationId, tenantId);
+    if (!integration) {
+      throw new NotFoundException('Channel integration not found.');
+    }
+    if (integration.status !== ChannelIntegrationStatus.ACTIVE) {
+      throw new BadRequestException('Only active channel integrations can import listings.');
+    }
+    if (integration.provider !== ChannelProvider.MOCK) {
+      throw new BadRequestException('Listing import is available only for MOCK provider in 10.0.7.');
+    }
+
+    const importedListings = dto.listings?.length ? dto.listings : this.defaultMockListings();
+    const data: ChannelListing[] = [];
+    const summary = {
+      imported: 0,
+      matched: 0,
+      unmatched: 0,
+      ambiguous: 0,
+      ignored: 0,
+    };
+
+    for (const listing of importedListings) {
+      const decision = await this.classifyListing(tenantId, listing);
+      const saved = await this.channelsRepository.upsertListing({
+        tenantId,
+        integrationId: integration.id,
+        provider: integration.provider,
+        externalListingId: listing.externalListingId,
+        title: listing.title,
+        externalSku: listing.externalSku?.trim() || null,
+        matchStatus: decision.status,
+        matchedSkuId: decision.matchedSkuId,
+        candidateSkuIds: decision.candidateSkuIds,
+      });
+
+      summary.imported += 1;
+      if (decision.status === ChannelListingMatchStatus.MATCHED) summary.matched += 1;
+      if (decision.status === ChannelListingMatchStatus.UNMATCHED) summary.unmatched += 1;
+      if (decision.status === ChannelListingMatchStatus.AMBIGUOUS) summary.ambiguous += 1;
+      if (decision.status === ChannelListingMatchStatus.IGNORED) summary.ignored += 1;
+      data.push(saved);
+    }
+
+    await this.audit(
+      tenantId,
+      actorUserId,
+      'channels.listings.imported',
+      integration.id,
+      {
+        provider: integration.provider,
+        summary,
+      },
+      'ChannelIntegration',
+    );
+
+    await this.createOutbox(tenantId, integration.id, 'channel.listing.import.completed', {
+      integrationId: integration.id,
+      provider: integration.provider,
+      summary,
+    });
+
+    return { summary, data };
+  }
+
+  async mapListing(
+    listingId: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: MapChannelListingDto,
+  ) {
+    const listing = await this.channelsRepository.findListingById(listingId, tenantId);
+    if (!listing) {
+      throw new NotFoundException('Channel listing not found.');
+    }
+
+    const sku = await this.channelsRepository.findSkuById(dto.skuId, tenantId);
+    if (!sku) {
+      throw new BadRequestException('SKU does not belong to this tenant.');
+    }
+
+    const mappedListing = await this.channelsRepository.createManualMapping({
+      tenantId,
+      listingId,
+      skuId: dto.skuId,
+      actorUserId,
+      reason: dto.reason,
+    });
+
+    await this.audit(
+      tenantId,
+      actorUserId,
+      'channels.listing.mapped',
+      mappedListing.id,
+      {
+        listingId,
+        skuId: dto.skuId,
+        previousStatus: listing.matchStatus,
+        reason: dto.reason,
+      },
+      'ChannelListing',
+    );
+
+    await this.createOutbox(tenantId, mappedListing.id, 'channel.listing.mapped', {
+      listingId: mappedListing.id,
+      skuId: dto.skuId,
+    });
+
+    return mappedListing;
+  }
+
   private hash(value: string) {
     return createHash('sha256').update(value).digest('hex');
+  }
+
+  private async classifyListing(
+    tenantId: string,
+    listing: MockChannelListingDto,
+  ): Promise<{
+    status: ChannelListingMatchStatus;
+    matchedSkuId: string | null;
+    candidateSkuIds: string[];
+  }> {
+    const externalSku = listing.externalSku?.trim();
+    if (!externalSku) {
+      return {
+        status: ChannelListingMatchStatus.UNMATCHED,
+        matchedSkuId: null,
+        candidateSkuIds: [],
+      };
+    }
+
+    const candidates = await this.channelsRepository.findSkuMatchCandidates(tenantId, externalSku);
+    if (candidates.length === 1) {
+      return {
+        status: ChannelListingMatchStatus.MATCHED,
+        matchedSkuId: candidates[0].id,
+        candidateSkuIds: [candidates[0].id],
+      };
+    }
+    if (candidates.length > 1) {
+      return {
+        status: ChannelListingMatchStatus.AMBIGUOUS,
+        matchedSkuId: null,
+        candidateSkuIds: candidates.map((candidate) => candidate.id),
+      };
+    }
+
+    return {
+      status: ChannelListingMatchStatus.UNMATCHED,
+      matchedSkuId: null,
+      candidateSkuIds: [],
+    };
+  }
+
+  private defaultMockListings(): MockChannelListingDto[] {
+    return [
+      {
+        externalListingId: 'mock-listing-missing-sku',
+        title: 'Mock Listing sem SKU externo',
+      },
+      {
+        externalListingId: 'mock-listing-unknown-sku',
+        title: 'Mock Listing com SKU não encontrado',
+        externalSku: 'MOCK-SKU-INEXISTENTE',
+      },
+    ];
+  }
+
+  private async createOutbox(
+    tenantId: string,
+    aggregateId: string,
+    eventType: string,
+    payload: Record<string, unknown>,
+  ) {
+    await this.prisma.outboxEvent.create({
+      data: {
+        tenantId,
+        aggregateType: 'ChannelListing',
+        aggregateId,
+        eventType,
+        eventVersion: 1,
+        payload: payload as Prisma.InputJsonValue,
+        payloadHash: this.hash(JSON.stringify(payload)),
+      },
+    });
   }
 
   private async audit(
@@ -63,13 +265,14 @@ export class ChannelsService {
     action: string,
     entityId: string,
     metadata?: Record<string, unknown>,
+    entityType = 'ChannelIntegration',
   ) {
     await this.prisma.auditLog.create({
       data: {
         tenantId,
         actorUserId,
         action,
-        entityType: 'ChannelIntegration',
+        entityType,
         entityId,
         metadata: (metadata as Prisma.InputJsonValue) ?? undefined,
       },

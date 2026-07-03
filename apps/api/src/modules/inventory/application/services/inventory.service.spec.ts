@@ -23,6 +23,9 @@ describe('InventoryService', () => {
     auditLog: {
       create: jest.fn(),
     },
+    outboxEvent: {
+      create: jest.fn(),
+    },
   };
 
   let service: InventoryService;
@@ -82,7 +85,15 @@ describe('InventoryService', () => {
     repository.findSkuById.mockResolvedValue({ id: 'sku-1' });
     repository.recordAdjustment.mockResolvedValue({
       movement: { id: 'movement-1', type: InventoryMovementType.ADJUSTMENT_IN },
-      balance: { onHandQuantity: '5', availableQuantity: '5' },
+      balance: {
+        id: 'balance-1',
+        skuId: 'sku-1',
+        warehouseId: 'warehouse-1',
+        onHandQuantity: '5',
+        reservedQuantity: '0',
+        availableQuantity: '5',
+        version: 1,
+      },
     });
 
     const result = await service.recordAdjustment('tenant-1', 'user-1', {
@@ -135,9 +146,13 @@ describe('InventoryService', () => {
         status: 'ACTIVE',
       },
       balance: {
+        id: 'balance-1',
+        skuId: 'sku-1',
+        warehouseId: 'warehouse-1',
         onHandQuantity: '10',
         reservedQuantity: '3',
         availableQuantity: '7',
+        version: 2,
       },
       movement: { id: 'movement-1', type: InventoryMovementType.RESERVATION },
     });
@@ -184,9 +199,13 @@ describe('InventoryService', () => {
         status: 'RELEASED',
       },
       balance: {
+        id: 'balance-1',
+        skuId: 'sku-1',
+        warehouseId: 'warehouse-1',
         onHandQuantity: '10',
         reservedQuantity: '0',
         availableQuantity: '10',
+        version: 3,
       },
       movement: { id: 'movement-2', type: InventoryMovementType.RESERVATION_RELEASE },
     });
@@ -221,9 +240,13 @@ describe('InventoryService', () => {
         status: 'CONSUMED',
       },
       balance: {
+        id: 'balance-1',
+        skuId: 'sku-1',
+        warehouseId: 'warehouse-1',
         onHandQuantity: '7',
         reservedQuantity: '0',
         availableQuantity: '7',
+        version: 4,
       },
       movement: { id: 'movement-3', type: InventoryMovementType.FULFILLMENT },
       outboxEvent: { id: 'outbox-1', eventType: 'inventory.reservation.consumed' },
