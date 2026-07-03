@@ -4,6 +4,7 @@ import { AsyncHandlerRegistryService } from '../async/application/services/async
 import { PrismaModule } from '../../database/prisma/prisma.module';
 import { ReconciliationSettlementReceivedAsyncHandler } from './application/async-handlers/reconciliation-settlement-received.handler';
 import { ReconciliationCasesService } from './application/services/reconciliation-cases.service';
+import { ReconciliationDecisionsService } from './application/services/reconciliation-decisions.service';
 import { ReconciliationMatchingService } from './application/services/reconciliation-matching.service';
 import { ReconciliationSettlementIngestionService } from './application/services/reconciliation-settlement-ingestion.service';
 import { AsaasReconciliationProviderAdapter } from './infra/adapters/asaas-reconciliation-provider.adapter';
@@ -16,6 +17,7 @@ import { ReconciliationFoundationController } from './presentation/controllers/r
   providers: [
     AsaasReconciliationProviderAdapter,
     ReconciliationCasesService,
+    ReconciliationDecisionsService,
     ReconciliationMatchingService,
     ReconciliationSettlementIngestionService,
     ReconciliationSettlementReceivedAsyncHandler,

@@ -5,7 +5,7 @@ import { ReconciliationCapabilities } from '../../../platform/domain/constants/p
 import { ReconciliationCasesController } from './reconciliation-cases.controller';
 
 describe('ReconciliationCasesController', () => {
-  it.each(['list', 'findOne'])(
+  it.each(['list', 'findOne', 'timeline'])(
     'protects %s with reconciliation read permission and capability',
     (methodName) => {
       const descriptor = Object.getOwnPropertyDescriptor(
@@ -21,4 +21,18 @@ describe('ReconciliationCasesController', () => {
       ]);
     },
   );
+
+  it('protects createDecision with reconciliation manage permission and capability', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      ReconciliationCasesController.prototype,
+      'createDecision',
+    );
+
+    expect(Reflect.getMetadata(REQUIRED_PERMISSIONS_KEY, descriptor?.value)).toEqual([
+      'reconciliation:manage',
+    ]);
+    expect(Reflect.getMetadata(REQUIRED_CAPABILITIES_KEY, descriptor?.value)).toEqual([
+      ReconciliationCapabilities.Manage,
+    ]);
+  });
 });

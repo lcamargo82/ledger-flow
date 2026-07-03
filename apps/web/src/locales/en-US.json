@@ -1590,6 +1590,40 @@
     "empty": {
       "title": "No reconciliation cases yet",
       "description": "The 9A foundation is ready. Settlement ingestion and automatic matching arrive in the next sprints."
+    },
+    "summary": {
+      "total": "Cases"
+    },
+    "table": {
+      "case": "Case",
+      "status": "Status",
+      "provider": "Provider",
+      "received": "Received",
+      "difference": "Difference",
+      "reference": "Reference",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "actions": {
+      "review": "Review",
+      "COMMENT": "Comment",
+      "MANUAL_MATCH": "Manual match",
+      "RESOLVE_EXCEPTION": "Resolve exception",
+      "IGNORE": "Ignore",
+      "REOPEN": "Reopen"
+    },
+    "decisionModal": {
+      "title": "Register decision",
+      "action": "Action",
+      "paymentId": "Payment ID",
+      "reasonCode": "Reason code",
+      "comment": "Comment",
+      "submit": "Register decision"
+    },
+    "errors": {
+      "default": "Could not load reconciliation.",
+      "forbidden": "You do not have access to reconciliation.",
+      "invalid": "Review the decision data."
     }
   },
   "features": {

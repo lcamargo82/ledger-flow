@@ -63,6 +63,30 @@ export class ReconciliationCasesService {
     return this.toResponse(reconciliationCase);
   }
 
+  async getTimeline(tenantId: string, id: string) {
+    const reconciliationCase = await this.prisma.reconciliationCase.findFirst({
+      where: { id, tenantId },
+      select: { id: true, status: true, createdAt: true, updatedAt: true },
+    });
+
+    if (!reconciliationCase) {
+      throw new NotFoundException('Reconciliation case not found.');
+    }
+
+    const decisions = await this.prisma.reconciliationDecision.findMany({
+      where: { tenantId, caseId: id },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return {
+      case: reconciliationCase,
+      decisions: decisions.map((decision) => ({
+        ...decision,
+        metadata: decision.metadata ?? null,
+      })),
+    };
+  }
+
   private buildWhere(
     tenantId: string,
     query: ListReconciliationCasesQueryDto,

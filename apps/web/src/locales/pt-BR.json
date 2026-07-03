@@ -1590,6 +1590,40 @@
     "empty": {
       "title": "Nenhum caso de conciliação ainda",
       "description": "A fundação 9A está pronta. A ingestão de settlements e o matching automático entram nas próximas sprints."
+    },
+    "summary": {
+      "total": "Casos"
+    },
+    "table": {
+      "case": "Caso",
+      "status": "Status",
+      "provider": "Provider",
+      "received": "Recebido",
+      "difference": "Diferença",
+      "reference": "Referência",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "actions": {
+      "review": "Revisar",
+      "COMMENT": "Comentário",
+      "MANUAL_MATCH": "Vincular manualmente",
+      "RESOLVE_EXCEPTION": "Resolver exceção",
+      "IGNORE": "Ignorar",
+      "REOPEN": "Reabrir"
+    },
+    "decisionModal": {
+      "title": "Registrar decisão",
+      "action": "Ação",
+      "paymentId": "ID do pagamento",
+      "reasonCode": "Código do motivo",
+      "comment": "Comentário",
+      "submit": "Registrar decisão"
+    },
+    "errors": {
+      "default": "Não foi possível carregar a conciliação.",
+      "forbidden": "Você não tem acesso à conciliação.",
+      "invalid": "Revise os dados da decisão."
     }
   },
   "features": {
