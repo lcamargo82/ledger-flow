@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   Payment,
   PaymentProvider,
+  PaymentStatus,
   Prisma,
   ProviderSettlementEvent,
   ReconciliationCase,
@@ -203,6 +204,12 @@ export class ReconciliationMatchingService {
     if (match.payment.currency !== settlement.currency) {
       return ReconciliationCaseStatus.CURRENCY_DIVERGENCE;
     }
+    const providerPaymentStatus = this.normalizeProviderStatus(
+      settlement.providerStatus,
+    );
+    if (providerPaymentStatus && providerPaymentStatus !== match.payment.status) {
+      return ReconciliationCaseStatus.STATUS_DIVERGENCE;
+    }
     if (
       differenceAmountMinor &&
       differenceAmountMinor.absoluteValue().gt(tolerance)
@@ -216,5 +223,27 @@ export class ReconciliationMatchingService {
     }
 
     return ReconciliationCaseStatus.RECONCILED;
+  }
+
+  private normalizeProviderStatus(providerStatus?: string | null) {
+    if (!providerStatus) return null;
+
+    const normalized = providerStatus.trim().toUpperCase();
+    const statusMap: Record<string, PaymentStatus> = {
+      APPROVED: PaymentStatus.APPROVED,
+      RECEIVED: PaymentStatus.APPROVED,
+      CONFIRMED: PaymentStatus.APPROVED,
+      REFUNDED: PaymentStatus.REFUNDED,
+      REFUND_REQUESTED: PaymentStatus.REFUNDED,
+      CANCELED: PaymentStatus.CANCELED,
+      CANCELLED: PaymentStatus.CANCELED,
+      DELETED: PaymentStatus.CANCELED,
+      FAILED: PaymentStatus.FAILED,
+      OVERDUE: PaymentStatus.FAILED,
+      PENDING: PaymentStatus.PENDING,
+      PROCESSING: PaymentStatus.PROCESSING,
+    };
+
+    return statusMap[normalized] ?? null;
   }
 }
