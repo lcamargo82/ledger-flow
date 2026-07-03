@@ -140,6 +140,7 @@ model Tenant {
   providerSettlementEvents ProviderSettlementEvent[]
   reconciliationCases      ReconciliationCase[]
   reconciliationPolicies   ReconciliationPolicy[]
+  reconciliationDecisions  ReconciliationDecision[]
 
   @@map("tenants")
 }
@@ -165,6 +166,7 @@ model User {
   sessions               UserSession[]
   passwordResetTokens    PasswordResetToken[]
   tenantAdminInvitations TenantAdminInvitation[]
+  reconciliationDecisions ReconciliationDecision[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -900,6 +902,7 @@ model Payment {
   events               PaymentEvent[]
   webhookInboxEvents   WebhookInboxEvent[]
   reconciliationCases   ReconciliationCase[]
+  reconciliationDecisions ReconciliationDecision[]
 
   @@unique([tenantId, reference])
   @@unique([tenantId, idempotencyKeyHash])
@@ -1111,6 +1114,14 @@ enum ReconciliationMatchType {
   NONE
 }
 
+enum ReconciliationDecisionAction {
+  MANUAL_MATCH
+  RESOLVE_EXCEPTION
+  IGNORE
+  REOPEN
+  COMMENT
+}
+
 model ExportJob {
   id                String          @id @default(uuid())
   tenantId          String          @map("tenant_id")
@@ -1201,12 +1212,40 @@ model ReconciliationCase {
   tenant          Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   settlementEvent ProviderSettlementEvent @relation(fields: [settlementEventId], references: [id], onDelete: Restrict)
   payment         Payment?                @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  decisions       ReconciliationDecision[]
 
   @@unique([tenantId, settlementEventId])
   @@index([tenantId, status])
   @@index([tenantId, provider, createdAt])
   @@index([paymentId])
   @@map("reconciliation_cases")
+}
+
+model ReconciliationDecision {
+  id             String                       @id @default(uuid())
+  tenantId       String                       @map("tenant_id")
+  caseId         String                       @map("case_id")
+  actorUserId    String                       @map("actor_user_id")
+  action         ReconciliationDecisionAction
+  reasonCode     String                       @map("reason_code")
+  comment        String?
+  previousStatus ReconciliationCaseStatus     @map("previous_status")
+  nextStatus     ReconciliationCaseStatus     @map("next_status")
+  paymentId      String?                      @map("payment_id")
+  metadata       Json?                        @map("metadata_json")
+  createdAt      DateTime                     @default(now()) @map("created_at")
+
+  tenant    Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  case      ReconciliationCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actorUser User               @relation(fields: [actorUserId], references: [id], onDelete: Restrict)
+  payment   Payment?           @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, caseId])
+  @@index([tenantId, action])
+  @@index([actorUserId])
+  @@index([paymentId])
+  @@map("reconciliation_decisions")
 }
 
 model ReconciliationPolicy {
