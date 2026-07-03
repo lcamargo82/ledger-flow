@@ -1460,6 +1460,31 @@ GET /financial-intelligence/dashboard
 GET /financial-intelligence/order-facts
 ```
 
+## Fase 10.0.10 - Exportacoes Pesadas
+
+A 10.0.10 adiciona jobs de exportacao CSV para relatorios operacionais sem carregar o dataset inteiro em memoria.
+
+- `ExportJob` registra tipo, formato, status, arquivo, quantidade de linhas, expiracao e erro.
+- `POST /exports` cria jobs protegidos por `reports:export`.
+- `POST /exports/process-pending` processa pendentes por cursor/lotes de 100 registros.
+- CSV de catalogo preserva SKU como texto para evitar perda de zeros em planilhas.
+- Download exige job concluido, tenant correto e arquivo ainda nao expirado.
+- Cancelamento e permitido somente para jobs pendentes.
+- AuditLog cobre criacao, cancelamento, conclusao, falha e download.
+- Outbox publica `export.job.completed` e `export.job.failed`.
+- UI `/exports` permite gerar CSV, filtrar status, processar fila, cancelar e baixar.
+- Fora de escopo: XLSX real, worker definitivo, storage externo e agendamento recorrente.
+
+Endpoints:
+
+```text
+POST /exports
+GET /exports
+POST /exports/process-pending
+POST /exports/:id/cancel
+GET /exports/:id/download
+```
+
 ### Platform Admin as Internal Tenant User
 
 O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Dual-Role_). Ele age simultaneamente como:

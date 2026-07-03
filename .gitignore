@@ -115,7 +115,7 @@ log/
 uploads/
 storage/
 reports/
-exports/
+/exports/
 tmp-reports/
 tmp-exports/
 

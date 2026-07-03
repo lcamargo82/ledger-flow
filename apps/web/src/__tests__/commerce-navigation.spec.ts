@@ -45,6 +45,12 @@ describe('commerce navigation foundation', () => {
     expect(analyticsRoute?.meta.capabilities).toEqual(['financial.analytics.read'])
   })
 
+  it('registers exports route behind report export permission', () => {
+    const exportsRoute = router.getRoutes().find((item) => item.path === '/exports')
+
+    expect(exportsRoute?.meta.permissions).toEqual(['reports:export'])
+  })
+
   it('checks capabilities from the authenticated user session', () => {
     const authStore = useAuthStore()
     authStore.user = {
@@ -83,5 +89,7 @@ describe('commerce navigation foundation', () => {
     expect(ptBR.financialIntelligence.cards.cogs).toBe('CMV')
     expect(enUS.financialIntelligence.table.margin).toBe('Margin')
     expect(ptBR.nav.analytics).toBe('Analytics')
+    expect(ptBR.exports.actions.create).toBe('Gerar CSV')
+    expect(enUS.exports.status.COMPLETED).toBe('Completed')
   })
 })

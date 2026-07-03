@@ -420,6 +420,54 @@
       "invalid": "Revise os filtros informados."
     }
   },
+  "exports": {
+    "title": "Relatórios",
+    "description": "Gere arquivos CSV rastreáveis para relatórios operacionais.",
+    "form": {
+      "type": "Relatório"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "Todos os status"
+    },
+    "actions": {
+      "create": "Gerar CSV",
+      "process": "Processar fila",
+      "cancel": "Cancelar",
+      "download": "Baixar"
+    },
+    "types": {
+      "CATALOG_PRODUCTS": "Produtos e SKUs",
+      "ORDER_FINANCIAL_FACTS": "Fatos financeiros"
+    },
+    "status": {
+      "PENDING": "Pendente",
+      "PROCESSING": "Processando",
+      "COMPLETED": "Concluído",
+      "FAILED": "Falhou",
+      "CANCELLED": "Cancelado",
+      "EXPIRED": "Expirado"
+    },
+    "table": {
+      "createdAt": "Criado em",
+      "type": "Relatório",
+      "format": "Formato",
+      "status": "Status",
+      "rows": "Linhas",
+      "expiresAt": "Expira em",
+      "actions": "Ações"
+    },
+    "empty": {
+      "title": "Nenhuma exportação encontrada",
+      "description": "Gere um arquivo para acompanhar o processamento."
+    },
+    "errors": {
+      "title": "Não foi possível carregar exportações",
+      "default": "Não foi possível processar a exportação.",
+      "forbidden": "Você não possui permissão para exportar relatórios.",
+      "invalid": "Revise os dados da exportação."
+    }
+  },
   "catalog": {
     "title": "Catálogo",
     "description": "Gerencie produtos simples, produtos pai e variantes vendáveis com SKU, custo e unidade de medida.",

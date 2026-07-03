@@ -421,6 +421,54 @@
       "invalid": "Review the filters."
     }
   },
+  "exports": {
+    "title": "Reports",
+    "description": "Generate traceable CSV files for operational reports.",
+    "form": {
+      "type": "Report"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All statuses"
+    },
+    "actions": {
+      "create": "Generate CSV",
+      "process": "Process queue",
+      "cancel": "Cancel",
+      "download": "Download"
+    },
+    "types": {
+      "CATALOG_PRODUCTS": "Products and SKUs",
+      "ORDER_FINANCIAL_FACTS": "Financial facts"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "type": "Report",
+      "format": "Format",
+      "status": "Status",
+      "rows": "Rows",
+      "expiresAt": "Expires at",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No exports found",
+      "description": "Generate a file to track processing."
+    },
+    "errors": {
+      "title": "Could not load exports",
+      "default": "Could not process the export.",
+      "forbidden": "You do not have report export permission.",
+      "invalid": "Review the export data."
+    }
+  },
   "catalog": {
     "title": "Catalog",
     "description": "Manage simple products, parent products, and sellable variants with SKU, cost, and unit of measure.",
