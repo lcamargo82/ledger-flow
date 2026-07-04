@@ -15,6 +15,36 @@ export interface MercadoLivreOAuthTokenResponse {
   scope?: string;
 }
 
+export interface MercadoLivreSearchItemsInput {
+  accessToken: string;
+  sellerId: string;
+  offset: number;
+  limit: number;
+}
+
+export interface MercadoLivreSearchItemsResponse {
+  results: string[];
+  paging: {
+    total: number;
+    offset: number;
+    limit: number;
+  };
+}
+
+export interface MercadoLivreItemResponse {
+  id: string;
+  title?: string;
+  seller_custom_field?: string | null;
+  status?: string;
+  secure_thumbnail?: string;
+  thumbnail?: string;
+  attributes?: Array<{
+    id?: string;
+    name?: string;
+    value_name?: string;
+  }>;
+}
+
 @Injectable()
 export class MercadoLivreApiClient {
   async exchangeAuthorizationCode(
@@ -38,5 +68,37 @@ export class MercadoLivreApiClient {
     }
 
     return response.json() as Promise<MercadoLivreOAuthTokenResponse>;
+  }
+
+  async searchSellerItems(
+    input: MercadoLivreSearchItemsInput,
+  ): Promise<MercadoLivreSearchItemsResponse> {
+    const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
+    const url = new URL(`${baseUrl}/users/${input.sellerId}/items/search`);
+    url.searchParams.set('offset', String(input.offset));
+    url.searchParams.set('limit', String(input.limit));
+
+    const response = await fetch(url, {
+      headers: { authorization: `Bearer ${input.accessToken}` },
+    });
+
+    if (!response.ok) {
+      throw new Error('Mercado Livre listing search failed.');
+    }
+
+    return response.json() as Promise<MercadoLivreSearchItemsResponse>;
+  }
+
+  async getItem(accessToken: string, itemId: string): Promise<MercadoLivreItemResponse> {
+    const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
+    const response = await fetch(`${baseUrl}/items/${itemId}`, {
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!response.ok) {
+      throw new Error('Mercado Livre item detail failed.');
+    }
+
+    return response.json() as Promise<MercadoLivreItemResponse>;
   }
 }

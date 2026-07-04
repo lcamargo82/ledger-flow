@@ -24,6 +24,12 @@ describe('ChannelsService listings', () => {
     auditLog: { create: jest.fn() },
     outboxEvent: { create: jest.fn() },
   };
+  const mercadoLivreAdapter = {
+    fetchListings: jest.fn(),
+  };
+  const encryptionService = {
+    decrypt: jest.fn(),
+  };
 
   const integration = {
     id: 'integration-1',
@@ -48,6 +54,11 @@ describe('ChannelsService listings', () => {
       ignoredAt: null,
       ...data,
     }));
+    mercadoLivreAdapter.fetchListings.mockResolvedValue([]);
+    encryptionService.decrypt.mockReturnValue({
+      accessToken: 'ml-access-token',
+      externalAccountId: 'seller-123',
+    });
   });
 
   it('imports mock listings and classifies safe matches only', async () => {
@@ -123,6 +134,84 @@ describe('ChannelsService listings', () => {
         }),
       }),
     );
+  });
+
+  it('imports Mercado Livre listings through the adapter and reuses SKU classification', async () => {
+    channelsRepository.findIntegrationById.mockResolvedValueOnce({
+      ...integration,
+      provider: ChannelProvider.MERCADO_LIVRE,
+      externalAccountId: 'seller-123',
+      encryptedCredentials: {
+        version: 1,
+        algorithm: 'aes-256-gcm',
+        ciphertext: 'ciphertext',
+      },
+    });
+    mercadoLivreAdapter.fetchListings.mockResolvedValueOnce([
+      {
+        externalListingId: 'MLB-1',
+        title: 'Produto casado',
+        externalSku: 'SKU-1',
+        metadata: { providerStatus: 'active' },
+      },
+      {
+        externalListingId: 'MLB-2',
+        title: 'Produto sem SKU',
+        metadata: { providerStatus: 'paused' },
+      },
+    ]);
+    channelsRepository.findSkuMatchCandidates.mockResolvedValueOnce([{ id: 'sku-1' }]);
+    const service = new ChannelsService(
+      channelsRepository as never,
+      prisma as never,
+      mercadoLivreAdapter as never,
+      encryptionService as never,
+    );
+
+    const result = await service.importListings('integration-1', 'tenant-1', 'user-1', {
+      maxPages: 2,
+      pageSize: 50,
+    });
+
+    expect(encryptionService.decrypt).toHaveBeenCalledWith(
+      JSON.stringify({
+        version: 1,
+        algorithm: 'aes-256-gcm',
+        ciphertext: 'ciphertext',
+      }),
+    );
+    expect(mercadoLivreAdapter.fetchListings).toHaveBeenCalledWith({
+      accessToken: 'ml-access-token',
+      externalAccountId: 'seller-123',
+      maxPages: 2,
+      pageSize: 50,
+    });
+    expect(channelsRepository.upsertListing).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalListingId: 'MLB-1',
+        matchStatus: ChannelListingMatchStatus.MATCHED,
+        matchedSkuId: 'sku-1',
+      }),
+    );
+    expect(channelsRepository.upsertListing).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalListingId: 'MLB-2',
+        matchStatus: ChannelListingMatchStatus.UNMATCHED,
+        matchedSkuId: null,
+      }),
+    );
+    expect(result.summary).toEqual({
+      imported: 2,
+      matched: 1,
+      unmatched: 1,
+      ambiguous: 0,
+      ignored: 0,
+    });
+    expect(JSON.stringify(prisma.auditLog.create.mock.calls)).not.toContain('ml-access-token');
   });
 
   it('rejects import for disabled or missing integrations', async () => {
