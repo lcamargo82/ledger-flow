@@ -599,7 +599,7 @@ model ChannelIntegration {
   listings      ChannelListing[]
 
   @@unique([tenantId, provider, name])
-  @@index([tenantId, provider, externalAccountId])
+  @@unique([tenantId, provider, externalAccountId])
   @@index([tenantId, provider, status])
   @@index([provider, webhookSecretHash])
   @@map("channel_integrations")
