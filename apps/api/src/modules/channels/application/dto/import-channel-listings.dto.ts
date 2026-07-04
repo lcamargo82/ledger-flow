@@ -4,8 +4,11 @@ import {
   ArrayMaxSize,
   IsArray,
   IsOptional,
+  IsInt,
   IsString,
   MaxLength,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -38,4 +41,20 @@ export class ImportChannelListingsDto {
   @ValidateNested({ each: true })
   @Type(() => MockChannelListingDto)
   listings?: MockChannelListingDto[];
+
+  @ApiPropertyOptional({ example: 5, minimum: 1, maximum: 20 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(20)
+  maxPages?: number;
+
+  @ApiPropertyOptional({ example: 50, minimum: 1, maximum: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  pageSize?: number;
 }
