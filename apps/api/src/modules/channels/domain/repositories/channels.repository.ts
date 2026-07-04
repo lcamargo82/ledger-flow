@@ -16,7 +16,13 @@ export interface CreateChannelIntegrationData {
   tenantId: string;
   provider: ChannelProvider;
   name: string;
-  webhookSecretHash: string;
+  externalAccountId?: string | null;
+  displayName?: string | null;
+  status?: ChannelIntegrationStatus;
+  webhookSecretHash?: string | null;
+  settingsJson?: Prisma.InputJsonValue;
+  defaultWarehouseId?: string | null;
+  syncPolicyJson?: Prisma.InputJsonValue;
   createdByUserId: string;
 }
 

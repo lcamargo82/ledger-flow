@@ -13,7 +13,17 @@ export class ChannelIntegrationResponseDto {
   @ApiProperty() tenantId: string;
   @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
   @ApiProperty() name: string;
+  @ApiPropertyOptional() externalAccountId?: string;
+  @ApiPropertyOptional() displayName?: string;
   @ApiProperty({ enum: ChannelIntegrationStatus }) status: ChannelIntegrationStatus;
+  @ApiPropertyOptional() credentialsFingerprint?: string;
+  @ApiProperty() credentialsVersion: number;
+  @ApiPropertyOptional() settingsJson?: Record<string, unknown>;
+  @ApiPropertyOptional() defaultWarehouseId?: string;
+  @ApiPropertyOptional() syncPolicyJson?: Record<string, unknown>;
+  @ApiPropertyOptional() healthStatus?: string;
+  @ApiPropertyOptional() lastSuccessfulOperationAt?: Date;
+  @ApiPropertyOptional() lastFailureAt?: Date;
   @ApiPropertyOptional() createdByUserId?: string;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;

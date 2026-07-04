@@ -67,8 +67,11 @@ enum ChannelProvider {
 }
 
 enum ChannelIntegrationStatus {
+  INACTIVE
   ACTIVE
   DISABLED
+  SUSPENDED
+  REAUTH_REQUIRED
 }
 
 enum ChannelWebhookStatus {
@@ -570,21 +573,33 @@ model OrderFinancialFact {
 }
 
 model ChannelIntegration {
-  id                String                   @id @default(uuid())
-  tenantId          String                   @map("tenant_id")
-  provider          ChannelProvider
-  name              String
-  status            ChannelIntegrationStatus @default(ACTIVE)
-  webhookSecretHash String                   @map("webhook_secret_hash")
-  createdByUserId   String?                  @map("created_by_user_id")
-  createdAt         DateTime                 @default(now()) @map("created_at")
-  updatedAt         DateTime                 @updatedAt @map("updated_at")
+  id                        String                   @id @default(uuid())
+  tenantId                  String                   @map("tenant_id")
+  provider                  ChannelProvider
+  name                      String
+  externalAccountId         String?                  @map("external_account_id")
+  displayName               String?                  @map("display_name")
+  status                    ChannelIntegrationStatus @default(INACTIVE)
+  webhookSecretHash         String?                  @map("webhook_secret_hash")
+  encryptedCredentials      Json?                    @map("encrypted_credentials")
+  credentialsVersion        Int                      @default(0) @map("credentials_version")
+  credentialsFingerprint    String?                  @map("credentials_fingerprint")
+  settingsJson              Json?                    @map("settings_json")
+  defaultWarehouseId        String?                  @map("default_warehouse_id")
+  syncPolicyJson            Json?                    @map("sync_policy_json")
+  healthStatus              String?                  @map("health_status")
+  lastSuccessfulOperationAt DateTime?                @map("last_successful_operation_at")
+  lastFailureAt             DateTime?                @map("last_failure_at")
+  createdByUserId           String?                  @map("created_by_user_id")
+  createdAt                 DateTime                 @default(now()) @map("created_at")
+  updatedAt                 DateTime                 @updatedAt @map("updated_at")
 
   tenant        Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   webhookEvents ChannelWebhookInboxEvent[]
   listings      ChannelListing[]
 
   @@unique([tenantId, provider, name])
+  @@index([tenantId, provider, externalAccountId])
   @@index([tenantId, provider, status])
   @@index([provider, webhookSecretHash])
   @@map("channel_integrations")

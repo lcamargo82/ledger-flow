@@ -25,17 +25,33 @@ export class ChannelsService {
   ) {}
 
   async createIntegration(tenantId: string, actorUserId: string, dto: CreateChannelIntegrationDto) {
+    this.assertSafePanelConfiguration(dto.settingsJson);
+    this.assertSafePanelConfiguration(dto.syncPolicyJson);
+
     const integration = await this.channelsRepository.createIntegration({
       tenantId,
       provider: dto.provider,
       name: dto.name,
-      webhookSecretHash: this.hash(dto.webhookSecret),
+      externalAccountId: dto.externalAccountId,
+      displayName: dto.displayName,
+      defaultWarehouseId: dto.defaultWarehouseId,
+      settingsJson: dto.settingsJson as Prisma.InputJsonValue,
+      syncPolicyJson: dto.syncPolicyJson as Prisma.InputJsonValue,
+      status:
+        dto.provider === ChannelProvider.MOCK
+          ? ChannelIntegrationStatus.ACTIVE
+          : ChannelIntegrationStatus.INACTIVE,
+      webhookSecretHash: dto.webhookSecret ? this.hash(dto.webhookSecret) : null,
       createdByUserId: actorUserId,
     });
 
     await this.audit(tenantId, actorUserId, 'channels.integration.created', integration.id, {
       provider: dto.provider,
       name: dto.name,
+      externalAccountId: dto.externalAccountId,
+      displayName: dto.displayName,
+      hasSettings: Boolean(dto.settingsJson),
+      hasSyncPolicy: Boolean(dto.syncPolicyJson),
     });
 
     return integration;
@@ -184,6 +200,43 @@ export class ChannelsService {
 
   private hash(value: string) {
     return createHash('sha256').update(value).digest('hex');
+  }
+
+  private assertSafePanelConfiguration(value: unknown) {
+    if (!value || typeof value !== 'object') return;
+
+    const forbiddenKeys = new Set([
+      'accessToken',
+      'apiKey',
+      'authorization',
+      'clientSecret',
+      'code',
+      'encryptedCredentials',
+      'mercadoLivreAccessToken',
+      'mercadoLivreRefreshToken',
+      'refreshToken',
+      'secret',
+      'shopeeStoreToken',
+      'shopifyAccessToken',
+      'state',
+      'token',
+      'webhookSecret',
+    ]);
+    const stack = [value as Record<string, unknown>];
+
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      for (const [key, nested] of Object.entries(current)) {
+        if (forbiddenKeys.has(key)) {
+          throw new BadRequestException(
+            'Channel panel settings cannot contain tenant scoped tokens or secrets.',
+          );
+        }
+        if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+          stack.push(nested as Record<string, unknown>);
+        }
+      }
+    }
   }
 
   private async classifyListing(
