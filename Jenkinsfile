@@ -7,6 +7,10 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '20'))
     }
 
+    tools {
+        nodejs 'node-24'
+    }
+
     environment {
         DEPLOY_HOST = '192.168.15.174'
         DEPLOY_USER = 'camargo'
@@ -59,6 +63,8 @@ pipeline {
                 sh '''
                     set -eu
                     export npm_config_cache="$WORKSPACE/.npm-cache"
+                    node --version
+                    npm --version
 
                     cd apps/api
                     npm ci

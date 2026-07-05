@@ -7,6 +7,7 @@ Publicar LedgerFlow no servidor `camargo@192.168.15.174`, dentro de `/home/camar
 ## Premissas
 
 - Jenkins possui acesso SSH ao servidor com a credencial `ledgerflow-ctn01-ssh`.
+- Jenkins possui uma ferramenta NodeJS configurada em `Manage Jenkins > Tools` com o nome exato `NodeJS 22`, compatível com `^20.19.0 || >=22.12.0`.
 - O servidor tem Docker Compose disponível para o usuário `camargo`.
 - O diretório remoto é `/home/camargo/apps/ledger-flow`.
 - O arquivo remoto `/home/camargo/apps/ledger-flow/.env` é criado manualmente a partir de `.env.production.example`.
