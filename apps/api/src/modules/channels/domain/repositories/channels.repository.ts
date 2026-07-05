@@ -17,6 +17,7 @@ export interface CreateChannelIntegrationData {
   provider: ChannelProvider;
   name: string;
   externalAccountId?: string | null;
+  externalStoreId?: string | null;
   displayName?: string | null;
   status?: ChannelIntegrationStatus;
   webhookSecretHash?: string | null;
@@ -153,10 +154,10 @@ export interface ChannelsRepository {
     provider: ChannelProvider,
     secretHash: string,
   ): Promise<ChannelIntegration | null>;
-  findActiveIntegrationByExternalAccountId(
+  findActiveIntegrationsByExternalAccountId(
     provider: ChannelProvider,
     externalAccountId: string,
-  ): Promise<ChannelIntegration | null>;
+  ): Promise<ChannelIntegration[]>;
   findIntegrationById(id: string, tenantId: string): Promise<ChannelIntegration | null>;
   findInboxByProviderEventId(
     provider: ChannelProvider,

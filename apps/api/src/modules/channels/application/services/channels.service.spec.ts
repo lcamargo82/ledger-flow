@@ -37,6 +37,7 @@ describe('ChannelsService', () => {
       provider: ChannelProvider.MERCADO_LIVRE,
       name: 'Conta principal ML',
       externalAccountId: 'seller-123',
+      externalStoreId: 'store-456',
       displayName: 'Mercado Livre Principal',
       defaultWarehouseId: 'warehouse-1',
       settingsJson: {
@@ -54,6 +55,7 @@ describe('ChannelsService', () => {
       provider: ChannelProvider.MERCADO_LIVRE,
       name: 'Conta principal ML',
       externalAccountId: 'seller-123',
+      externalStoreId: 'store-456',
       displayName: 'Mercado Livre Principal',
       defaultWarehouseId: 'warehouse-1',
       settingsJson: {
@@ -76,6 +78,7 @@ describe('ChannelsService', () => {
           provider: ChannelProvider.MERCADO_LIVRE,
           name: 'Conta principal ML',
           externalAccountId: 'seller-123',
+          externalStoreId: 'store-456',
           displayName: 'Mercado Livre Principal',
           hasSettings: true,
           hasSyncPolicy: true,

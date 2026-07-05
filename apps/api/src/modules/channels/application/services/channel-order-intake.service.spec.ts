@@ -267,6 +267,26 @@ describe('ChannelOrderIntakeService', () => {
     );
   });
 
+  it('fails closed when the integration has no default warehouse for order reservation', async () => {
+    channelsRepository.findInboxById.mockResolvedValueOnce({
+      ...inboxEvent,
+      integration: {
+        ...integration,
+        defaultWarehouseId: null,
+      },
+    });
+
+    await expect(makeService().processInboxEvent('inbox-1')).rejects.toBeInstanceOf(
+      BadRequestException,
+    );
+
+    expect(ordersService.create).not.toHaveBeenCalled();
+    expect(channelsRepository.markInboxFailed).toHaveBeenCalledWith(
+      'inbox-1',
+      'Channel integration default warehouse is required.',
+    );
+  });
+
   it('ignores non-order topics without provider calls or stock effects', async () => {
     channelsRepository.findInboxById.mockResolvedValueOnce({
       ...inboxEvent,
