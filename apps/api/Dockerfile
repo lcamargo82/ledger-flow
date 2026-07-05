@@ -39,7 +39,16 @@ RUN npm ci
 
 COPY apps/api ./
 
-RUN npm run build
+RUN npm run prisma:generate && npm run build
+
+
+# ============================================================
+# Production dependencies
+# ============================================================
+
+FROM build AS production-deps
+
+RUN npm prune --omit=dev
 
 
 # ============================================================
@@ -55,10 +64,9 @@ ENV NODE_ENV=production
 RUN apk add --no-cache openssl libc6-compat
 
 COPY apps/api/package*.json ./
-
-RUN npm ci --omit=dev
-
+COPY --from=production-deps /usr/src/app/apps/api/node_modules ./node_modules
 COPY --from=build /usr/src/app/apps/api/dist ./dist
+COPY --from=build /usr/src/app/apps/api/prisma ./prisma
 
 EXPOSE 3000
 

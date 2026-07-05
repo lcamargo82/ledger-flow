@@ -230,25 +230,37 @@ const typeOptions = computed(() => [
             <AppButton 
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('customers.actions.viewDetails')"
               @click="openCustomerDetails(item.id)"
             >
-              {{ t('customers.actions.viewDetails') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </template>
             </AppButton>
             <AppButton 
               v-if="authStore.checkPermission('customers:update')"
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('customers.actions.edit')"
               @click="openEditModal(item.id)"
             >
-              {{ t('customers.actions.edit') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </template>
             </AppButton>
             <AppButton 
               v-if="authStore.checkPermission('customers:update')"
               :variant="item.active ? 'danger' : 'primary'"
               size="small"
+              icon-only
+              :title="item.active ? t('customers.actions.deactivate') : t('customers.actions.activate')"
               @click="openStatusModal(item)"
             >
-              {{ item.active ? t('customers.actions.deactivate') : t('customers.actions.activate') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">{{ item.active ? 'block' : 'check_circle' }}</span>
+              </template>
             </AppButton>
           </div>
         </template>

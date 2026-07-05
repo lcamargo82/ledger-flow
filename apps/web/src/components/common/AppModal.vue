@@ -2,7 +2,7 @@
   <Teleport to="body">
     <Transition name="lf-modal">
       <div v-if="modelValue" class="lf-modal-overlay" @click="handleOverlayClick" role="dialog" aria-modal="true" :aria-labelledby="title ? 'lf-modal-title' : undefined">
-        <div class="lf-modal-container" @click.stop>
+        <div class="lf-modal-container" :class="[`lf-modal-container--${size}`]" @click.stop>
           <div class="lf-modal-header">
             <h3 v-if="title" id="lf-modal-title" class="lf-modal-title">{{ title }}</h3>
             <slot name="header" v-else></slot>
@@ -34,11 +34,13 @@ interface Props {
   modelValue: boolean;
   title?: string;
   preventClose?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: false,
   preventClose: false,
+  size: 'md',
 });
 
 const emit = defineEmits<{
@@ -104,12 +106,19 @@ onUnmounted(() => {
   border: 1px solid var(--lf-border-primary);
   border-radius: var(--lf-radius);
   width: 100%;
-  max-width: 500px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
 }
+
+.lf-modal-container--sm { max-width: 400px; }
+.lf-modal-container--md { max-width: 500px; }
+.lf-modal-container--lg { max-width: 800px; }
+.lf-modal-container--xl { max-width: 1024px; }
+.lf-modal-container--2xl { max-width: 1280px; }
+.lf-modal-container--3xl { max-width: 1536px; }
+.lf-modal-container--full { max-width: 100%; height: 100vh; max-height: 100vh; border-radius: 0; }
 
 .lf-modal-header {
   padding: var(--lf-space-4) var(--lf-space-6);

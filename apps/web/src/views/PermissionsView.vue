@@ -86,18 +86,20 @@ const getPermissionDescription = (item: any) => {
 
     <template v-else>
       <AppCard class="lf-mb-6">
-        <div class="flex flex-col sm:flex-row gap-4 w-full">
-          <div class="w-full sm:w-2/3">
+        <div class="lf-filter-container">
+          <div class="lf-filter-item lf-filter-item--large">
             <AppInput 
               id="search"
               v-model="searchInput"
+              :label="t('permissions.searchLabel')"
               :placeholder="t('permissions.searchPlaceholder')"
             />
           </div>
-          <div class="w-full sm:w-1/3" v-if="authStore.user?.isPlatformAdmin">
+          <div class="lf-filter-item" v-if="authStore.user?.isPlatformAdmin">
             <AppSelect
               id="scope-filter"
               v-model="selectedScope"
+              :label="t('permissions.table.scope')"
               :options="scopeOptions"
             />
           </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { usePaymentsStore } from '../stores/payments.store';
 import { useAuthStore } from '../stores/auth.store';
@@ -42,8 +42,24 @@ const columns = computed(() => [
   { key: 'actions', label: t('payments.table.actions'), align: 'right' as const }
 ]);
 
+let pollingInterval: number | null = null;
+
 onMounted(() => {
   paymentsStore.fetchPayments();
+  
+  // Poll every 15 seconds to update payment statuses transparently
+  pollingInterval = window.setInterval(() => {
+    // Only poll if no modals are open (to prevent data shifting while acting) and no error
+    if (!isCreateModalOpen.value && !isConfirmCancelOpen.value && !paymentsStore.error) {
+      paymentsStore.fetchPayments(undefined, true);
+    }
+  }, 15000);
+});
+
+onUnmounted(() => {
+  if (pollingInterval) {
+    window.clearInterval(pollingInterval);
+  }
 });
 
 const handleSearch = useDebounceFn(() => {
@@ -111,6 +127,7 @@ const statusOptions = computed(() => [
   { value: 'FAILED', label: t('payments.status.FAILED') },
   { value: 'CANCELED', label: t('payments.status.CANCELED') },
   { value: 'REFUNDED', label: t('payments.status.REFUNDED') },
+  { value: 'OVERDUE', label: t('payments.status.OVERDUE') },
 ]);
 
 const methodOptions = computed(() => [
@@ -130,6 +147,7 @@ const getStatusVariant = (status: string) => {
     case 'FAILED': return 'danger';
     case 'CANCELED': return 'default';
     case 'REFUNDED': return 'default';
+    case 'OVERDUE': return 'danger';
     default: return 'default';
   }
 };
@@ -286,17 +304,25 @@ const canCancel = (status: string) => {
               v-if="authStore.checkPermission('payments:read')"
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('payments.actions.viewDetails')"
               @click="openPaymentDetails(item.id)"
             >
-              {{ t('payments.actions.viewDetails') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </template>
             </AppButton>
             <AppButton 
               v-if="authStore.checkPermission('payments:cancel') && canCancel(item.status)"
               variant="danger" 
               size="small"
+              icon-only
+              :title="t('payments.actions.cancel')"
               @click="openCancelConfirm(item.id)"
             >
-              {{ t('payments.actions.cancel') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">cancel</span>
+              </template>
             </AppButton>
           </div>
         </template>
@@ -350,7 +376,7 @@ const canCancel = (status: string) => {
     <AppModal 
       v-model="isDetailsModalOpen" 
       :title="t('payments.details.title')" 
-      size="lg"
+      size="xl"
     >
       <div v-if="paymentsStore.isLoadingDetails" class="py-8 flex justify-center">
         <span class="text-gray-500">{{ t('common.loading') }}</span>

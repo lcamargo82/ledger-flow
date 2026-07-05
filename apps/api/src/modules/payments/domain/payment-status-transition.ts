@@ -8,6 +8,7 @@ export function canTransitionPaymentStatus(from: PaymentStatus, to: PaymentStatu
       PaymentStatus.PROCESSING,
       PaymentStatus.CANCELED,
       PaymentStatus.FAILED,
+      PaymentStatus.OVERDUE,
     ],
     [PaymentStatus.PROCESSING]: [
       PaymentStatus.APPROVED,
@@ -18,6 +19,7 @@ export function canTransitionPaymentStatus(from: PaymentStatus, to: PaymentStatu
     [PaymentStatus.FAILED]: [],
     [PaymentStatus.CANCELED]: [],
     [PaymentStatus.REFUNDED]: [],
+    [PaymentStatus.OVERDUE]: [],
   };
 
   return validTransitions[from].includes(to);

@@ -117,6 +117,13 @@
     "apiConnected": "API Conectada"
   },
   "nav": {
+    "groups": {
+      "operations": "Operações",
+      "catalogAndInventory": "Catálogo e Estoque",
+      "analytics": "Inteligência",
+      "settings": "Configurações",
+      "platform": "Plataforma"
+    },
     "dashboard": "Dashboard",
     "users": "Usuários",
     "payments": "Pagamentos",
@@ -543,12 +550,17 @@
       "invalid": "Revise as informações do produto e do SKU.",
       "skuAlreadyExists": "Este SKU já está cadastrado para o tenant atual.",
       "notFound": "Produto não encontrado.",
+      "costChangeReasonRequired": "O motivo da alteração de custo é obrigatório.",
       "forbidden": "Você não possui acesso ao catálogo."
     },
     "pagination": {
       "pageOf": "Página {page} de {totalPages}",
       "previous": "Anterior",
       "next": "Próxima"
+    },
+    "toast": {
+      "created": "Produto criado com sucesso.",
+      "updated": "Produto atualizado com sucesso."
     }
   },
   "users": {
@@ -713,6 +725,7 @@
     "missing": "Permissão negada",
     "title": "Permissões do Sistema",
     "description": "Lista de todas as permissões globais disponíveis no sistema.",
+    "searchLabel": "Buscar permissão",
     "searchPlaceholder": "Buscar permissões...",
     "list": {
       "auth": {
@@ -1118,7 +1131,8 @@
       "APPROVED": "Aprovado",
       "FAILED": "Falhou",
       "CANCELED": "Cancelado",
-      "REFUNDED": "Estornado"
+      "REFUNDED": "Estornado",
+      "OVERDUE": "Vencido"
     },
     "method": {
       "PIX": "Pix",
@@ -1166,6 +1180,7 @@
     "error": {
       "title": "Não foi possível carregar os pagamentos",
       "description": "Tente novamente em alguns instantes.",
+      "default": "Ocorreu um erro inesperado.",
       "createFailed": "Erro ao criar pagamento.",
       "cancelFailed": "Erro ao cancelar pagamento.",
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",

@@ -9,7 +9,7 @@ export class AsaasWebhookStatusMapper {
       case ASAAS_PAYMENT_EVENTS.PAYMENT_RECEIVED_IN_CASH:
         return PaymentStatus.APPROVED;
       case ASAAS_PAYMENT_EVENTS.PAYMENT_OVERDUE:
-        return PaymentStatus.FAILED;
+        return PaymentStatus.OVERDUE;
       case ASAAS_PAYMENT_EVENTS.PAYMENT_REFUND_IN_PROGRESS:
       case ASAAS_PAYMENT_EVENTS.PAYMENT_REFUNDED:
         return PaymentStatus.REFUNDED;

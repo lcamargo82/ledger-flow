@@ -4,6 +4,7 @@
       'lf-button',
       `lf-button--${variant}`,
       { 'lf-button--small': size === 'small' },
+      { 'lf-button--icon-only': iconOnly },
       { 'lf-w-full': block }
     ]"
     :disabled="disabled || loading"
@@ -25,6 +26,7 @@ interface Props {
   disabled?: boolean;
   loading?: boolean;
   block?: boolean;
+  iconOnly?: boolean;
   type?: 'button' | 'submit' | 'reset';
 }
 
@@ -34,6 +36,7 @@ withDefaults(defineProps<Props>(), {
   disabled: false,
   loading: false,
   block: false,
+  iconOnly: false,
   type: 'button',
 });
 </script>

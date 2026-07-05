@@ -118,6 +118,13 @@
     "apiConnected": "API Connected"
   },
   "nav": {
+    "groups": {
+      "operations": "Operations",
+      "catalogAndInventory": "Catalog & Inventory",
+      "analytics": "Analytics",
+      "settings": "Settings",
+      "platform": "Platform"
+    },
     "dashboard": "Dashboard",
     "users": "Users",
     "payments": "Payments",
@@ -544,12 +551,17 @@
       "invalid": "Review the product and SKU information.",
       "skuAlreadyExists": "This SKU already exists for the current tenant.",
       "notFound": "Product not found.",
+      "costChangeReasonRequired": "The reason for the cost change is required.",
       "forbidden": "You do not have catalog access."
     },
     "pagination": {
       "pageOf": "Page {page} of {totalPages}",
       "previous": "Previous",
       "next": "Next"
+    },
+    "toast": {
+      "created": "Product created successfully.",
+      "updated": "Product updated successfully."
     }
   },
   "users": {
@@ -714,6 +726,7 @@
     "missing": "Permission denied",
     "title": "System Permissions",
     "description": "List of all available global permissions in the system.",
+    "searchLabel": "Search permission",
     "searchPlaceholder": "Search permissions...",
     "list": {
       "auth": {
@@ -1118,7 +1131,8 @@
       "APPROVED": "Approved",
       "FAILED": "Failed",
       "CANCELED": "Canceled",
-      "REFUNDED": "Refunded"
+      "REFUNDED": "Refunded",
+      "OVERDUE": "Overdue"
     },
     "method": {
       "PIX": "Pix",

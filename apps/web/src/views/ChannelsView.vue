@@ -266,10 +266,14 @@ const mapListing = async () => {
             v-if="canImportListings && item.provider === 'MOCK' && item.status === 'ACTIVE'"
             variant="secondary"
             size="small"
+            icon-only
+            :title="t('channels.actions.importListings')"
             :loading="channelsStore.isMutating"
             @click="importListings(item.id)"
           >
-            {{ t('channels.actions.importListings') }}
+            <template #icon>
+              <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+            </template>
           </AppButton>
         </template>
       </AppTable>
@@ -374,9 +378,13 @@ const mapListing = async () => {
               v-if="canMapListings && item.matchStatus !== 'IGNORED'"
               variant="secondary"
               size="small"
+              icon-only
+              :title="t('channels.actions.mapListing')"
               @click="openMapModal(item)"
             >
-              {{ t('channels.actions.mapListing') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">link</span>
+              </template>
             </AppButton>
           </template>
         </AppTable>
