@@ -7,6 +7,7 @@ import { OrdersModule } from '../orders/orders.module';
 import { ChannelWebhookReceivedAsyncHandler } from './application/async-handlers/channel-webhook-received.handler';
 import { ChannelOrderIntakeService } from './application/services/channel-order-intake.service';
 import { ChannelsService } from './application/services/channels.service';
+import { ChannelHealthReplayService } from './application/services/channel-health-replay.service';
 import { ChannelInventorySyncService } from './application/services/channel-inventory-sync.service';
 import { ChannelWebhookIntakeService } from './application/services/channel-webhook-intake.service';
 import { MercadoLivreOAuthService } from './application/services/mercado-livre-oauth.service';
@@ -30,6 +31,7 @@ import { MercadoLivreOAuthController } from './presentation/controllers/mercado-
   ],
   providers: [
     ChannelsService,
+    ChannelHealthReplayService,
     ChannelInventorySyncService,
     ChannelOrderIntakeService,
     ChannelWebhookIntakeService,

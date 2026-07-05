@@ -130,6 +130,15 @@ export interface PaginatedInventorySyncStatesResult {
   };
 }
 
+export interface ChannelHealthSummary {
+  integrations: Array<ChannelIntegration & { encryptedCredentials?: unknown }>;
+  failedInboxCount: number;
+  pendingInboxCount: number;
+  failedInventorySyncCount: number;
+  circuitOpenInventorySyncCount: number;
+  retryScheduledInventorySyncCount: number;
+}
+
 export const CHANNELS_REPOSITORY = Symbol('CHANNELS_REPOSITORY');
 
 export interface ChannelsRepository {
@@ -182,6 +191,13 @@ export interface ChannelsRepository {
   listInventorySyncStates(
     params: ListInventorySyncStatesParams,
   ): Promise<PaginatedInventorySyncStatesResult>;
+  getHealthSummary(tenantId: string): Promise<ChannelHealthSummary>;
+  findInventorySyncStateById(
+    id: string,
+    tenantId: string,
+  ): Promise<ChannelInventorySyncState | null>;
+  resetInventorySyncForReplay(id: string): Promise<ChannelInventorySyncState>;
+  resetInboxForReplay(id: string): Promise<ChannelWebhookInboxEvent>;
   findPendingInventorySyncStates(params: {
     tenantId: string;
     limit: number;
