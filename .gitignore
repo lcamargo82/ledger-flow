@@ -15,10 +15,12 @@
 !.env.example
 !.env.template
 !.env.local.example
+!.env.production.example
 
 *.env
 *.env.*
 !.env.example
+!.env.production.example
 
 # Local secrets
 secrets/
