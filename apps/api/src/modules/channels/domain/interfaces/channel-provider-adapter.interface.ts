@@ -52,3 +52,27 @@ export interface ChannelOrderDetails {
 export interface ChannelOrderAdapter extends ChannelProviderAdapter {
   fetchOrder(input: ChannelOrderFetchInput): Promise<ChannelOrderDetails>;
 }
+
+export interface ChannelInventoryUpdateInput {
+  accessToken: string;
+  externalListingId: string;
+  availableQuantity: number;
+}
+
+export type ChannelInventoryUpdateResult =
+  | {
+      ok: true;
+      providerStatus: string;
+      externalListingId: string;
+      availableQuantity: number;
+    }
+  | {
+      ok: false;
+      errorCode: string;
+      errorSummary: string;
+      retryAfterSeconds?: number;
+    };
+
+export interface ChannelInventorySyncAdapter extends ChannelProviderAdapter {
+  updateListingStock(input: ChannelInventoryUpdateInput): Promise<ChannelInventoryUpdateResult>;
+}

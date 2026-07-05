@@ -5,6 +5,7 @@ describe('MercadoLivreChannelAdapter', () => {
   const apiClient = {
     searchSellerItems: jest.fn(),
     getItem: jest.fn(),
+    updateItemStock: jest.fn(),
   };
 
   beforeEach(() => {
@@ -107,5 +108,34 @@ describe('MercadoLivreChannelAdapter', () => {
     ]);
     expect(JSON.stringify(result)).not.toContain('must-not-leak');
     expect(JSON.stringify(result)).not.toContain('ml-access-token');
+  });
+
+  it('updates Mercado Livre listing stock using desired available quantity', async () => {
+    apiClient.updateItemStock.mockResolvedValue({
+      id: 'MLB-1',
+      available_quantity: 7,
+      access_token: 'must-not-leak',
+    });
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const result = await adapter.updateListingStock({
+      accessToken: 'ml-access-token',
+      externalListingId: 'MLB-1',
+      availableQuantity: 7,
+    });
+
+    expect(apiClient.updateItemStock).toHaveBeenCalledWith({
+      accessToken: 'ml-access-token',
+      externalListingId: 'MLB-1',
+      availableQuantity: 7,
+    });
+    expect(result).toEqual({
+      ok: true,
+      providerStatus: 'updated',
+      externalListingId: 'MLB-1',
+      availableQuantity: 7,
+    });
+    expect(JSON.stringify(result)).not.toContain('ml-access-token');
+    expect(JSON.stringify(result)).not.toContain('must-not-leak');
   });
 });
