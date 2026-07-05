@@ -140,6 +140,10 @@ export interface ChannelsRepository {
     provider: ChannelProvider,
     secretHash: string,
   ): Promise<ChannelIntegration | null>;
+  findActiveIntegrationByExternalAccountId(
+    provider: ChannelProvider,
+    externalAccountId: string,
+  ): Promise<ChannelIntegration | null>;
   findIntegrationById(id: string, tenantId: string): Promise<ChannelIntegration | null>;
   findInboxByProviderEventId(
     provider: ChannelProvider,
