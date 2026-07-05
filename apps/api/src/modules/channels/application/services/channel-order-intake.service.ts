@@ -7,6 +7,7 @@ import {
   ChannelProvider,
   ChannelWebhookStatus,
 } from '@prisma/client';
+import { FinancialIntelligenceService } from '../../../financial-intelligence/application/services/financial-intelligence.service';
 import { GatewayCredentialsEncryptionService } from '../../../gateways/application/services/gateway-credentials-encryption.service';
 import { OrdersService } from '../../../orders/application/services/orders.service';
 import {
@@ -31,6 +32,7 @@ export class ChannelOrderIntakeService {
     private readonly ordersService: OrdersService,
     private readonly mercadoLivreAdapter: MercadoLivreChannelAdapter,
     private readonly credentialsEncryptionService: GatewayCredentialsEncryptionService,
+    private readonly financialIntelligenceService?: FinancialIntelligenceService,
   ) {}
 
   async processInboxEvent(inboxEventId: string) {
@@ -96,11 +98,39 @@ export class ChannelOrderIntakeService {
       actorUserId,
       baseIdempotencyKey,
     );
+    await this.createOperationalFinancialFact(
+      order,
+      transitioned?.order.id ?? created.order.id,
+      integration.tenantId,
+      actorUserId,
+      inboxEvent.provider,
+    );
 
     return {
       orderId: transitioned?.order.id ?? created.order.id,
       status: transitioned?.order.status ?? created.order.status,
     };
+  }
+
+  private async createOperationalFinancialFact(
+    order: ChannelOrderDetails,
+    orderId: string,
+    tenantId: string,
+    actorUserId: string,
+    provider: ChannelProvider,
+  ) {
+    if (!order.financial || !this.financialIntelligenceService) return;
+
+    await this.financialIntelligenceService.createChannelOrderOperationalFact(
+      orderId,
+      tenantId,
+      actorUserId,
+      {
+        provider,
+        externalOrderId: order.externalOrderId,
+        ...order.financial,
+      },
+    );
   }
 
   private async mapOrderItems(integration: ChannelIntegration, items: ChannelOrderItem[]) {

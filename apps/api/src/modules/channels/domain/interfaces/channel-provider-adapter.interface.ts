@@ -47,6 +47,14 @@ export interface ChannelOrderDetails {
   status: string;
   buyerName?: string;
   items: ChannelOrderItem[];
+  financial?: {
+    currency?: string;
+    revenueAmount?: string;
+    paidAmount?: string;
+    channelFeeAmount?: string;
+    freightAmount?: string;
+    discountAmount?: string;
+  };
 }
 
 export interface ChannelOrderAdapter extends ChannelProviderAdapter {

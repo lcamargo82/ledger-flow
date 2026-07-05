@@ -2,6 +2,7 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma/prisma.module';
 import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
 import { AsyncModule } from '../async/async.module';
+import { FinancialIntelligenceModule } from '../financial-intelligence/financial-intelligence.module';
 import { GatewaysModule } from '../gateways/gateways.module';
 import { OrdersModule } from '../orders/orders.module';
 import { ChannelWebhookReceivedAsyncHandler } from './application/async-handlers/channel-webhook-received.handler';
@@ -22,7 +23,7 @@ import { ChannelsFoundationController } from './presentation/controllers/channel
 import { MercadoLivreOAuthController } from './presentation/controllers/mercado-livre-oauth.controller';
 
 @Module({
-  imports: [PrismaModule, AsyncModule, GatewaysModule, OrdersModule],
+  imports: [PrismaModule, AsyncModule, FinancialIntelligenceModule, GatewaysModule, OrdersModule],
   controllers: [
     ChannelsFoundationController,
     ChannelsController,

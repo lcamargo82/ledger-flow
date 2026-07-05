@@ -5,6 +5,7 @@ describe('MercadoLivreChannelAdapter', () => {
   const apiClient = {
     searchSellerItems: jest.fn(),
     getItem: jest.fn(),
+    getOrder: jest.fn(),
     updateItemStock: jest.fn(),
   };
 
@@ -137,5 +138,40 @@ describe('MercadoLivreChannelAdapter', () => {
     });
     expect(JSON.stringify(result)).not.toContain('ml-access-token');
     expect(JSON.stringify(result)).not.toContain('must-not-leak');
+  });
+
+  it('normalizes optional Mercado Livre order financial components', async () => {
+    apiClient.getOrder.mockResolvedValue({
+      id: 2000000001,
+      status: 'paid',
+      currency_id: 'BRL',
+      total_amount: 120.5,
+      paid_amount: 115,
+      shipping_cost: 8,
+      coupon: { amount: 5.5 },
+      order_items: [
+        {
+          quantity: 2,
+          sale_fee: 12.05,
+          item: { id: 'MLB123', title: 'Produto Teste' },
+        },
+      ],
+    });
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const order = await adapter.fetchOrder({
+      accessToken: 'ml-access-token',
+      resource: '/orders/2000000001',
+    });
+
+    expect(order.financial).toEqual({
+      currency: 'BRL',
+      revenueAmount: '120.5',
+      paidAmount: '115',
+      channelFeeAmount: '12.05',
+      freightAmount: '8',
+      discountAmount: '5.5',
+    });
+    expect(JSON.stringify(order)).not.toContain('ml-access-token');
   });
 });

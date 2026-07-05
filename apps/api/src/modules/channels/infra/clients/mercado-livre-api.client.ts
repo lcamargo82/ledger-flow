@@ -48,6 +48,19 @@ export interface MercadoLivreItemResponse {
 export interface MercadoLivreOrderResponse {
   id: number | string;
   status?: string;
+  currency_id?: string;
+  total_amount?: number | string;
+  paid_amount?: number | string;
+  shipping_cost?: number | string;
+  coupon?: {
+    amount?: number | string;
+  };
+  payments?: Array<{
+    total_paid_amount?: number | string;
+    transaction_amount?: number | string;
+    shipping_cost?: number | string;
+    marketplace_fee?: number | string;
+  }>;
   buyer?: {
     nickname?: string;
     first_name?: string;
@@ -55,6 +68,7 @@ export interface MercadoLivreOrderResponse {
   };
   order_items?: Array<{
     quantity?: number;
+    sale_fee?: number | string;
     item?: {
       id?: string;
       title?: string;

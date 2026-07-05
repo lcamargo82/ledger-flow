@@ -27,6 +27,9 @@ describe('ChannelOrderIntakeService', () => {
   const credentialsEncryptionService = {
     decrypt: jest.fn(),
   };
+  const financialIntelligenceService = {
+    createChannelOrderOperationalFact: jest.fn(),
+  };
 
   const integration = {
     id: 'integration-1',
@@ -118,6 +121,7 @@ describe('ChannelOrderIntakeService', () => {
       ordersService as never,
       mercadoLivreAdapter as never,
       credentialsEncryptionService as never,
+      financialIntelligenceService as never,
     );
   }
 
@@ -164,6 +168,47 @@ describe('ChannelOrderIntakeService', () => {
     );
     expect(result.orderId).toBe('order-1');
     expect(result.status).toBe(InternalOrderStatus.CONFIRMED);
+  });
+
+  it('creates operational financial facts when Mercado Livre financial data is available', async () => {
+    mercadoLivreAdapter.fetchOrder.mockResolvedValueOnce({
+      externalOrderId: '2000000001',
+      status: 'paid',
+      buyerName: 'Comprador Teste',
+      financial: {
+        currency: 'BRL',
+        revenueAmount: '120.5',
+        paidAmount: '115',
+        channelFeeAmount: '12.05',
+        freightAmount: '8',
+        discountAmount: '5.5',
+      },
+      items: [
+        {
+          externalListingId: 'MLB123',
+          title: 'Produto Teste',
+          quantity: 2,
+        },
+      ],
+    });
+
+    await makeService().processInboxEvent('inbox-1');
+
+    expect(financialIntelligenceService.createChannelOrderOperationalFact).toHaveBeenCalledWith(
+      'order-1',
+      'tenant-1',
+      'channel:integration-1',
+      {
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalOrderId: '2000000001',
+        currency: 'BRL',
+        revenueAmount: '120.5',
+        paidAmount: '115',
+        channelFeeAmount: '12.05',
+        freightAmount: '8',
+        discountAmount: '5.5',
+      },
+    );
   });
 
   it('cancels existing Mercado Livre orders and lets OrdersService release reservations', async () => {
