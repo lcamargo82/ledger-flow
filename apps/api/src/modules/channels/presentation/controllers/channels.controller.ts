@@ -21,14 +21,17 @@ import { ListInventorySyncQueryDto } from '../../application/dto/list-inventory-
 import { MapChannelListingDto } from '../../application/dto/map-channel-listing.dto';
 import {
   ChannelInventorySyncProcessSummaryDto,
+  ChannelHealthResponseDto,
   ChannelListingMutationResponseDto,
   ChannelListingsImportResponseDto,
   ChannelIntegrationMutationResponseDto,
   ChannelIntegrationsResponseDto,
+  ChannelReplayResponseDto,
   PaginatedChannelInventorySyncResponseDto,
   PaginatedChannelListingsResponseDto,
   PaginatedChannelInboxResponseDto,
 } from '../../application/dto/channel-response.dto';
+import { ChannelHealthReplayService } from '../../application/services/channel-health-replay.service';
 import { ChannelInventorySyncService } from '../../application/services/channel-inventory-sync.service';
 import { ChannelsService } from '../../application/services/channels.service';
 
@@ -40,6 +43,7 @@ export class ChannelsController {
   constructor(
     private readonly channelsService: ChannelsService,
     private readonly inventorySyncService: ChannelInventorySyncService,
+    private readonly healthReplayService: ChannelHealthReplayService,
   ) {}
 
   @Post('integrations')
@@ -75,6 +79,26 @@ export class ChannelsController {
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
   listInbox(@CurrentUser() user: AuthenticatedUser, @Query() query: ListChannelInboxQueryDto) {
     return this.channelsService.listInbox(user.tenantId, query);
+  }
+
+  @Get('health')
+  @RequirePermissions('channels:read')
+  @ApiOperation({ summary: 'Consultar saúde operacional sanitizada dos canais' })
+  @ApiOkResponse({ type: ChannelHealthResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
+  health(@CurrentUser() user: AuthenticatedUser) {
+    return this.healthReplayService.getHealth(user.tenantId);
+  }
+
+  @Post('webhook-inbox/:id/replay')
+  @RequirePermissions('channels:manage')
+  @ApiOperation({ summary: 'Reenfileirar inbox de webhook de canal com falha' })
+  @ApiCreatedResponse({ type: ChannelReplayResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
+  replayWebhookInbox(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.healthReplayService.replayWebhookInbox(user.tenantId, user.id, id);
   }
 
   @Post('integrations/:id/import-listings')
@@ -141,5 +165,16 @@ export class ChannelsController {
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de sincronização' })
   processInventorySync(@CurrentUser() user: AuthenticatedUser) {
     return this.inventorySyncService.processPending(user.tenantId);
+  }
+
+  @Post('inventory-sync/:id/replay')
+  @RequirePermissions('channels:manage')
+  @RequireCapabilities(CommerceCapabilities.ChannelsSyncInventory)
+  @ApiOperation({ summary: 'Reenfileirar sincronização de estoque de canal com falha' })
+  @ApiCreatedResponse({ type: ChannelReplayResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de sincronização' })
+  replayInventorySync(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.healthReplayService.replayInventorySync(user.tenantId, user.id, id);
   }
 }

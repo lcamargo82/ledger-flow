@@ -347,6 +347,76 @@ export class PrismaChannelsRepository implements ChannelsRepository {
     };
   }
 
+  async getHealthSummary(tenantId: string) {
+    const [
+      integrations,
+      failedInboxCount,
+      pendingInboxCount,
+      failedInventorySyncCount,
+      circuitOpenInventorySyncCount,
+      retryScheduledInventorySyncCount,
+    ] = await Promise.all([
+      this.prisma.channelIntegration.findMany({
+        where: { tenantId },
+        orderBy: { updatedAt: 'desc' },
+      }),
+      this.prisma.channelWebhookInboxEvent.count({
+        where: { tenantId, failureReason: { not: null } },
+      }),
+      this.prisma.channelWebhookInboxEvent.count({
+        where: { tenantId, processedAt: null, failureReason: null },
+      }),
+      this.prisma.channelInventorySyncState.count({
+        where: { tenantId, status: ChannelInventorySyncStatus.FAILED },
+      }),
+      this.prisma.channelInventorySyncState.count({
+        where: { tenantId, status: ChannelInventorySyncStatus.CIRCUIT_OPEN },
+      }),
+      this.prisma.channelInventorySyncState.count({
+        where: { tenantId, status: ChannelInventorySyncStatus.RETRY_SCHEDULED },
+      }),
+    ]);
+
+    return {
+      integrations,
+      failedInboxCount,
+      pendingInboxCount,
+      failedInventorySyncCount,
+      circuitOpenInventorySyncCount,
+      retryScheduledInventorySyncCount,
+    };
+  }
+
+  findInventorySyncStateById(id: string, tenantId: string) {
+    return this.prisma.channelInventorySyncState.findFirst({
+      where: { id, tenantId },
+    });
+  }
+
+  resetInventorySyncForReplay(id: string) {
+    return this.prisma.channelInventorySyncState.update({
+      where: { id },
+      data: {
+        status: ChannelInventorySyncStatus.PENDING,
+        circuitState: 'CLOSED',
+        nextAttemptAt: null,
+        circuitOpenedUntil: null,
+        lastErrorCode: null,
+        lastErrorSummary: null,
+      },
+    });
+  }
+
+  resetInboxForReplay(id: string) {
+    return this.prisma.channelWebhookInboxEvent.update({
+      where: { id },
+      data: {
+        processedAt: null,
+        failureReason: null,
+      },
+    });
+  }
+
   findPendingInventorySyncStates(params: { tenantId: string; limit: number; now: Date }) {
     return this.prisma.channelInventorySyncState.findMany({
       where: {
