@@ -48,7 +48,7 @@ ssh camargo@192.168.15.174 "cp /home/camargo/apps/ledger-flow/.env.production.ex
 
 ## Fluxo do Jenkinsfile
 
-- Valida `docker-compose.prod.yml` com `.env.production.example`.
+- Valida `docker-compose.prod.yml` criando um `.env` temporário no workspace do Jenkins a partir de `.env.production.example`, porque os serviços usam `env_file: .env`.
 - Instala dependências em `apps/api` e `apps/web` usando cache local do workspace.
 - Roda `npm run prisma:generate`, `npm test -- --runInBand` e `npm run build` na API.
 - Roda `npm run test:unit -- --run`, `npm run i18n:check` e `npm run build` no Web.

@@ -32,7 +32,24 @@ pipeline {
                     test -f Jenkinsfile
                     test -f docker-compose.yml
                     test -f docker-compose.prod.yml
-                    docker compose --env-file .env.production.example -f docker-compose.prod.yml config -q
+
+                    VALIDATION_ENV_BACKUP=""
+                    cleanup_validation_env() {
+                      if [ -n "${VALIDATION_ENV_BACKUP}" ]; then
+                        mv "${VALIDATION_ENV_BACKUP}" .env
+                      else
+                        rm -f .env
+                      fi
+                    }
+                    trap cleanup_validation_env EXIT
+
+                    if [ -f .env ]; then
+                      VALIDATION_ENV_BACKUP=".env.validate-backup-$$"
+                      mv .env "${VALIDATION_ENV_BACKUP}"
+                    fi
+
+                    cp .env.production.example .env
+                    docker compose --env-file .env -f docker-compose.prod.yml config -q
                 '''
             }
         }
