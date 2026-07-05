@@ -45,6 +45,23 @@ export interface MercadoLivreItemResponse {
   }>;
 }
 
+export interface MercadoLivreOrderResponse {
+  id: number | string;
+  status?: string;
+  buyer?: {
+    nickname?: string;
+    first_name?: string;
+    last_name?: string;
+  };
+  order_items?: Array<{
+    quantity?: number;
+    item?: {
+      id?: string;
+      title?: string;
+    };
+  }>;
+}
+
 @Injectable()
 export class MercadoLivreApiClient {
   async exchangeAuthorizationCode(
@@ -100,5 +117,19 @@ export class MercadoLivreApiClient {
     }
 
     return response.json() as Promise<MercadoLivreItemResponse>;
+  }
+
+  async getOrder(accessToken: string, resource: string): Promise<MercadoLivreOrderResponse> {
+    const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
+    const normalizedResource = resource.startsWith('/') ? resource : `/${resource}`;
+    const response = await fetch(`${baseUrl}${normalizedResource}`, {
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!response.ok) {
+      throw new Error('Mercado Livre order detail failed.');
+    }
+
+    return response.json() as Promise<MercadoLivreOrderResponse>;
   }
 }

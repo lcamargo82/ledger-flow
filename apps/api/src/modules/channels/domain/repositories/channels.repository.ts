@@ -98,6 +98,10 @@ export interface SyncableListingProjection {
   matchedSkuId: string | null;
 }
 
+export type ChannelWebhookInboxWithIntegration = ChannelWebhookInboxEvent & {
+  integration: ChannelIntegration;
+};
+
 export interface UpsertInventorySyncStateData {
   tenantId: string;
   listingId: string;
@@ -149,12 +153,20 @@ export interface ChannelsRepository {
     provider: ChannelProvider,
     providerEventId: string,
   ): Promise<ChannelWebhookInboxEvent | null>;
+  findInboxById(id: string): Promise<ChannelWebhookInboxWithIntegration | null>;
   createInboxEvent(data: CreateChannelWebhookInboxData): Promise<ChannelWebhookInboxEvent>;
+  markInboxProcessed(id: string): Promise<ChannelWebhookInboxEvent>;
+  markInboxFailed(id: string, failureReason: string): Promise<ChannelWebhookInboxEvent>;
   listInbox(params: ListChannelInboxParams): Promise<PaginatedChannelInboxResult>;
   findSkuMatchCandidates(tenantId: string, externalSku: string): Promise<ProductSku[]>;
   upsertListing(data: UpsertChannelListingData): Promise<ChannelListing>;
   listListings(params: ListChannelListingsParams): Promise<PaginatedChannelListingsResult>;
   findListingById(id: string, tenantId: string): Promise<ChannelListing | null>;
+  findListingByExternalId(params: {
+    tenantId: string;
+    integrationId: string;
+    externalListingId: string;
+  }): Promise<ChannelListing | null>;
   findSkuById(id: string, tenantId: string): Promise<ProductSku | null>;
   createManualMapping(params: {
     tenantId: string;

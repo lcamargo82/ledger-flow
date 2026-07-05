@@ -76,8 +76,34 @@ export class PrismaChannelsRepository implements ChannelsRepository {
     });
   }
 
+  findInboxById(id: string) {
+    return this.prisma.channelWebhookInboxEvent.findUnique({
+      where: { id },
+      include: { integration: true },
+    });
+  }
+
   createInboxEvent(data: CreateChannelWebhookInboxData) {
     return this.prisma.channelWebhookInboxEvent.create({ data });
+  }
+
+  markInboxProcessed(id: string) {
+    return this.prisma.channelWebhookInboxEvent.update({
+      where: { id },
+      data: {
+        processedAt: new Date(),
+        failureReason: null,
+      },
+    });
+  }
+
+  markInboxFailed(id: string, failureReason: string) {
+    return this.prisma.channelWebhookInboxEvent.update({
+      where: { id },
+      data: {
+        failureReason,
+      },
+    });
   }
 
   async listInbox(params: ListChannelInboxParams) {
@@ -184,6 +210,22 @@ export class PrismaChannelsRepository implements ChannelsRepository {
   findListingById(id: string, tenantId: string) {
     return this.prisma.channelListing.findFirst({
       where: { id, tenantId },
+    });
+  }
+
+  findListingByExternalId(params: {
+    tenantId: string;
+    integrationId: string;
+    externalListingId: string;
+  }) {
+    return this.prisma.channelListing.findUnique({
+      where: {
+        tenantId_integrationId_externalListingId: {
+          tenantId: params.tenantId,
+          integrationId: params.integrationId,
+          externalListingId: params.externalListingId,
+        },
+      },
     });
   }
 

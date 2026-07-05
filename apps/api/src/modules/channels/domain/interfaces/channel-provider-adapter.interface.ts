@@ -30,3 +30,25 @@ export interface ChannelListingImportItem {
 export interface ChannelListingImportAdapter extends ChannelProviderAdapter {
   fetchListings(input: ChannelListingImportInput): Promise<ChannelListingImportItem[]>;
 }
+
+export interface ChannelOrderFetchInput {
+  accessToken: string;
+  resource: string;
+}
+
+export interface ChannelOrderItem {
+  externalListingId: string;
+  title?: string;
+  quantity: number;
+}
+
+export interface ChannelOrderDetails {
+  externalOrderId: string;
+  status: string;
+  buyerName?: string;
+  items: ChannelOrderItem[];
+}
+
+export interface ChannelOrderAdapter extends ChannelProviderAdapter {
+  fetchOrder(input: ChannelOrderFetchInput): Promise<ChannelOrderDetails>;
+}
