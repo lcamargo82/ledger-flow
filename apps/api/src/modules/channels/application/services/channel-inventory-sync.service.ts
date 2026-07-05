@@ -1,7 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ChannelInventorySyncState, ChannelProvider, Prisma } from '@prisma/client';
+import {
+  ChannelIntegration,
+  ChannelIntegrationStatus,
+  ChannelInventorySyncState,
+  ChannelProvider,
+  Prisma,
+} from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
+import { GatewayCredentialsEncryptionService } from '../../../gateways/application/services/gateway-credentials-encryption.service';
+import { MercadoLivreChannelAdapter } from '../../infra/adapters/mercado-livre-channel.adapter';
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
 
@@ -20,6 +28,8 @@ export class ChannelInventorySyncService {
     @Inject(CHANNELS_REPOSITORY)
     private readonly channelsRepository: ChannelsRepository,
     private readonly prisma: PrismaService,
+    private readonly mercadoLivreAdapter?: MercadoLivreChannelAdapter,
+    private readonly credentialsEncryptionService?: GatewayCredentialsEncryptionService,
   ) {}
 
   listStatus(
@@ -86,7 +96,7 @@ export class ChannelInventorySyncService {
     for (const state of pendingStates) {
       summary.processed += 1;
       const quantity = Number(state.targetAvailableQuantity);
-      const result = this.mockProviderSync(state);
+      const result = await this.providerSync(state, quantity, tenantId);
 
       if (result.ok) {
         await this.channelsRepository.markInventorySyncSuccess({
@@ -104,7 +114,10 @@ export class ChannelInventorySyncService {
         continue;
       }
 
-      if (state.attemptCount + 1 >= this.maxAttemptsBeforeCircuit) {
+      if (
+        result.errorCode === 'INTEGRATION_NOT_SYNCABLE' ||
+        state.attemptCount + 1 >= this.maxAttemptsBeforeCircuit
+      ) {
         await this.channelsRepository.markInventorySyncCircuitOpen({
           id: state.id,
           circuitOpenedUntil: this.addSeconds(now, 300),
@@ -117,7 +130,10 @@ export class ChannelInventorySyncService {
 
       await this.channelsRepository.markInventorySyncRetry({
         id: state.id,
-        nextAttemptAt: this.addSeconds(now, this.backoffSeconds(state.attemptCount)),
+        nextAttemptAt: this.addSeconds(
+          now,
+          result.retryAfterSeconds ?? this.backoffSeconds(state.attemptCount),
+        ),
         errorCode: result.errorCode,
         errorSummary: result.errorSummary,
       });
@@ -127,17 +143,32 @@ export class ChannelInventorySyncService {
     return summary;
   }
 
+  private async providerSync(
+    state: ChannelInventorySyncState,
+    quantity: number,
+    tenantId: string,
+  ): Promise<
+    | { ok: true }
+    | { ok: false; errorCode: string; errorSummary: string; retryAfterSeconds?: number }
+  > {
+    if (state.provider === ChannelProvider.MOCK) {
+      return this.mockProviderSync(state);
+    }
+
+    if (state.provider === ChannelProvider.MERCADO_LIVRE) {
+      return this.mercadoLivreProviderSync(state, quantity, tenantId);
+    }
+
+    return {
+      ok: false,
+      errorCode: 'PROVIDER_NOT_SUPPORTED',
+      errorSummary: 'Provider is not supported for egress inventory sync.',
+    };
+  }
+
   private mockProviderSync(state: ChannelInventorySyncState):
     | { ok: true }
     | { ok: false; errorCode: string; errorSummary: string } {
-    if (state.provider !== ChannelProvider.MOCK) {
-      return {
-        ok: false,
-        errorCode: 'PROVIDER_NOT_SUPPORTED',
-        errorSummary: 'Only MOCK provider is supported for egress sync in 10.0.8.',
-      };
-    }
-
     if (state.externalListingId.includes('rate-limit')) {
       return {
         ok: false,
@@ -147,6 +178,74 @@ export class ChannelInventorySyncService {
     }
 
     return { ok: true };
+  }
+
+  private async mercadoLivreProviderSync(
+    state: ChannelInventorySyncState,
+    quantity: number,
+    tenantId: string,
+  ): Promise<
+    | { ok: true }
+    | { ok: false; errorCode: string; errorSummary: string; retryAfterSeconds?: number }
+  > {
+    if (!this.mercadoLivreAdapter || !this.credentialsEncryptionService) {
+      return {
+        ok: false as const,
+        errorCode: 'PROVIDER_NOT_CONFIGURED',
+        errorSummary: 'Mercado Livre inventory sync is not configured.',
+      };
+    }
+
+    const integration = await this.channelsRepository.findIntegrationById(
+      state.integrationId,
+      tenantId,
+    );
+    const syncableFailure = this.integrationSyncableFailure(integration);
+    if (syncableFailure) return syncableFailure;
+    if (!integration) {
+      return {
+        ok: false,
+        errorCode: 'INTEGRATION_NOT_SYNCABLE',
+        errorSummary: 'Channel integration is not active for inventory sync.',
+      };
+    }
+
+    const credentials = this.credentialsEncryptionService.decrypt(
+      JSON.stringify(integration.encryptedCredentials),
+    );
+    if (!credentials.accessToken) {
+      return {
+        ok: false as const,
+        errorCode: 'CREDENTIALS_NOT_SYNCABLE',
+        errorSummary: 'Mercado Livre access token is unavailable.',
+      };
+    }
+
+    return this.mercadoLivreAdapter.updateListingStock({
+      accessToken: credentials.accessToken,
+      externalListingId: state.externalListingId,
+      availableQuantity: quantity,
+    });
+  }
+
+  private integrationSyncableFailure(integration: ChannelIntegration | null) {
+    if (!integration || integration.status !== ChannelIntegrationStatus.ACTIVE) {
+      return {
+        ok: false as const,
+        errorCode: 'INTEGRATION_NOT_SYNCABLE',
+        errorSummary: 'Channel integration is not active for inventory sync.',
+      };
+    }
+
+    if (!integration.encryptedCredentials) {
+      return {
+        ok: false as const,
+        errorCode: 'CREDENTIALS_NOT_SYNCABLE',
+        errorSummary: 'Channel integration credentials are unavailable.',
+      };
+    }
+
+    return null;
   }
 
   private backoffSeconds(attemptCount: number) {

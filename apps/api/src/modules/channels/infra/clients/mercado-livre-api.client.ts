@@ -62,6 +62,18 @@ export interface MercadoLivreOrderResponse {
   }>;
 }
 
+export interface MercadoLivreUpdateItemStockInput {
+  accessToken: string;
+  externalListingId: string;
+  availableQuantity: number;
+}
+
+export interface MercadoLivreUpdateItemStockResponse {
+  id: string;
+  available_quantity?: number;
+  status?: string;
+}
+
 @Injectable()
 export class MercadoLivreApiClient {
   async exchangeAuthorizationCode(
@@ -131,5 +143,35 @@ export class MercadoLivreApiClient {
     }
 
     return response.json() as Promise<MercadoLivreOrderResponse>;
+  }
+
+  async updateItemStock(
+    input: MercadoLivreUpdateItemStockInput,
+  ): Promise<MercadoLivreUpdateItemStockResponse> {
+    const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
+    const response = await fetch(`${baseUrl}/items/${input.externalListingId}`, {
+      method: 'PUT',
+      headers: {
+        authorization: `Bearer ${input.accessToken}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ available_quantity: input.availableQuantity }),
+    });
+
+    if (!response.ok) {
+      const error = new Error('Mercado Livre listing stock update failed.') as Error & {
+        status?: number;
+        retryAfterSeconds?: number;
+      };
+      error.status = response.status;
+      const retryAfter = response.headers.get('retry-after');
+      if (retryAfter) {
+        const retryAfterSeconds = Number(retryAfter);
+        if (Number.isFinite(retryAfterSeconds)) error.retryAfterSeconds = retryAfterSeconds;
+      }
+      throw error;
+    }
+
+    return response.json() as Promise<MercadoLivreUpdateItemStockResponse>;
   }
 }

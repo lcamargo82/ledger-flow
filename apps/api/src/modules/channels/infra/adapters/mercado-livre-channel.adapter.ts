@@ -4,6 +4,9 @@ import {
   ChannelListingImportAdapter,
   ChannelListingImportInput,
   ChannelListingImportItem,
+  ChannelInventorySyncAdapter,
+  ChannelInventoryUpdateInput,
+  ChannelInventoryUpdateResult,
   ChannelOrderAdapter,
   ChannelOrderDetails,
   ChannelProviderAdapter,
@@ -16,7 +19,9 @@ import {
 } from '../clients/mercado-livre-api.client';
 
 @Injectable()
-export class MercadoLivreChannelAdapter implements ChannelListingImportAdapter, ChannelOrderAdapter {
+export class MercadoLivreChannelAdapter
+  implements ChannelListingImportAdapter, ChannelOrderAdapter, ChannelInventorySyncAdapter
+{
   readonly provider = ChannelProvider.MERCADO_LIVRE;
 
   readonly capabilities: ChannelProviderCapabilities = {
@@ -60,6 +65,36 @@ export class MercadoLivreChannelAdapter implements ChannelListingImportAdapter, 
     resource: string;
   }): Promise<ChannelOrderDetails> {
     return this.toOrder(await this.apiClient.getOrder(input.accessToken, input.resource));
+  }
+
+  async updateListingStock(
+    input: ChannelInventoryUpdateInput,
+  ): Promise<ChannelInventoryUpdateResult> {
+    try {
+      const result = await this.apiClient.updateItemStock(input);
+      return {
+        ok: true,
+        providerStatus: result.status ?? 'updated',
+        externalListingId: result.id,
+        availableQuantity: Number(result.available_quantity ?? input.availableQuantity),
+      };
+    } catch (error) {
+      const providerError = error as Error & {
+        status?: number;
+        retryAfterSeconds?: number;
+      };
+      return {
+        ok: false,
+        errorCode: providerError.status === 429 ? 'PROVIDER_RATE_LIMIT' : 'PROVIDER_ERROR',
+        errorSummary:
+          providerError.status === 429
+            ? 'Mercado Livre returned 429.'
+            : 'Mercado Livre stock update failed.',
+        ...(providerError.retryAfterSeconds && {
+          retryAfterSeconds: providerError.retryAfterSeconds,
+        }),
+      };
+    }
   }
 
   private toListing(item: MercadoLivreItemResponse): ChannelListingImportItem {
