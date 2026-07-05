@@ -32,7 +32,7 @@ describe('InventoryService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new InventoryService(repository as never, prisma as never);
+    service = new InventoryService(repository, prisma as never);
   });
 
   it('creates a warehouse with normalized code and audit log', async () => {

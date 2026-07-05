@@ -103,11 +103,14 @@ describe('ReconciliationSyncService', () => {
     expect(adapter.fetchSettlements).not.toHaveBeenCalled();
   });
 
-  function adapterStub(pages: Array<{ data: ReturnType<typeof settlement>[]; nextCursor?: string }>) {
+  function adapterStub(
+    pages: Array<{ data: ReturnType<typeof settlement>[]; nextCursor?: string }>,
+  ) {
     return {
       provider: WebhookProvider.ASAAS,
       supportsSettlementSync: jest.fn().mockReturnValue(true),
-      fetchSettlements: jest.fn()
+      fetchSettlements: jest
+        .fn()
         .mockImplementation(() => Promise.resolve(pages.shift() ?? { data: [] })),
       normalizeWebhook: jest.fn(),
     } as unknown as ReconciliationProviderAdapter & {

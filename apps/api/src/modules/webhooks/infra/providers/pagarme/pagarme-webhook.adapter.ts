@@ -12,17 +12,11 @@ export class PagarmeWebhookAdapter implements ProviderWebhookAdapter {
   readonly provider = WebhookProvider.PAGARME;
 
   async authenticate(input: ProviderWebhookAuthenticationInput): Promise<void> {
-    throw new WebhookProviderNotSupportedError(
-      'Pagar.me webhook adapter not implemented.',
-    );
+    throw new WebhookProviderNotSupportedError('Pagar.me webhook adapter not implemented.');
   }
 
-  async normalize(
-    input: ProviderWebhookPayloadInput,
-  ): Promise<NormalizedWebhookEvent> {
-    throw new WebhookProviderNotSupportedError(
-      'Pagar.me webhook adapter not implemented.',
-    );
+  async normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent> {
+    throw new WebhookProviderNotSupportedError('Pagar.me webhook adapter not implemented.');
   }
 
   supportsEvent(eventType: string): boolean {

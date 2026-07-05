@@ -11,6 +11,7 @@ import AppButton from '../components/common/AppButton.vue'
 import AppCard from '../components/common/AppCard.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
+import AppNumberInput from '../components/common/AppNumberInput.vue'
 import AppModal from '../components/common/AppModal.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
@@ -44,14 +45,14 @@ const adjustmentForm = reactive({
   skuId: '',
   warehouseId: '',
   type: 'ADJUSTMENT_IN' as 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT',
-  quantity: '1',
+  quantity: null as number | null,
   reasonCode: '',
   notes: '',
 })
 const reserveForm = reactive({
   skuId: '',
   warehouseId: '',
-  quantity: '1',
+  quantity: null as number | null,
   sourceType: 'ADMIN_RESERVATION',
   sourceId: '',
   reasonCode: '',
@@ -160,7 +161,7 @@ const recordAdjustment = async () => {
   })
   adjustmentForm.skuId = ''
   adjustmentForm.warehouseId = ''
-  adjustmentForm.quantity = '1'
+  adjustmentForm.quantity = null
   adjustmentForm.reasonCode = ''
   adjustmentForm.notes = ''
   isAdjustmentModalOpen.value = false
@@ -183,7 +184,7 @@ const reserveStock = async () => {
   })
   reserveForm.skuId = ''
   reserveForm.warehouseId = ''
-  reserveForm.quantity = '1'
+  reserveForm.quantity = null
   reserveForm.sourceType = 'ADMIN_RESERVATION'
   reserveForm.sourceId = ''
   reserveForm.reasonCode = ''
@@ -318,9 +319,13 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
             v-if="authStore.checkAllPermissions(['inventory:manage'])"
             size="small"
             variant="secondary"
+            icon-only
+            :title="item.isActive ? t('inventory.actions.disable') : t('inventory.actions.enable')"
             @click="toggleWarehouse(item.id, item.isActive)"
           >
-            {{ item.isActive ? t('inventory.actions.disable') : t('inventory.actions.enable') }}
+            <template #icon>
+              <span class="material-symbols-outlined text-[18px]">{{ item.isActive ? 'block' : 'check_circle' }}</span>
+            </template>
           </AppButton>
         </template>
       </AppTable>
@@ -379,16 +384,24 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
             <AppButton
               size="small"
               variant="secondary"
+              icon-only
+              :title="t('inventory.actions.releaseReservation')"
               @click="openReservationTransition(item, 'release')"
             >
-              {{ t('inventory.actions.releaseReservation') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">lock_open</span>
+              </template>
             </AppButton>
             <AppButton
               size="small"
               variant="primary"
+              icon-only
+              :title="t('inventory.actions.consumeReservation')"
               @click="openReservationTransition(item, 'consume')"
             >
-              {{ t('inventory.actions.consumeReservation') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">shopping_cart_checkout</span>
+              </template>
             </AppButton>
           </div>
         </template>
@@ -431,12 +444,10 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           :label="t('inventory.form.warehouseLabel')"
           :options="warehouseOptions"
         />
-        <AppInput
+        <AppNumberInput
           id="reserve-quantity"
           v-model="reserveForm.quantity"
-          type="number"
-          min="0.000001"
-          step="0.000001"
+          :allow-decimals="true"
           :label="t('inventory.form.quantityLabel')"
         />
         <AppInput
@@ -493,12 +504,10 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           :label="t('inventory.form.typeLabel')"
           :options="movementTypeOptions"
         />
-        <AppInput
+        <AppNumberInput
           id="adjustment-quantity"
           v-model="adjustmentForm.quantity"
-          type="number"
-          min="0.000001"
-          step="0.000001"
+          :allow-decimals="true"
           :label="t('inventory.form.quantityLabel')"
         />
         <AppInput

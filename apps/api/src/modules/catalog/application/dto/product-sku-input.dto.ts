@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsOptional,
-  IsString,
-  Length,
-  Min,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
 
 export class ProductSkuInputDto {
   @ApiProperty({ example: 'SKU_1234' })

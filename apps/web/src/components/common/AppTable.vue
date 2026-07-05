@@ -24,16 +24,16 @@ const isEmpty = computed(() => !props.items || props.items.length === 0)
 </script>
 
 <template>
-  <div class="app-table-wrapper w-full border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-300">
+  <div class="lf-table-wrapper">
+    <div class="lf-table-scroll">
+      <table class="lf-table">
+        <thead class="lf-table-head">
           <tr>
             <th 
               v-for="col in columns" 
               :key="col.key" 
               scope="col" 
-              class="px-6 py-3 font-medium tracking-wider"
+              class="lf-table-th"
               :class="{
                 'text-left': !col.align || col.align === 'left',
                 'text-center': col.align === 'center',
@@ -46,15 +46,15 @@ const isEmpty = computed(() => !props.items || props.items.length === 0)
         </thead>
         <tbody>
           <!-- Loading State -->
-          <tr v-if="isLoading" class="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
-            <td :colspan="columns.length" class="px-6 py-12 text-center">
+          <tr v-if="isLoading" class="lf-table-row">
+            <td :colspan="columns.length" class="lf-table-td text-center" style="padding-top: 3rem; padding-bottom: 3rem;">
               <AppLoading :text="t('common.loading')" />
             </td>
           </tr>
 
           <!-- Empty State -->
-          <tr v-else-if="isEmpty" class="bg-white dark:bg-gray-900 border-b dark:border-gray-800">
-            <td :colspan="columns.length" class="px-6 py-12 text-center">
+          <tr v-else-if="isEmpty" class="lf-table-row">
+            <td :colspan="columns.length" class="lf-table-td text-center" style="padding-top: 3rem; padding-bottom: 3rem;">
               <AppEmptyState 
                 :title="emptyTitle || t('common.noData')" 
                 :description="emptyDescription" 
@@ -67,12 +67,12 @@ const isEmpty = computed(() => !props.items || props.items.length === 0)
             <tr 
               v-for="(item, index) in items" 
               :key="index"
-              class="bg-white dark:bg-gray-900 border-b dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              class="lf-table-row"
             >
               <td 
                 v-for="col in columns" 
                 :key="`${index}-${col.key}`" 
-                class="px-6 py-4"
+                class="lf-table-td"
                 :class="{
                   'text-left': !col.align || col.align === 'left',
                   'text-center': col.align === 'center',

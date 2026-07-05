@@ -5,9 +5,7 @@ describe('ReconciliationSettlementReceivedAsyncHandler', () => {
     const matchingService = {
       matchSettlement: jest.fn().mockResolvedValue({ created: true }),
     };
-    const handler = new ReconciliationSettlementReceivedAsyncHandler(
-      matchingService as never,
-    );
+    const handler = new ReconciliationSettlementReceivedAsyncHandler(matchingService as never);
 
     await expect(
       handler.handle({

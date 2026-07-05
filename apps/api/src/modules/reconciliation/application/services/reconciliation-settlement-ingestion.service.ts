@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Prisma,
-  ProviderSettlementEvent,
-  WebhookInboxEvent,
-} from '@prisma/client';
+import { Prisma, ProviderSettlementEvent, WebhookInboxEvent } from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { NormalizedWebhookEvent } from '../../../webhooks/domain/interfaces/provider-webhook-adapter.interface';
@@ -60,12 +56,7 @@ export class ReconciliationSettlementIngestionService {
       }
 
       const settlementEvent = await tx.providerSettlementEvent.create({
-        data: this.toCreateInput(
-          normalized,
-          tenantId,
-          sourceWebhookInboxEventId,
-          receivedAt,
-        ),
+        data: this.toCreateInput(normalized, tenantId, sourceWebhookInboxEventId, receivedAt),
       });
 
       const outboxPayload = {

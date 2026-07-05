@@ -53,7 +53,7 @@ describe('OrdersService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new OrdersService(
-      ordersRepository as never,
+      ordersRepository,
       inventoryService as never,
       financialIntelligenceService as never,
       prisma as never,

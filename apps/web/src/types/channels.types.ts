@@ -1,5 +1,10 @@
 export type ChannelProvider = 'MOCK' | 'MERCADO_LIVRE'
-export type ChannelIntegrationStatus = 'ACTIVE' | 'DISABLED'
+export type ChannelIntegrationStatus =
+  | 'INACTIVE'
+  | 'ACTIVE'
+  | 'DISABLED'
+  | 'SUSPENDED'
+  | 'REAUTH_REQUIRED'
 export type ChannelWebhookStatus = 'RECEIVED' | 'DUPLICATE' | 'INVALID' | 'DLQ'
 export type ChannelListingMatchStatus = 'MATCHED' | 'UNMATCHED' | 'AMBIGUOUS' | 'IGNORED'
 export type ChannelInventorySyncStatus =
@@ -122,6 +127,10 @@ export interface PaginatedChannelInventorySyncResponse {
 export interface ChannelListingsImportResponse {
   summary: ChannelListingsImportSummary
   data: ChannelListing[]
+}
+
+export interface MercadoLivreConnectResponse {
+  authorizationUrl: string
 }
 
 export interface CreateChannelIntegrationRequest {

@@ -31,8 +31,7 @@ export class FinancialIntelligenceFoundationController {
   })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({
-    description:
-      'Sem permissão ou capability para acessar Financial Intelligence',
+    description: 'Sem permissão ou capability para acessar Financial Intelligence',
   })
   getStatus() {
     return {

@@ -12,8 +12,7 @@ export class AcceptTenantInvitationDto {
   @IsNotEmpty()
   @MinLength(8, { message: 'A senha deve ter pelo menos 8 caracteres' })
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message:
-      'A senha deve conter letras maiúsculas, minúsculas, números ou caracteres especiais',
+    message: 'A senha deve conter letras maiúsculas, minúsculas, números ou caracteres especiais',
   })
   password: string;
 }

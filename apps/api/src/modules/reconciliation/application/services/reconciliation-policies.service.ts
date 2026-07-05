@@ -23,19 +23,10 @@ export class ReconciliationPoliciesService {
     });
   }
 
-  async createPolicy(
-    tenantId: string,
-    actorUserId: string,
-    dto: CreateReconciliationPolicyDto,
-  ) {
+  async createPolicy(tenantId: string, actorUserId: string, dto: CreateReconciliationPolicyDto) {
     return this.prisma.$transaction(async (tx) => {
       const provider = dto.provider ?? null;
-      const previous = await this.findLatestPolicy(
-        tx,
-        tenantId,
-        provider,
-        dto.currency,
-      );
+      const previous = await this.findLatestPolicy(tx, tenantId, provider, dto.currency);
       const created = await this.createNextVersion(tx, tenantId, {
         provider,
         currency: dto.currency,
@@ -71,8 +62,7 @@ export class ReconciliationPoliciesService {
         provider,
         currency,
         currencyExponent: dto.currencyExponent ?? current.currencyExponent,
-        amountToleranceMinor:
-          dto.amountToleranceMinor ?? current.amountToleranceMinor.toString(),
+        amountToleranceMinor: dto.amountToleranceMinor ?? current.amountToleranceMinor.toString(),
         version: (previous?.version ?? current.version) + 1,
       });
 
@@ -170,7 +160,7 @@ export class ReconciliationPoliciesService {
           currency: policy.currency,
           version: policy.version,
           amountToleranceMinor: policy.amountToleranceMinor.toString(),
-        } as Prisma.InputJsonValue,
+        },
       },
     });
   }

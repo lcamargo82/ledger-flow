@@ -36,10 +36,7 @@ export class ReconciliationSyncController {
   })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem capability de sync de conciliação' })
-  syncAsaas(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: ReconciliationSyncRequestDto,
-  ) {
+  syncAsaas(@CurrentUser() user: AuthenticatedUser, @Body() dto: ReconciliationSyncRequestDto) {
     return this.syncService.syncProvider(user.tenantId, user.id, this.asaasAdapter, {
       from: dto.from ? new Date(dto.from) : undefined,
       to: dto.to ? new Date(dto.to) : undefined,

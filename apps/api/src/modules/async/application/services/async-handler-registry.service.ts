@@ -12,9 +12,7 @@ export class AsyncHandlerRegistryService {
       this.handlers.set(eventType, []);
     }
     this.handlers.get(eventType)!.push(handler);
-    this.logger.log(
-      `Registered async handler ${handler.consumerName} for event ${eventType}`,
-    );
+    this.logger.log(`Registered async handler ${handler.consumerName} for event ${eventType}`);
   }
 
   getHandlers(eventType: string): AsyncEventHandler[] {

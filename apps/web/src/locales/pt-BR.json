@@ -117,6 +117,13 @@
     "apiConnected": "API Conectada"
   },
   "nav": {
+    "groups": {
+      "operations": "Operações",
+      "catalogAndInventory": "Catálogo e Estoque",
+      "analytics": "Inteligência",
+      "settings": "Configurações",
+      "platform": "Plataforma"
+    },
     "dashboard": "Dashboard",
     "users": "Usuários",
     "payments": "Pagamentos",
@@ -298,6 +305,7 @@
     },
     "actions": {
       "createIntegration": "Nova integração",
+      "connectMercadoLivre": "Conectar Mercado Livre",
       "importListings": "Importar anúncios",
       "mapListing": "Mapear SKU",
       "processSync": "Processar pendências"
@@ -333,15 +341,19 @@
       "nameLabel": "Nome",
       "webhookSecretLabel": "Segredo do webhook",
       "skuIdLabel": "ID do SKU",
-      "reasonLabel": "Motivo"
+      "reasonLabel": "Motivo",
+      "mercadoLivreOAuthDescription": "A conexão será feita via OAuth do Mercado Livre. Tokens da loja não são digitados nem exibidos no painel."
     },
     "provider": {
       "MOCK": "Mock",
       "MERCADO_LIVRE": "Mercado Livre"
     },
     "integrationStatus": {
+      "INACTIVE": "Inativa",
       "ACTIVE": "Ativa",
-      "DISABLED": "Desativada"
+      "DISABLED": "Desativada",
+      "SUSPENDED": "Suspensa",
+      "REAUTH_REQUIRED": "Reautenticação necessária"
     },
     "webhookStatus": {
       "RECEIVED": "Recebido",
@@ -371,13 +383,13 @@
     "syncSummary": "{processed} processados, {synced} sincronizados, {retry} retries, {circuit} circuitos abertos.",
     "empty": {
       "integrationsTitle": "Nenhuma integração de canal",
-      "integrationsDescription": "Crie uma integração mock para testar intake autenticado.",
+      "integrationsDescription": "Conecte um canal para importar anúncios, pedidos e eventos operacionais.",
       "inboxTitle": "Nenhum webhook recebido",
       "inboxDescription": "Eventos válidos, duplicados e inválidos aparecerão aqui sem payload bruto.",
       "listingsTitle": "Nenhum anúncio na malha fina",
-      "listingsDescription": "Importe anúncios do provider mock para revisar vínculos de SKU.",
+      "listingsDescription": "Importe anúncios do canal conectado para revisar vínculos de SKU.",
       "syncTitle": "Nenhum status de sincronização",
-      "syncDescription": "Mudanças de saldo em SKUs vinculados aparecerão aqui para sincronização mock."
+      "syncDescription": "Mudanças de saldo em SKUs vinculados aparecerão aqui para sincronização de estoque."
     },
     "errors": {
       "title": "Não foi possível carregar canais",
@@ -538,12 +550,17 @@
       "invalid": "Revise as informações do produto e do SKU.",
       "skuAlreadyExists": "Este SKU já está cadastrado para o tenant atual.",
       "notFound": "Produto não encontrado.",
+      "costChangeReasonRequired": "O motivo da alteração de custo é obrigatório.",
       "forbidden": "Você não possui acesso ao catálogo."
     },
     "pagination": {
       "pageOf": "Página {page} de {totalPages}",
       "previous": "Anterior",
       "next": "Próxima"
+    },
+    "toast": {
+      "created": "Produto criado com sucesso.",
+      "updated": "Produto atualizado com sucesso."
     }
   },
   "users": {
@@ -708,6 +725,7 @@
     "missing": "Permissão negada",
     "title": "Permissões do Sistema",
     "description": "Lista de todas as permissões globais disponíveis no sistema.",
+    "searchLabel": "Buscar permissão",
     "searchPlaceholder": "Buscar permissões...",
     "list": {
       "auth": {
@@ -1113,7 +1131,8 @@
       "APPROVED": "Aprovado",
       "FAILED": "Falhou",
       "CANCELED": "Cancelado",
-      "REFUNDED": "Estornado"
+      "REFUNDED": "Estornado",
+      "OVERDUE": "Vencido"
     },
     "method": {
       "PIX": "Pix",
@@ -1161,6 +1180,7 @@
     "error": {
       "title": "Não foi possível carregar os pagamentos",
       "description": "Tente novamente em alguns instantes.",
+      "default": "Ocorreu um erro inesperado.",
       "createFailed": "Erro ao criar pagamento.",
       "cancelFailed": "Erro ao cancelar pagamento.",
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",

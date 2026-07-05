@@ -7,6 +7,7 @@ import type {
   ChannelListing,
   ChannelListingsImportResponse,
   ChannelListingMatchStatus,
+  MercadoLivreConnectResponse,
   ChannelProvider,
   ChannelWebhookStatus,
   CreateChannelIntegrationRequest,
@@ -28,6 +29,14 @@ export class ChannelsService {
     const { data } = await httpClient.post<{ integration: ChannelIntegration }>(
       '/channels/integrations',
       payload,
+    )
+    return data
+  }
+
+  async connectMercadoLivre(): Promise<MercadoLivreConnectResponse> {
+    const { data } = await httpClient.post<MercadoLivreConnectResponse>(
+      '/channels/mercado-livre/connect',
+      {},
     )
     return data
   }

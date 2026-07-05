@@ -1,18 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ReconciliationCaseStatus,
-  ReconciliationMatchType,
-  WebhookProvider,
-} from '@prisma/client';
+import { ReconciliationCaseStatus, ReconciliationMatchType, WebhookProvider } from '@prisma/client';
 import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsEnum,
-  IsInt,
-  IsOptional,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 export class ListReconciliationCasesQueryDto {
   @ApiPropertyOptional({ minimum: 1, default: 1 })

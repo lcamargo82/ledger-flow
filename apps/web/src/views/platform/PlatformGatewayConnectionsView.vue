@@ -41,17 +41,25 @@
             v-if="item.status === 'ACTIVE'" 
             variant="danger" 
             size="small"
+            icon-only
+            :title="t('platform.gateways.actions.suspend')"
             @click="openSuspendModal(item)"
           >
-            {{ t('platform.gateways.actions.suspend') }}
+            <template #icon>
+              <span class="material-symbols-outlined text-[18px]">pause_circle</span>
+            </template>
           </AppButton>
           <AppButton 
             v-else 
             variant="primary" 
             size="small"
+            icon-only
+            :title="t('platform.gateways.actions.reactivate')"
             @click="openReactivateModal(item)"
           >
-            {{ t('platform.gateways.actions.reactivate') }}
+            <template #icon>
+              <span class="material-symbols-outlined text-[18px]">play_circle</span>
+            </template>
           </AppButton>
         </div>
       </template>

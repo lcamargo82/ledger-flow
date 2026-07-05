@@ -217,9 +217,13 @@ const handleSearch = () => {
             <AppButton 
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('platformTenants.actions.view')"
               @click="router.push(`/platform/tenants/${item.id}`)"
             >
-              {{ t('platformTenants.actions.view') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </template>
             </AppButton>
           </div>
         </template>

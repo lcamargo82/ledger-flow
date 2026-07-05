@@ -13,7 +13,17 @@ export class ChannelIntegrationResponseDto {
   @ApiProperty() tenantId: string;
   @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
   @ApiProperty() name: string;
+  @ApiPropertyOptional() externalAccountId?: string;
+  @ApiPropertyOptional() displayName?: string;
   @ApiProperty({ enum: ChannelIntegrationStatus }) status: ChannelIntegrationStatus;
+  @ApiPropertyOptional() credentialsFingerprint?: string;
+  @ApiProperty() credentialsVersion: number;
+  @ApiPropertyOptional() settingsJson?: Record<string, unknown>;
+  @ApiPropertyOptional() defaultWarehouseId?: string;
+  @ApiPropertyOptional() syncPolicyJson?: Record<string, unknown>;
+  @ApiPropertyOptional() healthStatus?: string;
+  @ApiPropertyOptional() lastSuccessfulOperationAt?: Date;
+  @ApiPropertyOptional() lastFailureAt?: Date;
   @ApiPropertyOptional() createdByUserId?: string;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
@@ -103,6 +113,41 @@ export class ChannelInventorySyncProcessSummaryDto {
   @ApiProperty() synced: number;
   @ApiProperty() retryScheduled: number;
   @ApiProperty() circuitOpened: number;
+}
+
+export class ChannelHealthSummaryDto {
+  @ApiProperty() integrations: number;
+  @ApiProperty() failedInbox: number;
+  @ApiProperty() pendingInbox: number;
+  @ApiProperty() failedInventorySync: number;
+  @ApiProperty() circuitOpenInventorySync: number;
+  @ApiProperty() retryScheduledInventorySync: number;
+}
+
+export class ChannelHealthIntegrationDto {
+  @ApiProperty() id: string;
+  @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
+  @ApiProperty({ enum: ChannelIntegrationStatus }) status: ChannelIntegrationStatus;
+  @ApiPropertyOptional() healthStatus?: string;
+  @ApiPropertyOptional() lastSuccessfulOperationAt?: Date;
+  @ApiPropertyOptional() lastFailureAt?: Date;
+}
+
+export class ChannelHealthResponseDto {
+  @ApiProperty({ enum: ['HEALTHY', 'DEGRADED', 'DOWN'] })
+  status: 'HEALTHY' | 'DEGRADED' | 'DOWN';
+
+  @ApiProperty({ type: ChannelHealthSummaryDto })
+  summary: ChannelHealthSummaryDto;
+
+  @ApiProperty({ type: [ChannelHealthIntegrationDto] })
+  integrations: ChannelHealthIntegrationDto[];
+}
+
+export class ChannelReplayResponseDto {
+  @ApiProperty() replayed: boolean;
+  @ApiPropertyOptional() inboxEventId?: string;
+  @ApiPropertyOptional() syncStateId?: string;
 }
 
 export class ChannelIntegrationMutationResponseDto {

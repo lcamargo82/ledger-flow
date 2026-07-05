@@ -30,9 +30,7 @@ export class PermissionsController {
   @ApiForbiddenResponse({
     description: 'Forbidden - requires permissions:read permission',
   })
-  async listPermissions(
-    @CurrentUser() user: AuthenticatedUser,
-  ): Promise<PermissionsResponseDto> {
+  async listPermissions(@CurrentUser() user: AuthenticatedUser): Promise<PermissionsResponseDto> {
     return this.permissionsService.listPermissions(user);
   }
 }

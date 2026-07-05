@@ -82,7 +82,9 @@ export class ReconciliationSyncService {
 
         if (!page.nextCursor) break;
         cursor = page.nextCursor;
-        await this.wait(this.jitteredDelay(options.delayMs ?? 250, options.jitterSeed ?? result.pagesFetched));
+        await this.wait(
+          this.jitteredDelay(options.delayMs ?? 250, options.jitterSeed ?? result.pagesFetched),
+        );
       } catch (error) {
         consecutiveFailures += 1;
         if (consecutiveFailures >= failureThreshold) {
@@ -167,7 +169,7 @@ export class ReconciliationSyncService {
         aggregateId: provider,
         eventType: 'reconciliation.sync.completed',
         eventVersion: 1,
-        payload: payload as Prisma.InputJsonValue,
+        payload: payload,
         payloadHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
       },
     });

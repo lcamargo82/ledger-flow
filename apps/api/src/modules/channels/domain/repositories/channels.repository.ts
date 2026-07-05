@@ -16,7 +16,13 @@ export interface CreateChannelIntegrationData {
   tenantId: string;
   provider: ChannelProvider;
   name: string;
-  webhookSecretHash: string;
+  externalAccountId?: string | null;
+  displayName?: string | null;
+  status?: ChannelIntegrationStatus;
+  webhookSecretHash?: string | null;
+  settingsJson?: Prisma.InputJsonValue;
+  defaultWarehouseId?: string | null;
+  syncPolicyJson?: Prisma.InputJsonValue;
   createdByUserId: string;
 }
 
@@ -92,6 +98,10 @@ export interface SyncableListingProjection {
   matchedSkuId: string | null;
 }
 
+export type ChannelWebhookInboxWithIntegration = ChannelWebhookInboxEvent & {
+  integration: ChannelIntegration;
+};
+
 export interface UpsertInventorySyncStateData {
   tenantId: string;
   listingId: string;
@@ -120,6 +130,15 @@ export interface PaginatedInventorySyncStatesResult {
   };
 }
 
+export interface ChannelHealthSummary {
+  integrations: Array<ChannelIntegration & { encryptedCredentials?: unknown }>;
+  failedInboxCount: number;
+  pendingInboxCount: number;
+  failedInventorySyncCount: number;
+  circuitOpenInventorySyncCount: number;
+  retryScheduledInventorySyncCount: number;
+}
+
 export const CHANNELS_REPOSITORY = Symbol('CHANNELS_REPOSITORY');
 
 export interface ChannelsRepository {
@@ -134,17 +153,29 @@ export interface ChannelsRepository {
     provider: ChannelProvider,
     secretHash: string,
   ): Promise<ChannelIntegration | null>;
+  findActiveIntegrationByExternalAccountId(
+    provider: ChannelProvider,
+    externalAccountId: string,
+  ): Promise<ChannelIntegration | null>;
   findIntegrationById(id: string, tenantId: string): Promise<ChannelIntegration | null>;
   findInboxByProviderEventId(
     provider: ChannelProvider,
     providerEventId: string,
   ): Promise<ChannelWebhookInboxEvent | null>;
+  findInboxById(id: string): Promise<ChannelWebhookInboxWithIntegration | null>;
   createInboxEvent(data: CreateChannelWebhookInboxData): Promise<ChannelWebhookInboxEvent>;
+  markInboxProcessed(id: string): Promise<ChannelWebhookInboxEvent>;
+  markInboxFailed(id: string, failureReason: string): Promise<ChannelWebhookInboxEvent>;
   listInbox(params: ListChannelInboxParams): Promise<PaginatedChannelInboxResult>;
   findSkuMatchCandidates(tenantId: string, externalSku: string): Promise<ProductSku[]>;
   upsertListing(data: UpsertChannelListingData): Promise<ChannelListing>;
   listListings(params: ListChannelListingsParams): Promise<PaginatedChannelListingsResult>;
   findListingById(id: string, tenantId: string): Promise<ChannelListing | null>;
+  findListingByExternalId(params: {
+    tenantId: string;
+    integrationId: string;
+    externalListingId: string;
+  }): Promise<ChannelListing | null>;
   findSkuById(id: string, tenantId: string): Promise<ProductSku | null>;
   createManualMapping(params: {
     tenantId: string;
@@ -154,12 +185,17 @@ export interface ChannelsRepository {
     reason?: string | null;
   }): Promise<ChannelListing>;
   findSyncableListingsBySku(tenantId: string, skuId: string): Promise<SyncableListingProjection[]>;
-  upsertInventorySyncState(
-    data: UpsertInventorySyncStateData,
-  ): Promise<ChannelInventorySyncState>;
+  upsertInventorySyncState(data: UpsertInventorySyncStateData): Promise<ChannelInventorySyncState>;
   listInventorySyncStates(
     params: ListInventorySyncStatesParams,
   ): Promise<PaginatedInventorySyncStatesResult>;
+  getHealthSummary(tenantId: string): Promise<ChannelHealthSummary>;
+  findInventorySyncStateById(
+    id: string,
+    tenantId: string,
+  ): Promise<ChannelInventorySyncState | null>;
+  resetInventorySyncForReplay(id: string): Promise<ChannelInventorySyncState>;
+  resetInboxForReplay(id: string): Promise<ChannelWebhookInboxEvent>;
   findPendingInventorySyncStates(params: {
     tenantId: string;
     limit: number;

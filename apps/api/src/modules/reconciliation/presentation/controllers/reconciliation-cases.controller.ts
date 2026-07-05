@@ -40,10 +40,7 @@ export class ReconciliationCasesController {
   @ApiForbiddenResponse({
     description: 'Sem permissão ou capability para acessar Reconciliation',
   })
-  list(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ListReconciliationCasesQueryDto,
-  ) {
+  list(@CurrentUser() user: AuthenticatedUser, @Query() query: ListReconciliationCasesQueryDto) {
     return this.reconciliationCasesService.listCases(user.tenantId, query);
   }
 
@@ -90,11 +87,6 @@ export class ReconciliationCasesController {
     @Param('id') id: string,
     @Body() dto: CreateReconciliationDecisionDto,
   ) {
-    return this.reconciliationDecisionsService.createDecision(
-      user.tenantId,
-      user.id,
-      id,
-      dto,
-    );
+    return this.reconciliationDecisionsService.createDecision(user.tenantId, user.id, id, dto);
   }
 }

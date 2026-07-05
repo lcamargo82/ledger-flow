@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma/prisma.module';
 import { FinancialIntelligenceModule } from '../financial-intelligence/financial-intelligence.module';
 import { InventoryModule } from '../inventory/inventory.module';
@@ -9,7 +9,7 @@ import { OrdersController } from './presentation/controllers/orders.controller';
 import { OrdersFoundationController } from './presentation/controllers/orders-foundation.controller';
 
 @Module({
-  imports: [PrismaModule, InventoryModule, FinancialIntelligenceModule],
+  imports: [PrismaModule, forwardRef(() => InventoryModule), FinancialIntelligenceModule],
   controllers: [OrdersFoundationController, OrdersController],
   providers: [
     OrdersService,
@@ -18,5 +18,6 @@ import { OrdersFoundationController } from './presentation/controllers/orders-fo
       useClass: PrismaOrdersRepository,
     },
   ],
+  exports: [OrdersService],
 })
 export class OrdersModule {}

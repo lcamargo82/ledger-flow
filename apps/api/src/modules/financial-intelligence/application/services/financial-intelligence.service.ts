@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InternalOrderStatus, Prisma } from '@prisma/client';
+import { ChannelProvider, InternalOrderStatus, Prisma } from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { ListOrderFinancialFactsQueryDto } from '../dto/list-order-financial-facts-query.dto';
@@ -8,49 +8,116 @@ import { ListOrderFinancialFactsQueryDto } from '../dto/list-order-financial-fac
 export class FinancialIntelligenceService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async createChannelOrderOperationalFact(
+    orderId: string,
+    tenantId: string,
+    actorUserId: string | undefined,
+    input: {
+      provider: ChannelProvider;
+      externalOrderId: string;
+      currency?: string;
+      revenueAmount?: string;
+      channelFeeAmount?: string;
+      freightAmount?: string;
+      discountAmount?: string;
+    },
+  ) {
+    const existingFact = await this.prisma.orderFinancialFact.findFirst({
+      where: { tenantId, orderId, version: 1 },
+    });
+    if (existingFact) return existingFact;
+
+    const order = await this.findOrderWithSku(orderId, tenantId);
+    const revenueAmount = this.decimal(input.revenueAmount);
+    const channelFeeAmount = this.decimal(input.channelFeeAmount);
+    const freightAmount = this.decimal(input.freightAmount);
+    const discountAmount = this.decimal(input.discountAmount);
+    const { cogsAmount, items, currency } = this.calculateCogs(order.items, input.currency);
+    const grossMarginAmount = revenueAmount.sub(cogsAmount).sub(channelFeeAmount);
+    const components = {
+      note: 'Operational marketplace financial fact only. This is not payment settlement or reconciliation.',
+      provider: input.provider,
+      externalOrderId: input.externalOrderId,
+      revenue: {
+        source: 'Provider order detail when available',
+        amount: revenueAmount.toString(),
+      },
+      cogs: {
+        source: 'ProductSku.averageCost snapshot at operational fact creation',
+        amount: cogsAmount.toString(),
+      },
+      channelFees: {
+        source: 'Provider order detail when available',
+        amount: channelFeeAmount.toString(),
+      },
+      freight: {
+        source: 'Provider order detail when available',
+        amount: freightAmount.toString(),
+      },
+      discounts: {
+        source: 'Provider order detail when available',
+        amount: discountAmount.toString(),
+      },
+      marginFormula: 'revenueAmount - cogsAmount - channelFeeAmount',
+      items,
+    };
+
+    const fact = await this.prisma.orderFinancialFact.create({
+      data: {
+        tenantId,
+        orderId: order.id,
+        version: 1,
+        orderNumber: order.orderNumber,
+        orderStatus: order.status,
+        channelProvider: input.provider,
+        revenueAmount,
+        cogsAmount,
+        channelFeeAmount,
+        grossMarginAmount,
+        currency,
+        itemCount: items.length,
+        fulfilledAt: order.fulfilledAt,
+        components: components,
+      },
+    });
+
+    await this.audit(tenantId, actorUserId, fact.id, {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      provider: input.provider,
+      externalOrderId: input.externalOrderId,
+      revenueAmount: revenueAmount.toString(),
+      channelFeeAmount: channelFeeAmount.toString(),
+      cogsAmount: cogsAmount.toString(),
+      grossMarginAmount: grossMarginAmount.toString(),
+    });
+    await this.outbox(tenantId, fact.id, {
+      factId: fact.id,
+      orderId: order.id,
+      provider: input.provider,
+      revenueAmount: revenueAmount.toString(),
+      channelFeeAmount: channelFeeAmount.toString(),
+      cogsAmount: cogsAmount.toString(),
+      grossMarginAmount: grossMarginAmount.toString(),
+    });
+
+    return { ...fact, components };
+  }
+
   async createFulfilledOrderFact(orderId: string, tenantId: string, actorUserId?: string) {
     const existingFact = await this.prisma.orderFinancialFact.findFirst({
       where: { tenantId, orderId, version: 1 },
     });
     if (existingFact) return existingFact;
 
-    const order = await this.prisma.internalOrder.findFirst({
-      where: { id: orderId, tenantId },
-      include: {
-        items: {
-          orderBy: { createdAt: 'asc' },
-          include: { sku: true },
-        },
-      },
-    });
-
-    if (!order) {
-      throw new NotFoundException('Order not found.');
-    }
+    const order = await this.findOrderWithSku(orderId, tenantId);
     if (order.status !== InternalOrderStatus.FULFILLED) {
       throw new BadRequestException('Financial facts are created only for fulfilled orders.');
     }
 
     const revenueAmount = new Prisma.Decimal(0);
     const channelFeeAmount = new Prisma.Decimal(0);
-    let cogsAmount = new Prisma.Decimal(0);
-
-    const items = order.items.map((item) => {
-      const quantity = new Prisma.Decimal(item.quantity);
-      const unitCost = new Prisma.Decimal(item.sku.averageCost);
-      const itemCogs = quantity.mul(unitCost);
-      cogsAmount = cogsAmount.add(itemCogs);
-
-      return {
-        orderItemId: item.id,
-        skuId: item.skuId ?? item.sku.id,
-        skuCanonical: item.sku.skuCanonical,
-        quantity: quantity.toString(),
-        unitCost: unitCost.toString(),
-        cogsAmount: itemCogs.toString(),
-        currency: item.sku.currency,
-      };
-    });
+    const { cogsAmount, items } = this.calculateCogs(order.items);
 
     const grossMarginAmount = revenueAmount.sub(cogsAmount).sub(channelFeeAmount);
     const components = {
@@ -84,7 +151,7 @@ export class FinancialIntelligenceService {
         currency: items[0]?.currency ?? 'BRL',
         itemCount: items.length,
         fulfilledAt: order.fulfilledAt,
-        components: components as Prisma.InputJsonValue,
+        components: components,
       },
     });
 
@@ -164,6 +231,67 @@ export class FinancialIntelligenceService {
     }
 
     return where;
+  }
+
+  private async findOrderWithSku(orderId: string, tenantId: string) {
+    const order = await this.prisma.internalOrder.findFirst({
+      where: { id: orderId, tenantId },
+      include: {
+        items: {
+          orderBy: { createdAt: 'asc' },
+          include: { sku: true },
+        },
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found.');
+    }
+
+    return order;
+  }
+
+  private calculateCogs(
+    itemsWithSku: Array<{
+      id: string;
+      skuId: string | null;
+      quantity: Prisma.Decimal | string | number;
+      sku: {
+        id: string;
+        skuCanonical: string;
+        averageCost: Prisma.Decimal | string | number;
+        currency: string;
+      };
+    }>,
+    preferredCurrency?: string,
+  ) {
+    let cogsAmount = new Prisma.Decimal(0);
+    const items = itemsWithSku.map((item) => {
+      const quantity = new Prisma.Decimal(item.quantity);
+      const unitCost = new Prisma.Decimal(item.sku.averageCost);
+      const itemCogs = quantity.mul(unitCost);
+      cogsAmount = cogsAmount.add(itemCogs);
+
+      return {
+        orderItemId: item.id,
+        skuId: item.skuId ?? item.sku.id,
+        skuCanonical: item.sku.skuCanonical,
+        quantity: quantity.toString(),
+        unitCost: unitCost.toString(),
+        cogsAmount: itemCogs.toString(),
+        currency: preferredCurrency ?? item.sku.currency,
+      };
+    });
+
+    return {
+      cogsAmount,
+      items,
+      currency: preferredCurrency ?? items[0]?.currency ?? 'BRL',
+    };
+  }
+
+  private decimal(value: string | undefined) {
+    return new Prisma.Decimal(value ?? 0);
   }
 
   private async audit(

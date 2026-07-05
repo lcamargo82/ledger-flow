@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -48,15 +40,8 @@ export class CustomersController {
     description: 'Email ou documento já cadastrado para este tenant',
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
-  create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() createCustomerDto: CreateCustomerDto,
-  ) {
-    return this.customersService.create(
-      user.tenantId,
-      user.id,
-      createCustomerDto,
-    );
+  create(@CurrentUser() user: AuthenticatedUser, @Body() createCustomerDto: CreateCustomerDto) {
+    return this.customersService.create(user.tenantId, user.id, createCustomerDto);
   }
 
   @Get()
@@ -65,10 +50,7 @@ export class CustomersController {
   @ApiOkResponse({ type: PaginatedCustomersResponseDto })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem permissão para customers:read' })
-  findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ListCustomersQueryDto,
-  ) {
+  findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: ListCustomersQueryDto) {
     return this.customersService.findAll(user.tenantId, query);
   }
 
@@ -79,10 +61,7 @@ export class CustomersController {
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem permissão para customers:read' })
   @ApiNotFoundResponse({ description: 'Cliente não encontrado' })
-  async findOne(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id') id: string,
-  ) {
+  async findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     const customer = await this.customersService.findOne(id, user.tenantId);
     return { customer };
   }
@@ -101,12 +80,7 @@ export class CustomersController {
     @Param('id') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    return this.customersService.update(
-      id,
-      user.tenantId,
-      user.id,
-      updateCustomerDto,
-    );
+    return this.customersService.update(id, user.tenantId, user.id, updateCustomerDto);
   }
 
   @Patch(':id/status')

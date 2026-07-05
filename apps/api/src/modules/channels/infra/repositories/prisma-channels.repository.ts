@@ -57,14 +57,50 @@ export class PrismaChannelsRepository implements ChannelsRepository {
     });
   }
 
+  findActiveIntegrationByExternalAccountId(provider: ChannelProvider, externalAccountId: string) {
+    return this.prisma.channelIntegration.findFirst({
+      where: {
+        provider,
+        externalAccountId,
+        status: ChannelIntegrationStatus.ACTIVE,
+      },
+    });
+  }
+
   findInboxByProviderEventId(provider: ChannelProvider, providerEventId: string) {
     return this.prisma.channelWebhookInboxEvent.findUnique({
       where: { provider_providerEventId: { provider, providerEventId } },
     });
   }
 
+  findInboxById(id: string) {
+    return this.prisma.channelWebhookInboxEvent.findUnique({
+      where: { id },
+      include: { integration: true },
+    });
+  }
+
   createInboxEvent(data: CreateChannelWebhookInboxData) {
     return this.prisma.channelWebhookInboxEvent.create({ data });
+  }
+
+  markInboxProcessed(id: string) {
+    return this.prisma.channelWebhookInboxEvent.update({
+      where: { id },
+      data: {
+        processedAt: new Date(),
+        failureReason: null,
+      },
+    });
+  }
+
+  markInboxFailed(id: string, failureReason: string) {
+    return this.prisma.channelWebhookInboxEvent.update({
+      where: { id },
+      data: {
+        failureReason,
+      },
+    });
   }
 
   async listInbox(params: ListChannelInboxParams) {
@@ -171,6 +207,22 @@ export class PrismaChannelsRepository implements ChannelsRepository {
   findListingById(id: string, tenantId: string) {
     return this.prisma.channelListing.findFirst({
       where: { id, tenantId },
+    });
+  }
+
+  findListingByExternalId(params: {
+    tenantId: string;
+    integrationId: string;
+    externalListingId: string;
+  }) {
+    return this.prisma.channelListing.findUnique({
+      where: {
+        tenantId_integrationId_externalListingId: {
+          tenantId: params.tenantId,
+          integrationId: params.integrationId,
+          externalListingId: params.externalListingId,
+        },
+      },
     });
   }
 
@@ -290,6 +342,76 @@ export class PrismaChannelsRepository implements ChannelsRepository {
       data,
       meta: { page, perPage: take, total, totalPages: Math.ceil(total / take) },
     };
+  }
+
+  async getHealthSummary(tenantId: string) {
+    const [
+      integrations,
+      failedInboxCount,
+      pendingInboxCount,
+      failedInventorySyncCount,
+      circuitOpenInventorySyncCount,
+      retryScheduledInventorySyncCount,
+    ] = await Promise.all([
+      this.prisma.channelIntegration.findMany({
+        where: { tenantId },
+        orderBy: { updatedAt: 'desc' },
+      }),
+      this.prisma.channelWebhookInboxEvent.count({
+        where: { tenantId, failureReason: { not: null } },
+      }),
+      this.prisma.channelWebhookInboxEvent.count({
+        where: { tenantId, processedAt: null, failureReason: null },
+      }),
+      this.prisma.channelInventorySyncState.count({
+        where: { tenantId, status: ChannelInventorySyncStatus.FAILED },
+      }),
+      this.prisma.channelInventorySyncState.count({
+        where: { tenantId, status: ChannelInventorySyncStatus.CIRCUIT_OPEN },
+      }),
+      this.prisma.channelInventorySyncState.count({
+        where: { tenantId, status: ChannelInventorySyncStatus.RETRY_SCHEDULED },
+      }),
+    ]);
+
+    return {
+      integrations,
+      failedInboxCount,
+      pendingInboxCount,
+      failedInventorySyncCount,
+      circuitOpenInventorySyncCount,
+      retryScheduledInventorySyncCount,
+    };
+  }
+
+  findInventorySyncStateById(id: string, tenantId: string) {
+    return this.prisma.channelInventorySyncState.findFirst({
+      where: { id, tenantId },
+    });
+  }
+
+  resetInventorySyncForReplay(id: string) {
+    return this.prisma.channelInventorySyncState.update({
+      where: { id },
+      data: {
+        status: ChannelInventorySyncStatus.PENDING,
+        circuitState: 'CLOSED',
+        nextAttemptAt: null,
+        circuitOpenedUntil: null,
+        lastErrorCode: null,
+        lastErrorSummary: null,
+      },
+    });
+  }
+
+  resetInboxForReplay(id: string) {
+    return this.prisma.channelWebhookInboxEvent.update({
+      where: { id },
+      data: {
+        processedAt: null,
+        failureReason: null,
+      },
+    });
   }
 
   findPendingInventorySyncStates(params: { tenantId: string; limit: number; now: Date }) {

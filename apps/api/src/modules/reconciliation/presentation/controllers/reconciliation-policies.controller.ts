@@ -33,10 +33,7 @@ export class ReconciliationPoliciesController {
   @ApiOkResponse({ type: [ReconciliationPolicyResponseDto] })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem acesso à conciliação' })
-  list(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ListReconciliationPoliciesQueryDto,
-  ) {
+  list(@CurrentUser() user: AuthenticatedUser, @Query() query: ListReconciliationPoliciesQueryDto) {
     return this.reconciliationPoliciesService.listPolicies(user.tenantId, query);
   }
 
@@ -45,10 +42,7 @@ export class ReconciliationPoliciesController {
   @RequireCapabilities(ReconciliationCapabilities.Manage)
   @ApiOperation({ summary: 'Criar nova versão de policy de conciliação' })
   @ApiOkResponse({ type: ReconciliationPolicyResponseDto })
-  create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() dto: CreateReconciliationPolicyDto,
-  ) {
+  create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateReconciliationPolicyDto) {
     return this.reconciliationPoliciesService.createPolicy(user.tenantId, user.id, dto);
   }
 
@@ -62,12 +56,7 @@ export class ReconciliationPoliciesController {
     @Param('id') id: string,
     @Body() dto: UpdateReconciliationPolicyDto,
   ) {
-    return this.reconciliationPoliciesService.updatePolicy(
-      user.tenantId,
-      user.id,
-      id,
-      dto,
-    );
+    return this.reconciliationPoliciesService.updatePolicy(user.tenantId, user.id, id, dto);
   }
 
   @Post(':id/deactivate')
@@ -76,10 +65,6 @@ export class ReconciliationPoliciesController {
   @ApiOperation({ summary: 'Desativar policy de conciliação' })
   @ApiOkResponse({ type: ReconciliationPolicyResponseDto })
   deactivate(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    return this.reconciliationPoliciesService.deactivatePolicy(
-      user.tenantId,
-      user.id,
-      id,
-    );
+    return this.reconciliationPoliciesService.deactivatePolicy(user.tenantId, user.id, id);
   }
 }

@@ -14,9 +14,7 @@ describe('SkuPolicy', () => {
   );
 
   it('rejects fully numeric SKU with leading zero', () => {
-    expect(() => SkuPolicy.normalize('01234567')).toThrow(
-      BadRequestException,
-    );
+    expect(() => SkuPolicy.normalize('01234567')).toThrow(BadRequestException);
   });
 
   it('allows alphanumeric SKU starting with zero', () => {

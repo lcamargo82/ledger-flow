@@ -2,7 +2,7 @@
 # LedgerFlow Web — Vue 3 / Vite Dockerfile
 # ============================================================
 
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 WORKDIR /usr/src/app/apps/web
 
@@ -17,7 +17,7 @@ FROM base AS development
 ENV NODE_ENV=development
 ENV CYPRESS_INSTALL_BINARY=0
 
-RUN npm install
+RUN npm install --ignore-scripts
 
 COPY apps/web ./
 
@@ -35,7 +35,21 @@ FROM base AS build
 ENV NODE_ENV=production
 ENV CYPRESS_INSTALL_BINARY=0
 
-RUN npm ci
+ARG VITE_APP_NAME=LedgerFlow
+ARG VITE_APP_ENV=production
+ARG VITE_API_BASE_URL
+ARG VITE_WS_BASE_URL
+ARG VITE_DEFAULT_LOCALE=pt-BR
+ARG VITE_DEFAULT_TIMEZONE=America/Sao_Paulo
+
+ENV VITE_APP_NAME=${VITE_APP_NAME}
+ENV VITE_APP_ENV=${VITE_APP_ENV}
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_WS_BASE_URL=${VITE_WS_BASE_URL}
+ENV VITE_DEFAULT_LOCALE=${VITE_DEFAULT_LOCALE}
+ENV VITE_DEFAULT_TIMEZONE=${VITE_DEFAULT_TIMEZONE}
+
+RUN npm ci --ignore-scripts
 
 COPY apps/web ./
 

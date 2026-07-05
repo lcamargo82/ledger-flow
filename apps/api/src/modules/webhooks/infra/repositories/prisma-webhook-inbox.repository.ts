@@ -29,9 +29,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
     });
   }
 
-  async createReceived(
-    data: CreateWebhookInboxEventInput,
-  ): Promise<WebhookInboxEvent> {
+  async createReceived(data: CreateWebhookInboxEventInput): Promise<WebhookInboxEvent> {
     return this.prisma.$transaction(async (tx) => {
       const inboxEvent = await tx.webhookInboxEvent.create({
         data: {
@@ -42,8 +40,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
           externalReference: data.externalReference,
           providerPaymentStatus: data.providerPaymentStatus,
           payloadHash: data.payloadHash,
-          payloadSummary:
-            (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+          payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
           status: WebhookProcessingStatus.RECEIVED,
           tenantId: data.tenantId,
           paymentId: data.paymentId,
@@ -79,8 +76,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
         externalReference: data.externalReference,
         providerPaymentStatus: data.providerPaymentStatus,
         payloadHash: data.payloadHash,
-        payloadSummary:
-          (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+        payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
         status: WebhookProcessingStatus.IGNORED,
         failureReason: reason,
       },
@@ -100,8 +96,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
         externalReference: data.externalReference,
         providerPaymentStatus: data.providerPaymentStatus,
         payloadHash: data.payloadHash,
-        payloadSummary:
-          (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+        payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
         status: WebhookProcessingStatus.INVALID,
         failureReason: reason,
       },
@@ -121,8 +116,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
         externalReference: data.externalReference,
         providerPaymentStatus: data.providerPaymentStatus,
         payloadHash: data.payloadHash,
-        payloadSummary:
-          (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
+        payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
         status: WebhookProcessingStatus.UNMATCHED,
         failureReason: reason,
       },

@@ -6,11 +6,7 @@ import { AsaasApiError } from '../../domain/errors/asaas-errors';
 export class AsaasApiClient implements IGatewayApiClient {
   private readonly logger = new Logger(AsaasApiClient.name);
 
-  async post(
-    endpoint: string,
-    payload: any,
-    headers?: Record<string, string>,
-  ): Promise<any> {
+  async post(endpoint: string, payload: any, headers?: Record<string, string>): Promise<any> {
     return this.request('POST', endpoint, payload, headers);
   }
 
@@ -24,10 +20,7 @@ export class AsaasApiClient implements IGatewayApiClient {
     return this.request('GET', fullEndpoint, undefined, headers);
   }
 
-  async delete(
-    endpoint: string,
-    headers?: Record<string, string>,
-  ): Promise<any> {
+  async delete(endpoint: string, headers?: Record<string, string>): Promise<any> {
     return this.request('DELETE', endpoint, undefined, headers);
   }
 
@@ -92,20 +85,12 @@ export class AsaasApiClient implements IGatewayApiClient {
       }
 
       const err = error as Error;
-      this.logger.error(
-        `[AsaasApiClient] Failed to execute ${method} ${endpoint}: ${err.message}`,
-      );
+      this.logger.error(`[AsaasApiClient] Failed to execute ${method} ${endpoint}: ${err.message}`);
 
       if (err.name === 'AbortError') {
-        throw new AsaasApiError(
-          'A solicitação ao gateway excedeu o tempo esperado.',
-          408,
-        );
+        throw new AsaasApiError('A solicitação ao gateway excedeu o tempo esperado.', 408);
       }
-      throw new AsaasApiError(
-        'O gateway apresentou uma instabilidade temporária.',
-        500,
-      );
+      throw new AsaasApiError('O gateway apresentou uma instabilidade temporária.', 500);
     }
   }
 
@@ -113,30 +98,23 @@ export class AsaasApiClient implements IGatewayApiClient {
     let message = 'Erro desconhecido ao processar requisição no Asaas.';
     const parsedData = data as { errors?: Array<{ description: string }> };
     const firstError =
-      parsedData?.errors && parsedData.errors.length > 0
-        ? parsedData.errors[0].description
-        : null;
+      parsedData?.errors && parsedData.errors.length > 0 ? parsedData.errors[0].description : null;
 
     if (status === 401) {
-      message =
-        'A configuração do gateway Asaas não está válida para este ambiente.';
+      message = 'A configuração do gateway Asaas não está válida para este ambiente.';
     } else if (status === 400) {
       message =
-        firstError ||
-        'Não foi possível processar a requisição no Asaas. Verifique os dados.';
+        firstError || 'Não foi possível processar a requisição no Asaas. Verifique os dados.';
     } else if (status === 404) {
       message = 'O recurso solicitado não foi encontrado no Asaas.';
     } else if (status === 429) {
-      message =
-        'O gateway está temporariamente indisponível. Tente novamente mais tarde.';
+      message = 'O gateway está temporariamente indisponível. Tente novamente mais tarde.';
     } else if (status >= 500) {
       message = 'O gateway apresentou uma instabilidade temporária.';
     }
 
     if (firstError) {
-      this.logger.error(
-        `[AsaasApiClient] API Error: ${status} - ${firstError}`,
-      );
+      this.logger.error(`[AsaasApiClient] API Error: ${status} - ${firstError}`);
     } else {
       this.logger.error(`[AsaasApiClient] API Error: ${status}`);
     }

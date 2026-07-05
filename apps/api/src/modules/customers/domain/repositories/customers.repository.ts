@@ -24,25 +24,9 @@ export const CUSTOMERS_REPOSITORY = Symbol('CUSTOMERS_REPOSITORY');
 export interface CustomersRepository {
   findPaginated(params: ListCustomersParams): Promise<PaginatedCustomersResult>;
   findByIdAndTenant(id: string, tenantId: string): Promise<Customer | null>;
-  findByEmailAndTenant(
-    email: string,
-    tenantId: string,
-  ): Promise<Customer | null>;
-  findByDocumentAndTenant(
-    document: string,
-    tenantId: string,
-  ): Promise<Customer | null>;
-  create(
-    data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Customer>;
-  update(
-    id: string,
-    tenantId: string,
-    data: Partial<Customer>,
-  ): Promise<Customer>;
-  updateStatus(
-    id: string,
-    tenantId: string,
-    active: boolean,
-  ): Promise<Customer>;
+  findByEmailAndTenant(email: string, tenantId: string): Promise<Customer | null>;
+  findByDocumentAndTenant(document: string, tenantId: string): Promise<Customer | null>;
+  create(data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>): Promise<Customer>;
+  update(id: string, tenantId: string, data: Partial<Customer>): Promise<Customer>;
+  updateStatus(id: string, tenantId: string, active: boolean): Promise<Customer>;
 }

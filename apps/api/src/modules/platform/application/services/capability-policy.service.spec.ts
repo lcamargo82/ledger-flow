@@ -26,9 +26,7 @@ describe('CapabilityPolicyService', () => {
     });
 
     await expect(
-      service.hasCapabilities('tenant-1', [
-        CommerceCapabilities.InventoryManage,
-      ]),
+      service.hasCapabilities('tenant-1', [CommerceCapabilities.InventoryManage]),
     ).resolves.toBe(true);
   });
 
@@ -39,9 +37,7 @@ describe('CapabilityPolicyService', () => {
     });
 
     await expect(
-      service.hasCapabilities('tenant-1', [
-        CommerceCapabilities.InventoryManage,
-      ]),
+      service.hasCapabilities('tenant-1', [CommerceCapabilities.InventoryManage]),
     ).resolves.toBe(false);
   });
 
@@ -52,9 +48,7 @@ describe('CapabilityPolicyService', () => {
     });
 
     await expect(
-      service.hasCapabilities('tenant-1', [
-        ReconciliationCapabilities.Read,
-      ]),
+      service.hasCapabilities('tenant-1', [ReconciliationCapabilities.Read]),
     ).resolves.toBe(false);
   });
 
@@ -65,9 +59,7 @@ describe('CapabilityPolicyService', () => {
     });
 
     await expect(
-      service.hasCapabilities('tenant-1', [
-        CommerceCapabilities.ChannelsConnect,
-      ]),
+      service.hasCapabilities('tenant-1', [CommerceCapabilities.ChannelsConnect]),
     ).resolves.toBe(false);
   });
 
@@ -75,9 +67,7 @@ describe('CapabilityPolicyService', () => {
     prisma.tenantSubscription.findUnique.mockResolvedValue(null);
 
     await expect(
-      service.hasCapabilities('tenant-1', [
-        CommerceCapabilities.CatalogManage,
-      ]),
+      service.hasCapabilities('tenant-1', [CommerceCapabilities.CatalogManage]),
     ).resolves.toBe(false);
   });
 

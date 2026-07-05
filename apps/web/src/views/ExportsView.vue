@@ -87,27 +87,33 @@ onMounted(() => {
 
     <template v-else>
       <AppCard>
-        <div class="grid gap-4 md:grid-cols-[minmax(220px,320px)_minmax(220px,320px)_auto] md:items-end">
-          <AppSelect
-            :model-value="selectedType"
-            :label="t('exports.form.type')"
-            :options="typeOptions"
-            @update:model-value="selectedType = $event as ExportJobType"
-          />
-          <AppSelect
-            :model-value="exportsStore.filters.status || ''"
-            :label="t('exports.filters.status')"
-            :options="statusOptions"
-            @update:model-value="
-              exportsStore.setFilters({ status: ($event || undefined) as ExportJobStatus | undefined })
-            "
-          />
-          <AppButton :loading="exportsStore.isMutating" @click="createJob">
-            <template #icon>
-              <span class="material-symbols-outlined text-base">download</span>
-            </template>
-            {{ t('exports.actions.create') }}
-          </AppButton>
+        <div class="lf-filter-container">
+          <div class="lf-filter-item">
+            <AppSelect
+              :model-value="selectedType"
+              :label="t('exports.form.type')"
+              :options="typeOptions"
+              @update:model-value="selectedType = $event as ExportJobType"
+            />
+          </div>
+          <div class="lf-filter-item">
+            <AppSelect
+              :model-value="exportsStore.filters.status || ''"
+              :label="t('exports.filters.status')"
+              :options="statusOptions"
+              @update:model-value="
+                exportsStore.setFilters({ status: ($event || undefined) as ExportJobStatus | undefined })
+              "
+            />
+          </div>
+          <div class="lf-filter-actions">
+            <AppButton :loading="exportsStore.isMutating" @click="createJob">
+              <template #icon>
+                <span class="material-symbols-outlined text-base">download</span>
+              </template>
+              {{ t('exports.actions.create') }}
+            </AppButton>
+          </div>
         </div>
       </AppCard>
 
@@ -138,18 +144,26 @@ onMounted(() => {
               v-if="canCancel(item)"
               variant="secondary"
               size="small"
+              icon-only
+              :title="t('exports.actions.cancel')"
               :disabled="exportsStore.isMutating"
               @click="exportsStore.cancelJob(item.id)"
             >
-              {{ t('exports.actions.cancel') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">cancel</span>
+              </template>
             </AppButton>
             <AppButton
               v-if="canDownload(item)"
               size="small"
+              icon-only
+              :title="t('exports.actions.download')"
               :disabled="exportsStore.isMutating"
               @click="exportsStore.downloadJob(item)"
             >
-              {{ t('exports.actions.download') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">download</span>
+              </template>
             </AppButton>
           </div>
         </template>

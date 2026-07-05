@@ -119,9 +119,11 @@ export class ReconciliationDashboardService {
     >();
 
     for (const item of cases) {
-      const current =
-        grouped.get(item.status) ??
-        { status: item.status, count: 0, amountMinor: new Prisma.Decimal(0) };
+      const current = grouped.get(item.status) ?? {
+        status: item.status,
+        count: 0,
+        amountMinor: new Prisma.Decimal(0),
+      };
       current.count += 1;
       current.amountMinor = current.amountMinor.add(this.decimal(item.expectedAmountMinor));
       grouped.set(item.status, current);
@@ -146,14 +148,12 @@ export class ReconciliationDashboardService {
     >();
 
     for (const item of cases) {
-      const current =
-        grouped.get(item.provider) ??
-        {
-          provider: item.provider,
-          count: 0,
-          expectedAmountMinor: new Prisma.Decimal(0),
-          receivedAmountMinor: new Prisma.Decimal(0),
-        };
+      const current = grouped.get(item.provider) ?? {
+        provider: item.provider,
+        count: 0,
+        expectedAmountMinor: new Prisma.Decimal(0),
+        receivedAmountMinor: new Prisma.Decimal(0),
+      };
       current.count += 1;
       current.expectedAmountMinor = current.expectedAmountMinor.add(
         this.decimal(item.expectedAmountMinor),
@@ -177,7 +177,14 @@ export class ReconciliationDashboardService {
       { key: '0_1', label: '0-1d', min: 0, max: 1, count: 0, amountMinor: new Prisma.Decimal(0) },
       { key: '2_3', label: '2-3d', min: 2, max: 3, count: 0, amountMinor: new Prisma.Decimal(0) },
       { key: '4_7', label: '4-7d', min: 4, max: 7, count: 0, amountMinor: new Prisma.Decimal(0) },
-      { key: '8_plus', label: '8+d', min: 8, max: Infinity, count: 0, amountMinor: new Prisma.Decimal(0) },
+      {
+        key: '8_plus',
+        label: '8+d',
+        min: 8,
+        max: Infinity,
+        count: 0,
+        amountMinor: new Prisma.Decimal(0),
+      },
     ];
     const now = Date.now();
 
@@ -185,9 +192,9 @@ export class ReconciliationDashboardService {
       if (item.status === ReconciliationCaseStatus.RECONCILED) continue;
 
       const ageDays = Math.floor((now - item.createdAt.getTime()) / 86_400_000);
-      const bucket = buckets.find((candidate) => (
-        ageDays >= candidate.min && ageDays <= candidate.max
-      ));
+      const bucket = buckets.find(
+        (candidate) => ageDays >= candidate.min && ageDays <= candidate.max,
+      );
       if (!bucket) continue;
 
       bucket.count += 1;

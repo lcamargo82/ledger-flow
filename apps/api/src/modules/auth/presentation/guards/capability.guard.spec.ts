@@ -36,31 +36,25 @@ describe('CapabilityGuard', () => {
   });
 
   it('allows authenticated tenant users with all required capabilities', async () => {
-    reflector.getAllAndOverride.mockReturnValue([
-      CommerceCapabilities.InventoryManage,
-    ]);
+    reflector.getAllAndOverride.mockReturnValue([CommerceCapabilities.InventoryManage]);
     capabilityPolicy.hasCapabilities.mockResolvedValue(true);
 
-    await expect(
-      guard.canActivate(createContext({ tenantId: 'tenant-1' })),
-    ).resolves.toBe(true);
-    expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
-      REQUIRED_CAPABILITIES_KEY,
-      [expect.any(Function), expect.any(Function)],
-    );
+    await expect(guard.canActivate(createContext({ tenantId: 'tenant-1' }))).resolves.toBe(true);
+    expect(reflector.getAllAndOverride).toHaveBeenCalledWith(REQUIRED_CAPABILITIES_KEY, [
+      expect.any(Function),
+      expect.any(Function),
+    ]);
     expect(capabilityPolicy.hasCapabilities).toHaveBeenCalledWith('tenant-1', [
       CommerceCapabilities.InventoryManage,
     ]);
   });
 
   it('throws 403 when the tenant lacks a required capability', async () => {
-    reflector.getAllAndOverride.mockReturnValue([
-      CommerceCapabilities.InventoryManage,
-    ]);
+    reflector.getAllAndOverride.mockReturnValue([CommerceCapabilities.InventoryManage]);
     capabilityPolicy.hasCapabilities.mockResolvedValue(false);
 
-    await expect(
-      guard.canActivate(createContext({ tenantId: 'tenant-1' })),
-    ).rejects.toBeInstanceOf(ForbiddenException);
+    await expect(guard.canActivate(createContext({ tenantId: 'tenant-1' }))).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
   });
 });

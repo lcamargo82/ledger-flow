@@ -82,30 +82,32 @@ export const useChannelsStore = defineStore('channels', () => {
     }
   }
 
-  const fetchListings = async () => {
+  const fetchListings = async (options: { setError?: boolean } = {}) => {
+    const shouldSetError = options.setError ?? true
     isLoading.value = true
-    error.value = null
+    if (shouldSetError) error.value = null
     try {
       const response = await channelsService.listListings(listingFilters.value)
       listings.value = response.data
       listingsMeta.value = response.meta
     } catch (err) {
-      error.value = extractErrorMessage(err)
+      if (shouldSetError) error.value = extractErrorMessage(err)
       throw err
     } finally {
       isLoading.value = false
     }
   }
 
-  const fetchInventorySyncStatus = async () => {
+  const fetchInventorySyncStatus = async (options: { setError?: boolean } = {}) => {
+    const shouldSetError = options.setError ?? true
     isLoading.value = true
-    error.value = null
+    if (shouldSetError) error.value = null
     try {
       const response = await channelsService.listInventorySyncStatus(inventorySyncFilters.value)
       inventorySyncStates.value = response.data
       inventorySyncMeta.value = response.meta
     } catch (err) {
-      error.value = extractErrorMessage(err)
+      if (shouldSetError) error.value = extractErrorMessage(err)
       throw err
     } finally {
       isLoading.value = false
@@ -119,6 +121,21 @@ export const useChannelsStore = defineStore('channels', () => {
       const response = await channelsService.createIntegration(payload)
       await fetchChannels()
       return response.integration
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const connectMercadoLivre = async () => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await channelsService.connectMercadoLivre()
+      window.location.assign(response.authorizationUrl)
+      return response.authorizationUrl
     } catch (err) {
       error.value = extractErrorMessage(err)
       throw err
@@ -212,6 +229,7 @@ export const useChannelsStore = defineStore('channels', () => {
     fetchListings,
     fetchInventorySyncStatus,
     createIntegration,
+    connectMercadoLivre,
     setInboxStatus,
     setListingStatus,
     setInventorySyncStatus,

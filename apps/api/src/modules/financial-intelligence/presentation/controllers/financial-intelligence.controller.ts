@@ -44,7 +44,10 @@ export class FinancialIntelligenceController {
   @ApiOkResponse({ type: PaginatedOrderFinancialFactsResponseDto })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability financeira' })
-  listFacts(@CurrentUser() user: AuthenticatedUser, @Query() query: ListOrderFinancialFactsQueryDto) {
+  listFacts(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListOrderFinancialFactsQueryDto,
+  ) {
     return this.financialService.listFacts(user.tenantId, query);
   }
 }

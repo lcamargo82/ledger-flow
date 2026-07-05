@@ -1,6 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ChannelProvider } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateChannelIntegrationDto {
   @ApiProperty({ enum: ChannelProvider, example: ChannelProvider.MOCK })
@@ -12,8 +12,34 @@ export class CreateChannelIntegrationDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'local-secret-token', minLength: 12 })
+  @ApiPropertyOptional({ example: 'seller-123' })
+  @IsOptional()
+  @IsString()
+  externalAccountId?: string;
+
+  @ApiPropertyOptional({ example: 'Mercado Livre Principal' })
+  @IsOptional()
+  @IsString()
+  displayName?: string;
+
+  @ApiPropertyOptional({ example: 'warehouse-uuid' })
+  @IsOptional()
+  @IsString()
+  defaultWarehouseId?: string;
+
+  @ApiPropertyOptional({ example: { importListingsEnabled: true } })
+  @IsOptional()
+  @IsObject()
+  settingsJson?: Record<string, unknown>;
+
+  @ApiPropertyOptional({ example: { stockSyncEnabled: false, maxPagesPerRun: 2 } })
+  @IsOptional()
+  @IsObject()
+  syncPolicyJson?: Record<string, unknown>;
+
+  @ApiPropertyOptional({ example: 'local-secret-token', minLength: 12 })
+  @IsOptional()
   @IsString()
   @MinLength(12)
-  webhookSecret: string;
+  webhookSecret?: string;
 }

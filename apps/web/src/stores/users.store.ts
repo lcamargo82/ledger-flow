@@ -89,7 +89,7 @@ export const useUsersStore = defineStore('users', () => {
     try {
       await usersService.createUser(payload)
       toast.success(t('users.toast.created'))
-      fetchUsers()
+      await fetchUsers()
     } catch (err) {
       mutationError.value = getHttpErrorMessage(err, 'users.errors.createFailed')
       throw err
@@ -108,7 +108,7 @@ export const useUsersStore = defineStore('users', () => {
     try {
       await usersService.updateUser(id, payload)
       toast.success(t('users.toast.updated'))
-      fetchUsers()
+      await fetchUsers()
     } catch (err) {
       mutationError.value = getHttpErrorMessage(err, 'users.errors.updateFailed')
       throw err
@@ -128,7 +128,7 @@ export const useUsersStore = defineStore('users', () => {
       await usersService.updateUserStatus(id, { active })
       const messageKey = active ? 'users.toast.activated' : 'users.toast.deactivated'
       toast.success(t(messageKey))
-      fetchUsers()
+      await fetchUsers()
     } catch (err) {
       mutationError.value = getHttpErrorMessage(err, 'users.errors.statusFailed')
       throw err
@@ -147,7 +147,7 @@ export const useUsersStore = defineStore('users', () => {
     try {
       await usersService.updateUserRoles(id, { roleKeys })
       toast.success(t('users.toast.rolesUpdated'))
-      fetchUsers()
+      await fetchUsers()
     } catch (err) {
       mutationError.value = getHttpErrorMessage(err, 'users.errors.rolesFailed')
       throw err

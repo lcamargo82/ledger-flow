@@ -12,17 +12,11 @@ export class PagBankWebhookAdapter implements ProviderWebhookAdapter {
   readonly provider = WebhookProvider.PAGBANK;
 
   async authenticate(input: ProviderWebhookAuthenticationInput): Promise<void> {
-    throw new WebhookProviderNotSupportedError(
-      'PagBank webhook adapter not implemented.',
-    );
+    throw new WebhookProviderNotSupportedError('PagBank webhook adapter not implemented.');
   }
 
-  async normalize(
-    input: ProviderWebhookPayloadInput,
-  ): Promise<NormalizedWebhookEvent> {
-    throw new WebhookProviderNotSupportedError(
-      'PagBank webhook adapter not implemented.',
-    );
+  async normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent> {
+    throw new WebhookProviderNotSupportedError('PagBank webhook adapter not implemented.');
   }
 
   supportsEvent(eventType: string): boolean {

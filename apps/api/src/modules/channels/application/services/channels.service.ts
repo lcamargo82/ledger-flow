@@ -8,13 +8,18 @@ import {
 } from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
+import { GatewayCredentialsEncryptionService } from '../../../gateways/application/services/gateway-credentials-encryption.service';
 import { CreateChannelIntegrationDto } from '../dto/create-channel-integration.dto';
 import { ListChannelInboxQueryDto } from '../dto/list-channel-inbox-query.dto';
-import { ImportChannelListingsDto, MockChannelListingDto } from '../dto/import-channel-listings.dto';
+import {
+  ImportChannelListingsDto,
+  MockChannelListingDto,
+} from '../dto/import-channel-listings.dto';
 import { ListChannelListingsQueryDto } from '../dto/list-channel-listings-query.dto';
 import { MapChannelListingDto } from '../dto/map-channel-listing.dto';
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
+import { MercadoLivreChannelAdapter } from '../../infra/adapters/mercado-livre-channel.adapter';
 
 @Injectable()
 export class ChannelsService {
@@ -22,20 +27,38 @@ export class ChannelsService {
     @Inject(CHANNELS_REPOSITORY)
     private readonly channelsRepository: ChannelsRepository,
     private readonly prisma: PrismaService,
+    private readonly mercadoLivreAdapter?: MercadoLivreChannelAdapter,
+    private readonly credentialsEncryptionService?: GatewayCredentialsEncryptionService,
   ) {}
 
   async createIntegration(tenantId: string, actorUserId: string, dto: CreateChannelIntegrationDto) {
+    this.assertSafePanelConfiguration(dto.settingsJson);
+    this.assertSafePanelConfiguration(dto.syncPolicyJson);
+
     const integration = await this.channelsRepository.createIntegration({
       tenantId,
       provider: dto.provider,
       name: dto.name,
-      webhookSecretHash: this.hash(dto.webhookSecret),
+      externalAccountId: dto.externalAccountId,
+      displayName: dto.displayName,
+      defaultWarehouseId: dto.defaultWarehouseId,
+      settingsJson: dto.settingsJson as Prisma.InputJsonValue,
+      syncPolicyJson: dto.syncPolicyJson as Prisma.InputJsonValue,
+      status:
+        dto.provider === ChannelProvider.MOCK
+          ? ChannelIntegrationStatus.ACTIVE
+          : ChannelIntegrationStatus.INACTIVE,
+      webhookSecretHash: dto.webhookSecret ? this.hash(dto.webhookSecret) : null,
       createdByUserId: actorUserId,
     });
 
     await this.audit(tenantId, actorUserId, 'channels.integration.created', integration.id, {
       provider: dto.provider,
       name: dto.name,
+      externalAccountId: dto.externalAccountId,
+      displayName: dto.displayName,
+      hasSettings: Boolean(dto.settingsJson),
+      hasSyncPolicy: Boolean(dto.syncPolicyJson),
     });
 
     return integration;
@@ -79,11 +102,7 @@ export class ChannelsService {
     if (integration.status !== ChannelIntegrationStatus.ACTIVE) {
       throw new BadRequestException('Only active channel integrations can import listings.');
     }
-    if (integration.provider !== ChannelProvider.MOCK) {
-      throw new BadRequestException('Listing import is available only for MOCK provider in 10.0.7.');
-    }
-
-    const importedListings = dto.listings?.length ? dto.listings : this.defaultMockListings();
+    const importedListings = await this.resolveImportListings(integration, dto);
     const data: ChannelListing[] = [];
     const summary = {
       imported: 0,
@@ -186,6 +205,43 @@ export class ChannelsService {
     return createHash('sha256').update(value).digest('hex');
   }
 
+  private assertSafePanelConfiguration(value: unknown) {
+    if (!value || typeof value !== 'object') return;
+
+    const forbiddenKeys = new Set([
+      'accessToken',
+      'apiKey',
+      'authorization',
+      'clientSecret',
+      'code',
+      'encryptedCredentials',
+      'mercadoLivreAccessToken',
+      'mercadoLivreRefreshToken',
+      'refreshToken',
+      'secret',
+      'shopeeStoreToken',
+      'shopifyAccessToken',
+      'state',
+      'token',
+      'webhookSecret',
+    ]);
+    const stack = [value as Record<string, unknown>];
+
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      for (const [key, nested] of Object.entries(current)) {
+        if (forbiddenKeys.has(key)) {
+          throw new BadRequestException(
+            'Channel panel settings cannot contain tenant scoped tokens or secrets.',
+          );
+        }
+        if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+          stack.push(nested as Record<string, unknown>);
+        }
+      }
+    }
+  }
+
   private async classifyListing(
     tenantId: string,
     listing: MockChannelListingDto,
@@ -238,6 +294,43 @@ export class ChannelsService {
         externalSku: 'MOCK-SKU-INEXISTENTE',
       },
     ];
+  }
+
+  private async resolveImportListings(
+    integration: {
+      provider: ChannelProvider;
+      externalAccountId?: string | null;
+      encryptedCredentials?: unknown;
+    },
+    dto: ImportChannelListingsDto,
+  ): Promise<MockChannelListingDto[]> {
+    if (integration.provider === ChannelProvider.MOCK) {
+      return dto.listings?.length ? dto.listings : this.defaultMockListings();
+    }
+
+    if (integration.provider !== ChannelProvider.MERCADO_LIVRE) {
+      throw new BadRequestException('Unsupported channel provider for listing import.');
+    }
+    if (!this.mercadoLivreAdapter || !this.credentialsEncryptionService) {
+      throw new BadRequestException('Mercado Livre listing import is not configured.');
+    }
+    if (!integration.encryptedCredentials || !integration.externalAccountId) {
+      throw new BadRequestException('Mercado Livre integration requires encrypted credentials.');
+    }
+
+    const credentials = this.credentialsEncryptionService.decrypt(
+      JSON.stringify(integration.encryptedCredentials),
+    );
+    if (!credentials.accessToken) {
+      throw new BadRequestException('Mercado Livre integration requires an access token.');
+    }
+
+    return this.mercadoLivreAdapter.fetchListings({
+      accessToken: credentials.accessToken,
+      externalAccountId: integration.externalAccountId,
+      maxPages: dto.maxPages,
+      pageSize: dto.pageSize,
+    });
   }
 
   private async createOutbox(

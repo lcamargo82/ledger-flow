@@ -23,9 +23,7 @@ export class AsaasWebhookAdapter implements ProviderWebhookAdapter {
     await this.authenticator.authenticate(input);
   }
 
-  async normalize(
-    input: ProviderWebhookPayloadInput,
-  ): Promise<NormalizedWebhookEvent> {
+  async normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent> {
     return this.normalizer.normalize(input);
   }
 

@@ -1,4 +1,4 @@
-# LedgerFlow — Documentação dos Programas 9A e 10.0
+# LedgerFlow — Documentação dos Programas 9A, 10.0 e 10.1
 
 ## Programa 9A — Conciliação Financeira
 
@@ -67,6 +67,55 @@ Plano Master
 ```
 
 **Regra importante:** precificação/entitlement controla acesso a capacidades; não cria bancos, entidades ou regras de domínio paralelas. Os módulos continuam interoperáveis por contratos e eventos explícitos.
+
+## Programa 10.1 — Mercado Livre Adapter & Omnichannel Operations
+
+A fase 10.1 conecta canais reais ao domínio genérico de Commerce, começando por Mercado Livre e preservando a arquitetura para Shopee, Shopify, WooCommerce e futuros canais.
+
+Arquivos do programa:
+
+```text
+docs/
+├─ prd/10.1-mercado-livre-adapter-prd.md
+├─ sdd/10.1-mercado-livre-adapter-sdd.md
+├─ specs/10.1-mercado-livre-components-i18n.md
+├─ specs/10.1-mercado-livre-sprint-plan.md
+├─ backlog/10.1-mercado-livre-backlog.md
+├─ runbooks/10.1-mercado-livre-operational-readiness.md
+└─ adr/0035-mercado-livre-adapter-and-connection-boundaries.md
+```
+
+Regra central de configuração:
+
+```text
+.env
+→ infraestrutura global da aplicação LedgerFlow:
+  client ID/client secret da aplicação, callback base URL, URLs do provider,
+  chave central de criptografia, Redis, RabbitMQ e observabilidade.
+
+Painel do tenant
+→ conectar/desconectar Mercado Livre, Shopee, Shopify, WooCommerce e futuros canais;
+→ OAuth por conta/loja, depósito padrão, política de sync, importação e mapping de SKU;
+→ status, saúde, reautenticação e operação diária da integração.
+```
+
+Nunca usar `MERCADO_LIVRE_ACCESS_TOKEN`, `MERCADO_LIVRE_REFRESH_TOKEN`, `SHOPEE_STORE_TOKEN`, `SHOPIFY_ACCESS_TOKEN` ou segredos de loja como configuração operacional normal em `.env`. Esses dados pertencem à integração tenant-scoped, criptografada e gerida pelo painel. `.env` pode existir apenas para bootstrap/local controlado, sem fallback silencioso em produção.
+
+Sprints:
+
+```text
+10.1.1 — Foundation e contrato
+10.1.2 — OAuth real, token lifecycle e conexão por painel
+10.1.3 — Importação real de anúncios e malha fina
+10.1.4 — Webhooks reais e intake
+10.1.5 — Normalização de pedidos e estoque
+10.1.6 — Sync real de estoque
+10.1.7 — Saúde, falhas e replay
+10.1.8 — Dados financeiros operacionais
+10.1.9 — Hardening e fechamento
+```
+
+A 10.1.9 fecha o fluxo com checklist operacional em `docs/runbooks/10.1-mercado-livre-operational-readiness.md`, cobrindo OAuth, listing, venda, reserva, sync, replay, carga e segurança de token.
 
 ## Onde colocar os arquivos no repositório
 

@@ -1,14 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductType } from '@prisma/client';
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsObject,
-  IsOptional,
-  IsString,
-  MinLength,
-  ValidateNested,
-} from 'class-validator';
+import { IsEnum, IsObject, IsOptional, IsString, MinLength, ValidateNested } from 'class-validator';
 import { ProductSkuInputDto } from './product-sku-input.dto';
 
 export class CreateProductDto {

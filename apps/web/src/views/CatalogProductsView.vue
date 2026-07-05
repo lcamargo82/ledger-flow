@@ -4,7 +4,9 @@ import { useI18n } from '../composables/useI18n'
 import { useDebounceFn } from '../composables/useDebounce'
 import { useAuthStore } from '../stores/auth.store'
 import { useCatalogProductsStore } from '../stores/catalog-products.store'
+import { useToastStore } from '../stores/toast.store'
 import { formatDateTime } from '../utils/date-format'
+import { formatMoney } from '../utils/money-format'
 import type { ProductListItem, ProductStatus, ProductType } from '../types/catalog.types'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppButton from '../components/common/AppButton.vue'
@@ -20,11 +22,13 @@ import ProductForm from '../components/catalog/ProductForm.vue'
 const { t, currentLocale } = useI18n()
 const authStore = useAuthStore()
 const catalogStore = useCatalogProductsStore()
+const toast = useToastStore()
 
 const searchInput = ref(catalogStore.filters.search || '')
 const isCreateModalOpen = ref(false)
 const isEditModalOpen = ref(false)
 const targetProduct = ref<ProductListItem | null>(null)
+const formErrors = ref<Record<string, string>>({})
 
 const columns = computed(() => [
   { key: 'name', label: t('catalog.table.name') },
@@ -62,21 +66,45 @@ const clearFilters = () => {
   catalogStore.resetFilters()
 }
 
-const openEditModal = async (product: ProductListItem) => {
-  await catalogStore.fetchProductById(product.id)
-  targetProduct.value = catalogStore.selectedProduct
+const openCreateModal = () => {
+  formErrors.value = {}
+  isCreateModalOpen.value = true
+}
+
+const openEditModal = (product: ProductListItem) => {
+  targetProduct.value = { ...product }
+  formErrors.value = {}
   isEditModalOpen.value = true
 }
 
 const handleCreateProduct = async (payload: any) => {
-  await catalogStore.createProduct(payload)
-  isCreateModalOpen.value = false
+  try {
+    await catalogStore.createProduct(payload)
+    isCreateModalOpen.value = false
+    toast.success(t('catalog.toast.created') || 'Produto criado com sucesso!')
+  } catch (err: any) {
+    const msg = err.response?.data?.message || err.message
+    toast.error(Array.isArray(msg) ? msg.join(', ') : msg)
+  }
 }
 
 const handleUpdateProduct = async (payload: any) => {
   if (!targetProduct.value) return
-  await catalogStore.updateProduct(targetProduct.value.id, payload)
-  isEditModalOpen.value = false
+  formErrors.value = {}
+  try {
+    await catalogStore.updateProduct(targetProduct.value.id, payload)
+    isEditModalOpen.value = false
+    toast.success(t('catalog.toast.updated') || 'Produto atualizado com sucesso!')
+  } catch (err: any) {
+    const msg = err.response?.data?.message || err.message
+    const errorMessage = Array.isArray(msg) ? msg.join(', ') : msg
+    
+    if (errorMessage.includes('Cost change reason is required')) {
+      formErrors.value = { costChangeReason: t('catalog.errors.costChangeReasonRequired') || 'O motivo da alteração de custo é obrigatório.' }
+    } else {
+      toast.error(errorMessage)
+    }
+  }
 }
 
 const archiveProduct = async (product: ProductListItem) => {
@@ -107,8 +135,8 @@ const archiveProduct = async (product: ProductListItem) => {
 
     <template v-else>
       <AppCard>
-        <div class="filters-row">
-          <div class="filter-item filter-item--large">
+        <div class="lf-filter-container">
+          <div class="lf-filter-item lf-filter-item--large">
             <AppInput
               id="catalog-search"
               v-model="searchInput"
@@ -117,7 +145,7 @@ const archiveProduct = async (product: ProductListItem) => {
               @input="handleSearch"
             />
           </div>
-          <div class="filter-item">
+          <div class="lf-filter-item">
             <AppSelect
               id="catalog-type"
               :model-value="catalogStore.filters.type || ''"
@@ -126,7 +154,7 @@ const archiveProduct = async (product: ProductListItem) => {
               @update:model-value="catalogStore.setType(($event || undefined) as ProductType | undefined)"
             />
           </div>
-          <div class="filter-item">
+          <div class="lf-filter-item">
             <AppSelect
               id="catalog-status"
               :model-value="catalogStore.filters.status || ''"
@@ -135,7 +163,7 @@ const archiveProduct = async (product: ProductListItem) => {
               @update:model-value="catalogStore.setStatus(($event || undefined) as ProductStatus | undefined)"
             />
           </div>
-          <div class="filter-item-actions">
+          <div class="lf-filter-actions">
             <AppButton variant="secondary" @click="clearFilters">
               {{ t('catalog.actions.clearFilters') }}
             </AppButton>
@@ -166,7 +194,7 @@ const archiveProduct = async (product: ProductListItem) => {
         </template>
 
         <template #cost="{ item }">
-          <span>{{ item.sku ? `${item.sku.currency} ${item.sku.averageCost}` : '-' }}</span>
+          <span>{{ item.sku ? formatMoney(item.sku.averageCost, item.sku.currency, currentLocale) : '-' }}</span>
         </template>
 
         <template #status="{ item }">
@@ -187,17 +215,25 @@ const archiveProduct = async (product: ProductListItem) => {
               v-if="authStore.checkAllPermissions(['catalog:manage']) && item.status === 'ACTIVE'"
               variant="secondary"
               size="small"
+              icon-only
+              :title="t('catalog.actions.edit')"
               @click="openEditModal(item)"
             >
-              {{ t('catalog.actions.edit') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </template>
             </AppButton>
             <AppButton
               v-if="authStore.checkAllPermissions(['catalog:manage']) && item.status === 'ACTIVE'"
               variant="danger"
               size="small"
+              icon-only
+              :title="t('catalog.actions.archive')"
               @click="archiveProduct(item)"
             >
-              {{ t('catalog.actions.archive') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">archive</span>
+              </template>
             </AppButton>
           </div>
         </template>
@@ -233,6 +269,7 @@ const archiveProduct = async (product: ProductListItem) => {
         mode="create"
         :parent-options="catalogStore.products"
         :loading="catalogStore.isCreating"
+        :errors="formErrors"
         @submit="handleCreateProduct"
         @cancel="isCreateModalOpen = false"
       />
@@ -244,6 +281,7 @@ const archiveProduct = async (product: ProductListItem) => {
         :product="targetProduct"
         :parent-options="catalogStore.products"
         :loading="catalogStore.isUpdating"
+        :errors="formErrors"
         @submit="handleUpdateProduct"
         @cancel="isEditModalOpen = false"
       />

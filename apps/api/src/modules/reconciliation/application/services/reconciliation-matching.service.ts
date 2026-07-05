@@ -27,9 +27,7 @@ type MatchResult = {
 export class ReconciliationMatchingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async matchSettlement(
-    settlementEventId: string,
-  ): Promise<MatchSettlementResult> {
+  async matchSettlement(settlementEventId: string): Promise<MatchSettlementResult> {
     const settlement = await this.prisma.providerSettlementEvent.findUnique({
       where: { id: settlementEventId },
     });
@@ -84,7 +82,7 @@ export class ReconciliationMatchingService {
       const payment = await this.prisma.payment.findFirst({
         where: {
           tenantId: settlement.tenantId,
-          provider: settlement.provider as unknown as PaymentProvider,
+          provider: settlement.provider,
           providerPaymentId: settlement.providerPaymentId,
         },
       });
@@ -97,7 +95,7 @@ export class ReconciliationMatchingService {
       const payment = await this.prisma.payment.findFirst({
         where: {
           tenantId: settlement.tenantId,
-          provider: settlement.provider as unknown as PaymentProvider,
+          provider: settlement.provider,
           OR: [
             { reference: settlement.externalReference },
             { externalReference: settlement.externalReference },
@@ -138,7 +136,7 @@ export class ReconciliationMatchingService {
     return this.prisma.payment.findMany({
       where: {
         tenantId: settlement.tenantId,
-        provider: settlement.provider as unknown as PaymentProvider,
+        provider: settlement.provider,
         amount: Number(settlement.amountMinor.toString()),
         currency: settlement.currency,
         createdAt: {
@@ -167,12 +165,7 @@ export class ReconciliationMatchingService {
         ? receivedAmountMinor.sub(expectedAmountMinor)
         : undefined;
     const tolerance = policy?.amountToleranceMinor ?? new Prisma.Decimal(0);
-    const status = this.resolveStatus(
-      settlement,
-      match,
-      differenceAmountMinor,
-      tolerance,
-    );
+    const status = this.resolveStatus(settlement, match, differenceAmountMinor, tolerance);
 
     return {
       tenantId: settlement.tenantId!,
@@ -188,8 +181,7 @@ export class ReconciliationMatchingService {
       currencyExponent: settlement.currencyExponent,
       policyVersion: policy?.version ?? 1,
       matchedAt: match?.payment ? new Date() : undefined,
-      reconciledAt:
-        status === ReconciliationCaseStatus.RECONCILED ? new Date() : undefined,
+      reconciledAt: status === ReconciliationCaseStatus.RECONCILED ? new Date() : undefined,
     };
   }
 
@@ -204,21 +196,14 @@ export class ReconciliationMatchingService {
     if (match.payment.currency !== settlement.currency) {
       return ReconciliationCaseStatus.CURRENCY_DIVERGENCE;
     }
-    const providerPaymentStatus = this.normalizeProviderStatus(
-      settlement.providerStatus,
-    );
+    const providerPaymentStatus = this.normalizeProviderStatus(settlement.providerStatus);
     if (providerPaymentStatus && providerPaymentStatus !== match.payment.status) {
       return ReconciliationCaseStatus.STATUS_DIVERGENCE;
     }
-    if (
-      differenceAmountMinor &&
-      differenceAmountMinor.absoluteValue().gt(tolerance)
-    ) {
+    if (differenceAmountMinor && differenceAmountMinor.absoluteValue().gt(tolerance)) {
       return ReconciliationCaseStatus.AMOUNT_DIVERGENCE;
     }
-    if (
-      match.matchType === ReconciliationMatchType.AMOUNT_CURRENCY_TIME_CANDIDATE
-    ) {
+    if (match.matchType === ReconciliationMatchType.AMOUNT_CURRENCY_TIME_CANDIDATE) {
       return ReconciliationCaseStatus.AUTO_MATCHED;
     }
 

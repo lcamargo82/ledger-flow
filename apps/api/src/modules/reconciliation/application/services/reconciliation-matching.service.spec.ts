@@ -169,9 +169,7 @@ describe('ReconciliationMatchingService', () => {
   });
 
   it('does not create a tenant-scoped case when settlement has no tenant', async () => {
-    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
-      settlement({ tenantId: null }),
-    );
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(settlement({ tenantId: null }));
 
     const result = await service.matchSettlement('settlement-1');
 

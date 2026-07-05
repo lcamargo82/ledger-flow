@@ -24,9 +24,7 @@ describe('ReconciliationDecisionsService', () => {
     auditLog: {
       create: jest.fn(),
     },
-    $transaction: jest.fn(async (callback: (tx: typeof prisma) => unknown) =>
-      callback(prisma),
-    ),
+    $transaction: jest.fn(async (callback: (tx: typeof prisma) => unknown) => callback(prisma)),
   };
 
   let service: ReconciliationDecisionsService;
@@ -48,17 +46,12 @@ describe('ReconciliationDecisionsService', () => {
   });
 
   it('manually links a tenant payment and records an immutable audited decision', async () => {
-    const result = await service.createDecision(
-      'tenant-1',
-      'user-1',
-      'case-1',
-      {
-        action: ReconciliationDecisionAction.MANUAL_MATCH,
-        paymentId: 'payment-1',
-        reasonCode: 'MANUAL_PAYMENT_CONFIRMED',
-        comment: 'Confirmed by finance operations.',
-      },
-    );
+    const result = await service.createDecision('tenant-1', 'user-1', 'case-1', {
+      action: ReconciliationDecisionAction.MANUAL_MATCH,
+      paymentId: 'payment-1',
+      reasonCode: 'MANUAL_PAYMENT_CONFIRMED',
+      comment: 'Confirmed by finance operations.',
+    });
 
     expect(prisma.payment.findFirst).toHaveBeenCalledWith({
       where: { id: 'payment-1', tenantId: 'tenant-1' },

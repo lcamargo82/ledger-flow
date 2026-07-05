@@ -8,6 +8,7 @@ import type {
   ChannelInventorySyncStatus,
   ChannelListing,
   ChannelListingMatchStatus,
+  ChannelProvider,
   ChannelWebhookStatus,
 } from '../types/channels.types'
 import AppBadge from '../components/common/AppBadge.vue'
@@ -30,10 +31,15 @@ const isMapModalOpen = ref(false)
 const selectedListing = ref<ChannelListing | null>(null)
 
 const integrationForm = reactive({
-  provider: 'MOCK' as const,
+  provider: 'MOCK' as ChannelProvider,
   name: '',
   webhookSecret: '',
 })
+
+const channelProviderOptions = computed(() => [
+  { value: 'MOCK', label: t('channels.provider.MOCK') },
+  { value: 'MERCADO_LIVRE', label: t('channels.provider.MERCADO_LIVRE') },
+])
 
 const mappingForm = reactive({
   skuId: '',
@@ -105,11 +111,16 @@ const inventorySyncStatusOptions = computed(() => [
 
 onMounted(() => {
   channelsStore.fetchChannels()
-  channelsStore.fetchListings()
-  channelsStore.fetchInventorySyncStatus()
+  channelsStore.fetchListings({ setError: false }).catch(() => undefined)
+  channelsStore.fetchInventorySyncStatus({ setError: false }).catch(() => undefined)
 })
 
 const createIntegration = async () => {
+  if (integrationForm.provider === 'MERCADO_LIVRE') {
+    await channelsStore.connectMercadoLivre()
+    return
+  }
+
   await channelsStore.createIntegration({
     provider: integrationForm.provider,
     name: integrationForm.name,
@@ -255,10 +266,14 @@ const mapListing = async () => {
             v-if="canImportListings && item.provider === 'MOCK' && item.status === 'ACTIVE'"
             variant="secondary"
             size="small"
+            icon-only
+            :title="t('channels.actions.importListings')"
             :loading="channelsStore.isMutating"
             @click="importListings(item.id)"
           >
-            {{ t('channels.actions.importListings') }}
+            <template #icon>
+              <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+            </template>
           </AppButton>
         </template>
       </AppTable>
@@ -363,9 +378,13 @@ const mapListing = async () => {
               v-if="canMapListings && item.matchStatus !== 'IGNORED'"
               variant="secondary"
               size="small"
+              icon-only
+              :title="t('channels.actions.mapListing')"
               @click="openMapModal(item)"
             >
-              {{ t('channels.actions.mapListing') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">link</span>
+              </template>
             </AppButton>
           </template>
         </AppTable>
@@ -451,24 +470,33 @@ const mapListing = async () => {
           id="channel-provider"
           v-model="integrationForm.provider"
           :label="t('channels.form.providerLabel')"
-          :options="[{ value: 'MOCK', label: t('channels.provider.MOCK') }]"
+          :options="channelProviderOptions"
         />
-        <AppInput
-          id="channel-name"
-          v-model="integrationForm.name"
-          :label="t('channels.form.nameLabel')"
-        />
-        <AppInput
-          id="channel-secret"
-          v-model="integrationForm.webhookSecret"
-          :label="t('channels.form.webhookSecretLabel')"
-        />
+        <template v-if="integrationForm.provider === 'MOCK'">
+          <AppInput
+            id="channel-name"
+            v-model="integrationForm.name"
+            :label="t('channels.form.nameLabel')"
+          />
+          <AppInput
+            id="channel-secret"
+            v-model="integrationForm.webhookSecret"
+            :label="t('channels.form.webhookSecretLabel')"
+          />
+        </template>
+        <p v-else class="text-sm text-[var(--lf-text-secondary)]">
+          {{ t('channels.form.mercadoLivreOAuthDescription') }}
+        </p>
         <div class="flex justify-end gap-2">
           <AppButton type="button" variant="secondary" @click="isCreateModalOpen = false">
             {{ t('common.cancel') }}
           </AppButton>
           <AppButton type="submit" variant="primary" :loading="channelsStore.isMutating">
-            {{ t('channels.actions.createIntegration') }}
+            {{
+              integrationForm.provider === 'MERCADO_LIVRE'
+                ? t('channels.actions.connectMercadoLivre')
+                : t('channels.actions.createIntegration')
+            }}
           </AppButton>
         </div>
       </form>
