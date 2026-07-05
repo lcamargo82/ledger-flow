@@ -376,7 +376,7 @@ const canCancel = (status: string) => {
     <AppModal 
       v-model="isDetailsModalOpen" 
       :title="t('payments.details.title')" 
-      size="lg"
+      size="xl"
     >
       <div v-if="paymentsStore.isLoadingDetails" class="py-8 flex justify-center">
         <span class="text-gray-500">{{ t('common.loading') }}</span>

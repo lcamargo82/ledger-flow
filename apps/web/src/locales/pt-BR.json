@@ -1174,6 +1174,7 @@
     "error": {
       "title": "Não foi possível carregar os pagamentos",
       "description": "Tente novamente em alguns instantes.",
+      "default": "Ocorreu um erro inesperado.",
       "createFailed": "Erro ao criar pagamento.",
       "cancelFailed": "Erro ao cancelar pagamento.",
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
