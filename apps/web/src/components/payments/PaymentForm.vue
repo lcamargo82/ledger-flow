@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from '../../composables/useI18n';
 import { useCustomersStore } from '../../stores/customers.store';
 import AppInput from '../common/AppInput.vue';
+import AppCurrencyInput from '../common/AppCurrencyInput.vue';
 import AppSelect from '../common/AppSelect.vue';
 import AppButton from '../common/AppButton.vue';
 import { parseMoneyToCents } from '../../utils/money-input';
@@ -22,7 +23,7 @@ const customersStore = useCustomersStore();
 
 const form = ref({
   customerId: '',
-  amountInput: '',
+  amountInput: null as number | null,
   currency: 'BRL',
   method: '' as PaymentMethod | '',
   description: '',
@@ -78,8 +79,8 @@ const validate = () => {
     isValid = false;
   }
 
-  const cents = parseMoneyToCents(form.value.amountInput);
-  if (cents === null || cents <= 0) {
+  const cents = form.value.amountInput || 0;
+  if (!cents || isNaN(cents) || cents <= 0) {
     errors.value.amountInput = t('payments.form.validation.amountInvalid');
     isValid = false;
   }
@@ -95,7 +96,7 @@ const validate = () => {
 const handleSubmit = () => {
   if (!validate()) return;
   
-  const amountCents = parseMoneyToCents(form.value.amountInput)!;
+  const amountCents = form.value.amountInput || 0;
 
   emit('submit', {
     customerId: form.value.customerId,
@@ -119,9 +120,10 @@ const handleSubmit = () => {
     />
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <AppInput
+      <AppCurrencyInput
         id="amountInput"
         v-model="form.amountInput"
+        :currency="form.currency || 'BRL'"
         :label="t('payments.form.amountLabel')"
         :placeholder="t('payments.form.amountPlaceholder')"
         :error="errors.amountInput"

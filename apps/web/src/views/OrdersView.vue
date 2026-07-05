@@ -10,6 +10,7 @@ import AppButton from '../components/common/AppButton.vue'
 import AppCard from '../components/common/AppCard.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
+import AppNumberInput from '../components/common/AppNumberInput.vue'
 import AppModal from '../components/common/AppModal.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
@@ -27,7 +28,7 @@ const transitionAction = ref<'confirm' | 'cancel' | 'fulfill'>('confirm')
 const orderForm = reactive({
   customerName: '',
   notes: '',
-  items: [{ skuId: '', warehouseId: '', quantity: '1' }],
+  items: [{ skuId: '', warehouseId: '', quantity: null as any }],
 })
 
 const transitionForm = reactive({
@@ -57,7 +58,7 @@ onMounted(() => {
 })
 
 const addItem = () => {
-  orderForm.items.push({ skuId: '', warehouseId: '', quantity: '1' })
+  orderForm.items.push({ skuId: '', warehouseId: '', quantity: null as any })
 }
 
 const removeItem = (index: number) => {
@@ -68,7 +69,7 @@ const removeItem = (index: number) => {
 const resetCreateForm = () => {
   orderForm.customerName = ''
   orderForm.notes = ''
-  orderForm.items = [{ skuId: '', warehouseId: '', quantity: '1' }]
+  orderForm.items = [{ skuId: '', warehouseId: '', quantity: null as any }]
 }
 
 const createOrder = async () => {
@@ -288,12 +289,10 @@ const statusVariant = (status: InternalOrderStatus) => {
               v-model="item.warehouseId"
               :label="t('orders.form.warehouseIdLabel')"
             />
-            <AppInput
+            <AppNumberInput
               :id="`order-item-quantity-${index}`"
               v-model="item.quantity"
-              type="number"
-              min="0.000001"
-              step="0.000001"
+              :allow-decimals="true"
               :label="t('orders.form.quantityLabel')"
             />
             <div class="flex items-end">

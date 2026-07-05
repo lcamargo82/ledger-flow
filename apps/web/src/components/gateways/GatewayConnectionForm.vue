@@ -48,9 +48,8 @@
         placeholder="Asaas Sandbox"
       />
 
-      <AppInput
+      <AppNumberInput
         v-model.number="form.priority"
-        type="number"
         :label="t('gateways.form.priority')"
         min="1"
         max="1000"
@@ -95,6 +94,7 @@ import { ref, reactive, watch, computed } from 'vue';
 import { useI18n } from '@/composables/useI18n';
 import AppModal from '@components/common/AppModal.vue';
 import AppInput from '@components/common/AppInput.vue';
+import AppNumberInput from '@components/common/AppNumberInput.vue';
 import AppSelect from '@components/common/AppSelect.vue';
 import AppButton from '@components/common/AppButton.vue';
 import type { GatewayConnection } from '@/services/gateway-connections.service';
