@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   ChannelIntegration,
+  ChannelIntegrationStatus,
   ChannelInventorySyncStatus,
   ChannelProvider,
   ChannelWebhookInboxEvent,
@@ -24,10 +25,14 @@ export class ChannelHealthReplayService {
 
   async getHealth(tenantId: string) {
     const summary = await this.channelsRepository.getHealthSummary(tenantId);
+    const degradedIntegrationCount = summary.integrations.filter((integration) =>
+      this.isIntegrationDegraded(integration),
+    ).length;
     const failedSignals =
       summary.failedInboxCount +
       summary.failedInventorySyncCount +
-      summary.circuitOpenInventorySyncCount;
+      summary.circuitOpenInventorySyncCount +
+      degradedIntegrationCount;
     const retrySignals = summary.pendingInboxCount + summary.retryScheduledInventorySyncCount;
 
     return {
@@ -132,7 +137,17 @@ export class ChannelHealthReplayService {
   }
 
   private canReplayWebhook(inboxEvent: ChannelWebhookInboxEvent) {
-    return Boolean(inboxEvent.failureReason || !inboxEvent.processedAt);
+    return (
+      inboxEvent.status === ChannelWebhookStatus.RECEIVED &&
+      Boolean(inboxEvent.failureReason || !inboxEvent.processedAt)
+    );
+  }
+
+  private isIntegrationDegraded(integration: ChannelIntegration) {
+    return (
+      integration.status !== ChannelIntegrationStatus.ACTIVE ||
+      integration.healthStatus === 'degraded'
+    );
   }
 
   private canReplayInventorySync(status: ChannelInventorySyncStatus) {
