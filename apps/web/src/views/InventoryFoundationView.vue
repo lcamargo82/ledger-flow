@@ -318,9 +318,13 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
             v-if="authStore.checkAllPermissions(['inventory:manage'])"
             size="small"
             variant="secondary"
+            icon-only
+            :title="item.isActive ? t('inventory.actions.disable') : t('inventory.actions.enable')"
             @click="toggleWarehouse(item.id, item.isActive)"
           >
-            {{ item.isActive ? t('inventory.actions.disable') : t('inventory.actions.enable') }}
+            <template #icon>
+              <span class="material-symbols-outlined text-[18px]">{{ item.isActive ? 'block' : 'check_circle' }}</span>
+            </template>
           </AppButton>
         </template>
       </AppTable>
@@ -379,16 +383,24 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
             <AppButton
               size="small"
               variant="secondary"
+              icon-only
+              :title="t('inventory.actions.releaseReservation')"
               @click="openReservationTransition(item, 'release')"
             >
-              {{ t('inventory.actions.releaseReservation') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">lock_open</span>
+              </template>
             </AppButton>
             <AppButton
               size="small"
               variant="primary"
+              icon-only
+              :title="t('inventory.actions.consumeReservation')"
               @click="openReservationTransition(item, 'consume')"
             >
-              {{ t('inventory.actions.consumeReservation') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">shopping_cart_checkout</span>
+              </template>
             </AppButton>
           </div>
         </template>

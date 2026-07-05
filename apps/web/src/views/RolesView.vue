@@ -114,9 +114,13 @@ const getPermissionDescription = (key: string) => {
             <AppButton 
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('roles.actions.viewDetails')"
               @click="openRoleDetails(item.id)"
             >
-              {{ t('roles.actions.viewDetails') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </template>
             </AppButton>
           </div>
         </template>

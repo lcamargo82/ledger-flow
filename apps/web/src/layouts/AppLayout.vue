@@ -26,236 +26,292 @@
         <img v-else :src="brandAssets.appIcon" alt="LF Icon" class="lf-sidebar-logo-icon-img" />
       </div>
       <nav class="lf-sidebar__nav">
-        <!-- Section: Operations -->
-        <div
-          v-if="authStore.user?.isPlatformAdmin && !isCollapsed"
-          class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3"
-        >
-          {{ t('platform.sidebar.operations') }}
-        </div>
+        <!-- Dashboard -->
         <router-link to="/dashboard" class="lf-nav-item" active-class="lf-nav-item--active">
           <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
             >dashboard</span
           >
           <span class="text" v-show="!isCollapsed">{{ t('nav.dashboard') }}</span>
         </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['users:read'])"
-          to="/users"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >group</span
+
+        <!-- Group: Operations -->
+        <div class="lf-sidebar-group">
+          <button
+            v-if="!isCollapsed"
+            @click="toggleGroup('operations')"
+            class="lf-sidebar-group-header"
           >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.users') }}</span>
-        </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['customers:read'])"
-          to="/customers"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >person</span
+            <span>{{ t('nav.groups.operations') }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.operations ? 'expand_less' : 'expand_more' }}</span>
+          </button>
+          
+          <div v-show="expandedGroups.operations || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              v-if="authStore.checkAllPermissions(['payments:read'])"
+              to="/payments"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >payments</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
+            </router-link>
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['orders:read']) &&
+                authStore.checkAllCapabilities(['orders.manage'])
+              "
+              to="/orders"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >receipt_long</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.orders') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['customers:read'])"
+              to="/customers"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >person</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.customers') }}</span>
+            </router-link>
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['channels:read']) &&
+                authStore.checkAllCapabilities(['channels.connect'])
+              "
+              to="/channels"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >storefront</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.channels') }}</span>
+            </router-link>
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['reconciliation:read']) &&
+                authStore.checkAllCapabilities(['reconciliation.read'])
+              "
+              to="/reconciliation"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >account_tree</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Group: Catalog & Inventory -->
+        <div v-if="(authStore.checkAllPermissions(['catalog:read']) && authStore.checkAllCapabilities(['catalog.manage'])) || (authStore.checkAllPermissions(['inventory:read']) && authStore.checkAllCapabilities(['inventory.manage']))" class="lf-sidebar-group">
+          <button
+            v-if="!isCollapsed"
+            @click="toggleGroup('catalogAndInventory')"
+            class="lf-sidebar-group-header"
           >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.customers') }}</span>
-        </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['roles:manage'])"
-          to="/roles"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >verified_user</span
+            <span>{{ t('nav.groups.catalogAndInventory') }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.catalogAndInventory ? 'expand_less' : 'expand_more' }}</span>
+          </button>
+          <div v-show="expandedGroups.catalogAndInventory || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['catalog:read']) &&
+                authStore.checkAllCapabilities(['catalog.manage'])
+              "
+              to="/catalog/products"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >category</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.catalog') }}</span>
+            </router-link>
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['inventory:read']) &&
+                authStore.checkAllCapabilities(['inventory.manage'])
+              "
+              to="/inventory"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >inventory_2</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.inventory') }}</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Group: Analytics -->
+        <div v-if="(authStore.checkAllPermissions(['financial-intelligence:read']) && authStore.checkAllCapabilities(['financial.analytics.read'])) || authStore.checkAllPermissions(['reports:export'])" class="lf-sidebar-group">
+          <button
+            v-if="!isCollapsed"
+            @click="toggleGroup('analytics')"
+            class="lf-sidebar-group-header"
           >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.roles') }}</span>
-        </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['permissions:read'])"
-          to="/permissions"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >key</span
+            <span>{{ t('nav.groups.analytics') }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.analytics ? 'expand_less' : 'expand_more' }}</span>
+          </button>
+          <div v-show="expandedGroups.analytics || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['financial-intelligence:read']) &&
+                authStore.checkAllCapabilities(['financial.analytics.read'])
+              "
+              to="/analytics"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >analytics</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.analytics') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['reports:export'])"
+              to="/exports"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >file_download</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.reports') }}</span>
+            </router-link>
+          </div>
+        </div>
+
+        <!-- Group: Settings -->
+        <div v-if="authStore.checkAllPermissions(['users:read']) || authStore.checkAllPermissions(['roles:manage']) || authStore.checkAllPermissions(['permissions:read']) || authStore.checkAllPermissions(['tenant:update']) || authStore.checkAllPermissions(['gateways:read'])" class="lf-sidebar-group">
+          <button
+            v-if="!isCollapsed"
+            @click="toggleGroup('settings')"
+            class="lf-sidebar-group-header"
           >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.permissions') }}</span>
-        </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['tenant:update'])"
-          to="/settings/tenant"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >account_balance</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.tenantSettings') }}</span>
-        </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['gateways:read'])"
-          to="/settings/gateway-connections"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >account_balance_wallet</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.gatewayConnections') }}</span>
-        </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['payments:read'])"
-          to="/payments"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >payments</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
-        </router-link>
-        <router-link
-          v-if="
-            authStore.checkAllPermissions(['catalog:read']) &&
-            authStore.checkAllCapabilities(['catalog.manage'])
-          "
-          to="/catalog/products"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >category</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.catalog') }}</span>
-        </router-link>
-        <router-link
-          v-if="
-            authStore.checkAllPermissions(['inventory:read']) &&
-            authStore.checkAllCapabilities(['inventory.manage'])
-          "
-          to="/inventory"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >inventory_2</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.inventory') }}</span>
-        </router-link>
-        <router-link
-          v-if="
-            authStore.checkAllPermissions(['orders:read']) &&
-            authStore.checkAllCapabilities(['orders.manage'])
-          "
-          to="/orders"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >receipt_long</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.orders') }}</span>
-        </router-link>
-        <router-link
-          v-if="
-            authStore.checkAllPermissions(['channels:read']) &&
-            authStore.checkAllCapabilities(['channels.connect'])
-          "
-          to="/channels"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >storefront</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.channels') }}</span>
-        </router-link>
-        <router-link
-          v-if="
-            authStore.checkAllPermissions(['financial-intelligence:read']) &&
-            authStore.checkAllCapabilities(['financial.analytics.read'])
-          "
-          to="/analytics"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >analytics</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.analytics') }}</span>
-        </router-link>
-        <router-link
-          v-if="authStore.checkAllPermissions(['reports:export'])"
-          to="/exports"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >file_download</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.reports') }}</span>
-        </router-link>
-        <router-link
-          v-if="
-            authStore.checkAllPermissions(['reconciliation:read']) &&
-            authStore.checkAllCapabilities(['reconciliation.read'])
-          "
-          to="/reconciliation"
-          class="lf-nav-item"
-          active-class="lf-nav-item--active"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >account_tree</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>
-        </router-link>
+            <span>{{ t('nav.groups.settings') }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.settings ? 'expand_less' : 'expand_more' }}</span>
+          </button>
+          <div v-show="expandedGroups.settings || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              v-if="authStore.checkAllPermissions(['users:read'])"
+              to="/users"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >group</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.users') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['roles:manage'])"
+              to="/roles"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >verified_user</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.roles') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['permissions:read'])"
+              to="/permissions"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >key</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.permissions') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['tenant:update'])"
+              to="/settings/tenant"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >account_balance</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.tenantSettings') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['gateways:read'])"
+              to="/settings/gateway-connections"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >account_balance_wallet</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.gatewayConnections') }}</span>
+            </router-link>
+          </div>
+        </div>
 
         <!-- Platform Admin Menu -->
         <div
           v-if="authStore.user?.isPlatformAdmin"
-          class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700"
+          class="lf-sidebar-group--bordered"
         >
-          <div
+          <button
             v-if="!isCollapsed"
-            class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-2 px-3"
+            @click="toggleGroup('platform')"
+            class="lf-sidebar-group-header"
           >
-            {{ t('platform.sidebar.platform') }}
+            <span>{{ t('nav.groups.platform') }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.platform ? 'expand_less' : 'expand_more' }}</span>
+          </button>
+          
+          <div v-show="expandedGroups.platform || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              to="/platform/tenants"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >domain</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.tenants') }}</span>
+            </router-link>
+            <router-link
+              to="/platform/gateway-connections"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >settings_input_component</span
+              >
+              <span class="text" v-show="!isCollapsed">{{
+                t('platform.sidebar.gatewayConnections')
+              }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['platform:audit:read'])"
+              to="/platform/audit"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >history</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.audit') }}</span>
+            </router-link>
           </div>
-          <router-link
-            to="/platform/tenants"
-            class="lf-nav-item"
-            active-class="lf-nav-item--active"
-          >
-            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-              >domain</span
-            >
-            <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.tenants') }}</span>
-          </router-link>
-          <router-link
-            to="/platform/gateway-connections"
-            class="lf-nav-item"
-            active-class="lf-nav-item--active"
-          >
-            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-              >settings_input_component</span
-            >
-            <span class="text" v-show="!isCollapsed">{{
-              t('platform.sidebar.gatewayConnections')
-            }}</span>
-          </router-link>
-          <router-link
-            v-if="authStore.checkAllPermissions(['platform:audit:read'])"
-            to="/platform/audit"
-            class="lf-nav-item"
-            active-class="lf-nav-item--active"
-          >
-            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-              >history</span
-            >
-            <span class="text" v-show="!isCollapsed">{{ t('platform.sidebar.audit') }}</span>
-          </router-link>
         </div>
       </nav>
 
@@ -293,7 +349,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
 import { useConfirmDialogStore } from '../stores/confirm-dialog.store'
@@ -303,8 +359,23 @@ import AppButton from '../components/common/AppButton.vue'
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue'
 
 const isCollapsed = ref(false)
+
+const expandedGroups = reactive({
+  operations: true,
+  catalogAndInventory: true,
+  analytics: false,
+  settings: false,
+  platform: false,
+})
+
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
+}
+
+const toggleGroup = (group: keyof typeof expandedGroups) => {
+  if (!isCollapsed.value) {
+    expandedGroups[group] = !expandedGroups[group]
+  }
 }
 
 const authStore = useAuthStore()

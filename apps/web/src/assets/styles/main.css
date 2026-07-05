@@ -143,6 +143,22 @@ body {
   font-size: 0.875rem; /* 14px */
 }
 
+.lf-button--icon-only {
+  padding: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0; /* Ensures buttons don't overlap in tight tables */
+}
+
+.lf-button--small.lf-button--icon-only {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.lf-button--icon-only .lf-button__icon {
+  margin-right: 0 !important;
+}
+
 .lf-button__spinner {
   width: 1.125rem;
   height: 1.125rem;
@@ -249,7 +265,8 @@ body {
 /* App Layout & Dashboard */
 .lf-layout-app {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 .lf-sidebar {
   width: 260px;
@@ -315,6 +332,8 @@ body {
 .lf-sidebar__nav {
   padding: var(--lf-space-4) 0;
   flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .lf-nav-item {
   display: flex;
@@ -430,11 +449,58 @@ body {
   font-size: 1.25rem;
 }
 
+/* Sidebar Groups */
+.lf-sidebar-group {
+  margin-top: var(--lf-space-4);
+}
+
+.lf-sidebar-group-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--lf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--lf-space-2);
+  padding: 0 var(--lf-space-6);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.lf-sidebar-group-header:hover {
+  color: var(--lf-text-primary);
+}
+
+.lf-sidebar-group-icon {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.lf-sidebar-group-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.lf-sidebar-group--bordered {
+  margin-top: var(--lf-space-4);
+  padding-top: var(--lf-space-4);
+  border-top: 1px solid var(--lf-border-primary);
+}
+
 .lf-layout-app__main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .lf-layout-app__content {
@@ -571,3 +637,83 @@ body {
 }
 
 .lf-brand-logo { max-width: 240px; height: auto; margin-left: auto; margin-right: auto; }
+
+/* Table Component */
+.lf-table-wrapper {
+  width: 100%;
+  border: 1px solid var(--lf-border-primary);
+  border-radius: var(--lf-radius);
+  overflow: hidden;
+  background-color: var(--lf-surface-primary);
+}
+
+.lf-table-scroll {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.lf-table {
+  width: 100%;
+  font-size: 0.875rem;
+  text-align: left;
+  color: var(--lf-text-secondary);
+  border-collapse: collapse;
+}
+
+.lf-table-head {
+  font-size: 0.75rem;
+  color: var(--lf-text-primary);
+  text-transform: uppercase;
+  background-color: var(--lf-surface-secondary);
+}
+
+.lf-table-th {
+  padding: var(--lf-space-3) var(--lf-space-6);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.lf-table-row {
+  background-color: var(--lf-surface-primary);
+  border-bottom: 1px solid var(--lf-border-primary);
+  transition: background-color 0.2s ease;
+}
+
+.lf-table-row:hover {
+  background-color: var(--lf-bg-secondary);
+}
+
+.lf-table-td {
+  padding: var(--lf-space-4) var(--lf-space-6);
+}
+
+/* Filter Layout */
+.lf-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lf-space-4);
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .lf-filter-container {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.lf-filter-item {
+  flex: 1 1 200px;
+  min-width: 0; /* prevent flex overflow */
+}
+
+.lf-filter-item--large {
+  flex: 2 1 300px;
+}
+
+.lf-filter-actions {
+  display: flex;
+  gap: var(--lf-space-2);
+  flex: 0 0 auto;
+  align-items: center;
+}

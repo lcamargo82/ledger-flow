@@ -107,8 +107,8 @@ const archiveProduct = async (product: ProductListItem) => {
 
     <template v-else>
       <AppCard>
-        <div class="filters-row">
-          <div class="filter-item filter-item--large">
+        <div class="lf-filter-container">
+          <div class="lf-filter-item lf-filter-item--large">
             <AppInput
               id="catalog-search"
               v-model="searchInput"
@@ -117,7 +117,7 @@ const archiveProduct = async (product: ProductListItem) => {
               @input="handleSearch"
             />
           </div>
-          <div class="filter-item">
+          <div class="lf-filter-item">
             <AppSelect
               id="catalog-type"
               :model-value="catalogStore.filters.type || ''"
@@ -126,7 +126,7 @@ const archiveProduct = async (product: ProductListItem) => {
               @update:model-value="catalogStore.setType(($event || undefined) as ProductType | undefined)"
             />
           </div>
-          <div class="filter-item">
+          <div class="lf-filter-item">
             <AppSelect
               id="catalog-status"
               :model-value="catalogStore.filters.status || ''"
@@ -135,7 +135,7 @@ const archiveProduct = async (product: ProductListItem) => {
               @update:model-value="catalogStore.setStatus(($event || undefined) as ProductStatus | undefined)"
             />
           </div>
-          <div class="filter-item-actions">
+          <div class="lf-filter-actions">
             <AppButton variant="secondary" @click="clearFilters">
               {{ t('catalog.actions.clearFilters') }}
             </AppButton>
@@ -187,17 +187,25 @@ const archiveProduct = async (product: ProductListItem) => {
               v-if="authStore.checkAllPermissions(['catalog:manage']) && item.status === 'ACTIVE'"
               variant="secondary"
               size="small"
+              icon-only
+              :title="t('catalog.actions.edit')"
               @click="openEditModal(item)"
             >
-              {{ t('catalog.actions.edit') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </template>
             </AppButton>
             <AppButton
               v-if="authStore.checkAllPermissions(['catalog:manage']) && item.status === 'ACTIVE'"
               variant="danger"
               size="small"
+              icon-only
+              :title="t('catalog.actions.archive')"
               @click="archiveProduct(item)"
             >
-              {{ t('catalog.actions.archive') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">archive</span>
+              </template>
             </AppButton>
           </div>
         </template>

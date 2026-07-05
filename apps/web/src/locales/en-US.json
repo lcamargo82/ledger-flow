@@ -118,6 +118,13 @@
     "apiConnected": "API Connected"
   },
   "nav": {
+    "groups": {
+      "operations": "Operations",
+      "catalogAndInventory": "Catalog & Inventory",
+      "analytics": "Analytics",
+      "settings": "Settings",
+      "platform": "Platform"
+    },
     "dashboard": "Dashboard",
     "users": "Users",
     "payments": "Payments",

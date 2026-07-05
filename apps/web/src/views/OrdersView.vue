@@ -197,25 +197,37 @@ const statusVariant = (status: InternalOrderStatus) => {
               v-if="item.status === 'DRAFT'"
               size="small"
               variant="primary"
+              icon-only
+              :title="t('orders.actions.confirm')"
               @click="openTransition(item, 'confirm')"
             >
-              {{ t('orders.actions.confirm') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+              </template>
             </AppButton>
             <AppButton
               v-if="item.status === 'CONFIRMED'"
               size="small"
               variant="primary"
+              icon-only
+              :title="t('orders.actions.fulfill')"
               @click="openTransition(item, 'fulfill')"
             >
-              {{ t('orders.actions.fulfill') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">local_shipping</span>
+              </template>
             </AppButton>
             <AppButton
               v-if="item.status === 'DRAFT' || item.status === 'CONFIRMED'"
               size="small"
               variant="secondary"
+              icon-only
+              :title="t('orders.actions.cancel')"
               @click="openTransition(item, 'cancel')"
             >
-              {{ t('orders.actions.cancel') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">cancel</span>
+              </template>
             </AppButton>
           </div>
         </template>

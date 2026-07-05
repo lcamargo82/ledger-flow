@@ -48,7 +48,6 @@ const columns = computed(() => [
   { key: 'roles', label: t('users.table.roles') },
   { key: 'status', label: t('users.table.status') },
   { key: 'lastLoginAt', label: t('users.table.lastLogin') },
-  { key: 'createdAt', label: t('users.table.createdAt') },
   { key: 'actions', label: t('users.table.actions'), align: 'right' as const }
 ])
 
@@ -250,36 +249,42 @@ const filterRoleOptions = computed(() => [
           </span>
         </template>
 
-        <template #createdAt="{ item }">
-          <span class="text-sm text-gray-500 dark:text-gray-400">
-            {{ formatDateTime(item.createdAt, currentLocale) }}
-          </span>
-        </template>
-
         <template #actions="{ item }">
-          <div class="flex justify-end gap-2">
+          <div class="flex flex-nowrap justify-end gap-2">
             <AppButton 
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('users.actions.viewDetails')"
               @click="openUserDetails(item.id)"
             >
-              {{ t('users.actions.viewDetails') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </template>
             </AppButton>
             <AppButton 
               v-if="authStore.checkPermission('users:update')"
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('users.actions.edit')"
               @click="openEditModal(item.id)"
             >
-              {{ t('users.actions.edit') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </template>
             </AppButton>
             <AppButton 
               v-if="authStore.checkPermission('users:update')"
               :variant="item.active ? 'danger' : 'primary'"
               size="small"
+              icon-only
+              :title="item.active ? t('users.actions.deactivate') : t('users.actions.activate')"
               @click="openStatusModal(item)"
             >
-              {{ item.active ? t('users.actions.deactivate') : t('users.actions.activate') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">{{ item.active ? 'block' : 'check_circle' }}</span>
+              </template>
             </AppButton>
           </div>
         </template>

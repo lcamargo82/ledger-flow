@@ -286,17 +286,25 @@ const canCancel = (status: string) => {
               v-if="authStore.checkPermission('payments:read')"
               variant="secondary" 
               size="small"
+              icon-only
+              :title="t('payments.actions.viewDetails')"
               @click="openPaymentDetails(item.id)"
             >
-              {{ t('payments.actions.viewDetails') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </template>
             </AppButton>
             <AppButton 
               v-if="authStore.checkPermission('payments:cancel') && canCancel(item.status)"
               variant="danger" 
               size="small"
+              icon-only
+              :title="t('payments.actions.cancel')"
               @click="openCancelConfirm(item.id)"
             >
-              {{ t('payments.actions.cancel') }}
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">cancel</span>
+              </template>
             </AppButton>
           </div>
         </template>

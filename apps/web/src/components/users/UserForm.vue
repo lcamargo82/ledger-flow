@@ -43,7 +43,7 @@ watch(() => props.initialValue, (newVal) => {
   if (newVal) {
     formData.value.name = newVal.name || ''
     formData.value.email = newVal.email || ''
-    formData.value.roleKeys = newVal.roles || []
+    formData.value.roleKeys = [...(newVal.roles || [])]
     formData.value.active = newVal.active ?? true
     // temporaryPassword is not set on edit
   }
