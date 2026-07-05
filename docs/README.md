@@ -81,6 +81,7 @@ docs/
 ├─ specs/10.1-mercado-livre-components-i18n.md
 ├─ specs/10.1-mercado-livre-sprint-plan.md
 ├─ backlog/10.1-mercado-livre-backlog.md
+├─ runbooks/10.1-mercado-livre-operational-readiness.md
 └─ adr/0035-mercado-livre-adapter-and-connection-boundaries.md
 ```
 
@@ -113,6 +114,8 @@ Sprints:
 10.1.8 — Dados financeiros operacionais
 10.1.9 — Hardening e fechamento
 ```
+
+A 10.1.9 fecha o fluxo com checklist operacional em `docs/runbooks/10.1-mercado-livre-operational-readiness.md`, cobrindo OAuth, listing, venda, reserva, sync, replay, carga e segurança de token.
 
 ## Onde colocar os arquivos no repositório
 

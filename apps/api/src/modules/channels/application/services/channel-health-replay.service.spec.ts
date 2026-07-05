@@ -76,6 +76,38 @@ describe('ChannelHealthReplayService', () => {
     expect(JSON.stringify(result)).not.toContain('ciphertext');
   });
 
+  it('marks health as degraded when an integration is not active even without queued failures', async () => {
+    channelsRepository.getHealthSummary.mockResolvedValue({
+      integrations: [
+        {
+          id: 'integration-reauth',
+          provider: ChannelProvider.MERCADO_LIVRE,
+          status: ChannelIntegrationStatus.REAUTH_REQUIRED,
+          healthStatus: 'healthy',
+          lastSuccessfulOperationAt: null,
+          lastFailureAt: null,
+        },
+      ],
+      failedInboxCount: 0,
+      pendingInboxCount: 0,
+      failedInventorySyncCount: 0,
+      circuitOpenInventorySyncCount: 0,
+      retryScheduledInventorySyncCount: 0,
+    });
+
+    await expect(makeService().getHealth('tenant-1')).resolves.toMatchObject({
+      status: 'DEGRADED',
+      summary: {
+        integrations: 1,
+        failedInbox: 0,
+        pendingInbox: 0,
+        failedInventorySync: 0,
+        circuitOpenInventorySync: 0,
+        retryScheduledInventorySync: 0,
+      },
+    });
+  });
+
   it('replays a failed webhook inbox event by emitting the existing worker event', async () => {
     channelsRepository.findInboxById.mockResolvedValue({
       id: 'inbox-1',
@@ -172,5 +204,26 @@ describe('ChannelHealthReplayService', () => {
     await expect(
       makeService().replayInventorySync('tenant-1', 'user-1', 'sync-1'),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('rejects replay for invalid webhook inbox payloads', async () => {
+    channelsRepository.findInboxById.mockResolvedValue({
+      id: 'inbox-invalid',
+      tenantId: 'tenant-1',
+      integrationId: 'integration-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      providerEventId: 'evt-invalid',
+      eventType: 'orders_v2',
+      status: ChannelWebhookStatus.INVALID,
+      processedAt: null,
+      failureReason: 'Missing required provider resource id',
+      payloadHash: 'payload-hash',
+    });
+
+    await expect(
+      makeService().replayWebhookInbox('tenant-1', 'user-1', 'inbox-invalid'),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(channelsRepository.resetInboxForReplay).not.toHaveBeenCalled();
+    expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
   });
 });
