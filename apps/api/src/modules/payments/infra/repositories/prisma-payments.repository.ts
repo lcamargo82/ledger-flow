@@ -45,6 +45,9 @@ export class PrismaPaymentsRepository implements IPaymentsRepository {
           { reference: { contains: search, mode: 'insensitive' } },
           { externalReference: { contains: search, mode: 'insensitive' } },
           { description: { contains: search, mode: 'insensitive' } },
+          { customer: { name: { contains: search, mode: 'insensitive' } } },
+          { customer: { email: { contains: search, mode: 'insensitive' } } },
+          { customer: { document: { contains: search, mode: 'insensitive' } } },
         ],
       }),
     };
