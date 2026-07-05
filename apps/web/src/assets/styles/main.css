@@ -717,3 +717,35 @@ body {
   flex: 0 0 auto;
   align-items: center;
 }
+
+/* Tailwind Polyfills for missing utilities used in the codebase */
+.flex { display: flex; }
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.justify-end { justify-content: flex-end; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+.gap-4 { gap: 1rem; }
+.space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.75rem; }
+.space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem; }
+.space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
+.space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 2rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mt-8 { margin-top: 2rem; }
+
+@media (min-width: 768px) {
+  .md\:grid-cols-\[1fr_1fr_140px_auto\] {
+    grid-template-columns: 1fr 1fr 140px auto;
+  }
+}
+
+/* Global fix: Space out the final action buttons in modal forms */
+.lf-modal-body form > .flex.justify-end:last-child,
+.lf-modal-body > .flex.justify-end:last-child {
+  margin-top: var(--lf-space-8) !important;
+  padding-top: var(--lf-space-5);
+  border-top: 1px solid var(--lf-border-primary);
+}
