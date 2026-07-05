@@ -4,16 +4,19 @@ import {
   ChannelListingImportAdapter,
   ChannelListingImportInput,
   ChannelListingImportItem,
+  ChannelOrderAdapter,
+  ChannelOrderDetails,
   ChannelProviderAdapter,
   ChannelProviderCapabilities,
 } from '../../domain/interfaces/channel-provider-adapter.interface';
 import {
   MercadoLivreApiClient,
   MercadoLivreItemResponse,
+  MercadoLivreOrderResponse,
 } from '../clients/mercado-livre-api.client';
 
 @Injectable()
-export class MercadoLivreChannelAdapter implements ChannelListingImportAdapter {
+export class MercadoLivreChannelAdapter implements ChannelListingImportAdapter, ChannelOrderAdapter {
   readonly provider = ChannelProvider.MERCADO_LIVRE;
 
   readonly capabilities: ChannelProviderCapabilities = {
@@ -52,6 +55,13 @@ export class MercadoLivreChannelAdapter implements ChannelListingImportAdapter {
     return listings;
   }
 
+  async fetchOrder(input: {
+    accessToken: string;
+    resource: string;
+  }): Promise<ChannelOrderDetails> {
+    return this.toOrder(await this.apiClient.getOrder(input.accessToken, input.resource));
+  }
+
   private toListing(item: MercadoLivreItemResponse): ChannelListingImportItem {
     const thumbnailUrl = item.secure_thumbnail ?? item.thumbnail;
 
@@ -76,5 +86,32 @@ export class MercadoLivreChannelAdapter implements ChannelListingImportAdapter {
     });
 
     return sellerSku?.value_name?.trim() || undefined;
+  }
+
+  private toOrder(order: MercadoLivreOrderResponse): ChannelOrderDetails {
+    return {
+      externalOrderId: String(order.id),
+      status: order.status ?? 'unknown',
+      buyerName: this.resolveBuyerName(order),
+      items: (order.order_items ?? [])
+        .map((orderItem) => ({
+          externalListingId: orderItem.item?.id?.trim() ?? '',
+          title: orderItem.item?.title,
+          quantity: Number(orderItem.quantity ?? 0),
+        }))
+        .filter((item) => item.externalListingId && item.quantity > 0),
+    };
+  }
+
+  private resolveBuyerName(order: MercadoLivreOrderResponse) {
+    const buyer = order.buyer;
+    if (!buyer) return undefined;
+
+    const fullName = [buyer.first_name, buyer.last_name]
+      .filter((value): value is string => Boolean(value?.trim()))
+      .join(' ')
+      .trim();
+
+    return fullName || buyer.nickname?.trim() || undefined;
   }
 }

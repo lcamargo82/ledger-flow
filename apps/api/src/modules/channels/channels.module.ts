@@ -1,6 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma/prisma.module';
+import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
+import { AsyncModule } from '../async/async.module';
 import { GatewaysModule } from '../gateways/gateways.module';
+import { OrdersModule } from '../orders/orders.module';
+import { ChannelWebhookReceivedAsyncHandler } from './application/async-handlers/channel-webhook-received.handler';
+import { ChannelOrderIntakeService } from './application/services/channel-order-intake.service';
 import { ChannelsService } from './application/services/channels.service';
 import { ChannelInventorySyncService } from './application/services/channel-inventory-sync.service';
 import { ChannelWebhookIntakeService } from './application/services/channel-webhook-intake.service';
@@ -16,7 +21,7 @@ import { ChannelsFoundationController } from './presentation/controllers/channel
 import { MercadoLivreOAuthController } from './presentation/controllers/mercado-livre-oauth.controller';
 
 @Module({
-  imports: [PrismaModule, GatewaysModule],
+  imports: [PrismaModule, AsyncModule, GatewaysModule, OrdersModule],
   controllers: [
     ChannelsFoundationController,
     ChannelsController,
@@ -26,7 +31,9 @@ import { MercadoLivreOAuthController } from './presentation/controllers/mercado-
   providers: [
     ChannelsService,
     ChannelInventorySyncService,
+    ChannelOrderIntakeService,
     ChannelWebhookIntakeService,
+    ChannelWebhookReceivedAsyncHandler,
     MercadoLivreApiClient,
     MercadoLivreChannelAdapter,
     MercadoLivreOAuthService,
@@ -38,4 +45,13 @@ import { MercadoLivreOAuthController } from './presentation/controllers/mercado-
   ],
   exports: [ChannelInventorySyncService],
 })
-export class ChannelsModule {}
+export class ChannelsModule implements OnModuleInit {
+  constructor(
+    private readonly asyncHandlerRegistry: AsyncHandlerRegistryService,
+    private readonly channelWebhookReceivedHandler: ChannelWebhookReceivedAsyncHandler,
+  ) {}
+
+  onModuleInit() {
+    this.asyncHandlerRegistry.register(this.channelWebhookReceivedHandler);
+  }
+}

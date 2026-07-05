@@ -18,5 +18,6 @@ import { OrdersFoundationController } from './presentation/controllers/orders-fo
       useClass: PrismaOrdersRepository,
     },
   ],
+  exports: [OrdersService],
 })
 export class OrdersModule {}
