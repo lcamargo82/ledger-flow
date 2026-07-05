@@ -128,6 +128,7 @@ export class MercadoLivreChannelAdapter
       externalOrderId: String(order.id),
       status: order.status ?? 'unknown',
       buyerName: this.resolveBuyerName(order),
+      financial: this.resolveFinancial(order),
       items: (order.order_items ?? [])
         .map((orderItem) => ({
           externalListingId: orderItem.item?.id?.trim() ?? '',
@@ -148,5 +149,53 @@ export class MercadoLivreChannelAdapter
       .trim();
 
     return fullName || buyer.nickname?.trim() || undefined;
+  }
+
+  private resolveFinancial(order: MercadoLivreOrderResponse) {
+    const channelFeeAmount = this.sum(
+      (order.order_items ?? []).map((item) => item.sale_fee),
+      (order.payments ?? []).map((payment) => payment.marketplace_fee),
+    );
+    const freightAmount =
+      this.money(order.shipping_cost) ??
+      this.firstMoney((order.payments ?? []).map((payment) => payment.shipping_cost));
+    const paidAmount =
+      this.money(order.paid_amount) ??
+      this.firstMoney((order.payments ?? []).map((payment) => payment.total_paid_amount));
+    const revenueAmount =
+      this.money(order.total_amount) ??
+      this.firstMoney((order.payments ?? []).map((payment) => payment.transaction_amount)) ??
+      paidAmount;
+    const discountAmount = this.money(order.coupon?.amount);
+
+    const financial = {
+      ...(order.currency_id && { currency: order.currency_id }),
+      ...(revenueAmount && { revenueAmount }),
+      ...(paidAmount && { paidAmount }),
+      ...(channelFeeAmount && { channelFeeAmount }),
+      ...(freightAmount && { freightAmount }),
+      ...(discountAmount && { discountAmount }),
+    };
+
+    return Object.keys(financial).length > 0 ? financial : undefined;
+  }
+
+  private sum(...groups: Array<Array<number | string | undefined>>) {
+    const values = groups.flat().map((value) => this.money(value)).filter(Boolean);
+    if (values.length === 0) return undefined;
+
+    const total = values.reduce((sum, value) => sum + Number(value), 0);
+    return this.money(total);
+  }
+
+  private firstMoney(values: Array<number | string | undefined>) {
+    return values.map((value) => this.money(value)).find(Boolean);
+  }
+
+  private money(value: number | string | undefined) {
+    if (value === undefined || value === null || value === '') return undefined;
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) return undefined;
+    return String(amount);
   }
 }
