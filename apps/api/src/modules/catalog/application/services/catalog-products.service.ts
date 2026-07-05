@@ -92,9 +92,9 @@ export class CatalogProductsService {
         throw new BadRequestException('SKU changes require an explicit audited flow.');
       }
 
-      const nextAverageCost = updateProductDto.sku.averageCost;
+      const nextAverageCost = Number(updateProductDto.sku.averageCost);
       const currentAverageCost = Number(product.sku.averageCost);
-      if (nextAverageCost !== currentAverageCost && !updateProductDto.costChangeReason) {
+      if (Math.abs(nextAverageCost - currentAverageCost) > 0.0001 && !updateProductDto.costChangeReason) {
         throw new BadRequestException('Cost change reason is required.');
       }
 

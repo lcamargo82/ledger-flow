@@ -2,7 +2,7 @@
 import { computed, reactive } from 'vue'
 import { useI18n } from '../../composables/useI18n'
 import AppInput from '../common/AppInput.vue'
-import AppNumberInput from '../common/AppNumberInput.vue'
+import AppCurrencyInput from '../common/AppCurrencyInput.vue'
 import AppSelect from '../common/AppSelect.vue'
 import AppButton from '../common/AppButton.vue'
 import type { CreateProductRequest, ProductListItem, ProductType, UpdateProductRequest } from '../../types/catalog.types'
@@ -12,6 +12,7 @@ const props = defineProps<{
   product?: ProductListItem | null
   parentOptions?: ProductListItem[]
   loading?: boolean
+  errors?: Record<string, string>
 }>()
 
 const emit = defineEmits<{
@@ -29,7 +30,7 @@ const form = reactive({
   brand: props.product?.brand || '',
   category: props.product?.category || '',
   sku: props.product?.sku?.skuDisplay || '',
-  averageCost: props.product?.sku ? Number(props.product.sku.averageCost) : null as number | null,
+  averageCost: props.product?.sku ? Math.round(Number(props.product.sku.averageCost) * 100) : null as number | null,
   unitOfMeasure: props.product?.sku?.unitOfMeasure || 'UN',
   currency: props.product?.sku?.currency || 'BRL',
   barcode: props.product?.sku?.barcode || '',
@@ -65,7 +66,7 @@ const submit = () => {
   const skuPayload = requiresSku.value
     ? {
         sku: form.sku.trim().toUpperCase(),
-        averageCost: form.averageCost || 0,
+        averageCost: Math.round(form.averageCost || 0) / 100,
         unitOfMeasure: form.unitOfMeasure.trim().toUpperCase(),
         currency: form.currency.trim().toUpperCase(),
         barcode: form.barcode || undefined,
@@ -142,10 +143,10 @@ const submit = () => {
         :placeholder="t('catalog.form.skuPlaceholder')"
         :disabled="!canEditSku"
       />
-      <AppNumberInput
+      <AppCurrencyInput
         id="product-cost"
         v-model="form.averageCost"
-        :allow-decimals="true"
+        :currency="form.currency || 'BRL'"
         :label="t('catalog.form.averageCostLabel')"
       />
       <AppInput
@@ -169,6 +170,7 @@ const submit = () => {
         v-model="form.costChangeReason"
         :label="t('catalog.form.costChangeReasonLabel')"
         :placeholder="t('catalog.form.costChangeReasonPlaceholder')"
+        :error="props.errors?.costChangeReason"
       />
     </div>
 

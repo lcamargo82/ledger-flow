@@ -550,6 +550,7 @@
       "invalid": "Revise as informações do produto e do SKU.",
       "skuAlreadyExists": "Este SKU já está cadastrado para o tenant atual.",
       "notFound": "Produto não encontrado.",
+      "costChangeReasonRequired": "O motivo da alteração de custo é obrigatório.",
       "forbidden": "Você não possui acesso ao catálogo."
     },
     "pagination": {

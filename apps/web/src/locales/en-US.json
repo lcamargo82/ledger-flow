@@ -551,6 +551,7 @@
       "invalid": "Review the product and SKU information.",
       "skuAlreadyExists": "This SKU already exists for the current tenant.",
       "notFound": "Product not found.",
+      "costChangeReasonRequired": "The reason for the cost change is required.",
       "forbidden": "You do not have catalog access."
     },
     "pagination": {
