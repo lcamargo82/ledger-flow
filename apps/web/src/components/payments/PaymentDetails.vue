@@ -89,7 +89,7 @@ const handleRetry = async () => {
 };
 
 const openSettings = () => {
-  router.push('/platform/gateway-connections'); // Ou o caminho correto para tenant gateways se existir
+  router.push('/settings/gateway-connections');
 };
 
 const refreshStatus = async () => {
