@@ -1125,7 +1125,8 @@
       "APPROVED": "Aprovado",
       "FAILED": "Falhou",
       "CANCELED": "Cancelado",
-      "REFUNDED": "Estornado"
+      "REFUNDED": "Estornado",
+      "OVERDUE": "Vencido"
     },
     "method": {
       "PIX": "Pix",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from '../composables/useI18n';
 import { usePaymentsStore } from '../stores/payments.store';
 import { useAuthStore } from '../stores/auth.store';
@@ -42,8 +42,24 @@ const columns = computed(() => [
   { key: 'actions', label: t('payments.table.actions'), align: 'right' as const }
 ]);
 
+let pollingInterval: number | null = null;
+
 onMounted(() => {
   paymentsStore.fetchPayments();
+  
+  // Poll every 15 seconds to update payment statuses transparently
+  pollingInterval = window.setInterval(() => {
+    // Only poll if no modals are open (to prevent data shifting while acting) and no error
+    if (!isCreateModalOpen.value && !isConfirmCancelOpen.value && !paymentsStore.error) {
+      paymentsStore.fetchPayments(undefined, true);
+    }
+  }, 15000);
+});
+
+onUnmounted(() => {
+  if (pollingInterval) {
+    window.clearInterval(pollingInterval);
+  }
 });
 
 const handleSearch = useDebounceFn(() => {
@@ -111,6 +127,7 @@ const statusOptions = computed(() => [
   { value: 'FAILED', label: t('payments.status.FAILED') },
   { value: 'CANCELED', label: t('payments.status.CANCELED') },
   { value: 'REFUNDED', label: t('payments.status.REFUNDED') },
+  { value: 'OVERDUE', label: t('payments.status.OVERDUE') },
 ]);
 
 const methodOptions = computed(() => [
@@ -130,6 +147,7 @@ const getStatusVariant = (status: string) => {
     case 'FAILED': return 'danger';
     case 'CANCELED': return 'default';
     case 'REFUNDED': return 'default';
+    case 'OVERDUE': return 'danger';
     default: return 'default';
   }
 };

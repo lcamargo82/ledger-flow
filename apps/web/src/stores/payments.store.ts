@@ -76,8 +76,8 @@ export const usePaymentsStore = defineStore('payments', () => {
   };
 
   // Actions
-  const fetchPayments = async (forceParams?: typeof filters.value) => {
-    isLoading.value = true;
+  const fetchPayments = async (forceParams?: typeof filters.value, silent = false) => {
+    if (!silent) isLoading.value = true;
     error.value = null;
     try {
       const activeFilters = forceParams || filters.value;
@@ -97,7 +97,7 @@ export const usePaymentsStore = defineStore('payments', () => {
       error.value = extractErrorMessage(err);
       throw err;
     } finally {
-      isLoading.value = false;
+      if (!silent) isLoading.value = false;
     }
   };
 

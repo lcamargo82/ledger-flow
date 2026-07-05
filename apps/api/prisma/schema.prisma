@@ -864,6 +864,7 @@ enum PaymentStatus {
   FAILED
   CANCELED
   REFUNDED
+  OVERDUE
 }
 
 enum PaymentMethod {

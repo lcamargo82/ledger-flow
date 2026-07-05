@@ -4,7 +4,8 @@ export type PaymentStatus =
   | 'APPROVED'
   | 'FAILED'
   | 'CANCELED'
-  | 'REFUNDED';
+  | 'REFUNDED'
+  | 'OVERDUE';
 
 export type PaymentMethod =
   | 'PIX'
