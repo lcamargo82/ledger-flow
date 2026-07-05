@@ -57,6 +57,19 @@ export class PrismaChannelsRepository implements ChannelsRepository {
     });
   }
 
+  findActiveIntegrationByExternalAccountId(
+    provider: ChannelProvider,
+    externalAccountId: string,
+  ) {
+    return this.prisma.channelIntegration.findFirst({
+      where: {
+        provider,
+        externalAccountId,
+        status: ChannelIntegrationStatus.ACTIVE,
+      },
+    });
+  }
+
   findInboxByProviderEventId(provider: ChannelProvider, providerEventId: string) {
     return this.prisma.channelWebhookInboxEvent.findUnique({
       where: { provider_providerEventId: { provider, providerEventId } },

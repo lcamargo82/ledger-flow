@@ -5,6 +5,7 @@ import { ChannelWebhookIntakeService } from './channel-webhook-intake.service';
 describe('ChannelWebhookIntakeService', () => {
   const repository = {
     findActiveIntegrationBySecretHash: jest.fn(),
+    findActiveIntegrationByExternalAccountId: jest.fn(),
     findInboxByProviderEventId: jest.fn(),
     createInboxEvent: jest.fn(),
   };
@@ -77,6 +78,105 @@ describe('ChannelWebhookIntakeService', () => {
         eventType: 'channel.webhook.received',
       }),
     });
+  });
+
+  it('persists Mercado Livre notifications by resolving the integration from user_id', async () => {
+    repository.findActiveIntegrationByExternalAccountId.mockResolvedValue({
+      id: 'integration-ml',
+      tenantId: 'tenant-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      externalAccountId: '123456',
+    });
+    repository.findInboxByProviderEventId.mockResolvedValue(null);
+    repository.createInboxEvent.mockResolvedValue({
+      id: 'inbox-ml-1',
+      status: ChannelWebhookStatus.RECEIVED,
+    });
+
+    const result = await service.ingest(ChannelProvider.MERCADO_LIVRE, undefined, {
+      _id: 'notification-id-from-ml',
+      topic: 'orders_v2',
+      resource: '/orders/2000000001',
+      user_id: 123456,
+      application_id: 987654,
+      attempts: 1,
+      sent: '2026-07-04T12:00:00.000Z',
+      received: '2026-07-04T12:00:01.000Z',
+      access_token: 'must-not-be-stored',
+      buyer: { email: 'buyer@example.test' },
+    });
+
+    expect(repository.findActiveIntegrationByExternalAccountId).toHaveBeenCalledWith(
+      ChannelProvider.MERCADO_LIVRE,
+      '123456',
+    );
+    expect(repository.findActiveIntegrationBySecretHash).not.toHaveBeenCalled();
+    expect(repository.createInboxEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        integrationId: 'integration-ml',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        providerEventId: 'notification-id-from-ml',
+        eventType: 'orders_v2',
+        status: ChannelWebhookStatus.RECEIVED,
+        payloadSummary: {
+          notificationId: 'notification-id-from-ml',
+          topic: 'orders_v2',
+          resource: '/orders/2000000001',
+          userId: '123456',
+          applicationId: '987654',
+          attempts: 1,
+          sent: '2026-07-04T12:00:00.000Z',
+          received: '2026-07-04T12:00:01.000Z',
+        },
+      }),
+    );
+    expect(
+      JSON.stringify(repository.createInboxEvent.mock.calls[0][0].payloadSummary),
+    ).not.toContain('must-not-be-stored');
+    expect(
+      JSON.stringify(repository.createInboxEvent.mock.calls[0][0].payloadSummary),
+    ).not.toContain('buyer@example.test');
+    expect(result.status).toBe(ChannelWebhookStatus.RECEIVED);
+    expect(prisma.outboxEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        eventType: 'channel.webhook.received',
+        payload: expect.objectContaining({
+          inboxEventId: 'inbox-ml-1',
+          provider: ChannelProvider.MERCADO_LIVRE,
+          providerEventId: 'notification-id-from-ml',
+          status: ChannelWebhookStatus.RECEIVED,
+        }),
+      }),
+    });
+  });
+
+  it('returns duplicate Mercado Livre notifications without creating another outbox job', async () => {
+    repository.findActiveIntegrationByExternalAccountId.mockResolvedValue({
+      id: 'integration-ml',
+      tenantId: 'tenant-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      externalAccountId: '123456',
+    });
+    repository.findInboxByProviderEventId.mockResolvedValue({
+      id: 'inbox-ml-1',
+      status: ChannelWebhookStatus.RECEIVED,
+    });
+
+    const result = await service.ingest(ChannelProvider.MERCADO_LIVRE, undefined, {
+      topic: 'orders_v2',
+      resource: '/orders/2000000001',
+      user_id: 123456,
+      application_id: 987654,
+    });
+
+    expect(result).toEqual({
+      id: 'inbox-ml-1',
+      status: ChannelWebhookStatus.DUPLICATE,
+      duplicateOfId: 'inbox-ml-1',
+    });
+    expect(repository.createInboxEvent).not.toHaveBeenCalled();
+    expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
   });
 
   it('returns duplicate status without creating another inbox event', async () => {

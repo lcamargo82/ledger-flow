@@ -1,11 +1,11 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Headers,
   HttpCode,
   HttpStatus,
   Param,
-  ParseEnumPipe,
   Post,
 } from '@nestjs/common';
 import {
@@ -32,17 +32,30 @@ export class ChannelWebhooksController {
   @ApiOperation({ summary: 'Receber webhook genérico de canal de venda' })
   @ApiHeader({
     name: 'x-ledgerflow-channel-secret',
-    description: 'Segredo configurado na integração de canal',
-    required: true,
+    description: 'Segredo configurado na integração de canal quando exigido pelo provider',
+    required: false,
   })
   @ApiOkResponse({ type: ChannelWebhookAcceptedResponseDto })
   @ApiBadRequestResponse({ description: 'Provider ou payload inválido' })
   @ApiForbiddenResponse({ description: 'Segredo de integração inválido' })
   ingest(
-    @Param('provider', new ParseEnumPipe(ChannelProvider)) provider: ChannelProvider,
+    @Param('provider') provider: string,
     @Headers('x-ledgerflow-channel-secret') webhookSecret: string | undefined,
     @Body() payload: unknown,
   ) {
-    return this.intakeService.ingest(provider, webhookSecret, payload);
+    return this.intakeService.ingest(this.resolveProvider(provider), webhookSecret, payload);
+  }
+
+  private resolveProvider(provider: string): ChannelProvider {
+    const normalizedProvider = provider.trim().toLowerCase().replaceAll('-', '_');
+    const channelProvider = Object.values(ChannelProvider).find(
+      (value) => value.toLowerCase() === normalizedProvider,
+    );
+
+    if (!channelProvider) {
+      throw new BadRequestException('Provider inválido.');
+    }
+
+    return channelProvider;
   }
 }
