@@ -1,0 +1,83 @@
+import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import ChannelsView from '../views/ChannelsView.vue'
+
+const fetchChannels = vi.fn()
+const fetchListings = vi.fn()
+const fetchInventorySyncStatus = vi.fn()
+const createIntegration = vi.fn()
+const connectMercadoLivre = vi.fn()
+
+vi.mock('../stores/auth.store', () => ({
+  useAuthStore: () => ({
+    checkAllPermissions: vi.fn(() => true),
+    checkCapability: vi.fn(() => true),
+  }),
+}))
+
+vi.mock('../stores/channels.store', () => ({
+  useChannelsStore: () => ({
+    integrations: [],
+    inboxEvents: [],
+    listings: [],
+    inventorySyncStates: [],
+    filters: { page: 1, perPage: 10 },
+    listingFilters: { page: 1, perPage: 10, status: 'UNMATCHED' },
+    inventorySyncFilters: { page: 1, perPage: 10 },
+    lastImportSummary: null,
+    lastSyncSummary: null,
+    isLoading: false,
+    isMutating: false,
+    error: null,
+    fetchChannels,
+    fetchListings,
+    fetchInventorySyncStatus,
+    createIntegration,
+    connectMercadoLivre,
+    importListings: vi.fn(),
+    mapListing: vi.fn(),
+    processInventorySync: vi.fn(),
+    setInboxStatus: vi.fn(),
+    setListingStatus: vi.fn(),
+    setInventorySyncStatus: vi.fn(),
+  }),
+}))
+
+describe('ChannelsView Mercado Livre connection', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
+    document.body.innerHTML = ''
+  })
+
+  it('offers Mercado Livre as an OAuth connection instead of manual webhook credentials', async () => {
+    fetchChannels.mockResolvedValue(undefined)
+    fetchListings.mockResolvedValue(undefined)
+    fetchInventorySyncStatus.mockResolvedValue(undefined)
+    connectMercadoLivre.mockResolvedValue('https://auth.mercadolivre.com.br/authorization')
+
+    const wrapper = mount(ChannelsView, { attachTo: document.body })
+
+    await wrapper.get('button').trigger('click')
+
+    const providerSelect = document.body.querySelector<HTMLSelectElement>('#channel-provider')
+    expect(providerSelect).not.toBeNull()
+    expect([...providerSelect!.options].map((option) => option.value)).toContain('MERCADO_LIVRE')
+
+    providerSelect!.value = 'MERCADO_LIVRE'
+    providerSelect!.dispatchEvent(new Event('change'))
+    await nextTick()
+
+    expect(document.body.textContent).toContain('Conectar Mercado Livre')
+    expect(document.body.textContent).toContain('OAuth')
+    expect(document.body.textContent).not.toContain('Segredo do webhook')
+
+    document.body
+      .querySelector<HTMLFormElement>('form')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await nextTick()
+
+    expect(connectMercadoLivre).toHaveBeenCalledOnce()
+    expect(createIntegration).not.toHaveBeenCalled()
+  })
+})
