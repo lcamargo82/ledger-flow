@@ -55,8 +55,8 @@ export class ChannelWebhookIntakeService {
       payloadHash,
       payloadSummary:
         provider === ChannelProvider.MERCADO_LIVRE
-          ? (this.sanitizeMercadoLivrePayload(normalizedPayload) as Prisma.InputJsonValue)
-          : (this.sanitizePayload(normalizedPayload) as Prisma.InputJsonValue),
+          ? this.sanitizeMercadoLivrePayload(normalizedPayload)
+          : this.sanitizePayload(normalizedPayload),
       failureReason: validation.isValid ? null : validation.reason,
     });
 
@@ -150,9 +150,7 @@ export class ChannelWebhookIntakeService {
 
     return {
       isValid: true,
-      eventId:
-        notificationId ||
-        [topic, resource, userId, applicationId].filter(Boolean).join(':'),
+      eventId: notificationId || [topic, resource, userId, applicationId].filter(Boolean).join(':'),
       eventType: topic,
     };
   }

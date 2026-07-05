@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ChannelIntegration,
   ChannelIntegrationStatus,
@@ -29,6 +35,7 @@ export class ChannelOrderIntakeService {
   constructor(
     @Inject(CHANNELS_REPOSITORY)
     private readonly channelsRepository: ChannelsRepository,
+    @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
     private readonly mercadoLivreAdapter: MercadoLivreChannelAdapter,
     private readonly credentialsEncryptionService: GatewayCredentialsEncryptionService,

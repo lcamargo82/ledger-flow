@@ -55,11 +55,7 @@ export class PrismaOutboxRepository implements OutboxRepository {
     });
   }
 
-  async markAsFailed(
-    id: string,
-    errorCode: string,
-    errorSummary: string,
-  ): Promise<void> {
+  async markAsFailed(id: string, errorCode: string, errorSummary: string): Promise<void> {
     await this.prisma.outboxEvent.update({
       where: { id },
       data: {
@@ -90,12 +86,7 @@ export class PrismaOutboxRepository implements OutboxRepository {
   }
 
   async paginate(query: any): Promise<any> {
-    const {
-      skip = 0,
-      take = 10,
-      where,
-      orderBy = { createdAt: 'desc' },
-    } = query;
+    const { skip = 0, take = 10, where, orderBy = { createdAt: 'desc' } } = query;
     const [items, total] = await Promise.all([
       this.prisma.outboxEvent.findMany({ skip, take, where, orderBy }),
       this.prisma.outboxEvent.count({ where }),

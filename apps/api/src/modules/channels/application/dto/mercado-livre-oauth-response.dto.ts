@@ -3,8 +3,7 @@ import { ChannelIntegrationStatus } from '@prisma/client';
 
 export class MercadoLivreConnectResponseDto {
   @ApiProperty({
-    example:
-      'https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=...',
+    example: 'https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=...',
   })
   authorizationUrl!: string;
 }

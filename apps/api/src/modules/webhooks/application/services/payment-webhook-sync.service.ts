@@ -1,11 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
-import {
-  WebhookProcessingStatus,
-  Payment,
-  PaymentStatus,
-  PaymentProvider,
-} from '@prisma/client';
+import { WebhookProcessingStatus, Payment, PaymentStatus, PaymentProvider } from '@prisma/client';
 import { NormalizedWebhookEvent } from '../../domain/interfaces/provider-webhook-adapter.interface';
 import { AsaasWebhookStatusMapper } from '../mappers/asaas-webhook-status.mapper';
 
@@ -62,9 +57,7 @@ export class PaymentWebhookSyncService {
       };
     }
 
-    const targetStatus = event.normalizedPaymentStatus as
-      | PaymentStatus
-      | undefined;
+    const targetStatus = event.normalizedPaymentStatus as PaymentStatus | undefined;
 
     if (!targetStatus) {
       // Just update providerStatus
@@ -118,10 +111,8 @@ export class PaymentWebhookSyncService {
       providerUpdatedAt: new Date(),
     };
 
-    if (targetStatus === PaymentStatus.REFUNDED)
-      dataToUpdate.refundedAt = new Date();
-    if (targetStatus === PaymentStatus.CANCELED)
-      dataToUpdate.canceledAt = new Date();
+    if (targetStatus === PaymentStatus.REFUNDED) dataToUpdate.refundedAt = new Date();
+    if (targetStatus === PaymentStatus.CANCELED) dataToUpdate.canceledAt = new Date();
 
     const eventType = `payment.provider_${event.rawProviderEventType.toLowerCase()}`;
 

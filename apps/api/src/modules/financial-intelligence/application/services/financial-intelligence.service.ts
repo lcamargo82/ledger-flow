@@ -32,10 +32,7 @@ export class FinancialIntelligenceService {
     const channelFeeAmount = this.decimal(input.channelFeeAmount);
     const freightAmount = this.decimal(input.freightAmount);
     const discountAmount = this.decimal(input.discountAmount);
-    const { cogsAmount, items, currency } = this.calculateCogs(
-      order.items,
-      input.currency,
-    );
+    const { cogsAmount, items, currency } = this.calculateCogs(order.items, input.currency);
     const grossMarginAmount = revenueAmount.sub(cogsAmount).sub(channelFeeAmount);
     const components = {
       note: 'Operational marketplace financial fact only. This is not payment settlement or reconciliation.',
@@ -80,7 +77,7 @@ export class FinancialIntelligenceService {
         currency,
         itemCount: items.length,
         fulfilledAt: order.fulfilledAt,
-        components: components as Prisma.InputJsonValue,
+        components: components,
       },
     });
 
@@ -154,7 +151,7 @@ export class FinancialIntelligenceService {
         currency: items[0]?.currency ?? 'BRL',
         itemCount: items.length,
         fulfilledAt: order.fulfilledAt,
-        components: components as Prisma.InputJsonValue,
+        components: components,
       },
     });
 

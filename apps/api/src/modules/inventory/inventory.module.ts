@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma/prisma.module';
 import { ChannelsModule } from '../channels/channels.module';
 import { InventoryService } from './application/services/inventory.service';
@@ -9,7 +9,7 @@ import { InventoryLedgerController } from './presentation/controllers/inventory-
 import { InventoryWarehousesController } from './presentation/controllers/inventory-warehouses.controller';
 
 @Module({
-  imports: [PrismaModule, ChannelsModule],
+  imports: [PrismaModule, forwardRef(() => ChannelsModule)],
   controllers: [
     InventoryFoundationController,
     InventoryWarehousesController,

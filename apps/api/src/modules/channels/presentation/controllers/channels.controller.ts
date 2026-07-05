@@ -122,7 +122,10 @@ export class ChannelsController {
   @ApiOkResponse({ type: PaginatedChannelListingsResponseDto })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
-  listListings(@CurrentUser() user: AuthenticatedUser, @Query() query: ListChannelListingsQueryDto) {
+  listListings(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListChannelListingsQueryDto,
+  ) {
     return this.channelsService.listListings(user.tenantId, query);
   }
 

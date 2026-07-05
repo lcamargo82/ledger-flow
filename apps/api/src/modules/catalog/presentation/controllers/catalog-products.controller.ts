@@ -41,10 +41,7 @@ export class CatalogProductsController {
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de catálogo' })
   @ApiConflictResponse({ description: 'SKU já cadastrado para este tenant' })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
-  async create(
-    @CurrentUser() user: AuthenticatedUser,
-    @Body() createProductDto: CreateProductDto,
-  ) {
+  async create(@CurrentUser() user: AuthenticatedUser, @Body() createProductDto: CreateProductDto) {
     const product = await this.catalogProductsService.create(
       user.tenantId,
       user.id,
@@ -59,10 +56,7 @@ export class CatalogProductsController {
   @ApiOkResponse({ type: PaginatedProductsResponseDto })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de catálogo' })
-  findAll(
-    @CurrentUser() user: AuthenticatedUser,
-    @Query() query: ListProductsQueryDto,
-  ) {
+  findAll(@CurrentUser() user: AuthenticatedUser, @Query() query: ListProductsQueryDto) {
     return this.catalogProductsService.findAll(user.tenantId, query);
   }
 
@@ -108,11 +102,7 @@ export class CatalogProductsController {
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de catálogo' })
   @ApiNotFoundResponse({ description: 'Produto não encontrado' })
   async archive(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
-    const product = await this.catalogProductsService.archive(
-      id,
-      user.tenantId,
-      user.id,
-    );
+    const product = await this.catalogProductsService.archive(id, user.tenantId, user.id);
     return { product };
   }
 }

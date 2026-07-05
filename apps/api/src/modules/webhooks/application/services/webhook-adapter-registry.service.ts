@@ -5,10 +5,7 @@ import { WebhookProviderNotSupportedError } from '../../domain/errors/webhook-er
 
 @Injectable()
 export class WebhookAdapterRegistryService {
-  private readonly adapters = new Map<
-    WebhookProvider,
-    ProviderWebhookAdapter
-  >();
+  private readonly adapters = new Map<WebhookProvider, ProviderWebhookAdapter>();
 
   register(provider: WebhookProvider, adapter: ProviderWebhookAdapter): void {
     this.adapters.set(provider, adapter);

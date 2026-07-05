@@ -28,7 +28,7 @@ import {
 export class AsaasWebhooksController {
   private readonly logger = new Logger(AsaasWebhooksController.name);
 
-  constructor(private readonly ingressService: WebhookIngressService) { }
+  constructor(private readonly ingressService: WebhookIngressService) {}
 
   @Post()
   @Public()

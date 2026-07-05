@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InternalOrderItem, InternalOrderStatus, Prisma } from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
@@ -18,6 +24,7 @@ export class OrdersService {
   constructor(
     @Inject(ORDERS_REPOSITORY)
     private readonly ordersRepository: OrdersRepository,
+    @Inject(forwardRef(() => InventoryService))
     private readonly inventoryService: InventoryService,
     private readonly financialIntelligenceService: FinancialIntelligenceService,
     private readonly prisma: PrismaService,

@@ -76,7 +76,7 @@ describe('MercadoLivreOAuthService', () => {
     return new MercadoLivreOAuthService(
       apiClient as never,
       stateService as never,
-      encryptionService as never,
+      encryptionService,
       prisma as never,
     );
   }
@@ -89,7 +89,9 @@ describe('MercadoLivreOAuthService', () => {
     expect(stateService.generateState).toHaveBeenCalledWith('tenant-1', 'user-1');
     expect(result.authorizationUrl).toContain('client_id=ml-client-id');
     expect(result.authorizationUrl).toContain('state=secure-state');
-    expect(result.authorizationUrl).toContain('redirect_uri=https%3A%2F%2Fapp.ledgerflow.test%2Fchannels%2Fmercado-livre%2Fcallback');
+    expect(result.authorizationUrl).toContain(
+      'redirect_uri=https%3A%2F%2Fapp.ledgerflow.test%2Fchannels%2Fmercado-livre%2Fcallback',
+    );
     expect(result.authorizationUrl).not.toContain('access');
     expect(result.authorizationUrl).not.toContain('refresh');
     expect(prisma.auditLog.create).toHaveBeenCalledWith({
@@ -168,7 +170,10 @@ describe('MercadoLivreOAuthService', () => {
         },
       }),
     });
-    expect(result).toEqual({ integrationId: 'integration-1', status: ChannelIntegrationStatus.ACTIVE });
+    expect(result).toEqual({
+      integrationId: 'integration-1',
+      status: ChannelIntegrationStatus.ACTIVE,
+    });
   });
 
   it('fails closed when OAuth state is invalid or already consumed', async () => {

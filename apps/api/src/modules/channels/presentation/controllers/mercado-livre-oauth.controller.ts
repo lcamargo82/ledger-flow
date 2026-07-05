@@ -33,10 +33,7 @@ export class MercadoLivreOAuthController {
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
   connect(@CurrentUser() user: AuthenticatedUser) {
-    return this.mercadoLivreOAuthService.generateAuthorizationUrl(
-      user.tenantId,
-      user.id,
-    );
+    return this.mercadoLivreOAuthService.generateAuthorizationUrl(user.tenantId, user.id);
   }
 
   @Get('callback')
@@ -53,15 +50,8 @@ export class MercadoLivreOAuthController {
   @ApiOkResponse({ type: MercadoLivreDisconnectResponseDto })
   @ApiUnauthorizedResponse({ description: 'Não autorizado' })
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
-  async disconnect(
-    @CurrentUser() user: AuthenticatedUser,
-    @Param('id') integrationId: string,
-  ) {
-    await this.mercadoLivreOAuthService.disconnect(
-      user.tenantId,
-      user.id,
-      integrationId,
-    );
+  async disconnect(@CurrentUser() user: AuthenticatedUser, @Param('id') integrationId: string) {
+    await this.mercadoLivreOAuthService.disconnect(user.tenantId, user.id, integrationId);
     return { disconnected: true };
   }
 }

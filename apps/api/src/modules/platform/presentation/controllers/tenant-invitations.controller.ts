@@ -1,10 +1,5 @@
 import { Controller, Param, Post, HttpCode, HttpStatus } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TenantInvitationService } from '../../application/services/tenant-invitation.service';
 import { PlatformAdminOnly } from '../../../auth/presentation/decorators/platform-admin-only.decorator';
 import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
@@ -23,10 +18,7 @@ export class TenantInvitationsController {
   @ApiOperation({ summary: 'Resend tenant invitation to the owner' })
   @ApiResponse({ status: 200, description: 'Invitation resent successfully' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
-  async resendInvitation(
-    @Param('id') tenantId: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  async resendInvitation(@Param('id') tenantId: string, @CurrentUser('id') userId: string) {
     return this.invitationService.resendInvitation(tenantId, userId);
   }
 }

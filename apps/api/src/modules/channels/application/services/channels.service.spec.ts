@@ -47,7 +47,7 @@ describe('ChannelsService', () => {
         stockSyncEnabled: false,
         maxPagesPerRun: 2,
       },
-    } as never);
+    });
 
     expect(repository.createIntegration).toHaveBeenCalledWith({
       tenantId: 'tenant-1',
@@ -94,7 +94,7 @@ describe('ChannelsService', () => {
         settingsJson: {
           accessToken: 'tenant-access-token',
         },
-      } as never),
+      }),
     ).rejects.toBeInstanceOf(BadRequestException);
 
     expect(repository.createIntegration).not.toHaveBeenCalled();

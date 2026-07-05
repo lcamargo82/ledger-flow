@@ -25,8 +25,6 @@ export class AsaasWebhookStatusMapper {
   }
 
   static isTerminalStatus(status: PaymentStatus): boolean {
-    return (
-      status === PaymentStatus.REFUNDED || status === PaymentStatus.CANCELED
-    );
+    return status === PaymentStatus.REFUNDED || status === PaymentStatus.CANCELED;
   }
 }

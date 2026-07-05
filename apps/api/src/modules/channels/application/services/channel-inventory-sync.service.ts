@@ -166,9 +166,9 @@ export class ChannelInventorySyncService {
     };
   }
 
-  private mockProviderSync(state: ChannelInventorySyncState):
-    | { ok: true }
-    | { ok: false; errorCode: string; errorSummary: string } {
+  private mockProviderSync(
+    state: ChannelInventorySyncState,
+  ): { ok: true } | { ok: false; errorCode: string; errorSummary: string } {
     if (state.externalListingId.includes('rate-limit')) {
       return {
         ok: false,

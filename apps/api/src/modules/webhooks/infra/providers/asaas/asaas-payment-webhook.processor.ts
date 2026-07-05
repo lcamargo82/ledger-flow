@@ -13,20 +13,13 @@ export class AsaasPaymentWebhookProcessor implements WebhookEventProcessor {
 
   constructor(private readonly paymentSyncService: PaymentWebhookSyncService) {}
 
-  async process(
-    event: NormalizedWebhookEvent,
-  ): Promise<WebhookProcessingResult> {
-    this.logger.log(
-      `[AsaasPaymentWebhookProcessor] Processing event ${event.providerEventId}`,
-    );
+  async process(event: NormalizedWebhookEvent): Promise<WebhookProcessingResult> {
+    this.logger.log(`[AsaasPaymentWebhookProcessor] Processing event ${event.providerEventId}`);
 
     const result = await this.paymentSyncService.syncAsaasPayment(event);
 
     return {
-      status:
-        result.status === WebhookProcessingStatus.IGNORED
-          ? 'IGNORED'
-          : 'PROCESSED',
+      status: result.status === WebhookProcessingStatus.IGNORED ? 'IGNORED' : 'PROCESSED',
       reason: result.reason,
       paymentId: result.paymentId,
       tenantId: result.tenantId,

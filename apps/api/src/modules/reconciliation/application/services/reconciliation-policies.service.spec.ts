@@ -14,9 +14,7 @@ describe('ReconciliationPoliciesService', () => {
     auditLog: {
       create: jest.fn(),
     },
-    $transaction: jest.fn(async (callback: (tx: typeof prisma) => unknown) =>
-      callback(prisma),
-    ),
+    $transaction: jest.fn(async (callback: (tx: typeof prisma) => unknown) => callback(prisma)),
   };
 
   let service: ReconciliationPoliciesService;
@@ -69,10 +67,12 @@ describe('ReconciliationPoliciesService', () => {
   });
 
   it('versions provider-neutral policy independently from provider-specific policy', async () => {
-    prisma.reconciliationPolicy.findFirst.mockResolvedValueOnce(policy({
-      provider: null,
-      version: 4,
-    }));
+    prisma.reconciliationPolicy.findFirst.mockResolvedValueOnce(
+      policy({
+        provider: null,
+        version: 4,
+      }),
+    );
 
     await service.createPolicy('tenant-1', 'user-1', {
       currency: 'BRL',

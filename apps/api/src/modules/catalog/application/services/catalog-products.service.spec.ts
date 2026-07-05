@@ -22,7 +22,7 @@ describe('CatalogProductsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new CatalogProductsService(repository as never, prisma as never);
+    service = new CatalogProductsService(repository, prisma as never);
   });
 
   it('creates a simple product with normalized SKU and audit log', async () => {

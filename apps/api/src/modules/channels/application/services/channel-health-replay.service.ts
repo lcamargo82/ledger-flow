@@ -61,13 +61,19 @@ export class ChannelHealthReplayService {
     }
 
     await this.channelsRepository.resetInboxForReplay(inboxEvent.id);
-    await this.createOutbox(tenantId, inboxEvent.id, 'ChannelWebhookInboxEvent', 'channel.webhook.received', {
-      inboxEventId: inboxEvent.id,
-      provider: inboxEvent.provider,
-      providerEventId: inboxEvent.providerEventId,
-      status: ChannelWebhookStatus.RECEIVED,
-      replay: true,
-    });
+    await this.createOutbox(
+      tenantId,
+      inboxEvent.id,
+      'ChannelWebhookInboxEvent',
+      'channel.webhook.received',
+      {
+        inboxEventId: inboxEvent.id,
+        provider: inboxEvent.provider,
+        providerEventId: inboxEvent.providerEventId,
+        status: ChannelWebhookStatus.RECEIVED,
+        replay: true,
+      },
+    );
     await this.audit(
       tenantId,
       actorUserId,
@@ -81,10 +87,7 @@ export class ChannelHealthReplayService {
   }
 
   async replayInventorySync(tenantId: string, actorUserId: string, syncStateId: string) {
-    const state = await this.channelsRepository.findInventorySyncStateById(
-      syncStateId,
-      tenantId,
-    );
+    const state = await this.channelsRepository.findInventorySyncStateById(syncStateId, tenantId);
     if (!state) {
       throw new NotFoundException('Channel inventory sync state not found.');
     }

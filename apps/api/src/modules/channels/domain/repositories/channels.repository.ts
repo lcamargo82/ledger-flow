@@ -185,9 +185,7 @@ export interface ChannelsRepository {
     reason?: string | null;
   }): Promise<ChannelListing>;
   findSyncableListingsBySku(tenantId: string, skuId: string): Promise<SyncableListingProjection[]>;
-  upsertInventorySyncState(
-    data: UpsertInventorySyncStateData,
-  ): Promise<ChannelInventorySyncState>;
+  upsertInventorySyncState(data: UpsertInventorySyncStateData): Promise<ChannelInventorySyncState>;
   listInventorySyncStates(
     params: ListInventorySyncStatesParams,
   ): Promise<PaginatedInventorySyncStatesResult>;

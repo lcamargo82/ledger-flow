@@ -1,16 +1,9 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { AuthenticatedUser } from '../../application/types/authenticated-user.type';
 import { CapabilityPolicyService } from '../../../platform/application/services/capability-policy.service';
-import {
-  REQUIRED_CAPABILITIES_KEY,
-} from '../decorators/require-capabilities.decorator';
+import { REQUIRED_CAPABILITIES_KEY } from '../decorators/require-capabilities.decorator';
 import type { PlatformCapability } from '../../../platform/domain/constants/platform-capabilities';
 
 @Injectable()
@@ -21,11 +14,10 @@ export class CapabilityGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredCapabilities =
-      this.reflector.getAllAndOverride<PlatformCapability[]>(
-        REQUIRED_CAPABILITIES_KEY,
-        [context.getHandler(), context.getClass()],
-      );
+    const requiredCapabilities = this.reflector.getAllAndOverride<PlatformCapability[]>(
+      REQUIRED_CAPABILITIES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredCapabilities || requiredCapabilities.length === 0) {
       return true;
@@ -35,9 +27,7 @@ export class CapabilityGuard implements CanActivate {
     const user = request.user as AuthenticatedUser;
 
     if (!user) {
-      throw new ForbiddenException(
-        'User not authenticated for capability check',
-      );
+      throw new ForbiddenException('User not authenticated for capability check');
     }
 
     const hasCapabilities = await this.capabilityPolicy.hasCapabilities(

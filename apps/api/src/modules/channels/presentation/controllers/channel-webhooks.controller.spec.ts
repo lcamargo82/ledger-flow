@@ -48,9 +48,7 @@ describe('ChannelWebhooksController', () => {
   it('rejects unsupported providers before the intake service', () => {
     const controller = new ChannelWebhooksController(intakeService as never);
 
-    expect(() => controller.ingest('unknown-provider', undefined, {})).toThrow(
-      BadRequestException,
-    );
+    expect(() => controller.ingest('unknown-provider', undefined, {})).toThrow(BadRequestException);
     expect(intakeService.ingest).not.toHaveBeenCalled();
   });
 });

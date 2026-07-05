@@ -85,9 +85,7 @@ describe('ReconciliationCasesService', () => {
   it('throws not found when the case does not belong to the tenant', async () => {
     prisma.reconciliationCase.findFirst.mockResolvedValue(null);
 
-    await expect(service.getCase('tenant-1', 'case-1')).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
+    await expect(service.getCase('tenant-1', 'case-1')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   function reconciliationCase(overrides: Record<string, unknown> = {}) {

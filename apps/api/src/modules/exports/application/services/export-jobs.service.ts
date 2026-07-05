@@ -1,16 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  StreamableFile,
-} from '@nestjs/common';
-import {
-  ExportJob,
-  ExportJobFormat,
-  ExportJobStatus,
-  ExportJobType,
-  Prisma,
-} from '@prisma/client';
+import { BadRequestException, Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
+import { ExportJob, ExportJobFormat, ExportJobStatus, ExportJobType, Prisma } from '@prisma/client';
 import { createReadStream, createWriteStream } from 'fs';
 import { mkdir, stat } from 'fs/promises';
 import { tmpdir } from 'os';
@@ -219,7 +208,15 @@ export class ExportJobsService {
     let rowCount = 0;
 
     if (job.type === ExportJobType.CATALOG_PRODUCTS) {
-      await this.writeLine(stream, ['product_id', 'name', 'type', 'status', 'sku', 'unit', 'average_cost']);
+      await this.writeLine(stream, [
+        'product_id',
+        'name',
+        'type',
+        'status',
+        'sku',
+        'unit',
+        'average_cost',
+      ]);
       rowCount = await this.streamCatalogProducts(job.tenantId, stream);
     }
     if (job.type === ExportJobType.ORDER_FINANCIAL_FACTS) {
@@ -432,7 +429,9 @@ export class ExportJobsService {
   private normalizeParameters(parameters?: Record<string, unknown>) {
     if (!parameters) return undefined;
     return Object.fromEntries(
-      Object.entries(parameters).filter(([, value]) => ['string', 'number', 'boolean'].includes(typeof value)),
+      Object.entries(parameters).filter(([, value]) =>
+        ['string', 'number', 'boolean'].includes(typeof value),
+      ),
     ) as Prisma.InputJsonObject;
   }
 

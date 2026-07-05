@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -27,6 +28,7 @@ export class InventoryService {
     private readonly inventoryRepository: InventoryRepository,
     private readonly prisma: PrismaService,
     @Optional()
+    @Inject(forwardRef(() => ChannelInventorySyncService))
     private readonly channelInventorySyncService?: ChannelInventorySyncService,
   ) {}
 
@@ -328,7 +330,7 @@ export class InventoryService {
         aggregateId: balanceId,
         eventType: 'inventory.balance.changed',
         eventVersion: 1,
-        payload: payload as Prisma.InputJsonValue,
+        payload: payload,
         payloadHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
       },
     });

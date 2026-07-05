@@ -1,9 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ReconciliationCaseStatus,
-  ReconciliationMatchType,
-  WebhookProvider,
-} from '@prisma/client';
+import { ReconciliationCaseStatus, ReconciliationMatchType, WebhookProvider } from '@prisma/client';
 
 export class ReconciliationCasePaymentSummaryDto {
   @ApiProperty()

@@ -1,18 +1,5 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/modules/auth/presentation/guards/jwt-auth.guard';
 import { PermissionGuard } from '@/modules/auth/presentation/guards/permission.guard';
 import { RequirePermissions } from '@/modules/auth/presentation/decorators/require-permissions.decorator';
@@ -52,9 +39,7 @@ export class GatewayConnectionsController {
       tenantId: user.tenantId,
       feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
     });
-    const connections = await this.gatewayConnectionsService.listConnections(
-      user.tenantId,
-    );
+    const connections = await this.gatewayConnectionsService.listConnections(user.tenantId);
     return { data: connections };
   }
 
@@ -70,10 +55,7 @@ export class GatewayConnectionsController {
       tenantId: user.tenantId,
       feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
     });
-    return this.gatewayConnectionsService.createAsaasSandboxConnection(
-      user.tenantId,
-      dto,
-    );
+    return this.gatewayConnectionsService.createAsaasSandboxConnection(user.tenantId, dto);
   }
 
   @Patch(':id')
@@ -89,11 +71,7 @@ export class GatewayConnectionsController {
       tenantId: user.tenantId,
       feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
     });
-    return this.gatewayConnectionsService.updateConnection(
-      user.tenantId,
-      id,
-      dto,
-    );
+    return this.gatewayConnectionsService.updateConnection(user.tenantId, id, dto);
   }
 
   @Post(':id/credentials')
@@ -109,11 +87,7 @@ export class GatewayConnectionsController {
       tenantId: user.tenantId,
       feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
     });
-    return this.gatewayConnectionsService.updateCredentials(
-      user.tenantId,
-      id,
-      dto,
-    );
+    return this.gatewayConnectionsService.updateCredentials(user.tenantId, id, dto);
   }
 
   @Patch(':id/status')
@@ -129,11 +103,7 @@ export class GatewayConnectionsController {
       tenantId: user.tenantId,
       feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
     });
-    return this.gatewayConnectionsService.updateStatus(
-      user.tenantId,
-      id,
-      dto.status,
-    );
+    return this.gatewayConnectionsService.updateStatus(user.tenantId, id, dto.status);
   }
 
   @Post(':id/disconnect')
@@ -148,9 +118,6 @@ export class GatewayConnectionsController {
       tenantId: user.tenantId,
       feature: TENANT_FEATURES.GATEWAY_CONNECTIONS,
     });
-    return this.gatewayConnectionsService.disconnectConnection(
-      user.tenantId,
-      id,
-    );
+    return this.gatewayConnectionsService.disconnectConnection(user.tenantId, id);
   }
 }

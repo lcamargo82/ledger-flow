@@ -23,11 +23,7 @@ export abstract class OutboxRepository {
     leaseDurationMs: number,
   ): Promise<OutboxEvent[]>;
   abstract markAsPublished(id: string): Promise<void>;
-  abstract markAsFailed(
-    id: string,
-    errorCode: string,
-    errorSummary: string,
-  ): Promise<void>;
+  abstract markAsFailed(id: string, errorCode: string, errorSummary: string): Promise<void>;
   abstract releaseLock(id: string): Promise<void>;
   abstract findById(id: string): Promise<OutboxEvent | null>;
   abstract paginate(query: any): Promise<any>;

@@ -26,10 +26,7 @@ describe('ReconciliationSyncController', () => {
       'syncAsaas',
     );
 
-    const responses = Reflect.getMetadata(
-      'swagger/apiResponse',
-      descriptor?.value,
-    );
+    const responses = Reflect.getMetadata('swagger/apiResponse', descriptor?.value);
 
     expect(responses[200].type).toBe(ReconciliationSyncResponseDto);
   });

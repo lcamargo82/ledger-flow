@@ -1,9 +1,6 @@
 import { PaymentStatus } from '@prisma/client';
 
-export function canTransitionPaymentStatus(
-  from: PaymentStatus,
-  to: PaymentStatus,
-): boolean {
+export function canTransitionPaymentStatus(from: PaymentStatus, to: PaymentStatus): boolean {
   if (from === to) return false;
 
   const validTransitions: Record<PaymentStatus, PaymentStatus[]> = {

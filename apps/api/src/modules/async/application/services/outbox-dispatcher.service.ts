@@ -1,26 +1,17 @@
-import {
-  Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
-} from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
 import { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
 import { AsyncMessageEnvelope } from '../../domain/entities/async-message-envelope';
 import { randomUUID } from 'crypto';
 
 @Injectable()
-export class OutboxDispatcherService
-  implements OnApplicationBootstrap, OnApplicationShutdown
-{
+export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger(OutboxDispatcherService.name);
   private timer: NodeJS.Timeout | null = null;
   private isShuttingDown = false;
   private readonly dispatcherId = randomUUID();
-  private readonly batchSize =
-    Number(process.env.OUTBOX_DISPATCH_BATCH_SIZE) || 50;
-  private readonly intervalMs =
-    Number(process.env.OUTBOX_DISPATCH_INTERVAL_MS) || 2000;
+  private readonly batchSize = Number(process.env.OUTBOX_DISPATCH_BATCH_SIZE) || 50;
+  private readonly intervalMs = Number(process.env.OUTBOX_DISPATCH_INTERVAL_MS) || 2000;
   private readonly leaseDurationMs =
     (Number(process.env.OUTBOX_LEASE_DURATION_SECONDS) || 60) * 1000;
   private isProcessing = false;
@@ -86,26 +77,17 @@ export class OutboxDispatcherService
 
           const routingKey = event.eventType;
 
-          const published = await this.messagePublisher.publish(
-            routingKey,
-            envelope,
-          );
+          const published = await this.messagePublisher.publish(routingKey, envelope);
 
           if (published) {
             await this.outboxRepository.markAsPublished(event.id);
-            this.logger.debug(
-              `Successfully published outbox event ${event.id}`,
-            );
+            this.logger.debug(`Successfully published outbox event ${event.id}`);
           } else {
-            this.logger.warn(
-              `Failed to publish outbox event ${event.id}, releasing lock`,
-            );
+            this.logger.warn(`Failed to publish outbox event ${event.id}, releasing lock`);
             await this.outboxRepository.releaseLock(event.id);
           }
         } catch (error: any) {
-          this.logger.error(
-            `Error dispatching outbox event ${event.id}: ${error.message}`,
-          );
+          this.logger.error(`Error dispatching outbox event ${event.id}: ${error.message}`);
           await this.outboxRepository.releaseLock(event.id);
         }
       }

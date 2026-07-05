@@ -262,8 +262,7 @@ describe('ChannelInventorySyncService', () => {
 
     await service.processPending('tenant-1');
 
-    const nextAttemptAt =
-      channelsRepository.markInventorySyncRetry.mock.calls[0][0].nextAttemptAt;
+    const nextAttemptAt = channelsRepository.markInventorySyncRetry.mock.calls[0][0].nextAttemptAt;
     expect(channelsRepository.markInventorySyncRetry).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'sync-ml-1',

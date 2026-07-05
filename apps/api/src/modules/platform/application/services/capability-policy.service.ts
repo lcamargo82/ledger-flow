@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  SubscriptionPlan,
-  TenantSubscriptionStatus,
-} from '@prisma/client';
+import { SubscriptionPlan, TenantSubscriptionStatus } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import {
   CommerceCapabilities,
@@ -74,18 +71,14 @@ export class CapabilityPolicyService {
 
     const tenantCapabilities = new Set(capabilitiesByPlan[subscription.plan]);
 
-    return requiredCapabilities.every((capability) =>
-      tenantCapabilities.has(capability),
-    );
+    return requiredCapabilities.every((capability) => tenantCapabilities.has(capability));
   }
 
   getCapabilitiesForPlan(plan: SubscriptionPlan): PlatformCapability[] {
     return capabilitiesByPlan[plan];
   }
 
-  async getCapabilitiesForTenant(
-    tenantId: string,
-  ): Promise<PlatformCapability[]> {
+  async getCapabilitiesForTenant(tenantId: string): Promise<PlatformCapability[]> {
     const subscription = await this.prisma.tenantSubscription.findUnique({
       where: { tenantId },
       select: {

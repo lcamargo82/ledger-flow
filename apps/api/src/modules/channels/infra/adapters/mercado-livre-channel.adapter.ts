@@ -60,10 +60,7 @@ export class MercadoLivreChannelAdapter
     return listings;
   }
 
-  async fetchOrder(input: {
-    accessToken: string;
-    resource: string;
-  }): Promise<ChannelOrderDetails> {
+  async fetchOrder(input: { accessToken: string; resource: string }): Promise<ChannelOrderDetails> {
     return this.toOrder(await this.apiClient.getOrder(input.accessToken, input.resource));
   }
 
@@ -181,7 +178,10 @@ export class MercadoLivreChannelAdapter
   }
 
   private sum(...groups: Array<Array<number | string | undefined>>) {
-    const values = groups.flat().map((value) => this.money(value)).filter(Boolean);
+    const values = groups
+      .flat()
+      .map((value) => this.money(value))
+      .filter(Boolean);
     if (values.length === 0) return undefined;
 
     const total = values.reduce((sum, value) => sum + Number(value), 0);

@@ -11,9 +11,7 @@ import { CreateProductDto } from '../dto/create-product.dto';
 import { ListProductsQueryDto } from '../dto/list-products-query.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { SkuPolicy } from '../../domain/policies/sku-policy';
-import {
-  CATALOG_PRODUCTS_REPOSITORY,
-} from '../../domain/repositories/catalog-products.repository';
+import { CATALOG_PRODUCTS_REPOSITORY } from '../../domain/repositories/catalog-products.repository';
 import type {
   CatalogProductsRepository,
   ProductSkuCreateData,
@@ -27,11 +25,7 @@ export class CatalogProductsService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async create(
-    tenantId: string,
-    actorUserId: string,
-    createProductDto: CreateProductDto,
-  ) {
+  async create(tenantId: string, actorUserId: string, createProductDto: CreateProductDto) {
     await this.validateProductShape(tenantId, createProductDto);
 
     const sku = createProductDto.sku
@@ -50,12 +44,7 @@ export class CatalogProductsService {
       sku,
     });
 
-    await this.auditLog(
-      tenantId,
-      actorUserId,
-      'catalog.product.created',
-      product.id,
-    );
+    await this.auditLog(tenantId, actorUserId, 'catalog.product.created', product.id);
 
     return product;
   }
@@ -72,10 +61,7 @@ export class CatalogProductsService {
   }
 
   async findOne(id: string, tenantId: string) {
-    const product = await this.productsRepository.findByIdAndTenant(
-      id,
-      tenantId,
-    );
+    const product = await this.productsRepository.findByIdAndTenant(id, tenantId);
     if (!product) {
       throw new NotFoundException('Product not found.');
     }
@@ -103,17 +89,12 @@ export class CatalogProductsService {
 
       const nextSkuCanonical = SkuPolicy.normalize(updateProductDto.sku.sku);
       if (nextSkuCanonical !== product.sku.skuCanonical) {
-        throw new BadRequestException(
-          'SKU changes require an explicit audited flow.',
-        );
+        throw new BadRequestException('SKU changes require an explicit audited flow.');
       }
 
       const nextAverageCost = updateProductDto.sku.averageCost;
       const currentAverageCost = Number(product.sku.averageCost);
-      if (
-        nextAverageCost !== currentAverageCost &&
-        !updateProductDto.costChangeReason
-      ) {
+      if (nextAverageCost !== currentAverageCost && !updateProductDto.costChangeReason) {
         throw new BadRequestException('Cost change reason is required.');
       }
 
@@ -141,9 +122,7 @@ export class CatalogProductsService {
         ? 'catalog.product.cost_updated'
         : 'catalog.product.updated',
       updatedProduct.id,
-      updateProductDto.costChangeReason
-        ? { reason: updateProductDto.costChangeReason }
-        : undefined,
+      updateProductDto.costChangeReason ? { reason: updateProductDto.costChangeReason } : undefined,
     );
 
     return updatedProduct;
@@ -158,28 +137,17 @@ export class CatalogProductsService {
 
     const archivedProduct = await this.productsRepository.archive(id, tenantId);
 
-    await this.auditLog(
-      tenantId,
-      actorUserId,
-      'catalog.product.archived',
-      archivedProduct.id,
-    );
+    await this.auditLog(tenantId, actorUserId, 'catalog.product.archived', archivedProduct.id);
 
     return archivedProduct;
   }
 
-  private async validateProductShape(
-    tenantId: string,
-    dto: CreateProductDto,
-  ): Promise<void> {
+  private async validateProductShape(tenantId: string, dto: CreateProductDto): Promise<void> {
     if (dto.type === ProductType.PARENT && dto.sku) {
       throw new BadRequestException('Parent products cannot have SKU.');
     }
 
-    if (
-      (dto.type === ProductType.SIMPLE || dto.type === ProductType.VARIANT) &&
-      !dto.sku
-    ) {
+    if ((dto.type === ProductType.SIMPLE || dto.type === ProductType.VARIANT) && !dto.sku) {
       throw new BadRequestException('Sellable products require SKU.');
     }
 
@@ -192,10 +160,7 @@ export class CatalogProductsService {
         throw new BadRequestException('Variant products require parent.');
       }
 
-      const parent = await this.productsRepository.findByIdAndTenant(
-        dto.parentProductId,
-        tenantId,
-      );
+      const parent = await this.productsRepository.findByIdAndTenant(dto.parentProductId, tenantId);
       if (!parent || parent.type !== ProductType.PARENT) {
         throw new BadRequestException('Variant parent must be a parent product.');
       }
@@ -207,11 +172,10 @@ export class CatalogProductsService {
     skuInput: NonNullable<CreateProductDto['sku']>,
   ): Promise<ProductSkuCreateData> {
     const skuCanonical = SkuPolicy.normalize(skuInput.sku);
-    const existingSku =
-      await this.productsRepository.findSkuByCanonicalAndTenant(
-        skuCanonical,
-        tenantId,
-      );
+    const existingSku = await this.productsRepository.findSkuByCanonicalAndTenant(
+      skuCanonical,
+      tenantId,
+    );
 
     if (existingSku) {
       throw new ConflictException('SKU already exists for this tenant.');

@@ -1,5 +1,9 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { ChannelIntegrationStatus, ChannelListingMatchStatus, ChannelProvider } from '@prisma/client';
+import {
+  ChannelIntegrationStatus,
+  ChannelListingMatchStatus,
+  ChannelProvider,
+} from '@prisma/client';
 import { ChannelsService } from './channels.service';
 
 describe('ChannelsService listings', () => {

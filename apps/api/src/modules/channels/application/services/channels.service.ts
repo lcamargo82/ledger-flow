@@ -11,7 +11,10 @@ import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { GatewayCredentialsEncryptionService } from '../../../gateways/application/services/gateway-credentials-encryption.service';
 import { CreateChannelIntegrationDto } from '../dto/create-channel-integration.dto';
 import { ListChannelInboxQueryDto } from '../dto/list-channel-inbox-query.dto';
-import { ImportChannelListingsDto, MockChannelListingDto } from '../dto/import-channel-listings.dto';
+import {
+  ImportChannelListingsDto,
+  MockChannelListingDto,
+} from '../dto/import-channel-listings.dto';
 import { ListChannelListingsQueryDto } from '../dto/list-channel-listings-query.dto';
 import { MapChannelListingDto } from '../dto/map-channel-listing.dto';
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';

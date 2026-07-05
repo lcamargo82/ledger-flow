@@ -114,8 +114,7 @@ export class ReconciliationCasesService {
       ...reconciliationCase,
       expectedAmountMinor: reconciliationCase.expectedAmountMinor?.toString() ?? null,
       receivedAmountMinor: reconciliationCase.receivedAmountMinor?.toString() ?? null,
-      differenceAmountMinor:
-        reconciliationCase.differenceAmountMinor?.toString() ?? null,
+      differenceAmountMinor: reconciliationCase.differenceAmountMinor?.toString() ?? null,
     };
   }
 }

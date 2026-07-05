@@ -107,7 +107,10 @@ describe('FinancialIntelligenceService', () => {
       ],
     });
     prisma.orderFinancialFact.findFirst.mockResolvedValue(null);
-    prisma.orderFinancialFact.create.mockImplementation(({ data }) => ({ id: 'fact-ml-1', ...data }));
+    prisma.orderFinancialFact.create.mockImplementation(({ data }) => ({
+      id: 'fact-ml-1',
+      ...data,
+    }));
     const service = new FinancialIntelligenceService(prisma as never);
 
     const fact = await service.createChannelOrderOperationalFact(

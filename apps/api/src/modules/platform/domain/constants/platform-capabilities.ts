@@ -12,8 +12,7 @@ export const CommerceCapabilities = {
   FinancialAnalyticsRead: 'financial.analytics.read',
 } as const;
 
-export type CommerceCapability =
-  (typeof CommerceCapabilities)[keyof typeof CommerceCapabilities];
+export type CommerceCapability = (typeof CommerceCapabilities)[keyof typeof CommerceCapabilities];
 
 export const ReconciliationCapabilities = {
   Read: 'reconciliation.read',

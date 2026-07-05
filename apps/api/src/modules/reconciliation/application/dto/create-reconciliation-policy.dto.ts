@@ -1,15 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { WebhookProvider } from '@prisma/client';
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsInt,
-  IsOptional,
-  IsString,
-  Matches,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Matches, Max, Min } from 'class-validator';
 
 export class CreateReconciliationPolicyDto {
   @ApiPropertyOptional({ enum: WebhookProvider })
@@ -35,6 +27,4 @@ export class CreateReconciliationPolicyDto {
   amountToleranceMinor: string;
 }
 
-export class UpdateReconciliationPolicyDto extends PartialType(
-  CreateReconciliationPolicyDto,
-) {}
+export class UpdateReconciliationPolicyDto extends PartialType(CreateReconciliationPolicyDto) {}

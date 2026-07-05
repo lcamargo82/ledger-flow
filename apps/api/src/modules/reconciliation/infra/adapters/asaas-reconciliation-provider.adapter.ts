@@ -67,9 +67,7 @@ export class AsaasReconciliationProviderAdapter implements ReconciliationProvide
     return undefined;
   }
 
-  private sanitizePayload(
-    event: NormalizedWebhookEvent,
-  ): Record<string, unknown> {
+  private sanitizePayload(event: NormalizedWebhookEvent): Record<string, unknown> {
     const summary = (event.payloadSummary ?? {}) as Record<string, unknown>;
     const sanitized: Record<string, unknown> = {
       ...(this.asString(summary.eventId) && {

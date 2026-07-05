@@ -73,7 +73,7 @@ export class ReconciliationDecisionsService {
             previousStatus: reconciliationCase.status,
             nextStatus,
             paymentId: dto.paymentId,
-          } as Prisma.InputJsonValue,
+          },
         },
       });
 

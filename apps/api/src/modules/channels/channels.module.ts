@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { forwardRef, Module, OnModuleInit } from '@nestjs/common';
 import { PrismaModule } from '../../database/prisma/prisma.module';
 import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
 import { AsyncModule } from '../async/async.module';
@@ -23,7 +23,13 @@ import { ChannelsFoundationController } from './presentation/controllers/channel
 import { MercadoLivreOAuthController } from './presentation/controllers/mercado-livre-oauth.controller';
 
 @Module({
-  imports: [PrismaModule, AsyncModule, FinancialIntelligenceModule, GatewaysModule, OrdersModule],
+  imports: [
+    PrismaModule,
+    AsyncModule,
+    FinancialIntelligenceModule,
+    GatewaysModule,
+    forwardRef(() => OrdersModule),
+  ],
   controllers: [
     ChannelsFoundationController,
     ChannelsController,
