@@ -6,6 +6,7 @@ import { useAuthStore } from '../stores/auth.store'
 import { useCatalogProductsStore } from '../stores/catalog-products.store'
 import { useToastStore } from '../stores/toast.store'
 import { formatDateTime } from '../utils/date-format'
+import { formatMoney } from '../utils/money-format'
 import type { ProductListItem, ProductStatus, ProductType } from '../types/catalog.types'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppButton from '../components/common/AppButton.vue'
@@ -193,7 +194,7 @@ const archiveProduct = async (product: ProductListItem) => {
         </template>
 
         <template #cost="{ item }">
-          <span>{{ item.sku ? `${item.sku.currency} ${item.sku.averageCost}` : '-' }}</span>
+          <span>{{ item.sku ? formatMoney(item.sku.averageCost, item.sku.currency, currentLocale) : '-' }}</span>
         </template>
 
         <template #status="{ item }">
