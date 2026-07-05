@@ -5,7 +5,7 @@ import { ChannelWebhookIntakeService } from './channel-webhook-intake.service';
 describe('ChannelWebhookIntakeService', () => {
   const repository = {
     findActiveIntegrationBySecretHash: jest.fn(),
-    findActiveIntegrationByExternalAccountId: jest.fn(),
+    findActiveIntegrationsByExternalAccountId: jest.fn(),
     findInboxByProviderEventId: jest.fn(),
     createInboxEvent: jest.fn(),
   };
@@ -81,12 +81,14 @@ describe('ChannelWebhookIntakeService', () => {
   });
 
   it('persists Mercado Livre notifications by resolving the integration from user_id', async () => {
-    repository.findActiveIntegrationByExternalAccountId.mockResolvedValue({
-      id: 'integration-ml',
-      tenantId: 'tenant-1',
-      provider: ChannelProvider.MERCADO_LIVRE,
-      externalAccountId: '123456',
-    });
+    repository.findActiveIntegrationsByExternalAccountId.mockResolvedValue([
+      {
+        id: 'integration-ml',
+        tenantId: 'tenant-1',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalAccountId: '123456',
+      },
+    ]);
     repository.findInboxByProviderEventId.mockResolvedValue(null);
     repository.createInboxEvent.mockResolvedValue({
       id: 'inbox-ml-1',
@@ -106,7 +108,7 @@ describe('ChannelWebhookIntakeService', () => {
       buyer: { email: 'buyer@example.test' },
     });
 
-    expect(repository.findActiveIntegrationByExternalAccountId).toHaveBeenCalledWith(
+    expect(repository.findActiveIntegrationsByExternalAccountId).toHaveBeenCalledWith(
       ChannelProvider.MERCADO_LIVRE,
       '123456',
     );
@@ -151,13 +153,88 @@ describe('ChannelWebhookIntakeService', () => {
     });
   });
 
-  it('returns duplicate Mercado Livre notifications without creating another outbox job', async () => {
-    repository.findActiveIntegrationByExternalAccountId.mockResolvedValue({
-      id: 'integration-ml',
-      tenantId: 'tenant-1',
-      provider: ChannelProvider.MERCADO_LIVRE,
-      externalAccountId: '123456',
+  it('preserves Mercado Livre external identifiers as strings when building provider event keys', async () => {
+    const externalAccountId = '900719925474099312346';
+    const externalOrderId = '900719925474099312345';
+    const applicationId = '900719925474099312347';
+
+    repository.findActiveIntegrationsByExternalAccountId.mockResolvedValue([
+      {
+        id: 'integration-ml',
+        tenantId: 'tenant-1',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalAccountId,
+      },
+    ]);
+    repository.findInboxByProviderEventId.mockResolvedValue(null);
+    repository.createInboxEvent.mockResolvedValue({
+      id: 'inbox-ml-large-id',
+      status: ChannelWebhookStatus.RECEIVED,
     });
+
+    await service.ingest(ChannelProvider.MERCADO_LIVRE, undefined, {
+      topic: 'orders_v2',
+      resource: `/orders/${externalOrderId}`,
+      user_id: externalAccountId,
+      application_id: applicationId,
+    });
+
+    expect(repository.findActiveIntegrationsByExternalAccountId).toHaveBeenCalledWith(
+      ChannelProvider.MERCADO_LIVRE,
+      externalAccountId,
+    );
+    expect(repository.createInboxEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        providerEventId: `orders_v2:/orders/${externalOrderId}:${externalAccountId}:${applicationId}`,
+        payloadSummary: {
+          topic: 'orders_v2',
+          resource: `/orders/${externalOrderId}`,
+          userId: externalAccountId,
+          applicationId,
+        },
+      }),
+    );
+  });
+
+  it('rejects ambiguous Mercado Livre external accounts instead of mixing integrations', async () => {
+    repository.findActiveIntegrationsByExternalAccountId.mockResolvedValue([
+      {
+        id: 'integration-ml-a',
+        tenantId: 'tenant-a',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalAccountId: '123456',
+      },
+      {
+        id: 'integration-ml-b',
+        tenantId: 'tenant-b',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalAccountId: '123456',
+      },
+    ]);
+
+    await expect(
+      service.ingest(ChannelProvider.MERCADO_LIVRE, undefined, {
+        topic: 'orders_v2',
+        resource: '/orders/2000000001',
+        user_id: '123456',
+        application_id: '987654',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(repository.createInboxEvent).not.toHaveBeenCalled();
+    expect(prisma.auditLog.create).not.toHaveBeenCalled();
+    expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
+  });
+
+  it('returns duplicate Mercado Livre notifications without creating another outbox job', async () => {
+    repository.findActiveIntegrationsByExternalAccountId.mockResolvedValue([
+      {
+        id: 'integration-ml',
+        tenantId: 'tenant-1',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalAccountId: '123456',
+      },
+    ]);
     repository.findInboxByProviderEventId.mockResolvedValue({
       id: 'inbox-ml-1',
       status: ChannelWebhookStatus.RECEIVED,

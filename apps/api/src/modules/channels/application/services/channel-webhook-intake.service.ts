@@ -198,7 +198,12 @@ export class ChannelWebhookIntakeService {
   ) {
     const userId = this.asString(payload.user_id);
     if (!userId) return null;
-    return this.channelsRepository.findActiveIntegrationByExternalAccountId(provider, userId);
+
+    const integrations =
+      await this.channelsRepository.findActiveIntegrationsByExternalAccountId(provider, userId);
+
+    if (integrations.length !== 1) return null;
+    return integrations[0];
   }
 
   private asPayload(payload: unknown): ChannelWebhookPayload {

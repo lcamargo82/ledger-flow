@@ -14,6 +14,7 @@ export class ChannelIntegrationResponseDto {
   @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
   @ApiProperty() name: string;
   @ApiPropertyOptional() externalAccountId?: string;
+  @ApiPropertyOptional() externalStoreId?: string;
   @ApiPropertyOptional() displayName?: string;
   @ApiProperty({ enum: ChannelIntegrationStatus }) status: ChannelIntegrationStatus;
   @ApiPropertyOptional() credentialsFingerprint?: string;

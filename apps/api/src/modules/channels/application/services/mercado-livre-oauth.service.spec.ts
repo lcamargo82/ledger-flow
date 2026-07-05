@@ -176,6 +176,49 @@ describe('MercadoLivreOAuthService', () => {
     });
   });
 
+  it('stores Mercado Livre user_id as a string without numeric coercion', async () => {
+    const largeExternalAccountId = '900719925474099312345';
+    apiClient.exchangeAuthorizationCode.mockResolvedValue({
+      access_token: 'ml-access-token',
+      refresh_token: 'ml-refresh-token',
+      expires_in: 21600,
+      user_id: largeExternalAccountId,
+      scope: 'read write',
+    });
+    encryptionService.decrypt.mockReturnValue({
+      accessToken: 'ml-access-token',
+      refreshToken: 'ml-refresh-token',
+      externalAccountId: largeExternalAccountId,
+    });
+    prisma.channelIntegration.upsert.mockResolvedValue({
+      id: 'integration-1',
+      tenantId: 'tenant-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      externalAccountId: largeExternalAccountId,
+      status: ChannelIntegrationStatus.ACTIVE,
+    });
+    const service = makeService();
+
+    await service.handleCallback('auth-code', 'secure-state');
+
+    expect(encryptionService.encrypt).toHaveBeenCalledWith(
+      expect.objectContaining({
+        externalAccountId: largeExternalAccountId,
+      }),
+    );
+    expect(prisma.channelIntegration.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId_provider_externalAccountId: {
+            tenantId: 'tenant-1',
+            provider: ChannelProvider.MERCADO_LIVRE,
+            externalAccountId: largeExternalAccountId,
+          },
+        },
+      }),
+    );
+  });
+
   it('fails closed when OAuth state is invalid or already consumed', async () => {
     stateService.validateAndConsumeState.mockResolvedValue(null);
     const service = makeService();

@@ -578,6 +578,7 @@ model ChannelIntegration {
   provider                  ChannelProvider
   name                      String
   externalAccountId         String?                  @map("external_account_id")
+  externalStoreId           String?                  @map("external_store_id")
   displayName               String?                  @map("display_name")
   status                    ChannelIntegrationStatus @default(INACTIVE)
   webhookSecretHash         String?                  @map("webhook_secret_hash")
@@ -601,6 +602,7 @@ model ChannelIntegration {
   @@unique([tenantId, provider, name])
   @@unique([tenantId, provider, externalAccountId])
   @@index([tenantId, provider, status])
+  @@index([tenantId, provider, externalStoreId])
   @@index([provider, webhookSecretHash])
   @@map("channel_integrations")
 }

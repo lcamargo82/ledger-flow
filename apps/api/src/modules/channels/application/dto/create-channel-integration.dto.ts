@@ -17,6 +17,11 @@ export class CreateChannelIntegrationDto {
   @IsString()
   externalAccountId?: string;
 
+  @ApiPropertyOptional({ example: 'store-123' })
+  @IsOptional()
+  @IsString()
+  externalStoreId?: string;
+
   @ApiPropertyOptional({ example: 'Mercado Livre Principal' })
   @IsOptional()
   @IsString()
