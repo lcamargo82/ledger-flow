@@ -1,25 +1,186 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    environment {
+        DEPLOY_HOST = '192.168.15.174'
+        DEPLOY_USER = 'camargo'
+        DEPLOY_PATH = '/home/camargo/apps/ledger-flow'
+        SSH_CREDENTIALS_ID = 'ledgerflow-ctn01-ssh'
+        COMPOSE_PROJECT_NAME = 'ledgerflow'
+        COMPOSE_FILES = '-f docker-compose.prod.yml'
+        API_HEALTHCHECK_URL = 'http://127.0.0.1:3010/health/readiness'
+        WEB_HEALTHCHECK_URL = 'http://127.0.0.1:5180'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                echo 'Baixando o código do GitHub...'
-                // O Jenkins vai baixar o código automaticamente baseado na configuração que faremos abaixo
+                checkout scm
             }
         }
-        stage('Build') {
+
+        stage('Validate deployment files') {
             steps {
-                echo 'Construindo o projeto...'
-                // Aqui você pode colocar seus comandos Docker
-                // sh 'docker build -t meu-projeto:latest .'
+                sh '''
+                    set -eu
+                    test -f Jenkinsfile
+                    test -f docker-compose.yml
+                    test -f docker-compose.prod.yml
+                    docker compose --env-file .env.production.example -f docker-compose.prod.yml config -q
+                '''
             }
         }
-        stage('Deploy') {
+
+        stage('Install and test') {
             steps {
-                echo 'Subindo no meu servidor caseiro!'
-                // sh 'docker run -d -p 3000:3000 meu-projeto:latest'
+                sh '''
+                    set -eu
+                    export npm_config_cache="$WORKSPACE/.npm-cache"
+
+                    cd apps/api
+                    npm ci
+                    npm run prisma:generate
+                    npm test -- --runInBand
+                    npm run build
+
+                    cd ../web
+                    npm ci --ignore-scripts
+                    npm run test:unit -- --run
+                    npm run i18n:check
+                    npm run build
+                '''
             }
+        }
+
+        stage('Sync workspace to server') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh '''
+                        set -eu
+                        ssh -o StrictHostKeyChecking=accept-new ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p ${DEPLOY_PATH}"
+                        rsync -az --delete \
+                          --exclude='.git/' \
+                          --exclude='.env' \
+                          --exclude='apps/api/node_modules/' \
+                          --exclude='apps/api/dist/' \
+                          --exclude='apps/web/node_modules/' \
+                          --exclude='apps/web/dist/' \
+                          ./ ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+                    '''
+                }
+            }
+        }
+
+        stage('Preflight remote environment') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh '''
+                        set -eu
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                          set -eu
+                          cd ${DEPLOY_PATH}
+                          test -f .env || {
+                            echo 'ERRO: crie ${DEPLOY_PATH}/.env no servidor antes do deploy. Use .env.production.example como checklist, sem versionar segredos.'
+                            exit 10
+                          }
+                          docker compose --env-file .env ${COMPOSE_FILES} config -q
+                          mkdir -p .deploy-backups
+                          docker compose --env-file .env ${COMPOSE_FILES} ps > .deploy-backups/compose-ps-${BUILD_NUMBER}.txt || true
+                          docker compose --env-file .env ${COMPOSE_FILES} images > .deploy-backups/compose-images-${BUILD_NUMBER}.txt || true
+                        "
+                    '''
+                }
+            }
+        }
+
+        stage('Build images on server') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh '''
+                        set -eu
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                          set -eu
+                          cd ${DEPLOY_PATH}
+                          export LEDGERFLOW_IMAGE_TAG=${BUILD_NUMBER}
+                          docker compose --env-file .env ${COMPOSE_FILES} build migrate api worker web
+                        "
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy infrastructure and migrations') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh '''
+                        set -eu
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                          set -eu
+                          cd ${DEPLOY_PATH}
+                          export LEDGERFLOW_IMAGE_TAG=${BUILD_NUMBER}
+                          docker compose --env-file .env ${COMPOSE_FILES} up -d postgres mongodb redis rabbitmq mailpit prometheus grafana
+                          docker compose --env-file .env ${COMPOSE_FILES} run --rm migrate
+                        "
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy application') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh '''
+                        set -eu
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                          set -eu
+                          cd ${DEPLOY_PATH}
+                          export LEDGERFLOW_IMAGE_TAG=${BUILD_NUMBER}
+                          docker compose --env-file .env ${COMPOSE_FILES} up -d api worker web
+                          docker compose --env-file .env ${COMPOSE_FILES} ps
+                        "
+                    '''
+                }
+            }
+        }
+
+        stage('Verify deployment') {
+            steps {
+                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                    sh '''
+                        set -eu
+                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                          set -eu
+                          for i in \$(seq 1 30); do
+                            if curl -fsS ${API_HEALTHCHECK_URL}; then
+                              break
+                            fi
+                            if [ \$i -eq 30 ]; then
+                              echo 'API readiness failed after 30 attempts'
+                              docker compose --env-file ${DEPLOY_PATH}/.env -f ${DEPLOY_PATH}/docker-compose.prod.yml logs --tail=120 api
+                              exit 20
+                            fi
+                            sleep 5
+                          done
+                          curl -fsS ${WEB_HEALTHCHECK_URL} > /dev/null
+                        "
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Deploy falhou. Verifique os arquivos .deploy-backups no servidor e os logs do Jenkins.'
+        }
+        success {
+            echo 'Deploy LedgerFlow concluído e healthchecks responderam com sucesso.'
         }
     }
 }

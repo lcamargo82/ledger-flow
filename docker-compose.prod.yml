@@ -1,0 +1,251 @@
+services:
+  migrate:
+    container_name: ledgerflow-migrate
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    command: npm run prisma:deploy
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ledgerflow_network
+    profiles:
+      - migration
+
+  worker:
+    container_name: ledgerflow-worker
+    image: ledgerflow-worker:${LEDGERFLOW_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: production
+    command: node dist/main.worker.js
+    env_file:
+      - .env
+    environment:
+      APP_PROCESS_ROLE: worker
+    volumes:
+      - reports_data:/tmp/ledgerflow/reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+  api:
+    container_name: ledgerflow-api
+    image: ledgerflow-api:${LEDGERFLOW_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: production
+    env_file:
+      - .env
+    environment:
+      APP_PROCESS_ROLE: api
+    ports:
+      - "${HOST_API_PORT:-3010}:${API_PORT:-3000}"
+    volumes:
+      - reports_data:/tmp/ledgerflow/reports
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:${API_PORT:-3000}/health/liveness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  web:
+    container_name: ledgerflow-web
+    image: ledgerflow-web:${LEDGERFLOW_IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: production
+      args:
+        VITE_APP_NAME: ${VITE_APP_NAME:-LedgerFlow}
+        VITE_APP_ENV: ${VITE_APP_ENV:-production}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3010}
+        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL:-ws://localhost:3010}
+        VITE_DEFAULT_LOCALE: ${VITE_DEFAULT_LOCALE:-pt-BR}
+        VITE_DEFAULT_TIMEZONE: ${VITE_DEFAULT_TIMEZONE:-America/Sao_Paulo}
+    ports:
+      - "${HOST_WEB_PORT:-5180}:80"
+    depends_on:
+      api:
+        condition: service_started
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  postgres:
+    container_name: ledgerflow-postgres
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ledgerflow}
+      POSTGRES_USER: ${POSTGRES_USER:-ledgerflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ledgerflow}
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${POSTGRES_PUBLIC_PORT:-55432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-ledgerflow} -d ${POSTGRES_DB:-ledgerflow}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mongodb:
+    container_name: ledgerflow-mongodb
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-ledgerflow}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-ledgerflow}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-ledgerflow}
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${MONGODB_PUBLIC_PORT:-27018}:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    container_name: ledgerflow-redis
+    image: redis:7-alpine
+    command: >
+      sh -c "redis-server --appendonly yes"
+    ports:
+      - "${REDIS_PUBLIC_PORT:-6380}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  rabbitmq:
+    container_name: ledgerflow-rabbitmq
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-ledgerflow}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-ledgerflow}
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${RABBITMQ_PUBLIC_AMQP_PORT:-5682}:5672"
+      - "${RABBITMQ_PUBLIC_MANAGEMENT_PORT:-15682}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - ledgerflow_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  mailpit:
+    container_name: ledgerflow-mailpit
+    image: axllent/mailpit:latest
+    environment:
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1026}:1025"
+      - "${MAILPIT_UI_PORT:-8026}:8025"
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+  prometheus:
+    container_name: ledgerflow-prometheus
+    image: prom/prometheus:v2.54.1
+    ports:
+      - "${PROMETHEUS_PORT_PUBLIC:-9091}:9090"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+  grafana:
+    container_name: ledgerflow-grafana
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      TZ: ${TZ:-UTC}
+    ports:
+      - "${GRAFANA_PORT:-3002}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - ledgerflow_network
+    restart: unless-stopped
+
+networks:
+  ledgerflow_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+  reports_data:

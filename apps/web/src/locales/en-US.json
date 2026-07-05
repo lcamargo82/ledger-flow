@@ -558,6 +558,10 @@
       "pageOf": "Page {page} of {totalPages}",
       "previous": "Previous",
       "next": "Next"
+    },
+    "toast": {
+      "created": "Product created successfully.",
+      "updated": "Product updated successfully."
     }
   },
   "users": {
@@ -722,6 +726,7 @@
     "missing": "Permission denied",
     "title": "System Permissions",
     "description": "List of all available global permissions in the system.",
+    "searchLabel": "Search permission",
     "searchPlaceholder": "Search permissions...",
     "list": {
       "auth": {
@@ -1126,7 +1131,8 @@
       "APPROVED": "Approved",
       "FAILED": "Failed",
       "CANCELED": "Canceled",
-      "REFUNDED": "Refunded"
+      "REFUNDED": "Refunded",
+      "OVERDUE": "Overdue"
     },
     "method": {
       "PIX": "Pix",

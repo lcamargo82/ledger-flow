@@ -557,6 +557,10 @@
       "pageOf": "Página {page} de {totalPages}",
       "previous": "Anterior",
       "next": "Próxima"
+    },
+    "toast": {
+      "created": "Produto criado com sucesso.",
+      "updated": "Produto atualizado com sucesso."
     }
   },
   "users": {
@@ -721,6 +725,7 @@
     "missing": "Permissão negada",
     "title": "Permissões do Sistema",
     "description": "Lista de todas as permissões globais disponíveis no sistema.",
+    "searchLabel": "Buscar permissão",
     "searchPlaceholder": "Buscar permissões...",
     "list": {
       "auth": {
