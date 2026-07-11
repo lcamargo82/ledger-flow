@@ -49,7 +49,7 @@ ENV VITE_WS_BASE_URL=${VITE_WS_BASE_URL}
 ENV VITE_DEFAULT_LOCALE=${VITE_DEFAULT_LOCALE}
 ENV VITE_DEFAULT_TIMEZONE=${VITE_DEFAULT_TIMEZONE}
 
-RUN npm ci --ignore-scripts
+RUN npm ci --include=dev --ignore-scripts
 
 COPY apps/web ./
 
