@@ -17,15 +17,12 @@ export class ChannelIntegrationResponseDto {
   @ApiPropertyOptional() externalStoreId?: string;
   @ApiPropertyOptional() displayName?: string;
   @ApiProperty({ enum: ChannelIntegrationStatus }) status: ChannelIntegrationStatus;
-  @ApiPropertyOptional() credentialsFingerprint?: string;
-  @ApiProperty() credentialsVersion: number;
-  @ApiPropertyOptional() settingsJson?: Record<string, unknown>;
   @ApiPropertyOptional() defaultWarehouseId?: string;
-  @ApiPropertyOptional() syncPolicyJson?: Record<string, unknown>;
+  @ApiPropertyOptional() settings?: Record<string, unknown>;
   @ApiPropertyOptional() healthStatus?: string;
+  @ApiProperty() requiresReauth: boolean;
   @ApiPropertyOptional() lastSuccessfulOperationAt?: Date;
   @ApiPropertyOptional() lastFailureAt?: Date;
-  @ApiPropertyOptional() createdByUserId?: string;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
 }

@@ -5,10 +5,10 @@
 
 | Área | Estado atual | Gap para a spec | Fase |
 |---|---|---|---|
-| OAuth ML | conexão, state, criptografia, callback e refresh em evolução | UX completa, lock distribuído comprovado, E2E | 10.1.10 |
-| Channel settings | `defaultWarehouseId`, settings/sync JSON existem | endpoint/modal/validação e ações | 10.1.10 |
+| OAuth ML | conexão, state, criptografia, callback, nova aba, feedback e refresh | lock distribuído comprovado e E2E real | 10.1.10 |
+| Channel settings | endpoint/modal, warehouse tenant-safe e sync settings entregues | homologação E2E | 10.1.10 |
 | Listing import | adapter real e malha fina existem | ação/feedback/operacionalização | 10.1.10 |
-| Channel health | campos básicos e replay existem | projeção/códigos/timestamps consistentes | 10.1.10 |
+| Channel health | projeção sanitizada e ações por estado entregues | métricas/E2E operacional | 10.1.10 |
 | Notifications | apenas toast frontend | domínio event/recipient/audience/feed | 10.2.0A |
 | n8n outbound | não identificado como entrega durável | subscription, HMAC, delivery, retry/DLQ | 10.2.0B |
 | Inventory base | warehouse, ledger, balance versionado, reservas | capabilities/reason registry avançados | 10.2.1 |

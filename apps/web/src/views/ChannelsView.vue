@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
 import { useChannelsStore } from '../stores/channels.store'
+import { useToastStore } from '../stores/toast.store'
+import { useConfirmDialogStore } from '../stores/confirm-dialog.store'
+import { inventoryService } from '../services/inventory.service'
+import type { Warehouse } from '../types/inventory.types'
+import type { ChannelIntegration } from '../types/channels.types'
 import { formatDateTime } from '../utils/date-format'
 import type {
   ChannelInventorySyncStatus,
@@ -24,10 +30,17 @@ import AppTable from '../components/common/AppTable.vue'
 const { t, currentLocale } = useI18n()
 const authStore = useAuthStore()
 const channelsStore = useChannelsStore()
+const toast = useToastStore()
+const confirmDialog = useConfirmDialogStore()
+const route = useRoute()
+const router = useRouter()
 
 const activeTab = ref<'integrations' | 'inbox' | 'listings' | 'sync'>('integrations')
 const isCreateModalOpen = ref(false)
 const isMapModalOpen = ref(false)
+const isSettingsModalOpen = ref(false)
+const selectedIntegration = ref<ChannelIntegration | null>(null)
+const warehouses = ref<Warehouse[]>([])
 const selectedListing = ref<ChannelListing | null>(null)
 
 const integrationForm = reactive({
@@ -46,10 +59,21 @@ const mappingForm = reactive({
   reason: '',
 })
 
+const settingsForm = reactive({
+  defaultWarehouseId: '',
+  syncEnabled: true,
+  importListingsOnConnect: false,
+})
+const warehouseOptions = computed(() => [
+  { value: '', label: t('channels.settings.noWarehouse') },
+  ...warehouses.value.map((warehouse) => ({ value: warehouse.id, label: warehouse.name })),
+])
+
 const integrationColumns = computed(() => [
   { key: 'provider', label: t('channels.table.provider') },
   { key: 'name', label: t('channels.table.name') },
   { key: 'status', label: t('channels.table.status') },
+  { key: 'health', label: t('channels.table.health') },
   { key: 'createdAt', label: t('channels.table.createdAt') },
   { key: 'actions', label: t('channels.table.actions') },
 ])
@@ -109,11 +133,31 @@ const inventorySyncStatusOptions = computed(() => [
   { value: 'FAILED', label: t('channels.syncStatus.FAILED') },
 ])
 
-onMounted(() => {
-  channelsStore.fetchChannels()
+const refreshFromOtherTab = (event: StorageEvent) => {
+  if (event.key === 'ledgerflow:channel-connected') channelsStore.fetchChannels()
+}
+
+onMounted(async () => {
+  await channelsStore.fetchChannels()
   channelsStore.fetchListings({ setError: false }).catch(() => undefined)
   channelsStore.fetchInventorySyncStatus({ setError: false }).catch(() => undefined)
+  inventoryService
+    .listWarehouses({ isActive: true, perPage: 100 })
+    .then((response) => {
+      warehouses.value = response.data
+    })
+    .catch(() => undefined)
+  if (route.query.mercadoLivre) {
+    const connected = route.query.mercadoLivre === 'connected'
+    if (connected) toast.success(t('channels.oauth.connectedSuccess'))
+    else toast.error(t('channels.oauth.connectedFailed'))
+    if (connected) localStorage.setItem('ledgerflow:channel-connected', String(Date.now()))
+    await router.replace({ query: { ...route.query, mercadoLivre: undefined } })
+  }
+  window.addEventListener('storage', refreshFromOtherTab)
 })
+
+onBeforeUnmount(() => window.removeEventListener('storage', refreshFromOtherTab))
 
 const createIntegration = async () => {
   if (integrationForm.provider === 'MERCADO_LIVRE') {
@@ -172,6 +216,37 @@ const importListings = async (integrationId: string) => {
   await channelsStore.importListings(integrationId)
   activeTab.value = 'listings'
 }
+
+const openSettings = (integration: ChannelIntegration) => {
+  selectedIntegration.value = integration
+  settingsForm.defaultWarehouseId = integration.defaultWarehouseId || ''
+  settingsForm.syncEnabled = integration.settings.syncEnabled
+  settingsForm.importListingsOnConnect = integration.settings.importListingsOnConnect
+  isSettingsModalOpen.value = true
+}
+
+const saveSettings = async () => {
+  if (!selectedIntegration.value) return
+  await channelsStore.updateIntegrationSettings(selectedIntegration.value.id, {
+    defaultWarehouseId: settingsForm.defaultWarehouseId || null,
+    syncEnabled: settingsForm.syncEnabled,
+    stockSyncMode: 'AVAILABLE',
+    importListingsOnConnect: settingsForm.importListingsOnConnect,
+  })
+  toast.success(t('channels.settings.saved'))
+  isSettingsModalOpen.value = false
+}
+
+const disconnectIntegration = (integration: ChannelIntegration) =>
+  confirmDialog.open({
+    title: t('channels.disconnect.title'),
+    message: t('channels.disconnect.message'),
+    confirmText: t('channels.actions.disconnect'),
+    cancelText: t('common.cancel'),
+    confirmVariant: 'danger',
+    onConfirm: async () => channelsStore.disconnectMercadoLivre(integration.id),
+    onCancel: null,
+  })
 
 const openMapModal = (listing: ChannelListing) => {
   selectedListing.value = listing
@@ -258,23 +333,89 @@ const mapListing = async () => {
             {{ t(`channels.integrationStatus.${item.status}`) }}
           </AppBadge>
         </template>
+        <template #health="{ item }">
+          <AppBadge :variant="item.healthStatus === 'HEALTHY' ? 'success' : 'warning'">
+            {{ t(`channels.health.${item.healthStatus}`) }}
+          </AppBadge>
+        </template>
         <template #createdAt="{ item }">
           {{ formatDateTime(item.createdAt, currentLocale) }}
         </template>
         <template #actions="{ item }">
-          <AppButton
-            v-if="canImportListings && item.provider === 'MOCK' && item.status === 'ACTIVE'"
-            variant="secondary"
-            size="small"
-            icon-only
-            :title="t('channels.actions.importListings')"
-            :loading="channelsStore.isMutating"
-            @click="importListings(item.id)"
-          >
-            <template #icon>
-              <span class="material-symbols-outlined text-[18px]">cloud_download</span>
-            </template>
-          </AppButton>
+          <div class="flex flex-wrap gap-1">
+            <AppButton
+              v-if="authStore.checkAllPermissions(['channels:manage'])"
+              variant="secondary"
+              size="small"
+              icon-only
+              :title="t('channels.actions.configure')"
+              @click="openSettings(item)"
+              ><template #icon
+                ><span class="material-symbols-outlined text-[18px]">settings</span></template
+              ></AppButton
+            >
+            <AppButton
+              v-if="canImportListings && item.status === 'ACTIVE'"
+              variant="secondary"
+              size="small"
+              icon-only
+              :title="t('channels.actions.importListings')"
+              :loading="channelsStore.isMutating"
+              @click="importListings(item.id)"
+            >
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">cloud_download</span>
+              </template>
+            </AppButton>
+            <AppButton
+              v-if="item.status === 'ACTIVE'"
+              variant="secondary"
+              size="small"
+              icon-only
+              :title="t('channels.actions.suspend')"
+              @click="channelsStore.suspendIntegration(item.id)"
+            >
+              <template #icon
+                ><span class="material-symbols-outlined text-[18px]">pause</span></template
+              >
+            </AppButton>
+            <AppButton
+              v-if="item.status === 'SUSPENDED'"
+              variant="secondary"
+              size="small"
+              icon-only
+              :title="t('channels.actions.reactivate')"
+              @click="channelsStore.reactivateIntegration(item.id)"
+            >
+              <template #icon
+                ><span class="material-symbols-outlined text-[18px]">play_arrow</span></template
+              >
+            </AppButton>
+            <AppButton
+              v-if="item.requiresReauth"
+              variant="secondary"
+              size="small"
+              icon-only
+              :title="t('channels.actions.reconnect')"
+              @click="channelsStore.connectMercadoLivre()"
+            >
+              <template #icon
+                ><span class="material-symbols-outlined text-[18px]">sync</span></template
+              >
+            </AppButton>
+            <AppButton
+              v-if="item.provider === 'MERCADO_LIVRE' && item.status !== 'DISABLED'"
+              variant="danger"
+              size="small"
+              icon-only
+              :title="t('channels.actions.disconnect')"
+              @click="disconnectIntegration(item)"
+            >
+              <template #icon
+                ><span class="material-symbols-outlined text-[18px]">link_off</span></template
+              >
+            </AppButton>
+          </div>
         </template>
       </AppTable>
 
@@ -497,6 +638,36 @@ const mapListing = async () => {
                 ? t('channels.actions.connectMercadoLivre')
                 : t('channels.actions.createIntegration')
             }}
+          </AppButton>
+        </div>
+      </form>
+    </AppModal>
+
+    <AppModal v-model="isSettingsModalOpen" :title="t('channels.settings.title')" size="md">
+      <form class="space-y-4" @submit.prevent="saveSettings">
+        <AppSelect
+          id="channel-default-warehouse"
+          v-model="settingsForm.defaultWarehouseId"
+          :label="t('channels.settings.defaultWarehouse')"
+          :options="warehouseOptions"
+        />
+        <label class="flex items-center gap-2 text-sm text-[var(--lf-text-secondary)]">
+          <input v-model="settingsForm.syncEnabled" type="checkbox" />
+          {{ t('channels.settings.syncEnabled') }}
+        </label>
+        <label class="flex items-center gap-2 text-sm text-[var(--lf-text-secondary)]">
+          <input v-model="settingsForm.importListingsOnConnect" type="checkbox" />
+          {{ t('channels.settings.importListingsOnConnect') }}
+        </label>
+        <p class="text-sm text-[var(--lf-text-secondary)]">
+          {{ t('channels.settings.stockSyncModeAvailable') }}
+        </p>
+        <div class="flex justify-end gap-2">
+          <AppButton type="button" variant="secondary" @click="isSettingsModalOpen = false">
+            {{ t('common.cancel') }}
+          </AppButton>
+          <AppButton type="submit" variant="primary" :loading="channelsStore.isMutating">
+            {{ t('channels.actions.save') }}
           </AppButton>
         </div>
       </form>

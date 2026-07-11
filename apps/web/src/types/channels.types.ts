@@ -20,10 +20,28 @@ export interface ChannelIntegration {
   tenantId: string
   provider: ChannelProvider
   name: string
+  externalAccountId?: string | null
+  displayName?: string | null
   status: ChannelIntegrationStatus
-  createdByUserId?: string | null
+  defaultWarehouseId?: string | null
+  settings: {
+    syncEnabled: boolean
+    stockSyncMode: 'AVAILABLE'
+    importListingsOnConnect: boolean
+  }
+  healthStatus: 'HEALTHY' | 'DEGRADED' | 'REAUTH_REQUIRED' | 'SUSPENDED' | 'DISCONNECTED' | 'FAILED'
+  requiresReauth: boolean
+  lastSuccessfulOperationAt?: string | null
+  lastFailureAt?: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface UpdateChannelIntegrationSettingsRequest {
+  defaultWarehouseId?: string | null
+  syncEnabled?: boolean
+  stockSyncMode?: 'AVAILABLE'
+  importListingsOnConnect?: boolean
 }
 
 export interface ChannelWebhookInboxEvent {

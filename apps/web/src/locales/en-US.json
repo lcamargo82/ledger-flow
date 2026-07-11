@@ -317,7 +317,13 @@
       "connectMercadoLivre": "Connect Mercado Livre",
       "importListings": "Import listings",
       "mapListing": "Map SKU",
-      "processSync": "Process pending"
+      "processSync": "Process pending",
+      "configure": "Configure",
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "reconnect": "Reconnect",
+      "save": "Save",
+      "disconnect": "Disconnect"
     },
     "filters": {
       "statusLabel": "Status",
@@ -341,7 +347,8 @@
       "skuId": "SKU",
       "targetAvailable": "Target available",
       "circuit": "Circuit",
-      "nextAttemptAt": "Next attempt"
+      "nextAttemptAt": "Next attempt",
+      "health": "Health"
     },
     "form": {
       "integrationTitle": "New channel integration",
@@ -363,6 +370,31 @@
       "DISABLED": "Disabled",
       "SUSPENDED": "Suspended",
       "REAUTH_REQUIRED": "Reauthentication required"
+    },
+    "health": {
+      "HEALTHY": "Healthy",
+      "DEGRADED": "Degraded",
+      "REAUTH_REQUIRED": "Reconnection required",
+      "SUSPENDED": "Suspended",
+      "DISCONNECTED": "Disconnected",
+      "FAILED": "Failed"
+    },
+    "settings": {
+      "title": "Configure integration",
+      "defaultWarehouse": "Default warehouse",
+      "noWarehouse": "No warehouse selected",
+      "syncEnabled": "Inventory sync enabled",
+      "stockSyncModeAvailable": "Stock mode: available",
+      "saved": "Integration settings saved.",
+      "importListingsOnConnect": "Import listings after connecting"
+    },
+    "disconnect": {
+      "title": "Disconnect Mercado Livre",
+      "message": "Credentials will be removed and channel operations will stop."
+    },
+    "oauth": {
+      "connectedSuccess": "Mercado Livre connected successfully.",
+      "connectedFailed": "Could not complete the Mercado Livre connection."
     },
     "webhookStatus": {
       "RECEIVED": "Received",

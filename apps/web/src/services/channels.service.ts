@@ -12,6 +12,7 @@ import type {
   ChannelWebhookStatus,
   CreateChannelIntegrationRequest,
   MapChannelListingRequest,
+  UpdateChannelIntegrationSettingsRequest,
   PaginatedChannelInventorySyncResponse,
   PaginatedChannelListingsResponse,
   PaginatedChannelInboxResponse,
@@ -39,6 +40,37 @@ export class ChannelsService {
       {},
     )
     return data
+  }
+
+  async updateIntegrationSettings(
+    integrationId: string,
+    payload: UpdateChannelIntegrationSettingsRequest,
+  ): Promise<{ integration: ChannelIntegration }> {
+    const { data } = await httpClient.patch<{ integration: ChannelIntegration }>(
+      `/channels/integrations/${integrationId}/settings`,
+      payload,
+    )
+    return data
+  }
+
+  async suspendIntegration(integrationId: string): Promise<{ integration: ChannelIntegration }> {
+    const { data } = await httpClient.post<{ integration: ChannelIntegration }>(
+      `/channels/integrations/${integrationId}/suspend`,
+      {},
+    )
+    return data
+  }
+
+  async reactivateIntegration(integrationId: string): Promise<{ integration: ChannelIntegration }> {
+    const { data } = await httpClient.post<{ integration: ChannelIntegration }>(
+      `/channels/integrations/${integrationId}/reactivate`,
+      {},
+    )
+    return data
+  }
+
+  async disconnectMercadoLivre(integrationId: string): Promise<void> {
+    await httpClient.post(`/channels/mercado-livre/integrations/${integrationId}/disconnect`, {})
   }
 
   async listInbox(params?: {
