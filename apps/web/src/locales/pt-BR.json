@@ -164,6 +164,9 @@
     },
     "actions": {
       "createWarehouse": "Novo warehouse",
+      "editWarehouse": "Editar warehouse",
+      "saveWarehouse": "Salvar warehouse",
+      "edit": "Editar",
       "adjust": "Registrar ajuste",
       "reserve": "Reservar estoque",
       "releaseReservation": "Liberar reserva",
@@ -191,6 +194,7 @@
     },
     "form": {
       "warehouseTitle": "Novo warehouse",
+      "editWarehouseTitle": "Editar warehouse",
       "adjustmentTitle": "Registrar ajuste",
       "reserveTitle": "Reservar estoque",
       "releaseTitle": "Liberar reserva",
@@ -206,7 +210,11 @@
       "sourceTypeLabel": "Tipo da origem",
       "sourceIdLabel": "ID da origem",
       "reasonCodeLabel": "Motivo",
-      "notesLabel": "Observações"
+      "notesLabel": "Observações",
+      "validation": {
+        "codeLength": "O código deve ter entre 2 e 20 caracteres.",
+        "nameMinLength": "O nome deve ter pelo menos 2 caracteres."
+      }
     },
     "reservationStatus": {
       "ACTIVE": "Ativa",

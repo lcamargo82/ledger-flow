@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
 import { useInventoryStore } from '../stores/inventory.store'
-import type { InventoryReservation } from '../types/inventory.types'
+import type { InventoryReservation, Warehouse } from '../types/inventory.types'
 import { formatDateTime } from '../utils/date-format'
+import {
+  validateWarehouseForm,
+  type WarehouseFormErrors,
+} from '../utils/inventory-validation'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppButton from '../components/common/AppButton.vue'
 import AppCard from '../components/common/AppCard.vue'
@@ -40,7 +45,9 @@ const isTransitionModalOpen = ref(false)
 const transitionMode = ref<'release' | 'consume'>('consume')
 const selectedReservation = ref<InventoryReservation | null>(null)
 
-const warehouseForm = reactive({ code: '', name: '' })
+const warehouseForm = reactive({ id: '', code: '', name: '' })
+const warehouseFormErrors = ref<WarehouseFormErrors>({})
+const warehouseSubmitError = ref('')
 const adjustmentForm = reactive({
   skuId: '',
   warehouseId: '',
@@ -136,14 +143,60 @@ const navigateTab = (tab: InventoryTab) => {
   router.push({ name: routeNameByTab[tab] })
 }
 
-const createWarehouse = async () => {
-  await inventoryStore.createWarehouse({
-    code: warehouseForm.code,
-    name: warehouseForm.name,
-  })
+const openWarehouseModal = () => {
+  warehouseForm.id = ''
   warehouseForm.code = ''
   warehouseForm.name = ''
-  isWarehouseModalOpen.value = false
+  warehouseFormErrors.value = {}
+  warehouseSubmitError.value = ''
+  isWarehouseModalOpen.value = true
+}
+
+const openEditWarehouseModal = (warehouse: Warehouse) => {
+  warehouseForm.id = warehouse.id
+  warehouseForm.code = warehouse.code
+  warehouseForm.name = warehouse.name
+  warehouseFormErrors.value = {}
+  warehouseSubmitError.value = ''
+  isWarehouseModalOpen.value = true
+}
+
+const saveWarehouse = async () => {
+  warehouseFormErrors.value = validateWarehouseForm(warehouseForm)
+  warehouseSubmitError.value = ''
+
+  if (Object.keys(warehouseFormErrors.value).length) return
+
+  try {
+    if (warehouseForm.id) {
+      await inventoryStore.updateWarehouse(warehouseForm.id, {
+        name: warehouseForm.name.trim(),
+      })
+    } else {
+      await inventoryStore.createWarehouse({
+        code: warehouseForm.code.trim(),
+        name: warehouseForm.name.trim(),
+      })
+    }
+    warehouseForm.id = ''
+    warehouseForm.code = ''
+    warehouseForm.name = ''
+    isWarehouseModalOpen.value = false
+  } catch (error) {
+    const status = axios.isAxiosError(error) ? error.response?.status : undefined
+    const errorKeyByStatus: Record<number, string> = {
+      400: 'inventory.errors.invalid',
+      403: 'inventory.errors.forbidden',
+      409: 'inventory.errors.warehouseCodeExists',
+    }
+    warehouseSubmitError.value =
+      (status && errorKeyByStatus[status]) || 'inventory.errors.default'
+  }
+}
+
+const clearWarehouseFieldError = (field: keyof WarehouseFormErrors) => {
+  delete warehouseFormErrors.value[field]
+  warehouseSubmitError.value = ''
 }
 
 const toggleWarehouse = async (id: string, isActive: boolean) => {
@@ -239,7 +292,7 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           <AppButton
             v-if="authStore.checkAllPermissions(['inventory:manage'])"
             variant="secondary"
-            @click="isWarehouseModalOpen = true"
+            @click="openWarehouseModal"
           >
             {{ t('inventory.actions.createWarehouse') }}
           </AppButton>
@@ -315,18 +368,32 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           {{ formatDateTime(item.createdAt, currentLocale) }}
         </template>
         <template #actions="{ item }">
-          <AppButton
-            v-if="authStore.checkAllPermissions(['inventory:manage'])"
-            size="small"
-            variant="secondary"
-            icon-only
-            :title="item.isActive ? t('inventory.actions.disable') : t('inventory.actions.enable')"
-            @click="toggleWarehouse(item.id, item.isActive)"
-          >
-            <template #icon>
-              <span class="material-symbols-outlined text-[18px]">{{ item.isActive ? 'block' : 'check_circle' }}</span>
-            </template>
-          </AppButton>
+          <div class="flex justify-end gap-2">
+            <AppButton
+              v-if="authStore.checkAllPermissions(['inventory:manage'])"
+              size="small"
+              variant="secondary"
+              icon-only
+              :title="t('inventory.actions.editWarehouse')"
+              @click="openEditWarehouseModal(item)"
+            >
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">edit</span>
+              </template>
+            </AppButton>
+            <AppButton
+              v-if="authStore.checkAllPermissions(['inventory:manage'])"
+              size="small"
+              variant="secondary"
+              icon-only
+              :title="item.isActive ? t('inventory.actions.disable') : t('inventory.actions.enable')"
+              @click="toggleWarehouse(item.id, item.isActive)"
+            >
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">{{ item.isActive ? 'block' : 'check_circle' }}</span>
+              </template>
+            </AppButton>
+          </div>
         </template>
       </AppTable>
 
@@ -408,24 +475,35 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
       </AppTable>
     </template>
 
-    <AppModal v-model="isWarehouseModalOpen" :title="t('inventory.form.warehouseTitle')" size="md">
-      <form class="space-y-4" @submit.prevent="createWarehouse">
+    <AppModal v-model="isWarehouseModalOpen" :title="warehouseForm.id ? t('inventory.form.editWarehouseTitle') : t('inventory.form.warehouseTitle')" size="md">
+      <form class="space-y-4" novalidate @submit.prevent="saveWarehouse">
         <AppInput
           id="warehouse-code"
           v-model="warehouseForm.code"
           :label="t('inventory.form.codeLabel')"
+          :error="warehouseFormErrors.code ? t(warehouseFormErrors.code) : undefined"
+          :disabled="!!warehouseForm.id"
+          required
+          maxlength="20"
+          @update:model-value="clearWarehouseFieldError('code')"
         />
         <AppInput
           id="warehouse-name"
           v-model="warehouseForm.name"
           :label="t('inventory.form.nameLabel')"
+          :error="warehouseFormErrors.name ? t(warehouseFormErrors.name) : undefined"
+          required
+          @update:model-value="clearWarehouseFieldError('name')"
         />
+        <p v-if="warehouseSubmitError" class="lf-error-message" role="alert">
+          {{ t(warehouseSubmitError) }}
+        </p>
         <div class="flex justify-end gap-2">
           <AppButton type="button" variant="secondary" @click="isWarehouseModalOpen = false">{{
             t('common.cancel')
           }}</AppButton>
           <AppButton type="submit" variant="primary" :loading="inventoryStore.isMutating">{{
-            t('inventory.actions.createWarehouse')
+            warehouseForm.id ? t('inventory.actions.saveWarehouse') : t('inventory.actions.createWarehouse')
           }}</AppButton>
         </div>
       </form>

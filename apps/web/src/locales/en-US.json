@@ -165,6 +165,9 @@
     },
     "actions": {
       "createWarehouse": "New warehouse",
+      "editWarehouse": "Edit warehouse",
+      "saveWarehouse": "Save warehouse",
+      "edit": "Edit",
       "adjust": "Record adjustment",
       "reserve": "Reserve stock",
       "releaseReservation": "Release reservation",
@@ -192,6 +195,7 @@
     },
     "form": {
       "warehouseTitle": "New warehouse",
+      "editWarehouseTitle": "Edit warehouse",
       "adjustmentTitle": "Record adjustment",
       "reserveTitle": "Reserve stock",
       "releaseTitle": "Release reservation",
@@ -207,7 +211,11 @@
       "sourceTypeLabel": "Source type",
       "sourceIdLabel": "Source ID",
       "reasonCodeLabel": "Reason",
-      "notesLabel": "Notes"
+      "notesLabel": "Notes",
+      "validation": {
+        "codeLength": "Code must be between 2 and 20 characters.",
+        "nameMinLength": "Name must be at least 2 characters."
+      }
     },
     "reservationStatus": {
       "ACTIVE": "Active",

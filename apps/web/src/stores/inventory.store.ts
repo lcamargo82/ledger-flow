@@ -91,14 +91,10 @@ export const useInventoryStore = defineStore('inventory', () => {
 
   const createWarehouse = async (payload: CreateWarehouseRequest) => {
     isMutating.value = true
-    error.value = null
     try {
       const response = await inventoryService.createWarehouse(payload)
       await fetchWarehouses()
       return response.warehouse
-    } catch (err) {
-      error.value = extractErrorMessage(err)
-      throw err
     } finally {
       isMutating.value = false
     }
