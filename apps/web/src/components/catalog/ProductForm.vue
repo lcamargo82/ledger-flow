@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch, ref } from 'vue'
+import slugify from 'slugify'
 import { useI18n } from '../../composables/useI18n'
 import AppInput from '../common/AppInput.vue'
 import AppCurrencyInput from '../common/AppCurrencyInput.vue'
@@ -35,6 +36,18 @@ const form = reactive({
   currency: props.product?.sku?.currency || 'BRL',
   barcode: props.product?.sku?.barcode || '',
   costChangeReason: '',
+})
+
+const skuManuallyEdited = ref(false)
+
+const onSkuInput = () => {
+  skuManuallyEdited.value = true
+}
+
+watch(() => form.name, (newName) => {
+  if (props.mode === 'create' && !skuManuallyEdited.value) {
+    form.sku = slugify(newName, { lower: false, strict: true, replacement: '-' }).toUpperCase()
+  }
 })
 
 const isParent = computed(() => form.type === 'PARENT')
@@ -93,7 +106,7 @@ const submit = () => {
 
 <template>
   <form class="space-y-4" @submit.prevent="submit">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <AppSelect
         v-if="mode === 'create'"
         id="product-type"
@@ -135,19 +148,27 @@ const submit = () => {
       :placeholder="t('catalog.form.descriptionPlaceholder')"
     />
 
-    <div v-if="requiresSku" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div v-if="requiresSku" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <AppInput
         id="product-sku"
         v-model="form.sku"
         :label="t('catalog.form.skuLabel')"
         :placeholder="t('catalog.form.skuPlaceholder')"
         :disabled="!canEditSku"
+        @input="onSkuInput"
       />
       <AppCurrencyInput
         id="product-cost"
         v-model="form.averageCost"
         :currency="form.currency || 'BRL'"
         :label="t('catalog.form.averageCostLabel')"
+      />
+    </div>
+    <div v-if="requiresSku" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+      <AppInput
+        id="product-barcode"
+        v-model="form.barcode"
+        :label="t('catalog.form.barcodeLabel')"
       />
       <AppInput
         id="product-uom"
@@ -159,11 +180,8 @@ const submit = () => {
         v-model="form.currency"
         :label="t('catalog.form.currencyLabel')"
       />
-      <AppInput
-        id="product-barcode"
-        v-model="form.barcode"
-        :label="t('catalog.form.barcodeLabel')"
-      />
+    </div>
+    <div v-if="requiresSku && mode === 'edit'" class="mt-4">
       <AppInput
         v-if="mode === 'edit'"
         id="product-cost-reason"

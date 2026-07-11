@@ -433,43 +433,49 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
 
     <AppModal v-model="isReserveModalOpen" :title="t('inventory.form.reserveTitle')" size="md">
       <form class="space-y-4" @submit.prevent="reserveStock">
-        <AppInput
-          id="reserve-sku"
-          v-model="reserveForm.skuId"
-          :label="t('inventory.form.skuIdLabel')"
-        />
-        <AppSelect
-          id="reserve-warehouse"
-          v-model="reserveForm.warehouseId"
-          :label="t('inventory.form.warehouseLabel')"
-          :options="warehouseOptions"
-        />
-        <AppNumberInput
-          id="reserve-quantity"
-          v-model="reserveForm.quantity"
-          :allow-decimals="true"
-          :label="t('inventory.form.quantityLabel')"
-        />
-        <AppInput
-          id="reserve-source-type"
-          v-model="reserveForm.sourceType"
-          :label="t('inventory.form.sourceTypeLabel')"
-        />
-        <AppInput
-          id="reserve-source-id"
-          v-model="reserveForm.sourceId"
-          :label="t('inventory.form.sourceIdLabel')"
-        />
-        <AppInput
-          id="reserve-reason"
-          v-model="reserveForm.reasonCode"
-          :label="t('inventory.form.reasonCodeLabel')"
-        />
-        <AppInput
-          id="reserve-notes"
-          v-model="reserveForm.notes"
-          :label="t('inventory.form.notesLabel')"
-        />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AppInput
+            id="reserve-sku"
+            v-model="reserveForm.skuId"
+            :label="t('inventory.form.skuIdLabel')"
+          />
+          <AppSelect
+            id="reserve-warehouse"
+            v-model="reserveForm.warehouseId"
+            :label="t('inventory.form.warehouseLabel')"
+            :options="warehouseOptions"
+          />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <AppNumberInput
+            id="reserve-quantity"
+            v-model="reserveForm.quantity"
+            :allow-decimals="true"
+            :label="t('inventory.form.quantityLabel')"
+          />
+          <AppInput
+            id="reserve-source-type"
+            v-model="reserveForm.sourceType"
+            :label="t('inventory.form.sourceTypeLabel')"
+          />
+          <AppInput
+            id="reserve-source-id"
+            v-model="reserveForm.sourceId"
+            :label="t('inventory.form.sourceIdLabel')"
+          />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AppInput
+            id="reserve-reason"
+            v-model="reserveForm.reasonCode"
+            :label="t('inventory.form.reasonCodeLabel')"
+          />
+          <AppInput
+            id="reserve-notes"
+            v-model="reserveForm.notes"
+            :label="t('inventory.form.notesLabel')"
+          />
+        </div>
         <div class="flex justify-end gap-2">
           <AppButton type="button" variant="secondary" @click="isReserveModalOpen = false">{{
             t('common.cancel')
@@ -487,34 +493,33 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
       size="md"
     >
       <form class="space-y-4" @submit.prevent="recordAdjustment">
-        <AppInput
-          id="adjustment-sku"
-          v-model="adjustmentForm.skuId"
-          :label="t('inventory.form.skuIdLabel')"
-        />
-        <AppSelect
-          id="adjustment-warehouse"
-          v-model="adjustmentForm.warehouseId"
-          :label="t('inventory.form.warehouseLabel')"
-          :options="warehouseOptions"
-        />
-        <AppSelect
-          id="adjustment-type"
-          v-model="adjustmentForm.type"
-          :label="t('inventory.form.typeLabel')"
-          :options="movementTypeOptions"
-        />
-        <AppNumberInput
-          id="adjustment-quantity"
-          v-model="adjustmentForm.quantity"
-          :allow-decimals="true"
-          :label="t('inventory.form.quantityLabel')"
-        />
-        <AppInput
-          id="adjustment-reason"
-          v-model="adjustmentForm.reasonCode"
-          :label="t('inventory.form.reasonCodeLabel')"
-        />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AppInput
+            id="adjustment-sku"
+            v-model="adjustmentForm.skuId"
+            :label="t('inventory.form.skuIdLabel')"
+          />
+          <AppSelect
+            id="adjustment-warehouse"
+            v-model="adjustmentForm.warehouseId"
+            :label="t('inventory.form.warehouseLabel')"
+            :options="warehouseOptions"
+          />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <AppNumberInput
+            id="adjustment-quantity"
+            v-model="adjustmentForm.quantity"
+            :allow-decimals="true"
+            :label="t('inventory.form.quantityLabel')"
+          />
+          <AppInput
+            id="adjustment-reason"
+            v-model="adjustmentForm.reasonCode"
+            :label="t('inventory.form.reasonCodeLabel')"
+            class="md:col-span-2"
+          />
+        </div>
         <AppInput
           id="adjustment-notes"
           v-model="adjustmentForm.notes"
@@ -541,7 +546,7 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
       size="md"
     >
       <form class="space-y-4" @submit.prevent="transitionReservation">
-        <p v-if="selectedReservation" class="text-sm text-[var(--lf-text-secondary)]">
+        <p v-if="selectedReservation" class="text-sm text-gray-500 dark:text-gray-400">
           {{
             t('inventory.form.reservationConfirmation', {
               quantity: selectedReservation.quantity,
@@ -549,16 +554,18 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
             })
           }}
         </p>
-        <AppInput
-          id="reservation-transition-reason"
-          v-model="transitionForm.reasonCode"
-          :label="t('inventory.form.reasonCodeLabel')"
-        />
-        <AppInput
-          id="reservation-transition-notes"
-          v-model="transitionForm.notes"
-          :label="t('inventory.form.notesLabel')"
-        />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AppInput
+            id="reservation-transition-reason"
+            v-model="transitionForm.reasonCode"
+            :label="t('inventory.form.reasonCodeLabel')"
+          />
+          <AppInput
+            id="reservation-transition-notes"
+            v-model="transitionForm.notes"
+            :label="t('inventory.form.notesLabel')"
+          />
+        </div>
         <div class="flex justify-end gap-2">
           <AppButton type="button" variant="secondary" @click="isTransitionModalOpen = false">{{
             t('common.cancel')
