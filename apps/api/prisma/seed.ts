@@ -4,6 +4,16 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const platformAdminEmail = process.env.PLATFORM_ADMIN_EMAIL;
+  const platformAdminPassword = process.env.PLATFORM_ADMIN_PASSWORD;
+
+  if (isProduction && (!platformAdminEmail || !platformAdminPassword)) {
+    throw new Error(
+      'PLATFORM_ADMIN_EMAIL and PLATFORM_ADMIN_PASSWORD are required when NODE_ENV=production.',
+    );
+  }
+
   console.log('Seeding database...');
 
   // 1. Create or update Platform and Demo Tenants
@@ -79,7 +89,10 @@ async function main() {
     { key: 'reconciliation:read', description: 'Visualizar conciliação financeira' },
     { key: 'reconciliation:manage', description: 'Gerenciar casos de conciliação financeira' },
     { key: 'reconciliation:export', description: 'Exportar relatórios de conciliação financeira' },
-    { key: 'reconciliation:sync', description: 'Solicitar sincronização de conciliação financeira' },
+    {
+      key: 'reconciliation:sync',
+      description: 'Solicitar sincronização de conciliação financeira',
+    },
     { key: 'platform:access', description: 'Acesso à administração da plataforma' },
     { key: 'platform:tenants:create', description: 'Criar tenants da plataforma' },
     { key: 'platform:tenants:read', description: 'Visualizar tenants da plataforma' },
@@ -245,56 +258,59 @@ async function main() {
     console.log('Assigned platform permissions to PLATFORM_OWNER role');
   }
 
-  // 5. Create Demo Owner user
-  const ownerEmail = 'owner@ledgerflow.local';
-  const passwordHash = await bcrypt.hash('ChangeMe123!', 10);
+  // 5. Create Demo Owner user outside production, or when explicitly requested.
+  const shouldSeedDemoAccess = !isProduction || process.env.SEED_DEMO_ACCESS === 'true';
+  if (shouldSeedDemoAccess) {
+    const ownerEmail = process.env.DEMO_OWNER_EMAIL || 'owner@ledgerflow.local';
+    const ownerPassword = process.env.DEMO_OWNER_PASSWORD || 'ChangeMe123!';
+    const passwordHash = await bcrypt.hash(ownerPassword, 10);
 
-  const ownerUser = await prisma.user.upsert({
-    where: {
-      tenantId_email: {
-        tenantId: tenant.id,
-        email: ownerEmail,
-      },
-    },
-    update: {
-      name: 'Demo Owner',
-      // Não atualiza a senha se o usuário já existir para evitar sobrescrever caso tenha sido alterada
-    },
-    create: {
-      tenantId: tenant.id,
-      name: 'Demo Owner',
-      email: ownerEmail,
-      passwordHash: passwordHash,
-      active: true,
-    },
-  });
-  console.log(`Demo Owner user created/verified: ${ownerUser.email}`);
-
-  // 6. Assign OWNER role to Demo Owner
-  const demoOwnerRole = roles.find((r) => r.key === 'OWNER' && r.tenantId === tenant.id);
-  if (demoOwnerRole) {
-    await prisma.userRole.upsert({
+    const ownerUser = await prisma.user.upsert({
       where: {
-        userId_roleId: {
+        tenantId_email: {
+          tenantId: tenant.id,
+          email: ownerEmail,
+        },
+      },
+      update: {
+        name: 'Demo Owner',
+        // Não atualiza a senha se o usuário já existir para evitar sobrescrever caso tenha sido alterada
+      },
+      create: {
+        tenantId: tenant.id,
+        name: 'Demo Owner',
+        email: ownerEmail,
+        passwordHash: passwordHash,
+        active: true,
+      },
+    });
+    console.log(`Demo Owner user created/verified: ${ownerUser.email}`);
+
+    // 6. Assign OWNER role to Demo Owner
+    const demoOwnerRole = roles.find((r) => r.key === 'OWNER' && r.tenantId === tenant.id);
+    if (demoOwnerRole) {
+      await prisma.userRole.upsert({
+        where: {
+          userId_roleId: {
+            userId: ownerUser.id,
+            roleId: demoOwnerRole.id,
+          },
+        },
+        update: {},
+        create: {
           userId: ownerUser.id,
           roleId: demoOwnerRole.id,
         },
-      },
-      update: {},
-      create: {
-        userId: ownerUser.id,
-        roleId: demoOwnerRole.id,
-      },
-    });
-    console.log('Assigned OWNER role to Demo Owner user');
+      });
+      console.log('Assigned OWNER role to Demo Owner user');
+    }
+  } else {
+    console.log('Skipped demo login user in production');
   }
 
   // 6.5 Create Platform Owner user and assign role
-  const platformOwnerEmail = process.env.PLATFORM_ADMIN_EMAIL || 'platform.owner@ledgerflow.local';
-  const platformPasswordHash = await bcrypt.hash(
-    process.env.PLATFORM_ADMIN_PASSWORD || 'ChangeMe123!',
-    10,
-  );
+  const platformOwnerEmail = platformAdminEmail || 'platform.owner@ledgerflow.local';
+  const platformPasswordHash = await bcrypt.hash(platformAdminPassword || 'ChangeMe123!', 10);
 
   const platformOwnerUser = await prisma.user.upsert({
     where: {
