@@ -258,7 +258,8 @@ pipeline {
                           APP_PATH="$3"
                           attempt=1
 
-                          until curl -fsS "$API_URL"; do
+                          until curl -fsS --connect-timeout 2 --max-time 5 "$API_URL"; do
+                            echo "API readiness attempt $attempt/30 failed"
                             if [ "$attempt" -ge 30 ]; then
                               echo 'API readiness failed after 30 attempts'
                               docker compose \
@@ -271,7 +272,7 @@ pipeline {
                             sleep 5
                           done
 
-                          curl -fsS "$WEB_URL" > /dev/null
+                          curl -fsS --connect-timeout 2 --max-time 5 "$WEB_URL" > /dev/null
 REMOTE_SCRIPT
                     '''
                 }
