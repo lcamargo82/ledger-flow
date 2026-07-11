@@ -246,21 +246,33 @@ pipeline {
                     sh '''
                         set -eu
                         REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
-                        ssh -i "${SSH_KEY}" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new ${REMOTE_USER}@${DEPLOY_HOST} "
+                        ssh -i "${SSH_KEY}" \
+                          -o IdentitiesOnly=yes \
+                          -o BatchMode=yes \
+                          -o StrictHostKeyChecking=accept-new \
+                          ${REMOTE_USER}@${DEPLOY_HOST} \
+                          sh -s -- "${API_HEALTHCHECK_URL}" "${WEB_HEALTHCHECK_URL}" "${DEPLOY_PATH}" <<'REMOTE_SCRIPT'
                           set -eu
-                          for i in \$(seq 1 30); do
-                            if curl -fsS ${API_HEALTHCHECK_URL}; then
-                              break
-                            fi
-                            if [ \$i -eq 30 ]; then
+                          API_URL="$1"
+                          WEB_URL="$2"
+                          APP_PATH="$3"
+                          attempt=1
+
+                          until curl -fsS "$API_URL"; do
+                            if [ "$attempt" -ge 30 ]; then
                               echo 'API readiness failed after 30 attempts'
-                              docker compose --env-file ${DEPLOY_PATH}/.env -f ${DEPLOY_PATH}/docker-compose.prod.yml logs --tail=120 api
+                              docker compose \
+                                --env-file "$APP_PATH/.env" \
+                                -f "$APP_PATH/docker-compose.prod.yml" \
+                                logs --tail=120 api
                               exit 20
                             fi
+                            attempt=$((attempt + 1))
                             sleep 5
                           done
-                          curl -fsS ${WEB_HEALTHCHECK_URL} > /dev/null
-                        "
+
+                          curl -fsS "$WEB_URL" > /dev/null
+REMOTE_SCRIPT
                     '''
                 }
             }
