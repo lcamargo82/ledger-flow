@@ -86,6 +86,14 @@
         "resetFailed": "Não foi possível redefinir sua senha agora. Tente novamente."
       }
     },
+    "passwordRequirements": {
+      "minChars": "Mínimo de 8 caracteres",
+      "uppercase": "Uma letra maiúscula",
+      "lowercase": "Uma letra minúscula",
+      "number": "Um número",
+      "special": "Um caractere especial",
+      "match": "As senhas coincidem"
+    },
     "acceptInvitation": {
       "title": "Ativar conta",
       "subtitle": "Defina sua senha para acessar a plataforma.",

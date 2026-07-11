@@ -87,6 +87,14 @@
         "resetFailed": "Could not reset your password at this time. Please try again."
       }
     },
+    "passwordRequirements": {
+      "minChars": "Minimum of 8 characters",
+      "uppercase": "One uppercase letter",
+      "lowercase": "One lowercase letter",
+      "number": "One number",
+      "special": "One special character",
+      "match": "Passwords match"
+    },
     "acceptInvitation": {
       "title": "Activate account",
       "subtitle": "Set your password to access the platform.",

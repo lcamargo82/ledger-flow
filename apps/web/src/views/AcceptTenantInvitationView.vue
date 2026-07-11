@@ -4,7 +4,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from '@/composables/useI18n';
 import { authService } from '@/services/auth.service';
 import AppButton from '@/components/common/AppButton.vue';
-import AppInput from '@/components/common/AppInput.vue';
+import AppPasswordInput from '@/components/common/AppPasswordInput.vue';
+import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator.vue';
+import { getHttpErrorMessage } from '@/utils/http-error';
 
 const route = useRoute();
 const router = useRouter();
@@ -32,12 +34,18 @@ const submit = async () => {
   state.error = null;
 
   if (state.password !== state.confirmPassword) {
-    state.error = 'As senhas não coincidem';
+    state.error = t('auth.passwordRequirements.match');
     return;
   }
 
-  if (state.password.length < 8) {
-    state.error = 'A senha deve ter pelo menos 8 caracteres';
+  const uppercaseValid = /[A-Z]/.test(state.password);
+  const lowercaseValid = /[a-z]/.test(state.password);
+  const numberValid = /[0-9]/.test(state.password);
+  const specialValid = /[!@#$%^&*(),.?":{}|<>\-_]/.test(state.password);
+
+  if (state.password.length < 8 || !uppercaseValid || !lowercaseValid || !numberValid || !specialValid) {
+    // Keep it generic here, but mostly the button should be disabled anyway.
+    state.error = 'A senha não atende aos requisitos mínimos.';
     return;
   }
 
@@ -47,7 +55,7 @@ const submit = async () => {
     await authService.acceptTenantInvitation(token.value, state.password);
     state.success = true;
   } catch (err: any) {
-    state.error = err.message || t('auth.acceptInvitation.failed');
+    state.error = t(getHttpErrorMessage(err, 'auth.acceptInvitation.failed'));
   } finally {
     state.loading = false;
   }
@@ -91,10 +99,9 @@ const goToLogin = () => {
         <template v-if="token">
           <div class="form-group">
             <label for="password">{{ t('auth.acceptInvitation.passwordLabel') }}</label>
-            <AppInput
+            <AppPasswordInput
               id="password"
               v-model="state.password"
-              type="password"
               required
               :disabled="state.loading"
             />
@@ -102,20 +109,26 @@ const goToLogin = () => {
 
           <div class="form-group">
             <label for="confirmPassword">{{ t('auth.acceptInvitation.confirmPasswordLabel') }}</label>
-            <AppInput
+            <AppPasswordInput
               id="confirmPassword"
               v-model="state.confirmPassword"
-              type="password"
               required
               :disabled="state.loading"
             />
           </div>
 
+          <PasswordStrengthIndicator 
+            v-if="state.password"
+            :password="state.password" 
+            :confirmPassword="state.confirmPassword"
+            :showConfirm="true"
+          />
+
           <AppButton
             type="submit"
             block
             :loading="state.loading"
-            :disabled="!state.password || !state.confirmPassword"
+            :disabled="!state.password || !state.confirmPassword || state.password.length < 8 || state.password !== state.confirmPassword || !(/[A-Z]/.test(state.password)) || !(/[a-z]/.test(state.password)) || !(/[0-9]/.test(state.password)) || !(/[!@#$%^&*(),.?\x22:{}|<>\-_]/.test(state.password))"
           >
             {{ state.loading ? t('auth.acceptInvitation.submitting') : t('auth.acceptInvitation.submit') }}
           </AppButton>

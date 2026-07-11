@@ -59,8 +59,16 @@
           :error="confirmPasswordError"
           required
           :disabled="authStore.isResettingPassword"
-          class="lf-mb-6"
+          class="lf-mb-2"
           autocomplete="new-password"
+        />
+
+        <PasswordStrengthIndicator 
+          v-if="password"
+          :password="password" 
+          :confirmPassword="confirmPassword"
+          :showConfirm="true"
+          class="lf-mb-6"
         />
 
         <AppButton
@@ -100,6 +108,7 @@ import AppCard from '../components/common/AppCard.vue';
 import AppPasswordInput from '../components/common/AppPasswordInput.vue';
 import AppButton from '../components/common/AppButton.vue';
 import AppAlert from '../components/common/AppAlert.vue';
+import PasswordStrengthIndicator from '../components/common/PasswordStrengthIndicator.vue';
 import { brandAssets } from '../config/brand';
 
 const password = ref('');
@@ -137,9 +146,15 @@ const confirmPasswordError = computed(() => {
 });
 
 const isValidForm = computed(() => {
+  const hasUppercase = /[A-Z]/.test(password.value);
+  const hasLowercase = /[a-z]/.test(password.value);
+  const hasNumber = /[0-9]/.test(password.value);
+  const hasSpecial = /[!@#$%^&*(),.?\x22:{}|<>\-_]/.test(password.value);
+
   return (
     password.value.length >= 8 &&
-    confirmPassword.value === password.value
+    confirmPassword.value === password.value &&
+    hasUppercase && hasLowercase && hasNumber && hasSpecial
   );
 });
 

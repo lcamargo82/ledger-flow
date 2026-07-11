@@ -95,10 +95,12 @@ export const useAuthStore = defineStore('auth', {
       try {
         await authService.resetPassword({ token, password })
       } catch (err: any) {
-        if (err.response?.status === 400 || err.response?.status === 401) {
+        if (err.response?.status === 401) {
           this.passwordRecoveryError = t('auth.resetPassword.errors.tokenInvalidOrExpired')
         } else {
-          this.passwordRecoveryError = t(getHttpErrorMessage(err, 'auth.resetPassword.errors.resetFailed'))
+          // Using tokenInvalidOrExpired as default for 400 as well, but allowing getHttpErrorMessage to extract real validation errors
+          const defaultKey = err.response?.status === 400 ? 'auth.resetPassword.errors.tokenInvalidOrExpired' : 'auth.resetPassword.errors.resetFailed'
+          this.passwordRecoveryError = t(getHttpErrorMessage(err, defaultKey))
         }
         throw err
       } finally {
