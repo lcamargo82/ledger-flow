@@ -39,7 +39,10 @@ RUN npm ci --include=dev
 
 COPY apps/api ./
 
-RUN npm run prisma:generate && npm run build
+RUN npm run prisma:generate \
+    && npm run build \
+    && test -f dist/main.js \
+    && test -f dist/main.worker.js
 
 
 # ============================================================
