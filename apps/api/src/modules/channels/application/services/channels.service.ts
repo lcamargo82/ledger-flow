@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  ChannelIntegration,
   ChannelIntegrationStatus,
   ChannelListing,
   ChannelListingMatchStatus,
@@ -20,6 +21,7 @@ import { MapChannelListingDto } from '../dto/map-channel-listing.dto';
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
 import { MercadoLivreChannelAdapter } from '../../infra/adapters/mercado-livre-channel.adapter';
+import { MercadoLivreCredentialsService } from './mercado-livre-credentials.service';
 
 @Injectable()
 export class ChannelsService {
@@ -29,6 +31,7 @@ export class ChannelsService {
     private readonly prisma: PrismaService,
     private readonly mercadoLivreAdapter?: MercadoLivreChannelAdapter,
     private readonly credentialsEncryptionService?: GatewayCredentialsEncryptionService,
+    private readonly mercadoLivreCredentialsService?: MercadoLivreCredentialsService,
   ) {}
 
   async createIntegration(tenantId: string, actorUserId: string, dto: CreateChannelIntegrationDto) {
@@ -299,11 +302,7 @@ export class ChannelsService {
   }
 
   private async resolveImportListings(
-    integration: {
-      provider: ChannelProvider;
-      externalAccountId?: string | null;
-      encryptedCredentials?: unknown;
-    },
+    integration: ChannelIntegration,
     dto: ImportChannelListingsDto,
   ): Promise<MockChannelListingDto[]> {
     if (integration.provider === ChannelProvider.MOCK) {
@@ -320,19 +319,26 @@ export class ChannelsService {
       throw new BadRequestException('Mercado Livre integration requires encrypted credentials.');
     }
 
-    const credentials = this.credentialsEncryptionService.decrypt(
-      JSON.stringify(integration.encryptedCredentials),
-    );
-    if (!credentials.accessToken) {
-      throw new BadRequestException('Mercado Livre integration requires an access token.');
-    }
+    const accessToken = this.mercadoLivreCredentialsService
+      ? await this.mercadoLivreCredentialsService.getAccessToken(integration)
+      : this.currentAccessToken(integration.encryptedCredentials);
 
     return this.mercadoLivreAdapter.fetchListings({
-      accessToken: credentials.accessToken,
+      accessToken,
       externalAccountId: integration.externalAccountId,
       maxPages: dto.maxPages,
       pageSize: dto.pageSize,
     });
+  }
+
+  private currentAccessToken(encryptedCredentials: unknown) {
+    const credentials = this.credentialsEncryptionService!.decrypt(
+      JSON.stringify(encryptedCredentials),
+    );
+    if (!credentials.accessToken) {
+      throw new BadRequestException('Mercado Livre integration requires an access token.');
+    }
+    return credentials.accessToken;
   }
 
   private async createOutbox(

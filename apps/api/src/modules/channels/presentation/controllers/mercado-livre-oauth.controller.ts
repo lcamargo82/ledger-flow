@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -8,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { AuthenticatedUser } from '../../../auth/application/types/authenticated-user.type';
+import { Public } from '../../../auth/presentation/decorators/public.decorator';
 import { CurrentUser } from '../../../auth/presentation/decorators/current-user.decorator';
 import { RequireCapabilities } from '../../../auth/presentation/decorators/require-capabilities.decorator';
 import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
@@ -37,10 +39,21 @@ export class MercadoLivreOAuthController {
   }
 
   @Get('callback')
+  @Public()
   @ApiOperation({ summary: 'Receber callback OAuth do Mercado Livre sem expor tokens' })
   @ApiOkResponse({ type: MercadoLivreCallbackResponseDto })
-  callback(@Query('code') code: string, @Query('state') state: string) {
-    return this.mercadoLivreOAuthService.handleCallback(code, state);
+  async callback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() response: Response,
+  ) {
+    const frontendUrl = (process.env.CORS_ORIGIN || 'http://localhost:5180').replace(/\/$/, '');
+    try {
+      await this.mercadoLivreOAuthService.handleCallback(code, state);
+      return response.redirect(`${frontendUrl}/channels?mercadoLivre=connected`);
+    } catch {
+      return response.redirect(`${frontendUrl}/channels?mercadoLivre=error`);
+    }
   }
 
   @Post('integrations/:id/disconnect')

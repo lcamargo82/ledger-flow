@@ -7,12 +7,27 @@ export interface MercadoLivreTokenExchangeInput {
   redirectUri: string;
 }
 
+export interface MercadoLivreTokenRefreshInput {
+  refreshToken: string;
+  clientId: string;
+  clientSecret: string;
+}
+
 export interface MercadoLivreOAuthTokenResponse {
   access_token: string;
-  refresh_token: string;
+  refresh_token?: string;
   expires_in: number;
   user_id: number | string;
   scope?: string;
+}
+
+export class MercadoLivreTokenRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
 }
 
 export interface MercadoLivreSearchItemsInput {
@@ -106,11 +121,32 @@ export class MercadoLivreApiClient {
       }),
     });
 
-    if (!response.ok) {
-      throw new Error('Mercado Livre token exchange failed.');
-    }
+    if (!response.ok) throw this.tokenRequestError(response.status);
 
     return response.json() as Promise<MercadoLivreOAuthTokenResponse>;
+  }
+
+  async refreshAccessToken(
+    input: MercadoLivreTokenRefreshInput,
+  ): Promise<MercadoLivreOAuthTokenResponse> {
+    const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
+    const response = await fetch(`${baseUrl}/oauth/token`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        client_id: input.clientId,
+        client_secret: input.clientSecret,
+        refresh_token: input.refreshToken,
+      }),
+    });
+
+    if (!response.ok) throw this.tokenRequestError(response.status);
+    return response.json() as Promise<MercadoLivreOAuthTokenResponse>;
+  }
+
+  private tokenRequestError(status: number) {
+    return new MercadoLivreTokenRequestError('Mercado Livre token request failed.', status);
   }
 
   async searchSellerItems(

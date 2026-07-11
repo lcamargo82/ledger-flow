@@ -12,6 +12,7 @@ import { ChannelHealthReplayService } from './application/services/channel-healt
 import { ChannelInventorySyncService } from './application/services/channel-inventory-sync.service';
 import { ChannelWebhookIntakeService } from './application/services/channel-webhook-intake.service';
 import { MercadoLivreOAuthService } from './application/services/mercado-livre-oauth.service';
+import { MercadoLivreCredentialsService } from './application/services/mercado-livre-credentials.service';
 import { MercadoLivreOAuthStateService } from './application/services/mercado-livre-oauth-state.service';
 import { CHANNELS_REPOSITORY } from './domain/repositories/channels.repository';
 import { MercadoLivreApiClient } from './infra/clients/mercado-livre-api.client';
@@ -46,6 +47,7 @@ import { MercadoLivreOAuthController } from './presentation/controllers/mercado-
     MercadoLivreApiClient,
     MercadoLivreChannelAdapter,
     MercadoLivreOAuthService,
+    MercadoLivreCredentialsService,
     MercadoLivreOAuthStateService,
     {
       provide: CHANNELS_REPOSITORY,

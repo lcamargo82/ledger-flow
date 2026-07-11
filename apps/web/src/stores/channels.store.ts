@@ -132,11 +132,17 @@ export const useChannelsStore = defineStore('channels', () => {
   const connectMercadoLivre = async () => {
     isMutating.value = true
     error.value = null
+    const authorizationWindow = window.open('about:blank', '_blank', 'noopener,noreferrer')
     try {
       const response = await channelsService.connectMercadoLivre()
-      window.location.assign(response.authorizationUrl)
+      if (authorizationWindow) {
+        authorizationWindow.location.replace(response.authorizationUrl)
+      } else {
+        window.open(response.authorizationUrl, '_blank', 'noopener,noreferrer')
+      }
       return response.authorizationUrl
     } catch (err) {
+      authorizationWindow?.close()
       error.value = extractErrorMessage(err)
       throw err
     } finally {

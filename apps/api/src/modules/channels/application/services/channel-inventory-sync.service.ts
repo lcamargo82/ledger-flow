@@ -12,6 +12,7 @@ import { GatewayCredentialsEncryptionService } from '../../../gateways/applicati
 import { MercadoLivreChannelAdapter } from '../../infra/adapters/mercado-livre-channel.adapter';
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
+import { MercadoLivreCredentialsService } from './mercado-livre-credentials.service';
 
 export interface InventoryBalanceChangedInput {
   tenantId: string;
@@ -30,6 +31,7 @@ export class ChannelInventorySyncService {
     private readonly prisma: PrismaService,
     private readonly mercadoLivreAdapter?: MercadoLivreChannelAdapter,
     private readonly credentialsEncryptionService?: GatewayCredentialsEncryptionService,
+    private readonly mercadoLivreCredentialsService?: MercadoLivreCredentialsService,
   ) {}
 
   listStatus(
@@ -210,10 +212,11 @@ export class ChannelInventorySyncService {
       };
     }
 
-    const credentials = this.credentialsEncryptionService.decrypt(
-      JSON.stringify(integration.encryptedCredentials),
-    );
-    if (!credentials.accessToken) {
+    const accessToken = this.mercadoLivreCredentialsService
+      ? await this.mercadoLivreCredentialsService.getAccessToken(integration)
+      : this.credentialsEncryptionService.decrypt(JSON.stringify(integration.encryptedCredentials))
+          .accessToken;
+    if (!accessToken) {
       return {
         ok: false as const,
         errorCode: 'CREDENTIALS_NOT_SYNCABLE',
@@ -222,7 +225,7 @@ export class ChannelInventorySyncService {
     }
 
     return this.mercadoLivreAdapter.updateListingStock({
-      accessToken: credentials.accessToken,
+      accessToken,
       externalListingId: state.externalListingId,
       availableQuantity: quantity,
     });

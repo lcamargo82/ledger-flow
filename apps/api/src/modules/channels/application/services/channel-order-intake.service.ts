@@ -27,6 +27,7 @@ import {
 } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
 import { MercadoLivreChannelAdapter } from '../../infra/adapters/mercado-livre-channel.adapter';
+import { MercadoLivreCredentialsService } from './mercado-livre-credentials.service';
 
 type PayloadSummary = Record<string, unknown>;
 
@@ -40,6 +41,7 @@ export class ChannelOrderIntakeService {
     private readonly mercadoLivreAdapter: MercadoLivreChannelAdapter,
     private readonly credentialsEncryptionService: GatewayCredentialsEncryptionService,
     private readonly financialIntelligenceService?: FinancialIntelligenceService,
+    private readonly mercadoLivreCredentialsService?: MercadoLivreCredentialsService,
   ) {}
 
   async processInboxEvent(inboxEventId: string) {
@@ -77,15 +79,16 @@ export class ChannelOrderIntakeService {
     this.assertActiveIntegration(integration);
 
     const resource = this.getResource(inboxEvent.payloadSummary);
-    const credentials = this.credentialsEncryptionService.decrypt(
-      JSON.stringify(integration.encryptedCredentials),
-    );
-    if (!credentials.accessToken) {
+    const accessToken = this.mercadoLivreCredentialsService
+      ? await this.mercadoLivreCredentialsService.getAccessToken(integration)
+      : this.credentialsEncryptionService.decrypt(JSON.stringify(integration.encryptedCredentials))
+          .accessToken;
+    if (!accessToken) {
       throw new BadRequestException('Channel integration access token is required.');
     }
 
     const order = await this.getAdapter(inboxEvent.provider).fetchOrder({
-      accessToken: credentials.accessToken,
+      accessToken,
       resource,
     });
     const orderItems = await this.mapOrderItems(integration, order.items);
