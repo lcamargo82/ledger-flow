@@ -35,7 +35,7 @@ pipeline {
                     set -eu
                     command -v docker
                     command -v ssh
-                    command -v rsync
+                    command -v tar
                     command -v node
                     command -v npm
 
@@ -100,17 +100,35 @@ pipeline {
                         set -eu
                         REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
                         SSH_OPTS="-i ${SSH_KEY} -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+                        REMOTE_STAGING="${DEPLOY_PATH}.staging-${BUILD_NUMBER}"
 
-                        ssh ${SSH_OPTS} ${REMOTE_USER}@${DEPLOY_HOST} "mkdir -p ${DEPLOY_PATH}"
-                        rsync -az --delete \
-                          -e "ssh ${SSH_OPTS}" \
-                          --exclude='.git/' \
-                          --exclude='.env' \
-                          --exclude='apps/api/node_modules/' \
-                          --exclude='apps/api/dist/' \
-                          --exclude='apps/web/node_modules/' \
-                          --exclude='apps/web/dist/' \
-                          ./ ${REMOTE_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+                        ssh ${SSH_OPTS} ${REMOTE_USER}@${DEPLOY_HOST} "
+                          set -eu
+                          command -v tar > /dev/null
+                          rm -rf ${REMOTE_STAGING}
+                          mkdir -p ${REMOTE_STAGING}
+                        "
+
+                        tar -czf - \
+                          --exclude='./.git' \
+                          --exclude='./.env' \
+                          --exclude='./.npm-cache' \
+                          --exclude='./apps/api/node_modules' \
+                          --exclude='./apps/api/dist' \
+                          --exclude='./apps/web/node_modules' \
+                          --exclude='./apps/web/dist' \
+                          . | ssh ${SSH_OPTS} ${REMOTE_USER}@${DEPLOY_HOST} "tar -xzf - -C ${REMOTE_STAGING}"
+
+                        ssh ${SSH_OPTS} ${REMOTE_USER}@${DEPLOY_HOST} "
+                          set -eu
+                          mkdir -p ${DEPLOY_PATH}
+                          find ${DEPLOY_PATH} -mindepth 1 -maxdepth 1 \
+                            ! -name .env \
+                            ! -name .deploy-backups \
+                            -exec rm -rf -- {} +
+                          cp -a ${REMOTE_STAGING}/. ${DEPLOY_PATH}/
+                          rm -rf ${REMOTE_STAGING}
+                        "
                     '''
                 }
             }

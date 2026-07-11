@@ -9,11 +9,11 @@ Publicar LedgerFlow no servidor `camargo@192.168.15.174`, dentro de `/home/camar
 - Jenkins possui acesso SSH ao servidor com a credencial `ledgerflow-ctn01-ssh`, do tipo `SSH Username with private key`.
 - A pipeline usa `withCredentials(sshUserPrivateKey(...))` e não depende do plugin Jenkins `SSH Agent`/passo `sshagent`.
 - Jenkins possui uma ferramenta NodeJS configurada em `Manage Jenkins > Tools` com o nome exato `node-24`, compatível com `^20.19.0 || >=22.12.0`.
-- O agente Jenkins possui `docker`, `ssh`, `rsync`, `node` e `npm` disponíveis no `PATH`.
+- O agente Jenkins possui `docker`, `ssh`, `tar`, `node` e `npm` disponíveis no `PATH`.
 - O servidor tem Docker Compose disponível para o usuário `camargo`.
 - O diretório remoto é `/home/camargo/apps/ledger-flow`.
 - O arquivo remoto `/home/camargo/apps/ledger-flow/.env` é criado manualmente a partir de `.env.production.example`.
-- Jenkins sincroniza código, mas exclui `.env`, `.git`, `node_modules` e builds locais.
+- Jenkins sincroniza código por um arquivo `tar` transmitido via SSH, mas exclui `.env`, `.git`, caches, `node_modules` e builds locais.
 
 ## Portas padrão do LedgerFlow
 
@@ -56,7 +56,8 @@ ssh camargo@192.168.15.174 "cp /home/camargo/apps/ledger-flow/.env.production.ex
 - Instala dependências em `apps/api` e `apps/web` usando cache local do workspace.
 - Roda `npm run prisma:generate`, `npm test -- --runInBand` e `npm run build` na API.
 - Roda `npm run test:unit -- --run`, `npm run i18n:check` e `npm run build` no Web.
-- Sincroniza o workspace para o servidor via `rsync`.
+- Empacota o workspace com `tar` e o transmite ao servidor via SSH, sem depender de `rsync` no agente Jenkins.
+- Extrai primeiro em um diretório temporário e só então atualiza o diretório da aplicação, preservando `.env` e `.deploy-backups`.
 - Injeta temporariamente a chave privada cadastrada no Jenkins em cada etapa remota, sem gravá-la no repositório ou no servidor de destino.
 - Falha se o `.env` remoto não existir.
 - Salva snapshots de `docker compose ps` e `docker compose images` em `.deploy-backups`.
@@ -85,7 +86,7 @@ Configurar os hostnames para apontar para as portas internas do servidor ou para
 
 ## Solução de problemas do SSH
 
-O erro `No such DSL method 'sshagent'` indica que o plugin Jenkins `SSH Agent` não está instalado. O `Jenkinsfile` deste projeto não usa esse passo: ele obtém a credencial `ledgerflow-ctn01-ssh` pelo Credentials Binding e informa a chave diretamente aos comandos `ssh` e `rsync`.
+O erro `No such DSL method 'sshagent'` indica que o plugin Jenkins `SSH Agent` não está instalado. O `Jenkinsfile` deste projeto não usa esse passo: ele obtém a credencial `ledgerflow-ctn01-ssh` pelo Credentials Binding e informa a chave diretamente aos comandos `ssh` e `tar`.
 
 Se uma execução ainda mostrar `sshagent`, confirme que o job está construindo a revisão mais recente do `Jenkinsfile` e execute novamente a partir dela.
 
