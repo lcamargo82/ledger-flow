@@ -33,7 +33,10 @@ Telas acessíveis após autenticação bem-sucedida, com verificação de roles/
 - **Payments** (`/payments`) - _Futura tela da Fase 5_
 - **Catalog** (`/catalog/products`) - Produtos, SKUs e arquivamento
 - **Inventory** (`/inventory`, `/inventory/warehouses`, `/inventory/movements`) - Warehouses, saldos projetados e ledger de ajustes
-- **Reconciliation** (`/reconciliation`) - _Futura tela_
+- **Reconciliation** (`/reconciliation`) - Implementada na fase 9A
+- **Notifications** (`/notifications`) - Planejada 10.2.0A
+- **Inventory Transfers** (`/inventory/transfers`) - Planejada 10.2.2
+- **Cycle Counts** (`/inventory/cycle-counts`) - Planejada 10.2.3
 - **Reports** (`/reports`) - _Futura tela_
 - **Webhooks** (`/webhooks`) - _Futura tela_
 - **Audit Logs** (`/audit-logs`) - _Futura tela_
@@ -60,9 +63,12 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/inventory/movements`  | Implementada (10.0.3) | `AppLayout`                | `inventory:read` + `inventory.manage` | Histórico de movimentações do ledger                    |
 | `/inventory/reservations` | Implementada (10.0.4) | `AppLayout`              | `inventory:read` + `inventory.manage` | Reservas administrativas, liberação e consumo total     |
 | `/orders`               | Implementada (10.0.5) | `AppLayout`                | `orders:read` + `orders.manage`       | Pedidos internos, reserva, cancelamento e fulfillment   |
-| `/reconciliation`       | Futura                | `AppLayout`                | a definir                             | Conciliação financeira                                  |
+| `/reconciliation`       | Implementada (9A)     | `AppLayout`                | `reconciliation:read` + `reconciliation.read` | Conciliação, cases, dashboard e decisões        |
+| `/notifications`        | Planejada (10.2.0A)   | `AppLayout`                | `notifications:read` + `notifications.read` | Feed autorizado do usuário                     |
+| `/inventory/transfers`  | Planejada (10.2.2)    | `AppLayout`                | `inventory:transfer` + `inventory.transfer` | Transferências atômicas                         |
+| `/inventory/cycle-counts` | Planejada (10.2.3)  | `AppLayout`                | `inventory:cycle-count` + `inventory.cycle_count` | Contagem física controlada                 |
 | `/exports`              | Implementada (10.0.10) | `AppLayout`              | `reports:export`                     | Exportações CSV rastreáveis com fila operacional        |
-| `/channels`             | Implementada (10.0.6), expandida (10.0.7/10.0.8) | `AppLayout`                | `channels:read` + `channels.connect`  | Integrações, inbox sanitizado, malha fina e sync mock   |
+| `/channels`             | Implementada (10.0.6–10.1), expansão 10.1.10 planejada | `AppLayout` | `channels:read` + capabilities específicas | Integrações reais, inbox, malha fina e sync |
 | `/analytics`            | Implementada (10.0.9) | `AppLayout`                | `financial-intelligence:read` + `financial.analytics.read` | Dashboard operacional de facts financeiros              |
 | `/webhooks`             | Futura                | `AppLayout`                | a definir                             | Configuração e logs de webhooks                         |
 | `/audit-logs`           | Futura                | `AppLayout`                | a definir                             | Logs de auditoria geral                                 |

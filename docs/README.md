@@ -1,4 +1,4 @@
-# LedgerFlow — Documentação dos Programas 9A, 10.0 e 10.1
+# LedgerFlow — Documentação dos Programas 9A, 10.0, 10.1 e 10.2
 
 ## Programa 9A — Conciliação Financeira
 
@@ -116,6 +116,24 @@ Sprints:
 ```
 
 A 10.1.9 fecha o fluxo com checklist operacional em `docs/runbooks/10.1-mercado-livre-operational-readiness.md`, cobrindo OAuth, listing, venda, reserva, sync, replay, carga e segurança de token.
+
+## Programa 10.2 — Notification Center & Advanced Inventory
+
+**Status:** planejado. Documentação de roadmap não significa endpoint/evento implementado.
+
+- `prd/10.2-notifications-advanced-inventory-prd.md`
+- `sdd/10.2-notifications-advanced-inventory-sdd.md`
+- `specs/10.2-sprint-plan.md`
+- `specs/10.2-components-i18n.md`
+- `specs/post-10.1-current-state-assessment.md`
+- `backlog/10.2-notifications-advanced-inventory-backlog.md`
+- `runbooks/10.2-operational-readiness.md`
+- `roadmap/post-10-1-sequence.md`
+
+## Visões futuras
+
+- `roadmap/9B-marketplace-settlement-vision.md`
+- `roadmap/10.3-fulfillment-shipping-vision.md`
 
 ## Onde colocar os arquivos no repositório
 

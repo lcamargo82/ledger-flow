@@ -1491,3 +1491,18 @@ O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Du
 
 - **Usuário Operacional (Tenant)**: Dentro do tenant interno `LedgerFlow Platform`, o Platform Admin gerencia usuários, clientes e pagamentos da mesma forma que qualquer tenant padrão, utilizando a role `OWNER` com escopo `TENANT`.
 - **Administrador Global (Platform)**: Utilizando a role especial `PLATFORM_OWNER` com escopo `PLATFORM`, o Admin Master tem a capacidade de gerenciar todos os tenants do ecossistema a partir de uma interface separada na plataforma.
+
+## Roadmap pós-10.1
+
+O pacote planejado seguinte está documentado sem declarar endpoints futuros como implementados:
+
+```text
+10.1.10 → 10.2.0A → 10.2.0B → 10.2.1 → 10.2.2 → 10.2.3 → 10.1.11
+```
+
+- 10.1.10 fecha configuração operacional e UX OAuth do Mercado Livre.
+- 10.2 adiciona Notification Center e estoque avançado sobre o ledger existente.
+- 10.1.11 enriquece fatos financeiros operacionais e resumo logístico.
+- 9B (settlement de marketplace) e 10.3 (fulfillment) permanecem discovery futuro.
+
+Índice: `docs/README.md` e `docs/roadmap/post-10-1-sequence.md`. Cada sprint exige testes, Swagger/Redoc/OpenAPI, AsyncAPI quando houver eventos, i18n pt-BR/en-US e atualização dos documentos de produto, arquitetura, UI e operação.

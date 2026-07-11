@@ -53,9 +53,16 @@ Toda nova tela no projeto deve ser construída exclusivamente reaproveitando est
 
 ## 13. Sidebar
 * Navegação principal, com menus colapsáveis se necessário.
-* Rodapé com: menu do usuário, seletor de idioma, e botão de logout.
+* Rodapé atual: menu do usuário, seletor de idioma e logout.
+* Planejado 10.2.0: `NotificationBell` e `SystemVersionLabel`, preservando modo colapsado, target acessível e hierarquia do footer.
 * *Nota:* LedgerFlow usa a abordagem AppLayout sem header global, dependendo primariamente do Sidebar.
 
 ## 14. AuthHero
 * Seção visual de impacto para a tela de login/recuperação.
 * Contém a imagem decorativa de background, textos localizados via i18n e ícones gerados via código, não via imagem.
+
+## 15. Componentes planejados 10.2
+
+- `NotificationBell`, `NotificationCenterPanel`, `NotificationList` e itens/tabs de categoria.
+- Forms, status badges, items tables e variance summary para transferências/contagens.
+- Devem compor os componentes `App*` existentes; não criar paleta, modal, tabela, toast ou botão paralelo.
