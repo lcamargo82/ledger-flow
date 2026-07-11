@@ -6,8 +6,10 @@ Publicar LedgerFlow no servidor `camargo@192.168.15.174`, dentro de `/home/camar
 
 ## Premissas
 
-- Jenkins possui acesso SSH ao servidor com a credencial `ledgerflow-ctn01-ssh`.
-- Jenkins possui uma ferramenta NodeJS configurada em `Manage Jenkins > Tools` com o nome exato `NodeJS 22`, compatível com `^20.19.0 || >=22.12.0`.
+- Jenkins possui acesso SSH ao servidor com a credencial `ledgerflow-ctn01-ssh`, do tipo `SSH Username with private key`.
+- A pipeline usa `withCredentials(sshUserPrivateKey(...))` e não depende do plugin Jenkins `SSH Agent`/passo `sshagent`.
+- Jenkins possui uma ferramenta NodeJS configurada em `Manage Jenkins > Tools` com o nome exato `node-24`, compatível com `^20.19.0 || >=22.12.0`.
+- O agente Jenkins possui `docker`, `ssh`, `rsync`, `node` e `npm` disponíveis no `PATH`.
 - O servidor tem Docker Compose disponível para o usuário `camargo`.
 - O diretório remoto é `/home/camargo/apps/ledger-flow`.
 - O arquivo remoto `/home/camargo/apps/ledger-flow/.env` é criado manualmente a partir de `.env.production.example`.
@@ -50,10 +52,12 @@ ssh camargo@192.168.15.174 "cp /home/camargo/apps/ledger-flow/.env.production.ex
 ## Fluxo do Jenkinsfile
 
 - Valida `docker-compose.prod.yml` criando um `.env` temporário no workspace do Jenkins a partir de `.env.production.example`, porque os serviços usam `env_file: .env`.
+- Valida ferramentas mínimas do agente Jenkins antes de iniciar testes e sincronização remota.
 - Instala dependências em `apps/api` e `apps/web` usando cache local do workspace.
 - Roda `npm run prisma:generate`, `npm test -- --runInBand` e `npm run build` na API.
 - Roda `npm run test:unit -- --run`, `npm run i18n:check` e `npm run build` no Web.
 - Sincroniza o workspace para o servidor via `rsync`.
+- Injeta temporariamente a chave privada cadastrada no Jenkins em cada etapa remota, sem gravá-la no repositório ou no servidor de destino.
 - Falha se o `.env` remoto não existir.
 - Salva snapshots de `docker compose ps` e `docker compose images` em `.deploy-backups`.
 - Builda imagens no servidor.
@@ -78,6 +82,12 @@ Configurar os hostnames para apontar para as portas internas do servidor ou para
 - Usar senhas fortes para Postgres, MongoDB, RabbitMQ, Grafana e JWT.
 - Restringir RabbitMQ Management e Grafana por Cloudflare Access ou equivalente antes de expor publicamente.
 - Manter `CORS_ORIGIN=https://ledgerflow.lcamargo.dev.br`.
+
+## Solução de problemas do SSH
+
+O erro `No such DSL method 'sshagent'` indica que o plugin Jenkins `SSH Agent` não está instalado. O `Jenkinsfile` deste projeto não usa esse passo: ele obtém a credencial `ledgerflow-ctn01-ssh` pelo Credentials Binding e informa a chave diretamente aos comandos `ssh` e `rsync`.
+
+Se uma execução ainda mostrar `sshagent`, confirme que o job está construindo a revisão mais recente do `Jenkinsfile` e execute novamente a partir dela.
 
 ## Rollback
 

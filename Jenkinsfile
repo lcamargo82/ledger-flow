@@ -33,6 +33,12 @@ pipeline {
             steps {
                 sh '''
                     set -eu
+                    command -v docker
+                    command -v ssh
+                    command -v rsync
+                    command -v node
+                    command -v npm
+
                     test -f Jenkinsfile
                     test -f docker-compose.yml
                     test -f docker-compose.prod.yml
@@ -83,18 +89,28 @@ pipeline {
 
         stage('Sync workspace to server') {
             steps {
-                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: env.SSH_CREDENTIALS_ID,
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
                     sh '''
                         set -eu
-                        ssh -o StrictHostKeyChecking=accept-new ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p ${DEPLOY_PATH}"
+                        REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
+                        SSH_OPTS="-i ${SSH_KEY} -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+
+                        ssh ${SSH_OPTS} ${REMOTE_USER}@${DEPLOY_HOST} "mkdir -p ${DEPLOY_PATH}"
                         rsync -az --delete \
+                          -e "ssh ${SSH_OPTS}" \
                           --exclude='.git/' \
                           --exclude='.env' \
                           --exclude='apps/api/node_modules/' \
                           --exclude='apps/api/dist/' \
                           --exclude='apps/web/node_modules/' \
                           --exclude='apps/web/dist/' \
-                          ./ ${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
+                          ./ ${REMOTE_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}/
                     '''
                 }
             }
@@ -102,10 +118,17 @@ pipeline {
 
         stage('Preflight remote environment') {
             steps {
-                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: env.SSH_CREDENTIALS_ID,
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
                     sh '''
                         set -eu
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                        REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
+                        ssh -i "${SSH_KEY}" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new ${REMOTE_USER}@${DEPLOY_HOST} "
                           set -eu
                           cd ${DEPLOY_PATH}
                           test -f .env || {
@@ -124,10 +147,17 @@ pipeline {
 
         stage('Build images on server') {
             steps {
-                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: env.SSH_CREDENTIALS_ID,
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
                     sh '''
                         set -eu
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                        REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
+                        ssh -i "${SSH_KEY}" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new ${REMOTE_USER}@${DEPLOY_HOST} "
                           set -eu
                           cd ${DEPLOY_PATH}
                           export LEDGERFLOW_IMAGE_TAG=${BUILD_NUMBER}
@@ -140,10 +170,17 @@ pipeline {
 
         stage('Deploy infrastructure and migrations') {
             steps {
-                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: env.SSH_CREDENTIALS_ID,
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
                     sh '''
                         set -eu
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                        REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
+                        ssh -i "${SSH_KEY}" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new ${REMOTE_USER}@${DEPLOY_HOST} "
                           set -eu
                           cd ${DEPLOY_PATH}
                           export LEDGERFLOW_IMAGE_TAG=${BUILD_NUMBER}
@@ -157,10 +194,17 @@ pipeline {
 
         stage('Deploy application') {
             steps {
-                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: env.SSH_CREDENTIALS_ID,
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
                     sh '''
                         set -eu
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                        REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
+                        ssh -i "${SSH_KEY}" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new ${REMOTE_USER}@${DEPLOY_HOST} "
                           set -eu
                           cd ${DEPLOY_PATH}
                           export LEDGERFLOW_IMAGE_TAG=${BUILD_NUMBER}
@@ -174,10 +218,17 @@ pipeline {
 
         stage('Verify deployment') {
             steps {
-                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: env.SSH_CREDENTIALS_ID,
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'SSH_USER'
+                    )
+                ]) {
                     sh '''
                         set -eu
-                        ssh ${DEPLOY_USER}@${DEPLOY_HOST} "
+                        REMOTE_USER="${SSH_USER:-${DEPLOY_USER}}"
+                        ssh -i "${SSH_KEY}" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new ${REMOTE_USER}@${DEPLOY_HOST} "
                           set -eu
                           for i in \$(seq 1 30); do
                             if curl -fsS ${API_HEALTHCHECK_URL}; then
