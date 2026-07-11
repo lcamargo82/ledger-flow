@@ -20,7 +20,7 @@ Publicar LedgerFlow no servidor `camargo@192.168.15.174`, dentro de `/home/camar
 | Serviço | Porta host | Observação |
 |---|---:|---|
 | Web | `5180` | Origem sugerida para `ledgerflow.lcamargo.dev.br` |
-| API | `3010` | Origem sugerida para `api-ledgerflow.lcamargo.dev.br` |
+| API | `3010` | Publica a porta interna `3011`; origem sugerida para `api-ledgerflow.lcamargo.dev.br` |
 | Postgres | `55432` | Evita conflito com Postgres existente em `5432` |
 | MongoDB | `27018` | Porta auxiliar interna/operacional |
 | Redis | `6380` | Porta auxiliar interna/operacional |
@@ -47,7 +47,13 @@ ssh camargo@192.168.15.174 "cp /home/camargo/apps/ledger-flow/.env.production.ex
 ```
 
 5. Editar `/home/camargo/apps/ledger-flow/.env` com segredos reais e URLs oficiais.
-6. Executar o job Jenkins.
+6. Se o UFW usar `deny (outgoing)`, liberar a conexão do host para a API na bridge Docker:
+
+```bash
+sudo ufw allow out to 172.25.0.0/16 port 3011 proto tcp comment 'LedgerFlow API Docker bridge'
+```
+
+7. Executar o job Jenkins.
 
 ## Fluxo do Jenkinsfile
 
@@ -89,6 +95,10 @@ Configurar os hostnames para apontar para as portas internas do servidor ou para
 O erro `No such DSL method 'sshagent'` indica que o plugin Jenkins `SSH Agent` não está instalado. O `Jenkinsfile` deste projeto não usa esse passo: ele obtém a credencial `ledgerflow-ctn01-ssh` pelo Credentials Binding e informa a chave diretamente aos comandos `ssh` e `tar`.
 
 Se uma execução ainda mostrar `sshagent`, confirme que o job está construindo a revisão mais recente do `Jenkinsfile` e execute novamente a partir dela.
+
+## Solução de problemas do healthcheck da API
+
+Quando a API responde dentro do container, mas `http://127.0.0.1:3010` expira, verifique `sudo ufw status verbose`. Com a política `deny (outgoing)`, o `docker-proxy` precisa de uma regra de saída para alcançar a porta interna `3011` na subnet Docker do LedgerFlow. Se a subnet mudar após recriar a rede, atualize a regra do UFW para a nova subnet.
 
 ## Rollback
 
