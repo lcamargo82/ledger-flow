@@ -305,7 +305,35 @@ async function main() {
       console.log('Assigned OWNER role to Demo Owner user');
     }
   } else {
-    console.log('Skipped demo login user in production');
+    const existingDemoOwner = await prisma.user.findUnique({
+      where: {
+        tenantId_email: {
+          tenantId: tenant.id,
+          email: 'owner@ledgerflow.local',
+        },
+      },
+    });
+
+    if (existingDemoOwner) {
+      const revokedAt = new Date();
+      await prisma.$transaction([
+        prisma.refreshToken.updateMany({
+          where: { userId: existingDemoOwner.id, revokedAt: null },
+          data: { revokedAt },
+        }),
+        prisma.userSession.updateMany({
+          where: { userId: existingDemoOwner.id, active: true },
+          data: { active: false, revokedAt },
+        }),
+        prisma.user.update({
+          where: { id: existingDemoOwner.id },
+          data: { active: false },
+        }),
+      ]);
+      console.log('Disabled existing demo login user in production');
+    } else {
+      console.log('Skipped demo login user in production');
+    }
   }
 
   // 6.5 Create Platform Owner user and assign role
@@ -321,7 +349,9 @@ async function main() {
     },
     update: {
       name: 'Platform Admin',
+      passwordHash: isProduction ? platformPasswordHash : undefined,
       isPlatformAdmin: true,
+      active: true,
     },
     create: {
       tenantId: platformTenant.id,
