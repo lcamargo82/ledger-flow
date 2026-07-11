@@ -22,7 +22,7 @@ RUN npm install
 
 COPY apps/api ./
 
-EXPOSE 3000
+EXPOSE 3011
 
 CMD ["npm", "run", "start:dev"]
 
@@ -71,6 +71,6 @@ COPY --from=production-deps /usr/src/app/apps/api/node_modules ./node_modules
 COPY --from=build /usr/src/app/apps/api/dist ./dist
 COPY --from=build /usr/src/app/apps/api/prisma ./prisma
 
-EXPOSE 3000
+EXPOSE 3011
 
 CMD ["node", "dist/main.js"]

@@ -53,7 +53,7 @@ services:
     environment:
       APP_PROCESS_ROLE: api
     ports:
-      - "${HOST_API_PORT:-3010}:${API_PORT:-3000}"
+      - "${HOST_API_PORT:-3010}:${API_PORT:-3011}"
     volumes:
       - reports_data:/tmp/ledgerflow/reports
     depends_on:
@@ -72,7 +72,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "node -e \"fetch('http://127.0.0.1:${API_PORT:-3000}/health/liveness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
+          "node -e \"fetch('http://127.0.0.1:${API_PORT:-3011}/health/liveness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
         ]
       interval: 30s
       timeout: 10s
