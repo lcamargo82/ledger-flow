@@ -35,7 +35,10 @@ async function bootstrap() {
     res.type('text/html').send(getRedocHtml());
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  const host = process.env.API_HOST ?? '0.0.0.0';
+  const port = Number(process.env.API_PORT ?? process.env.PORT ?? 3000);
+
+  await app.listen(port, host);
 }
 bootstrap().catch((err) => {
   console.error('Error starting server', err);
