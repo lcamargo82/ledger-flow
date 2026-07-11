@@ -27,6 +27,11 @@ export interface CreateChannelIntegrationData {
   createdByUserId: string;
 }
 
+export interface UpdateChannelIntegrationSettingsData {
+  defaultWarehouseId?: string | null;
+  settingsJson: Prisma.InputJsonValue;
+}
+
 export interface CreateChannelWebhookInboxData {
   tenantId: string;
   integrationId: string;
@@ -159,6 +164,15 @@ export interface ChannelsRepository {
     externalAccountId: string,
   ): Promise<ChannelIntegration[]>;
   findIntegrationById(id: string, tenantId: string): Promise<ChannelIntegration | null>;
+  findWarehouseById(
+    id: string,
+    tenantId: string,
+  ): Promise<{ id: string; isActive: boolean } | null>;
+  updateIntegrationSettings(
+    id: string,
+    tenantId: string,
+    data: UpdateChannelIntegrationSettingsData,
+  ): Promise<ChannelIntegration>;
   findInboxByProviderEventId(
     provider: ChannelProvider,
     providerEventId: string,

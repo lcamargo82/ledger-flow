@@ -316,7 +316,13 @@
       "connectMercadoLivre": "Conectar Mercado Livre",
       "importListings": "Importar anúncios",
       "mapListing": "Mapear SKU",
-      "processSync": "Processar pendências"
+      "processSync": "Processar pendências",
+      "configure": "Configurar",
+      "suspend": "Suspender",
+      "reactivate": "Reativar",
+      "reconnect": "Reconectar",
+      "save": "Salvar",
+      "disconnect": "Desconectar"
     },
     "filters": {
       "statusLabel": "Status",
@@ -340,7 +346,8 @@
       "skuId": "SKU",
       "targetAvailable": "Disponível alvo",
       "circuit": "Circuito",
-      "nextAttemptAt": "Próxima tentativa"
+      "nextAttemptAt": "Próxima tentativa",
+      "health": "Saúde"
     },
     "form": {
       "integrationTitle": "Nova integração de canal",
@@ -362,6 +369,31 @@
       "DISABLED": "Desativada",
       "SUSPENDED": "Suspensa",
       "REAUTH_REQUIRED": "Reautenticação necessária"
+    },
+    "health": {
+      "HEALTHY": "Saudável",
+      "DEGRADED": "Degradada",
+      "REAUTH_REQUIRED": "Reconexão necessária",
+      "SUSPENDED": "Suspensa",
+      "DISCONNECTED": "Desconectada",
+      "FAILED": "Falhou"
+    },
+    "settings": {
+      "title": "Configurar integração",
+      "defaultWarehouse": "Depósito padrão",
+      "noWarehouse": "Nenhum depósito selecionado",
+      "syncEnabled": "Sincronização de estoque ativa",
+      "stockSyncModeAvailable": "Modo de saldo: disponível",
+      "saved": "Configuração da integração salva.",
+      "importListingsOnConnect": "Importar anúncios após conectar"
+    },
+    "disconnect": {
+      "title": "Desconectar Mercado Livre",
+      "message": "As credenciais serão removidas e as operações do canal serão interrompidas."
+    },
+    "oauth": {
+      "connectedSuccess": "Mercado Livre conectado com sucesso.",
+      "connectedFailed": "Não foi possível concluir a conexão com o Mercado Livre."
     },
     "webhookStatus": {
       "RECEIVED": "Recebido",

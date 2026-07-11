@@ -16,6 +16,7 @@ import type {
   ChannelWebhookStatus,
   CreateChannelIntegrationRequest,
   MapChannelListingRequest,
+  UpdateChannelIntegrationSettingsRequest,
 } from '../types/channels.types'
 
 export const useChannelsStore = defineStore('channels', () => {
@@ -150,6 +151,50 @@ export const useChannelsStore = defineStore('channels', () => {
     }
   }
 
+  const updateIntegrationSettings = async (
+    integrationId: string,
+    payload: UpdateChannelIntegrationSettingsRequest,
+  ) => {
+    isMutating.value = true
+    try {
+      const response = await channelsService.updateIntegrationSettings(integrationId, payload)
+      await fetchChannels()
+      return response.integration
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const suspendIntegration = async (integrationId: string) => {
+    isMutating.value = true
+    try {
+      await channelsService.suspendIntegration(integrationId)
+      await fetchChannels()
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const reactivateIntegration = async (integrationId: string) => {
+    isMutating.value = true
+    try {
+      await channelsService.reactivateIntegration(integrationId)
+      await fetchChannels()
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const disconnectMercadoLivre = async (integrationId: string) => {
+    isMutating.value = true
+    try {
+      await channelsService.disconnectMercadoLivre(integrationId)
+      await fetchChannels()
+    } finally {
+      isMutating.value = false
+    }
+  }
+
   const setInboxStatus = (status?: ChannelWebhookStatus) => {
     filters.value.status = status
     filters.value.page = 1
@@ -236,6 +281,10 @@ export const useChannelsStore = defineStore('channels', () => {
     fetchInventorySyncStatus,
     createIntegration,
     connectMercadoLivre,
+    updateIntegrationSettings,
+    suspendIntegration,
+    reactivateIntegration,
+    disconnectMercadoLivre,
     setInboxStatus,
     setListingStatus,
     setInventorySyncStatus,

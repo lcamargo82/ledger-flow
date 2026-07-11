@@ -4,7 +4,6 @@ import {
   ChannelInventorySyncStatus,
   ChannelListingMatchStatus,
   ChannelProvider,
-  ChannelWebhookStatus,
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
@@ -17,6 +16,7 @@ import {
   ListInventorySyncStatesParams,
   UpsertChannelListingData,
   UpsertInventorySyncStateData,
+  UpdateChannelIntegrationSettingsData,
 } from '../../domain/repositories/channels.repository';
 
 @Injectable()
@@ -44,6 +44,24 @@ export class PrismaChannelsRepository implements ChannelsRepository {
   findIntegrationById(id: string, tenantId: string) {
     return this.prisma.channelIntegration.findFirst({
       where: { id, tenantId },
+    });
+  }
+
+  findWarehouseById(id: string, tenantId: string) {
+    return this.prisma.warehouse.findFirst({
+      where: { id, tenantId },
+      select: { id: true, isActive: true },
+    });
+  }
+
+  updateIntegrationSettings(
+    id: string,
+    tenantId: string,
+    data: UpdateChannelIntegrationSettingsData,
+  ) {
+    return this.prisma.channelIntegration.update({
+      where: { id, tenantId },
+      data,
     });
   }
 

@@ -18,6 +18,7 @@ import {
 } from '../dto/import-channel-listings.dto';
 import { ListChannelListingsQueryDto } from '../dto/list-channel-listings-query.dto';
 import { MapChannelListingDto } from '../dto/map-channel-listing.dto';
+import { UpdateChannelIntegrationSettingsDto } from '../dto/update-channel-integration-settings.dto';
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
 import { MercadoLivreChannelAdapter } from '../../infra/adapters/mercado-livre-channel.adapter';
@@ -69,8 +70,82 @@ export class ChannelsService {
     return integration;
   }
 
-  listIntegrations(tenantId: string) {
-    return this.channelsRepository.listIntegrations(tenantId);
+  async listIntegrations(tenantId: string) {
+    const integrations = await this.channelsRepository.listIntegrations(tenantId);
+    return integrations.map((integration) => this.toOperationalIntegration(integration));
+  }
+
+  async getIntegration(id: string, tenantId: string) {
+    const integration = await this.requireIntegration(id, tenantId);
+    return this.toOperationalIntegration(integration);
+  }
+
+  async updateIntegrationSettings(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: UpdateChannelIntegrationSettingsDto,
+  ) {
+    const integration = await this.requireIntegration(id, tenantId);
+    if (dto.defaultWarehouseId) {
+      const warehouse = await this.channelsRepository.findWarehouseById(
+        dto.defaultWarehouseId,
+        tenantId,
+      );
+      if (!warehouse?.isActive) {
+        throw new BadRequestException('Active warehouse from the same tenant is required.');
+      }
+    }
+
+    const currentSettings = this.asRecord(integration.settingsJson);
+    const settingsJson = {
+      ...currentSettings,
+      syncEnabled: dto.syncEnabled ?? this.asBoolean(currentSettings.syncEnabled, true),
+      stockSyncMode: dto.stockSyncMode ?? this.asString(currentSettings.stockSyncMode, 'AVAILABLE'),
+      importListingsOnConnect:
+        dto.importListingsOnConnect ??
+        this.asBoolean(currentSettings.importListingsOnConnect, false),
+    };
+    const updated = await this.channelsRepository.updateIntegrationSettings(id, tenantId, {
+      ...(dto.defaultWarehouseId !== undefined && {
+        defaultWarehouseId: dto.defaultWarehouseId || null,
+      }),
+      settingsJson,
+    });
+    await this.audit(tenantId, actorUserId, 'channels.integration.settings_updated', id, {
+      provider: integration.provider,
+      defaultWarehouseId: updated.defaultWarehouseId,
+      ...settingsJson,
+    });
+    return this.toOperationalIntegration(updated);
+  }
+
+  suspendIntegration(id: string, tenantId: string, actorUserId: string) {
+    return this.transitionIntegration(
+      id,
+      tenantId,
+      actorUserId,
+      [ChannelIntegrationStatus.ACTIVE, ChannelIntegrationStatus.REAUTH_REQUIRED],
+      ChannelIntegrationStatus.SUSPENDED,
+    );
+  }
+
+  async reactivateIntegration(id: string, tenantId: string, actorUserId: string) {
+    const integration = await this.requireIntegration(id, tenantId);
+    if (
+      integration.status !== ChannelIntegrationStatus.SUSPENDED ||
+      !integration.encryptedCredentials
+    ) {
+      throw new BadRequestException('Only suspended integrations with credentials can reactivate.');
+    }
+    return this.transitionIntegration(
+      id,
+      tenantId,
+      actorUserId,
+      [ChannelIntegrationStatus.SUSPENDED],
+      ChannelIntegrationStatus.ACTIVE,
+      integration,
+    );
   }
 
   async updateIntegrationStatus(
@@ -208,6 +283,86 @@ export class ChannelsService {
 
   private hash(value: string) {
     return createHash('sha256').update(value).digest('hex');
+  }
+
+  private async transitionIntegration(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    allowedStatuses: ChannelIntegrationStatus[],
+    nextStatus: ChannelIntegrationStatus,
+    loadedIntegration?: ChannelIntegration,
+  ) {
+    const integration = loadedIntegration ?? (await this.requireIntegration(id, tenantId));
+    if (!allowedStatuses.includes(integration.status)) {
+      throw new BadRequestException('Channel integration status transition is not allowed.');
+    }
+    const updated = await this.channelsRepository.updateIntegrationStatus(id, tenantId, nextStatus);
+    await this.audit(tenantId, actorUserId, 'channels.integration.status_updated', id, {
+      provider: integration.provider,
+      previousStatus: integration.status,
+      status: nextStatus,
+    });
+    return this.toOperationalIntegration(updated);
+  }
+
+  private async requireIntegration(id: string, tenantId: string) {
+    const integration = await this.channelsRepository.findIntegrationById(id, tenantId);
+    if (!integration) throw new NotFoundException('Channel integration not found.');
+    return integration;
+  }
+
+  private toOperationalIntegration(integration: ChannelIntegration) {
+    const settings = this.asRecord(integration.settingsJson);
+    return {
+      id: integration.id,
+      tenantId: integration.tenantId,
+      provider: integration.provider,
+      name: integration.name,
+      externalAccountId: integration.externalAccountId,
+      externalStoreId: integration.externalStoreId,
+      displayName: integration.displayName,
+      status: integration.status,
+      defaultWarehouseId: integration.defaultWarehouseId,
+      settings: {
+        syncEnabled: this.asBoolean(settings.syncEnabled, true),
+        stockSyncMode: this.asString(settings.stockSyncMode, 'AVAILABLE'),
+        importListingsOnConnect: this.asBoolean(settings.importListingsOnConnect, false),
+      },
+      healthStatus: this.integrationHealth(integration),
+      requiresReauth: integration.status === ChannelIntegrationStatus.REAUTH_REQUIRED,
+      lastSuccessfulOperationAt: integration.lastSuccessfulOperationAt,
+      lastFailureAt: integration.lastFailureAt,
+      createdAt: integration.createdAt,
+      updatedAt: integration.updatedAt,
+    };
+  }
+
+  private integrationHealth(integration: ChannelIntegration) {
+    if (integration.status === ChannelIntegrationStatus.REAUTH_REQUIRED) return 'REAUTH_REQUIRED';
+    if (integration.status === ChannelIntegrationStatus.SUSPENDED) return 'SUSPENDED';
+    if (
+      integration.status === ChannelIntegrationStatus.DISABLED ||
+      integration.status === ChannelIntegrationStatus.INACTIVE
+    ) {
+      return 'DISCONNECTED';
+    }
+    if (integration.lastFailureAt && !integration.lastSuccessfulOperationAt) return 'DEGRADED';
+    return integration.healthStatus ?? 'HEALTHY';
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  }
+
+  private asBoolean(value: unknown, fallback: boolean) {
+    return typeof value === 'boolean' ? value : fallback;
+  }
+
+  private asString(value: unknown, fallback: string) {
+    return typeof value === 'string' && value.trim() ? value : fallback;
   }
 
   private assertSafePanelConfiguration(value: unknown) {

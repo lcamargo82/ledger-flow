@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -19,6 +19,7 @@ import { ListChannelInboxQueryDto } from '../../application/dto/list-channel-inb
 import { ListChannelListingsQueryDto } from '../../application/dto/list-channel-listings-query.dto';
 import { ListInventorySyncQueryDto } from '../../application/dto/list-inventory-sync-query.dto';
 import { MapChannelListingDto } from '../../application/dto/map-channel-listing.dto';
+import { UpdateChannelIntegrationSettingsDto } from '../../application/dto/update-channel-integration-settings.dto';
 import {
   ChannelInventorySyncProcessSummaryDto,
   ChannelHealthResponseDto,
@@ -69,6 +70,55 @@ export class ChannelsController {
   async listIntegrations(@CurrentUser() user: AuthenticatedUser) {
     const data = await this.channelsService.listIntegrations(user.tenantId);
     return { data };
+  }
+
+  @Get('integrations/:id')
+  @RequirePermissions('channels:read')
+  @ApiOperation({ summary: 'Consultar configuração operacional sanitizada da integração' })
+  @ApiOkResponse({ type: ChannelIntegrationMutationResponseDto })
+  async getIntegration(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    const integration = await this.channelsService.getIntegration(id, user.tenantId);
+    return { integration };
+  }
+
+  @Patch('integrations/:id/settings')
+  @RequirePermissions('channels:manage')
+  @ApiOperation({ summary: 'Atualizar depósito e opções operacionais da integração' })
+  @ApiOkResponse({ type: ChannelIntegrationMutationResponseDto })
+  async updateIntegrationSettings(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateChannelIntegrationSettingsDto,
+  ) {
+    const integration = await this.channelsService.updateIntegrationSettings(
+      id,
+      user.tenantId,
+      user.id,
+      dto,
+    );
+    return { integration };
+  }
+
+  @Post('integrations/:id/suspend')
+  @RequirePermissions('channels:manage')
+  @ApiOperation({ summary: 'Suspender operações externas da integração' })
+  @ApiOkResponse({ type: ChannelIntegrationMutationResponseDto })
+  async suspendIntegration(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    const integration = await this.channelsService.suspendIntegration(id, user.tenantId, user.id);
+    return { integration };
+  }
+
+  @Post('integrations/:id/reactivate')
+  @RequirePermissions('channels:manage')
+  @ApiOperation({ summary: 'Reativar integração suspensa com credenciais válidas' })
+  @ApiOkResponse({ type: ChannelIntegrationMutationResponseDto })
+  async reactivateIntegration(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    const integration = await this.channelsService.reactivateIntegration(
+      id,
+      user.tenantId,
+      user.id,
+    );
+    return { integration };
   }
 
   @Get('webhook-inbox')

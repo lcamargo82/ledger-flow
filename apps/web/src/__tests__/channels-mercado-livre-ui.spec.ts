@@ -1,3 +1,4 @@
+/* oxlint-disable vitest/require-mock-type-parameters */
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -14,6 +15,23 @@ vi.mock('../stores/auth.store', () => ({
     checkAllPermissions: vi.fn(() => true),
     checkCapability: vi.fn(() => true),
   }),
+}))
+
+vi.mock('../stores/toast.store', () => ({
+  useToastStore: () => ({ success: vi.fn(), error: vi.fn() }),
+}))
+
+vi.mock('../stores/confirm-dialog.store', () => ({
+  useConfirmDialogStore: () => ({ open: vi.fn() }),
+}))
+
+vi.mock('../services/inventory.service', () => ({
+  inventoryService: { listWarehouses: vi.fn().mockResolvedValue({ data: [], meta: {} }) },
+}))
+
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ query: {} }),
+  useRouter: () => ({ replace: vi.fn() }),
 }))
 
 vi.mock('../stores/channels.store', () => ({
@@ -35,6 +53,10 @@ vi.mock('../stores/channels.store', () => ({
     fetchInventorySyncStatus,
     createIntegration,
     connectMercadoLivre,
+    updateIntegrationSettings: vi.fn(),
+    suspendIntegration: vi.fn(),
+    reactivateIntegration: vi.fn(),
+    disconnectMercadoLivre: vi.fn(),
     importListings: vi.fn(),
     mapListing: vi.fn(),
     processInventorySync: vi.fn(),

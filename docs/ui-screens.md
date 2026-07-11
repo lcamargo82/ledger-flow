@@ -148,14 +148,14 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 ### Channels
 
 - **Rota:** `/channels`
-- **Status:** Implementada 10.0.6; expandida 10.0.7 com malha fina; expandida 10.0.8 com status de sincronização.
+- **Status:** Implementada 10.0.6–10.1; configuração operacional/health UX planejada em 10.1.10.
 - **Permissões:** `channels:read`, `channels:manage`
 - **Capability:** `channels.connect`; importação exige `channels.import_listings`; mapping exige `channels.mapping.manage`; sync exige `channels.sync_inventory`.
 - **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
-- **Objetivo:** Configurar integrações de canal, visualizar inbox sanitizado de webhooks, revisar vínculos de anúncios com SKU e acompanhar sync mock de estoque.
-- **Fluxos:** criação de integração mock com segredo de webhook, listagem de integrações, importação mock de anúncios, filtro de inbox/status de listing, exibição de candidatos, mapping manual auditado, processamento mock de sync e status com retry/circuit breaker.
+- **Objetivo:** Conectar canais reais, visualizar inbox sanitizado, revisar vínculos de anúncios com SKU e acompanhar sync de estoque.
+- **Planejado 10.1.10:** configurar depósito/sync policy, ações por estado, health sanitizado e feedback OAuth traduzido.
 - **Segurança:** Webhook público autentica por segredo da integração; UI protegida por permissão/capability; segredos e payload bruto não são exibidos.
-- **Fora de escopo:** Mercado Livre real, criação automática de pedido, envio real a marketplace e financeiro por pedido.
+- **Fora de escopo atual:** settlement 9B e fulfillment 10.3.
 - **i18n:** Namespace `channels.*` em pt-BR e en-US.
 
 ### Catalog Products
@@ -194,3 +194,17 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Segurança:** backend valida `reports:export`; download exige tenant do JWT, job concluído e não expirado; UI apenas esconde menu sem permissão.
 - **Fora de escopo:** XLSX real, storage externo, agendamento recorrente e worker definitivo.
 - **i18n:** Namespace `exports.*` em pt-BR e en-US.
+
+### Notifications (planejada 10.2.0A)
+
+- **Rota:** `/notifications`
+- **Layout:** `AppLayout`, sino no footer da sidebar.
+- **Autorização:** recipient + revalidação backend de permission/capability.
+- **Componentes:** definidos em `docs/specs/10.2-components-i18n.md`.
+- **Estados:** loading, vazio, erro, forbidden, unread/read/dismissed.
+
+### Inventory Transfers e Cycle Counts (planejadas)
+
+- **Rotas:** `/inventory/transfers` e `/inventory/cycle-counts`.
+- **Base:** reutilizam `AppPageHeader`, `AppTable`, `AppModal`/página de detalhe, `AppConfirmDialog`, `AppBadge` e ledger Inventory existente.
+- **UX:** ações condicionadas ao estado; conclusão/aprovação mostram consequência e impedem clique duplo.

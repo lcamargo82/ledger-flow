@@ -1,3 +1,4 @@
+/* oxlint-disable vitest/require-mock-type-parameters */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { channelsService } from '../services/channels.service'
 import { httpClient } from '../services/http-client'
@@ -5,6 +6,7 @@ import { httpClient } from '../services/http-client'
 vi.mock('../services/http-client', () => ({
   httpClient: {
     post: vi.fn(),
+    patch: vi.fn(),
   },
 }))
 
@@ -23,5 +25,21 @@ describe('ChannelsService', () => {
     })
 
     expect(httpClient.post).toHaveBeenCalledWith('/channels/mercado-livre/connect', {})
+  })
+
+  it('updates operational integration settings through the tenant-scoped endpoint', async () => {
+    vi.mocked(httpClient.patch).mockResolvedValue({
+      data: { integration: { id: 'integration-1' } },
+    })
+
+    await channelsService.updateIntegrationSettings('integration-1', {
+      defaultWarehouseId: 'warehouse-1',
+      syncEnabled: true,
+    })
+
+    expect(httpClient.patch).toHaveBeenCalledWith('/channels/integrations/integration-1/settings', {
+      defaultWarehouseId: 'warehouse-1',
+      syncEnabled: true,
+    })
   })
 })
