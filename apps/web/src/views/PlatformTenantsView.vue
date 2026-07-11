@@ -78,7 +78,23 @@ const prevStep = () => {
 
 const handleCreateTenant = async () => {
   try {
-    await platformTenantsStore.createTenant(createForm.value)
+    // Deep clone the form to avoid mutating the UI state
+    const payload = JSON.parse(JSON.stringify(createForm.value));
+    
+    // Clean up empty optional fields to prevent 400 Bad Request from class-validator
+    if (!payload.subscription.trialEndsAt) {
+      delete payload.subscription.trialEndsAt;
+    }
+    
+    // Auto-generate slug just in case it was missed
+    if (payload.organization.name && !payload.organization.slug) {
+      payload.organization.slug = payload.organization.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }
+
+    await platformTenantsStore.createTenant(payload)
     isCreateModalOpen.value = false
     fetchTenants()
   } catch (err) {
@@ -307,12 +323,12 @@ const handleSearch = () => {
               v-model="createForm.owner.email"
               required
             />
-            <div class="bg-blue-50 text-blue-800 p-4 rounded text-sm mt-4">
+            <div class="lf-info-message">
               {{ t('platformTenants.createModal.owner.infoMessage') }}
             </div>
           </div>
 
-          <div class="mt-6 flex justify-between">
+          <div class="lf-modal-actions">
             <AppButton v-if="currentStep > 1" type="button" variant="secondary" @click="prevStep">{{ t('platformTenants.createModal.actions.back') }}</AppButton>
             <div v-else></div>
             <AppButton v-if="currentStep < 3" type="submit">{{ t('platformTenants.createModal.actions.next') }}</AppButton>
@@ -355,7 +371,7 @@ const handleSearch = () => {
 .step-indicator {
   display: flex;
   margin-bottom: 2rem;
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
+  border-bottom: 1px solid var(--lf-border-primary);
 }
 
 .step {
@@ -364,17 +380,33 @@ const handleSearch = () => {
   padding: 0.5rem 0;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-secondary, #6b7280);
+  color: var(--lf-text-secondary);
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 }
 
 .step.active {
-  color: var(--primary, #3b82f6);
-  border-bottom-color: var(--primary, #3b82f6);
+  color: var(--lf-primary);
+  border-bottom-color: var(--lf-primary);
 }
 
 .step.completed {
-  color: var(--success, #10b981);
+  color: var(--lf-success);
+}
+
+.lf-info-message {
+  background-color: var(--lf-surface-secondary);
+  color: var(--lf-text-primary);
+  border: 1px solid var(--lf-border-primary);
+  padding: var(--lf-space-4);
+  border-radius: var(--lf-radius);
+  font-size: 0.875rem;
+  margin-top: var(--lf-space-4);
+}
+
+.lf-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--lf-space-6);
 }
 </style>

@@ -21,54 +21,54 @@ const { t } = useI18n()
 <template>
   <AppCard>
     <template #header>
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+      <h3 class="lf-card-title">
         {{ t('platform.tenants.overview.operations') }}
       </h3>
     </template>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="metric-group">
-        <h4 class="metric-title">{{ t('platform.tenants.metrics.usersTitle') }}</h4>
-        <div class="flex flex-col gap-2 mt-2">
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-500">{{ t('platform.tenants.metrics.usersTotal') }}</span>
-            <span class="font-medium text-gray-900 dark:text-white">{{ metrics.usersTotal }}</span>
+    <div class="lf-metrics-grid">
+      <div class="lf-metric-group">
+        <h4 class="lf-metric-title">{{ t('platform.tenants.metrics.usersTitle') }}</h4>
+        <div class="lf-metric-list">
+          <div class="lf-metric-item">
+            <span class="lf-metric-label">{{ t('platform.tenants.metrics.usersTotal') }}</span>
+            <span class="lf-metric-value">{{ metrics.usersTotal }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-500">{{ t('platform.tenants.metrics.usersActive') }}</span>
-            <span class="font-medium text-success">{{ metrics.usersActive }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="metric-group">
-        <h4 class="metric-title">{{ t('platform.tenants.metrics.customersTitle') }}</h4>
-        <div class="flex flex-col gap-2 mt-2">
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-500">{{ t('platform.tenants.metrics.customersTotal') }}</span>
-            <span class="font-medium text-gray-900 dark:text-white">{{ metrics.customersTotal }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-500">{{ t('platform.tenants.metrics.customersActive') }}</span>
-            <span class="font-medium text-success">{{ metrics.customersActive }}</span>
+          <div class="lf-metric-item">
+            <span class="lf-metric-label">{{ t('platform.tenants.metrics.usersActive') }}</span>
+            <span class="lf-metric-value lf-text-success">{{ metrics.usersActive }}</span>
           </div>
         </div>
       </div>
 
-      <div class="metric-group">
-        <h4 class="metric-title">{{ t('platform.tenants.metrics.paymentsTitle') }}</h4>
-        <div class="flex flex-col gap-2 mt-2">
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-500">{{ t('platform.tenants.metrics.paymentsTotal') }}</span>
-            <span class="font-medium text-gray-900 dark:text-white">{{ metrics.paymentsTotal }}</span>
+      <div class="lf-metric-group">
+        <h4 class="lf-metric-title">{{ t('platform.tenants.metrics.customersTitle') }}</h4>
+        <div class="lf-metric-list">
+          <div class="lf-metric-item">
+            <span class="lf-metric-label">{{ t('platform.tenants.metrics.customersTotal') }}</span>
+            <span class="lf-metric-value">{{ metrics.customersTotal }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-500">{{ t('platform.tenants.metrics.paymentsPending') }}</span>
-            <span class="font-medium text-warning">{{ metrics.paymentsPending }}</span>
+          <div class="lf-metric-item">
+            <span class="lf-metric-label">{{ t('platform.tenants.metrics.customersActive') }}</span>
+            <span class="lf-metric-value lf-text-success">{{ metrics.customersActive }}</span>
           </div>
-          <div class="flex justify-between">
-            <span class="text-sm text-gray-500">{{ t('platform.tenants.metrics.paymentsFailed') }}</span>
-            <span class="font-medium text-danger">{{ metrics.paymentsFailed }}</span>
+        </div>
+      </div>
+
+      <div class="lf-metric-group">
+        <h4 class="lf-metric-title">{{ t('platform.tenants.metrics.paymentsTitle') }}</h4>
+        <div class="lf-metric-list">
+          <div class="lf-metric-item">
+            <span class="lf-metric-label">{{ t('platform.tenants.metrics.paymentsTotal') }}</span>
+            <span class="lf-metric-value">{{ metrics.paymentsTotal }}</span>
+          </div>
+          <div class="lf-metric-item">
+            <span class="lf-metric-label">{{ t('platform.tenants.metrics.paymentsPending') }}</span>
+            <span class="lf-metric-value lf-text-warning">{{ metrics.paymentsPending }}</span>
+          </div>
+          <div class="lf-metric-item">
+            <span class="lf-metric-label">{{ t('platform.tenants.metrics.paymentsFailed') }}</span>
+            <span class="lf-metric-value lf-text-danger">{{ metrics.paymentsFailed }}</span>
           </div>
         </div>
       </div>
@@ -77,15 +77,59 @@ const { t } = useI18n()
 </template>
 
 <style scoped>
-.metric-title {
-  font-size: 0.875rem;
+.lf-card-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.lf-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--lf-space-6);
+}
+
+.lf-metric-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.lf-metric-title {
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--text-secondary, #6b7280);
-  border-bottom: 1px solid var(--border-color, #e5e7eb);
-  padding-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+  color: var(--lf-text-muted);
+  border-bottom: 1px solid var(--lf-border-primary);
+  padding-bottom: var(--lf-space-2);
+  margin: 0 0 var(--lf-space-3) 0;
 }
-.text-success { color: var(--success, #10b981); }
-.text-warning { color: var(--warning, #f59e0b); }
-.text-danger { color: var(--danger, #ef4444); }
+
+.lf-metric-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lf-space-2);
+}
+
+.lf-metric-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lf-metric-label {
+  font-size: 0.875rem;
+  color: var(--lf-text-secondary);
+}
+
+.lf-metric-value {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.lf-text-success { color: var(--lf-success); }
+.lf-text-warning { color: var(--lf-warning); }
+.lf-text-danger { color: var(--lf-danger); }
 </style>

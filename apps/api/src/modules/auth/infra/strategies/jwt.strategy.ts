@@ -65,7 +65,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       tenantKind: user.tenant.kind,
       name: user.name,
       email: user.email,
-      isPlatformAdmin: user.isPlatformAdmin,
+      isPlatformAdmin: payload.isPlatformAdmin ?? user.isPlatformAdmin,
       roles: payload.roles,
       permissions: payload.permissions,
       capabilities: payload.capabilities ?? [],

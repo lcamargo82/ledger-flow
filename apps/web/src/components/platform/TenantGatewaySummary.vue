@@ -26,36 +26,36 @@ const { t, currentLocale } = useI18n()
 <template>
   <AppCard>
     <template #header>
-      <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+      <h3 class="lf-card-title">
         {{ t('platform.tenants.overview.gateway') }}
       </h3>
     </template>
     
-    <div v-if="!gateway.hasActiveConfiguration" class="text-gray-500 text-sm text-center py-4">
+    <div v-if="!gateway.hasActiveConfiguration" class="lf-empty-state text-center py-4">
       {{ t('platform.tenants.gateway.noActiveConfiguration') }}
     </div>
     
-    <div v-else class="space-y-4">
-      <div v-for="provider in gateway.activeProviders" :key="`${provider.provider}-${provider.environment}`" class="provider-card p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-        <div class="flex justify-between items-start mb-2">
-          <div class="font-medium text-gray-900 dark:text-white">{{ provider.provider }}</div>
+    <div v-else class="lf-provider-list">
+      <div v-for="provider in gateway.activeProviders" :key="`${provider.provider}-${provider.environment}`" class="lf-provider-card">
+        <div class="lf-provider-header">
+          <div class="lf-provider-name">{{ provider.provider }}</div>
           <AppBadge :variant="provider.environment === 'PRODUCTION' ? 'success' : 'warning'">
             {{ provider.environment }}
           </AppBadge>
         </div>
         
-        <div class="grid grid-cols-2 gap-2 text-sm mt-4">
-          <div>
-            <span class="text-gray-500">{{ t('platform.tenants.gateway.status') }}: </span>
-            <span class="font-medium">{{ provider.status }}</span>
+        <div class="lf-provider-details">
+          <div class="lf-provider-detail">
+            <span class="lf-provider-label">{{ t('platform.tenants.gateway.status') }}: </span>
+            <span class="lf-provider-value">{{ provider.status }}</span>
           </div>
-          <div>
-            <span class="text-gray-500">{{ t('platform.tenants.gateway.healthStatus') }}: </span>
+          <div class="lf-provider-detail">
+            <span class="lf-provider-label">{{ t('platform.tenants.gateway.healthStatus') }}: </span>
             <AppBadge :variant="provider.healthStatus === 'HEALTHY' ? 'success' : provider.healthStatus === 'UNKNOWN' ? 'default' : 'danger'">
               {{ provider.healthStatus }}
             </AppBadge>
           </div>
-          <div class="col-span-2 text-xs text-gray-500 mt-2" v-if="provider.lastHealthCheckAt">
+          <div class="lf-provider-footer" v-if="provider.lastHealthCheckAt">
             {{ t('platform.tenants.gateway.lastHealthCheck') }}: {{ formatDateTime(provider.lastHealthCheckAt, currentLocale) }}
           </div>
         </div>
@@ -63,3 +63,73 @@ const { t, currentLocale } = useI18n()
     </div>
   </AppCard>
 </template>
+
+<style scoped>
+.lf-card-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.lf-empty-state {
+  color: var(--lf-text-secondary);
+  font-size: 0.875rem;
+}
+
+.lf-provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lf-space-4);
+}
+
+.lf-provider-card {
+  padding: var(--lf-space-4);
+  border-radius: var(--lf-radius);
+  background-color: var(--lf-bg-secondary);
+  border: 1px solid var(--lf-border-primary);
+}
+
+.lf-provider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--lf-space-2);
+}
+
+.lf-provider-name {
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.lf-provider-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--lf-space-2);
+  margin-top: var(--lf-space-4);
+}
+
+.lf-provider-detail {
+  display: flex;
+  align-items: center;
+  gap: var(--lf-space-2);
+}
+
+.lf-provider-label {
+  font-size: 0.875rem;
+  color: var(--lf-text-secondary);
+}
+
+.lf-provider-value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.lf-provider-footer {
+  grid-column: span 2;
+  font-size: 0.75rem;
+  color: var(--lf-text-muted);
+  margin-top: var(--lf-space-2);
+}
+</style>

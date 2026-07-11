@@ -59,27 +59,28 @@ const viewFullAudit = () => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center space-x-4 mb-2">
-      <button @click="goBack" class="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-500">
-        <span class="material-symbols-outlined">arrow_back</span>
-      </button>
-      <h1 class="text-2xl font-bold text-slate-900">{{ auditStore.tenantSupportSummary?.tenant.name || store.currentTenantOverview?.tenant.name || 'Tenant Details' }}</h1>
-    </div>
+  <div class="lf-tenant-details">
+    <AppPageHeader 
+      :title="auditStore.tenantSupportSummary?.tenant.name || store.currentTenantOverview?.tenant.name || 'Detalhes do Tenant'"
+      eyebrow="Plataforma"
+    >
+      <template #actions>
+        <AppButton variant="secondary" @click="goBack">
+          <span class="material-symbols-outlined lf-button__icon">arrow_back</span>
+          Voltar
+        </AppButton>
+      </template>
+    </AppPageHeader>
 
     <!-- Tabs -->
-    <div class="border-b border-slate-200">
-      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+    <div class="lf-tabs-container lf-mb-6">
+      <nav class="lf-tabs" aria-label="Tabs">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           @click="activeTab = tab.id"
-          :class="[
-            activeTab === tab.id
-              ? 'border-indigo-500 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300',
-            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
-          ]"
+          class="lf-tab"
+          :class="{ 'lf-tab--active': activeTab === tab.id }"
         >
           {{ tab.name }}
         </button>
@@ -87,7 +88,7 @@ const viewFullAudit = () => {
     </div>
 
     <!-- Content -->
-    <div class="mt-6">
+    <div class="lf-content-container">
       <div v-show="activeTab === 'overview'">
         <AppErrorState 
           v-if="store.error && !store.currentTenantOverview" 
@@ -95,12 +96,12 @@ const viewFullAudit = () => {
           :description="store.error"
           @retry="store.fetchTenantOverview(tenantId)"
         />
-        <div v-else-if="store.currentTenantOverview" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="lg:col-span-2 space-y-6">
+        <div v-else-if="store.currentTenantOverview" class="lf-overview-layout">
+          <div class="lf-overview-main">
             <TenantOverviewPanel :overview="store.currentTenantOverview" />
           </div>
           
-          <div class="space-y-6">
+          <div class="lf-overview-sidebar">
             <TenantRecentActivity 
               v-if="store.currentTenantActivity"
               :activity="store.currentTenantActivity.items" 
@@ -108,9 +109,9 @@ const viewFullAudit = () => {
 
             <!-- Health Reasons Box -->
             <div v-if="store.currentTenantHealth && store.currentTenantHealth.reasons.length > 0" 
-                 class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-              <h4 class="text-sm font-semibold text-yellow-800 dark:text-yellow-400 mb-2">Motivos de Atenção/Crítico</h4>
-              <ul class="list-disc pl-4 space-y-1 text-sm text-yellow-700 dark:text-yellow-500">
+                 class="lf-alert-box">
+              <h4>Motivos de Atenção/Crítico</h4>
+              <ul>
                 <li v-for="reason in store.currentTenantHealth.reasons" :key="reason.code">
                   {{ reason.message }}
                 </li>
@@ -151,3 +152,101 @@ const viewFullAudit = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.lf-tenant-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.lf-tabs-container {
+  border-bottom: 1px solid var(--lf-border-primary);
+}
+
+.lf-tabs {
+  display: flex;
+  gap: var(--lf-space-6);
+  overflow-x: auto;
+}
+
+.lf-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: var(--lf-space-3) var(--lf-space-2);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--lf-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: -1px;
+  white-space: nowrap;
+}
+
+.lf-tab:hover {
+  color: var(--lf-text-primary);
+  border-bottom-color: var(--lf-border-secondary);
+}
+
+.lf-tab--active {
+  color: var(--lf-primary);
+  border-bottom-color: var(--lf-primary);
+}
+
+.lf-alert-box {
+  background-color: var(--lf-warning-bg);
+  border: 1px solid var(--lf-warning);
+  border-radius: var(--lf-radius);
+  padding: var(--lf-space-4);
+}
+
+.lf-alert-box h4 {
+  margin: 0 0 var(--lf-space-2) 0;
+  font-size: 0.875rem;
+  color: var(--lf-warning);
+}
+
+.lf-alert-box ul {
+  margin: 0;
+  padding-left: var(--lf-space-4);
+  font-size: 0.875rem;
+  color: var(--lf-text-primary);
+}
+
+.lf-card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--lf-space-4);
+}
+
+.lf-card-header-flex h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.lf-content-container {
+  margin-top: var(--lf-space-6);
+}
+
+.lf-overview-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--lf-space-6);
+}
+
+@media (min-width: 1024px) {
+  .lf-overview-layout {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.lf-overview-main,
+.lf-overview-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lf-space-6);
+}
+</style>

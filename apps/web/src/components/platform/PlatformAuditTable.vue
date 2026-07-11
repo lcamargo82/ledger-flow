@@ -53,18 +53,18 @@ const formatDate = (dateString: string) => {
       </template>
 
       <template #cell-occurredAt="{ item }">
-        <span class="text-sm text-slate-600">{{ formatDate(item.occurredAt) }}</span>
+        <span class="lf-cell-date">{{ formatDate(item.occurredAt) }}</span>
       </template>
 
       <template #cell-tenant="{ item }">
-        <span v-if="item.tenant" class="text-sm font-medium text-slate-900">
+        <span v-if="item.tenant" class="lf-cell-tenant">
           {{ item.tenant.name }}
         </span>
-        <span v-else class="text-sm text-slate-400">-</span>
+        <span v-else class="lf-cell-empty">-</span>
       </template>
 
       <template #cell-action="{ item }">
-        <span class="text-sm text-indigo-600 font-mono">{{ item.action }}</span>
+        <span class="lf-cell-action">{{ item.action }}</span>
       </template>
 
       <template #cell-severity="{ item }">
@@ -72,7 +72,7 @@ const formatDate = (dateString: string) => {
       </template>
 
       <template #cell-actorType="{ item }">
-        <span class="text-xs text-slate-500 uppercase tracking-wider">{{ item.actorType || '-' }}</span>
+        <span class="lf-cell-actor">{{ item.actorType || '-' }}</span>
       </template>
 
       <template #cell-actions="{ item }">
@@ -93,3 +93,34 @@ const formatDate = (dateString: string) => {
     />
   </div>
 </template>
+
+<style scoped>
+.lf-cell-date {
+  font-size: 0.875rem;
+  color: var(--lf-text-secondary);
+}
+
+.lf-cell-tenant {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.lf-cell-empty {
+  font-size: 0.875rem;
+  color: var(--lf-text-muted);
+}
+
+.lf-cell-action {
+  font-size: 0.875rem;
+  color: var(--lf-primary);
+  font-family: monospace;
+}
+
+.lf-cell-actor {
+  font-size: 0.75rem;
+  color: var(--lf-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+</style>
