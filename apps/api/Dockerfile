@@ -35,7 +35,7 @@ FROM base AS build
 
 ENV NODE_ENV=production
 
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY apps/api ./
 
