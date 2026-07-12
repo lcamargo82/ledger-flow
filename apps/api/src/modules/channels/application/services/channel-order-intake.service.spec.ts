@@ -27,6 +27,15 @@ describe('ChannelOrderIntakeService', () => {
   const credentialsEncryptionService = {
     decrypt: jest.fn(),
   };
+  const prisma = {
+    orderShippingSummary: {
+      findUnique: jest.fn(),
+      upsert: jest.fn(),
+    },
+    outboxEvent: {
+      create: jest.fn(),
+    },
+  };
   const financialIntelligenceService = {
     createChannelOrderOperationalFact: jest.fn(),
   };
@@ -113,6 +122,10 @@ describe('ChannelOrderIntakeService', () => {
       accessToken: 'ml-access-token',
       refreshToken: 'ml-refresh-token',
     });
+    prisma.orderShippingSummary.findUnique.mockResolvedValue(null);
+    prisma.orderShippingSummary.upsert.mockResolvedValue({
+      id: 'shipping-summary-1',
+    });
   });
 
   function makeService() {
@@ -121,6 +134,7 @@ describe('ChannelOrderIntakeService', () => {
       ordersService as never,
       mercadoLivreAdapter as never,
       credentialsEncryptionService as never,
+      prisma as never,
       financialIntelligenceService as never,
     );
   }
@@ -209,6 +223,109 @@ describe('ChannelOrderIntakeService', () => {
         discountAmount: '5.5',
       },
     );
+  });
+
+  it('persists sanitized shipping summary and emits an idempotent operational event', async () => {
+    mercadoLivreAdapter.fetchOrder.mockResolvedValueOnce({
+      externalOrderId: '2000000001',
+      status: 'paid',
+      buyerName: 'Comprador Teste',
+      shipping: {
+        externalShipmentId: '987654321',
+        status: 'ready_to_ship',
+        substatus: 'printed',
+        shippingMode: 'me2',
+        logisticType: 'drop_off',
+        handlingEstimateAt: '2026-07-12T10:00:00.000Z',
+        deliveryEstimateAt: '2026-07-15T10:00:00.000Z',
+        trackingCodeMasked: '********1234',
+        source: 'MERCADO_LIVRE_ORDER',
+        confidence: 0.7,
+      },
+      items: [
+        {
+          externalListingId: 'MLB123',
+          title: 'Produto Teste',
+          quantity: 2,
+        },
+      ],
+    });
+
+    await makeService().processInboxEvent('inbox-1');
+
+    expect(prisma.orderShippingSummary.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId_orderId_provider: {
+            tenantId: 'tenant-1',
+            orderId: 'order-1',
+            provider: ChannelProvider.MERCADO_LIVRE,
+          },
+        },
+        create: expect.objectContaining({
+          tenantId: 'tenant-1',
+          orderId: 'order-1',
+          provider: ChannelProvider.MERCADO_LIVRE,
+          externalOrderId: '2000000001',
+          externalShipmentId: '987654321',
+          trackingCodeMasked: '********1234',
+        }),
+      }),
+    );
+    expect(prisma.outboxEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tenantId: 'tenant-1',
+        aggregateType: 'OrderShippingSummary',
+        aggregateId: 'shipping-summary-1',
+        eventType: 'channel.order.shipping_summary.updated',
+        payload: expect.objectContaining({
+          externalShipmentId: '987654321',
+          trackingCodeMasked: '********1234',
+        }),
+      }),
+    });
+    expect(JSON.stringify(prisma.outboxEvent.create.mock.calls)).not.toContain('ml-access-token');
+  });
+
+  it('does not emit another shipping outbox event when summary did not change', async () => {
+    prisma.orderShippingSummary.findUnique.mockResolvedValueOnce({
+      externalOrderId: '2000000001',
+      externalShipmentId: '987654321',
+      status: 'ready_to_ship',
+      substatus: null,
+      shippingMode: null,
+      logisticType: null,
+      handlingEstimateAt: null,
+      deliveryEstimateAt: null,
+      postedAt: null,
+      trackingCodeMasked: '********1234',
+      source: 'MERCADO_LIVRE_ORDER',
+      confidence: 0.7,
+    });
+    mercadoLivreAdapter.fetchOrder.mockResolvedValueOnce({
+      externalOrderId: '2000000001',
+      status: 'paid',
+      buyerName: 'Comprador Teste',
+      shipping: {
+        externalShipmentId: '987654321',
+        status: 'ready_to_ship',
+        trackingCodeMasked: '********1234',
+        source: 'MERCADO_LIVRE_ORDER',
+        confidence: 0.7,
+      },
+      items: [
+        {
+          externalListingId: 'MLB123',
+          title: 'Produto Teste',
+          quantity: 2,
+        },
+      ],
+    });
+
+    await makeService().processInboxEvent('inbox-1');
+
+    expect(prisma.orderShippingSummary.upsert).toHaveBeenCalled();
+    expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
   });
 
   it('cancels existing Mercado Livre orders and lets OrdersService release reservations', async () => {

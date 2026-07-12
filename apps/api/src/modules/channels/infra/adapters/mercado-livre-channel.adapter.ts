@@ -126,6 +126,7 @@ export class MercadoLivreChannelAdapter
       status: order.status ?? 'unknown',
       buyerName: this.resolveBuyerName(order),
       financial: this.resolveFinancial(order),
+      shipping: this.resolveShipping(order),
       items: (order.order_items ?? [])
         .map((orderItem) => ({
           externalListingId: orderItem.item?.id?.trim() ?? '',
@@ -177,6 +178,35 @@ export class MercadoLivreChannelAdapter
     return Object.keys(financial).length > 0 ? financial : undefined;
   }
 
+  private resolveShipping(order: MercadoLivreOrderResponse) {
+    const shipping = order.shipping;
+    if (!shipping?.id) return undefined;
+
+    const summary = {
+      externalShipmentId: String(shipping.id),
+      ...(shipping.status && { status: shipping.status }),
+      ...(shipping.substatus && { substatus: shipping.substatus }),
+      ...(shipping.mode && { shippingMode: shipping.mode }),
+      ...(shipping.logistic_type && { logisticType: shipping.logistic_type }),
+      ...(this.isoDate(shipping.date_handling) && {
+        handlingEstimateAt: this.isoDate(shipping.date_handling),
+      }),
+      ...(this.isoDate(shipping.estimated_delivery?.date) && {
+        deliveryEstimateAt: this.isoDate(shipping.estimated_delivery?.date),
+      }),
+      ...(this.isoDate(shipping.date_delivered) && {
+        postedAt: this.isoDate(shipping.date_delivered),
+      }),
+      ...(this.maskTracking(shipping.tracking_number) && {
+        trackingCodeMasked: this.maskTracking(shipping.tracking_number),
+      }),
+      source: 'MERCADO_LIVRE_ORDER',
+      confidence: shipping.status || shipping.estimated_delivery?.date ? 0.7 : 0.4,
+    };
+
+    return summary;
+  }
+
   private sum(...groups: Array<Array<number | string | undefined>>) {
     const values = groups
       .flat()
@@ -197,5 +227,18 @@ export class MercadoLivreChannelAdapter
     const amount = Number(value);
     if (!Number.isFinite(amount)) return undefined;
     return String(amount);
+  }
+
+  private isoDate(value: string | undefined) {
+    if (!value) return undefined;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+  }
+
+  private maskTracking(value: string | undefined) {
+    const tracking = value?.trim();
+    if (!tracking) return undefined;
+    if (tracking.length <= 4) return '****';
+    return `${'*'.repeat(Math.max(4, tracking.length - 4))}${tracking.slice(-4)}`;
   }
 }

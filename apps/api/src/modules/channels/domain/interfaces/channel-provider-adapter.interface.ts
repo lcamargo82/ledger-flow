@@ -55,6 +55,19 @@ export interface ChannelOrderDetails {
     freightAmount?: string;
     discountAmount?: string;
   };
+  shipping?: {
+    externalShipmentId?: string;
+    status?: string;
+    substatus?: string;
+    shippingMode?: string;
+    logisticType?: string;
+    handlingEstimateAt?: string;
+    deliveryEstimateAt?: string;
+    postedAt?: string;
+    trackingCodeMasked?: string;
+    source: string;
+    confidence: number;
+  };
 }
 
 export interface ChannelOrderAdapter extends ChannelProviderAdapter {

@@ -1508,7 +1508,7 @@ O pacote planejado seguinte está documentado sem declarar endpoints futuros com
 - 10.2.1 implementa capabilities/permissões estreitas, reason codes traduzíveis e flags desligadas por padrão para transferências e inventários cíclicos, sem criar workflows ou alterar saldos.
 - 10.2.2 implementa transferências entre warehouses com documento operacional, itens multi-SKU, transições, conclusão atômica no ledger (`TRANSFER_OUT`/`TRANSFER_IN`), Outbox `inventory.transfer.completed`, UI e i18n.
 - 10.2.3 implementa inventário cíclico com snapshot/versionamento de saldos, contagem física multi-SKU, aprovação atômica com `ADJUSTMENT_IN/OUT`, stale guard `CYCLE_COUNT_STALE_BALANCE`, Outbox `inventory.cycle_count.adjusted`, UI e i18n.
-- 10.1.11 enriquece fatos financeiros operacionais e resumo logístico.
+- 10.1.11 enriquece fatos financeiros operacionais e resumo logístico; o primeiro slice cria `OrderShippingSummary`, normaliza shipment Mercado Livre com IDs externos string/tracking mascarado e publica `channel.order.shipping_summary.updated`.
 - 9B (settlement de marketplace) e 10.3 (fulfillment) permanecem discovery futuro.
 
 Índice: `docs/README.md` e `docs/roadmap/post-10-1-sequence.md`. Cada sprint exige testes, Swagger/Redoc/OpenAPI, AsyncAPI quando houver eventos, i18n pt-BR/en-US e atualização dos documentos de produto, arquitetura, UI e operação.

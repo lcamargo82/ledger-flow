@@ -81,6 +81,19 @@ export interface MercadoLivreOrderResponse {
     first_name?: string;
     last_name?: string;
   };
+  shipping?: {
+    id?: number | string;
+    status?: string;
+    substatus?: string;
+    mode?: string;
+    logistic_type?: string;
+    date_handling?: string;
+    estimated_delivery?: {
+      date?: string;
+    };
+    date_delivered?: string;
+    tracking_number?: string;
+  };
   order_items?: Array<{
     quantity?: number;
     sale_fee?: number | string;
