@@ -8,6 +8,7 @@ import { InventoryFoundationController } from './presentation/controllers/invent
 import { InventoryLedgerController } from './presentation/controllers/inventory-ledger.controller';
 import { InventoryWarehousesController } from './presentation/controllers/inventory-warehouses.controller';
 import { InventoryAdvancedFoundationController } from './presentation/controllers/inventory-advanced-foundation.controller';
+import { InventoryTransfersController } from './presentation/controllers/inventory-transfers.controller';
 import { InventoryAdvancedFeatureService } from './application/services/inventory-advanced-feature.service';
 
 @Module({
@@ -17,6 +18,7 @@ import { InventoryAdvancedFeatureService } from './application/services/inventor
     InventoryWarehousesController,
     InventoryLedgerController,
     InventoryAdvancedFoundationController,
+    InventoryTransfersController,
   ],
   providers: [
     InventoryService,

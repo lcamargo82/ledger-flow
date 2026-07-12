@@ -248,6 +248,51 @@
         "OTHER": "Other"
       }
     },
+    "transfers": {
+      "title": "Warehouse transfers",
+      "description": "Create, track, and complete atomic transfers between warehouses using the inventory ledger.",
+      "actions": {
+        "create": "New transfer",
+        "start": "Start",
+        "complete": "Complete",
+        "cancel": "Cancel",
+        "addItem": "Add item",
+        "removeItem": "Remove"
+      },
+      "table": {
+        "number": "Number",
+        "status": "Status",
+        "source": "Source",
+        "destination": "Destination",
+        "items": "Items",
+        "itemCount": "{count} item(s)",
+        "reason": "Reason",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "form": {
+        "createTitle": "New transfer",
+        "cancelTitle": "Cancel transfer",
+        "sourceWarehouse": "Source warehouse",
+        "destinationWarehouse": "Destination warehouse"
+      },
+      "empty": {
+        "title": "No transfers found",
+        "description": "Warehouse transfers will appear here as they are created."
+      },
+      "errors": {
+        "title": "Could not load transfers",
+        "sameWarehouse": "Source and destination must be different warehouses.",
+        "invalid": "Review the transfer warehouses, SKUs, quantities, and reason.",
+        "conflict": "This transfer operation has already been used or is inconsistent."
+      }
+    },
+    "transferStatus": {
+      "DRAFT": "Draft",
+      "IN_TRANSIT": "In transit",
+      "COMPLETED": "Completed",
+      "CANCELED": "Canceled"
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Balances",

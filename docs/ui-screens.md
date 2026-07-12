@@ -204,8 +204,17 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Estados:** loading, vazio, erro, forbidden, unread/read/dismissed.
 - **Polling:** contador a cada 30 segundos por padrão, configurável por `VITE_NOTIFICATIONS_POLLING_INTERVAL_MS` com piso de 10 segundos.
 
-### Inventory Transfers e Cycle Counts (planejadas)
+### Inventory Transfers
 
-- **Rotas:** `/inventory/transfers` e `/inventory/cycle-counts`.
-- **Base:** reutilizam `AppPageHeader`, `AppTable`, `AppModal`/página de detalhe, `AppConfirmDialog`, `AppBadge` e ledger Inventory existente.
-- **UX:** ações condicionadas ao estado; conclusão/aprovação mostram consequência e impedem clique duplo.
+- **Rota:** `/inventory/transfers`.
+- **Status:** Implementada 10.2.2.
+- **Autorização:** `inventory:transfer` + `inventory.transfer`, com rota condicionada por feature flag.
+- **Base:** reutiliza `AppPageHeader`, `AppTable`, `AppModal`, `AppSelect`, `AppNumberInput`, `AppBadge` e ledger Inventory existente.
+- **UX:** lista por estado, criação multi-item, ações iniciar/concluir/cancelar condicionadas ao estado e feedback de erro traduzido.
+
+### Cycle Counts (planejada)
+
+- **Rota:** `/inventory/cycle-counts`.
+- **Status:** Planejada 10.2.3.
+- **Base:** deve reutilizar `AppPageHeader`, `AppTable`, página/drawer de detalhe, `AppConfirmDialog`, `AppBadge` e ledger Inventory existente.
+- **UX:** ações condicionadas ao estado; aprovação mostra consequência e impede clique duplo.

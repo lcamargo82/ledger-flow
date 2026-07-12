@@ -25,13 +25,14 @@ import ExportsView from '../views/ExportsView.vue'
 import ReconciliationView from '../views/ReconciliationView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
 import InventoryAdvancedFoundationView from '../views/InventoryAdvancedFoundationView.vue'
+import InventoryTransfersView from '../views/InventoryTransfersView.vue'
 import { advancedInventoryFeatures } from '../config/features'
 
 export const advancedInventoryRouteDefinitions: RouteRecordRaw[] = [
   {
     path: '/inventory/transfers',
     name: 'inventory-transfers',
-    component: InventoryAdvancedFoundationView,
+    component: InventoryTransfersView,
     meta: {
       layout: AppLayout,
       requiresAuth: true,

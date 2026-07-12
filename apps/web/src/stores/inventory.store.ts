@@ -3,10 +3,14 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { inventoryService } from '../services/inventory.service'
 import type {
+  CancelInventoryTransferRequest,
+  CompleteInventoryTransferRequest,
+  CreateInventoryTransferRequest,
   CreateWarehouseRequest,
   InventoryBalance,
   InventoryMovement,
   InventoryReservation,
+  InventoryTransfer,
   PaginatedMeta,
   RecordAdjustmentRequest,
   ReservationTransitionRequest,
@@ -20,10 +24,12 @@ export const useInventoryStore = defineStore('inventory', () => {
   const balances = ref<InventoryBalance[]>([])
   const movements = ref<InventoryMovement[]>([])
   const reservations = ref<InventoryReservation[]>([])
+  const transfers = ref<InventoryTransfer[]>([])
   const warehouseMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const balanceMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const movementMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const reservationMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
+  const transferMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
 
   const isLoading = ref(false)
   const isMutating = ref(false)
@@ -74,6 +80,12 @@ export const useInventoryStore = defineStore('inventory', () => {
     const response = await inventoryService.listReservations()
     reservations.value = response.data
     reservationMeta.value = response.meta
+  }
+
+  const fetchTransfers = async () => {
+    const response = await inventoryService.listTransfers()
+    transfers.value = response.data
+    transferMeta.value = response.meta
   }
 
   const fetchInventory = async () => {
@@ -175,15 +187,77 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
+  const createTransfer = async (payload: CreateInventoryTransferRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.createTransfer(payload)
+      await fetchTransfers()
+      return response.transfer
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const startTransfer = async (id: string) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.startTransfer(id)
+      await fetchTransfers()
+      return response.transfer
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const completeTransfer = async (id: string, payload: CompleteInventoryTransferRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.completeTransfer(id, payload)
+      await Promise.all([fetchTransfers(), fetchBalances(), fetchMovements()])
+      return response
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const cancelTransfer = async (id: string, payload: CancelInventoryTransferRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.cancelTransfer(id, payload)
+      await fetchTransfers()
+      return response.transfer
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
   return {
     warehouses,
     balances,
     movements,
     reservations,
+    transfers,
     warehouseMeta,
     balanceMeta,
     movementMeta,
     reservationMeta,
+    transferMeta,
     activeWarehouses,
     isLoading,
     isMutating,
@@ -193,11 +267,16 @@ export const useInventoryStore = defineStore('inventory', () => {
     fetchBalances,
     fetchMovements,
     fetchReservations,
+    fetchTransfers,
     createWarehouse,
     updateWarehouse,
     recordAdjustment,
     reserveStock,
     releaseReservation,
     consumeReservation,
+    createTransfer,
+    startTransfer,
+    completeTransfer,
+    cancelTransfer,
   }
 })

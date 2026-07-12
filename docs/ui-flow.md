@@ -35,7 +35,7 @@ Telas acessíveis após autenticação bem-sucedida, com verificação de roles/
 - **Inventory** (`/inventory`, `/inventory/warehouses`, `/inventory/movements`) - Warehouses, saldos projetados e ledger de ajustes
 - **Reconciliation** (`/reconciliation`) - Implementada na fase 9A
 - **Notifications** (`/notifications`) - Planejada 10.2.0A
-- **Inventory Transfers** (`/inventory/transfers`) - Planejada 10.2.2
+- **Inventory Transfers** (`/inventory/transfers`) - Implementada 10.2.2
 - **Cycle Counts** (`/inventory/cycle-counts`) - Planejada 10.2.3
 - **Reports** (`/reports`) - _Futura tela_
 - **Webhooks** (`/webhooks`) - _Futura tela_
@@ -65,7 +65,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/orders`               | Implementada (10.0.5) | `AppLayout`                | `orders:read` + `orders.manage`       | Pedidos internos, reserva, cancelamento e fulfillment   |
 | `/reconciliation`       | Implementada (9A)     | `AppLayout`                | `reconciliation:read` + `reconciliation.read` | Conciliação, cases, dashboard e decisões        |
 | `/notifications`        | Implementada (10.2.0A) | `AppLayout`               | `notifications:read` + `notifications.read` | Feed autorizado do usuário                     |
-| `/inventory/transfers`  | Planejada (10.2.2)    | `AppLayout`                | `inventory:transfer` + `inventory.transfer` | Transferências atômicas                         |
+| `/inventory/transfers`  | Implementada (10.2.2) | `AppLayout`                | `inventory:transfer` + `inventory.transfer` | Transferências atômicas entre warehouses        |
 | `/inventory/cycle-counts` | Planejada (10.2.3)  | `AppLayout`                | `inventory:cycle-count` + `inventory.cycle_count` | Contagem física controlada                 |
 | `/exports`              | Implementada (10.0.10) | `AppLayout`              | `reports:export`                     | Exportações CSV rastreáveis com fila operacional        |
 | `/channels`             | Implementada (10.0.6–10.1), expansão 10.1.10 planejada | `AppLayout` | `channels:read` + capabilities específicas | Integrações reais, inbox, malha fina e sync |
