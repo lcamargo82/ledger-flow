@@ -293,6 +293,59 @@
       "COMPLETED": "Completed",
       "CANCELED": "Canceled"
     },
+    "cycleCounts": {
+      "title": "Cycle counts",
+      "description": "Open physical counts, record quantities, and approve traceable ledger adjustments.",
+      "actions": {
+        "create": "New count",
+        "open": "Open",
+        "approve": "Approve",
+        "cancel": "Cancel",
+        "countItem": "Count",
+        "addItem": "Add item",
+        "removeItem": "Remove"
+      },
+      "table": {
+        "number": "Number",
+        "status": "Status",
+        "warehouse": "Warehouse",
+        "items": "Items",
+        "itemCount": "{count} item(s)",
+        "variance": "Variance",
+        "reason": "Reason",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "detail": {
+        "snapshotHint": "Balance snapshot captured when opened; approval fails if stock changed.",
+        "system": "System",
+        "counted": "Counted",
+        "variance": "Variance"
+      },
+      "form": {
+        "createTitle": "New cycle count",
+        "countTitle": "Record count",
+        "approveTitle": "Approve count",
+        "cancelTitle": "Cancel count",
+        "countedQuantity": "Counted quantity"
+      },
+      "empty": {
+        "title": "No cycle counts found",
+        "description": "Physical counts will appear here as they are created."
+      },
+      "errors": {
+        "title": "Could not load cycle counts",
+        "invalid": "Review the count warehouse, SKUs, quantities, and reason.",
+        "stale": "Stock changed since opening. Reopen or recreate the count before approving."
+      }
+    },
+    "cycleCountStatus": {
+      "DRAFT": "Draft",
+      "OPEN": "Open",
+      "COUNTED": "Counted",
+      "APPROVED": "Approved",
+      "CANCELED": "Canceled"
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Balances",

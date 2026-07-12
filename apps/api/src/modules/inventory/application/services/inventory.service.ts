@@ -11,12 +11,19 @@ import { InventoryMovementType, Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { ChannelInventorySyncService } from '../../../channels/application/services/channel-inventory-sync.service';
+import { CreateCycleCountDto } from '../dto/create-cycle-count.dto';
 import { CreateInventoryTransferDto } from '../dto/create-inventory-transfer.dto';
 import { CreateWarehouseDto } from '../dto/create-warehouse.dto';
+import {
+  ApproveCycleCountDto,
+  CancelCycleCountDto,
+  CountCycleCountItemDto,
+} from '../dto/cycle-count-transition.dto';
 import {
   CompleteInventoryTransferDto,
   CancelInventoryTransferDto,
 } from '../dto/inventory-transfer-transition.dto';
+import { ListCycleCountsQueryDto } from '../dto/list-cycle-counts-query.dto';
 import { ListInventoryQueryDto } from '../dto/list-inventory-query.dto';
 import { ListInventoryTransfersQueryDto } from '../dto/list-inventory-transfers-query.dto';
 import { ListWarehousesQueryDto } from '../dto/list-warehouses-query.dto';
@@ -367,6 +374,148 @@ export class InventoryService {
     return transfer;
   }
 
+  async createCycleCount(tenantId: string, actorUserId: string, dto: CreateCycleCountDto) {
+    this.assertCycleCountReason(dto.reasonCode, dto.notes);
+    await this.assertCycleCountReferences(tenantId, dto.warehouseId, dto.items);
+
+    const cycleCount = await this.inventoryRepository.createCycleCount({
+      tenantId,
+      warehouseId: dto.warehouseId,
+      reasonCode: dto.reasonCode,
+      notes: dto.notes ?? null,
+      idempotencyKey: dto.idempotencyKey,
+      createdByUserId: actorUserId,
+      items: dto.items,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.cycle_count.created',
+      'CycleCount',
+      cycleCount.id,
+      {
+        warehouseId: cycleCount.warehouseId,
+        itemCount: cycleCount.items.length,
+        reasonCode: cycleCount.reasonCode,
+      },
+    );
+
+    return cycleCount;
+  }
+
+  listCycleCounts(tenantId: string, query: ListCycleCountsQueryDto) {
+    return this.inventoryRepository.listCycleCounts({ tenantId, ...query });
+  }
+
+  async getCycleCount(id: string, tenantId: string) {
+    const cycleCount = await this.inventoryRepository.findCycleCountById(id, tenantId);
+    if (!cycleCount) {
+      throw new NotFoundException('Cycle count not found.');
+    }
+
+    return cycleCount;
+  }
+
+  async openCycleCount(id: string, tenantId: string, actorUserId: string) {
+    const cycleCount = await this.inventoryRepository.openCycleCount({
+      cycleCountId: id,
+      tenantId,
+      actorUserId,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.cycle_count.opened',
+      'CycleCount',
+      cycleCount.id,
+      { itemCount: cycleCount.items.length },
+    );
+
+    return cycleCount;
+  }
+
+  countCycleCountItem(
+    id: string,
+    itemId: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: CountCycleCountItemDto,
+  ) {
+    return this.inventoryRepository.countCycleCountItem({
+      cycleCountId: id,
+      itemId,
+      tenantId,
+      actorUserId,
+      countedQuantity: dto.countedQuantity,
+    });
+  }
+
+  async approveCycleCount(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: ApproveCycleCountDto,
+  ) {
+    this.assertCycleCountReason(dto.reasonCode, dto.notes);
+
+    const result = await this.inventoryRepository.approveCycleCount({
+      cycleCountId: id,
+      tenantId,
+      actorUserId,
+      reasonCode: dto.reasonCode,
+      idempotencyKey: dto.idempotencyKey,
+      notes: dto.notes ?? null,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.cycle_count.approved',
+      'CycleCount',
+      result.cycleCount.id,
+      {
+        movementIds: result.movements.map((movement) => movement.id),
+        outboxEventId: result.outboxEvent?.id,
+      },
+    );
+
+    await Promise.all(
+      result.balances.map((balance) => this.publishBalanceChanged(balance.id, tenantId, balance)),
+    );
+
+    return result;
+  }
+
+  async cancelCycleCount(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: CancelCycleCountDto,
+  ) {
+    this.assertCycleCountReason(dto.reasonCode, dto.notes);
+
+    const cycleCount = await this.inventoryRepository.cancelCycleCount({
+      cycleCountId: id,
+      tenantId,
+      actorUserId,
+      reasonCode: dto.reasonCode,
+      notes: dto.notes ?? null,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.cycle_count.canceled',
+      'CycleCount',
+      cycleCount.id,
+      { reasonCode: dto.reasonCode },
+    );
+
+    return cycleCount;
+  }
+
   async releaseReservation(
     id: string,
     tenantId: string,
@@ -501,6 +650,51 @@ export class InventoryService {
     );
     if (definition?.requiresNotes && !notes?.trim()) {
       throw new BadRequestException('Notes are required for this transfer reason code.');
+    }
+  }
+
+  private async assertCycleCountReferences(
+    tenantId: string,
+    warehouseId: string,
+    items: Array<{ skuId: string }>,
+  ) {
+    const warehouse = await this.inventoryRepository.findWarehouseById(warehouseId, tenantId);
+    if (!warehouse?.isActive) {
+      throw new NotFoundException('Warehouse not found.');
+    }
+
+    this.assertUniqueCycleCountItems(items);
+
+    const skus = await Promise.all(
+      [...new Set(items.map((item) => item.skuId))].map((skuId) =>
+        this.inventoryRepository.findSkuById(skuId, tenantId),
+      ),
+    );
+
+    if (skus.some((sku) => !sku)) {
+      throw new NotFoundException('SKU not found.');
+    }
+  }
+
+  private assertUniqueCycleCountItems(items: Array<{ skuId: string }>) {
+    const skuIds = items.map((item) => item.skuId);
+    if (new Set(skuIds).size !== skuIds.length) {
+      throw new BadRequestException('Cycle count items must not contain duplicated SKUs.');
+    }
+  }
+
+  private assertCycleCountReason(reasonCode: string, notes?: string | null) {
+    this.assertReason(reasonCode);
+
+    if (!isInventoryReasonCode(InventoryReasonContext.CYCLE_COUNT, reasonCode)) {
+      throw new BadRequestException('Invalid cycle count reason code.');
+    }
+
+    const definition = getInventoryReasonCodes(InventoryReasonContext.CYCLE_COUNT).find(
+      (reason) => reason.code === reasonCode,
+    );
+    if (definition?.requiresNotes && !notes?.trim()) {
+      throw new BadRequestException('Notes are required for this cycle count reason code.');
     }
   }
 

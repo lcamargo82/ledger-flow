@@ -61,6 +61,14 @@ enum InventoryTransferStatus {
   CANCELED
 }
 
+enum CycleCountStatus {
+  DRAFT
+  OPEN
+  COUNTED
+  APPROVED
+  CANCELED
+}
+
 enum InternalOrderStatus {
   DRAFT
   CONFIRMED
@@ -170,6 +178,8 @@ model Tenant {
   inventoryReservations            InventoryReservation[]
   inventoryTransfers               InventoryTransfer[]
   inventoryTransferItems           InventoryTransferItem[]
+  cycleCounts                      CycleCount[]
+  cycleCountItems                  CycleCountItem[]
   internalOrders                   InternalOrder[]
   internalOrderItems               InternalOrderItem[]
   orderFinancialFacts              OrderFinancialFact[]
@@ -215,9 +225,14 @@ model User {
   reconciliationDecisions                 ReconciliationDecision[]
   notificationRecipients                  NotificationRecipient[]
   createdNotificationWebhookSubscriptions NotificationWebhookSubscription[]
-  createdInventoryTransfers               InventoryTransfer[]                    @relation("InventoryTransferCreatedBy")
-  completedInventoryTransfers             InventoryTransfer[]                    @relation("InventoryTransferCompletedBy")
-  canceledInventoryTransfers              InventoryTransfer[]                    @relation("InventoryTransferCanceledBy")
+  createdInventoryTransfers               InventoryTransfer[]               @relation("InventoryTransferCreatedBy")
+  completedInventoryTransfers             InventoryTransfer[]               @relation("InventoryTransferCompletedBy")
+  canceledInventoryTransfers              InventoryTransfer[]               @relation("InventoryTransferCanceledBy")
+  createdCycleCounts                      CycleCount[]                      @relation("CycleCountCreatedBy")
+  openedCycleCounts                       CycleCount[]                      @relation("CycleCountOpenedBy")
+  approvedCycleCounts                     CycleCount[]                      @relation("CycleCountApprovedBy")
+  canceledCycleCounts                     CycleCount[]                      @relation("CycleCountCanceledBy")
+  countedCycleCountItems                  CycleCountItem[]                  @relation("CycleCountItemCountedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -527,15 +542,16 @@ model ProductSku {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  product               Product                @relation(fields: [productId], references: [id], onDelete: Restrict)
-  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  inventoryMovements    InventoryMovement[]
-  inventoryBalances     InventoryBalance[]
-  inventoryReservations InventoryReservation[]
+  product                Product                 @relation(fields: [productId], references: [id], onDelete: Restrict)
+  tenant                 Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements     InventoryMovement[]
+  inventoryBalances      InventoryBalance[]
+  inventoryReservations  InventoryReservation[]
   inventoryTransferItems InventoryTransferItem[]
-  internalOrderItems    InternalOrderItem[]
-  channelListings       ChannelListing[]
-  listingSkuMappings    ListingSkuMapping[]
+  cycleCountItems        CycleCountItem[]
+  internalOrderItems     InternalOrderItem[]
+  channelListings        ChannelListing[]
+  listingSkuMappings     ListingSkuMapping[]
 
   @@unique([tenantId, skuCanonical])
   @@index([tenantId, barcode])
@@ -555,8 +571,9 @@ model Warehouse {
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
-  sourceTransfers       InventoryTransfer[]     @relation("InventoryTransferSourceWarehouse")
-  destinationTransfers  InventoryTransfer[]     @relation("InventoryTransferDestinationWarehouse")
+  sourceTransfers       InventoryTransfer[]    @relation("InventoryTransferSourceWarehouse")
+  destinationTransfers  InventoryTransfer[]    @relation("InventoryTransferDestinationWarehouse")
+  cycleCounts           CycleCount[]
   internalOrderItems    InternalOrderItem[]
 
   @@unique([tenantId, code])
@@ -582,9 +599,10 @@ model InventoryMovement {
   createdByUserId String?               @map("created_by_user_id")
   createdAt       DateTime              @default(now()) @map("created_at")
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
-  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku             ProductSku       @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse       Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  cycleCountItems CycleCountItem[]
 
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, skuId, warehouseId, occurredAt])
@@ -695,6 +713,69 @@ model InventoryTransferItem {
   @@index([tenantId, skuId])
   @@index([tenantId, transferId])
   @@map("inventory_transfer_items")
+}
+
+model CycleCount {
+  id               String           @id @default(uuid())
+  tenantId         String           @map("tenant_id")
+  countNumber      String           @map("count_number")
+  warehouseId      String           @map("warehouse_id")
+  status           CycleCountStatus @default(DRAFT)
+  reasonCode       String?          @map("reason_code")
+  notes            String?
+  idempotencyKey   String           @map("idempotency_key")
+  createdByUserId  String?          @map("created_by_user_id")
+  openedByUserId   String?          @map("opened_by_user_id")
+  approvedByUserId String?          @map("approved_by_user_id")
+  canceledByUserId String?          @map("canceled_by_user_id")
+  openedAt         DateTime?        @map("opened_at")
+  countedAt        DateTime?        @map("counted_at")
+  approvedAt       DateTime?        @map("approved_at")
+  adjustedAt       DateTime?        @map("adjusted_at")
+  canceledAt       DateTime?        @map("canceled_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  warehouse      Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  createdByUser  User?            @relation("CycleCountCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  openedByUser   User?            @relation("CycleCountOpenedBy", fields: [openedByUserId], references: [id], onDelete: SetNull)
+  approvedByUser User?            @relation("CycleCountApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  canceledByUser User?            @relation("CycleCountCanceledBy", fields: [canceledByUserId], references: [id], onDelete: SetNull)
+  items          CycleCountItem[]
+
+  @@unique([tenantId, countNumber])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, warehouseId, status, createdAt(sort: Desc)])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@map("cycle_counts")
+}
+
+model CycleCountItem {
+  id                   String    @id @default(uuid())
+  tenantId             String    @map("tenant_id")
+  cycleCountId         String    @map("cycle_count_id")
+  skuId                String    @map("sku_id")
+  systemOnHandAtOpen   Decimal?  @map("system_on_hand_at_open") @db.Decimal(18, 6)
+  balanceVersionAtOpen Int?      @map("balance_version_at_open")
+  countedQuantity      Decimal?  @map("counted_quantity") @db.Decimal(18, 6)
+  varianceQuantity     Decimal?  @map("variance_quantity") @db.Decimal(18, 6)
+  countedByUserId      String?   @map("counted_by_user_id")
+  countedAt            DateTime? @map("counted_at")
+  adjustmentMovementId String?   @map("adjustment_movement_id")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cycleCount         CycleCount         @relation(fields: [cycleCountId], references: [id], onDelete: Cascade)
+  sku                ProductSku         @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  countedByUser      User?              @relation("CycleCountItemCountedBy", fields: [countedByUserId], references: [id], onDelete: SetNull)
+  adjustmentMovement InventoryMovement? @relation(fields: [adjustmentMovementId], references: [id], onDelete: SetNull)
+
+  @@unique([cycleCountId, skuId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, cycleCountId])
+  @@map("cycle_count_items")
 }
 
 model InternalOrder {

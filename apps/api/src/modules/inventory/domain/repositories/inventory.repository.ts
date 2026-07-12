@@ -7,6 +7,9 @@ import {
   InventoryTransfer,
   InventoryTransferItem,
   InventoryTransferStatus,
+  CycleCount,
+  CycleCountItem,
+  CycleCountStatus,
   ProductSku,
   Warehouse,
 } from '@prisma/client';
@@ -136,6 +139,53 @@ export interface InventoryTransferCompletionResult {
   outboxEvent?: { id: string; eventType: string };
 }
 
+export type CycleCountWithItems = CycleCount & {
+  items: CycleCountItem[];
+};
+
+export interface CycleCountItemData {
+  skuId: string;
+}
+
+export interface CreateCycleCountData {
+  tenantId: string;
+  warehouseId: string;
+  reasonCode?: string | null;
+  notes?: string | null;
+  idempotencyKey: string;
+  createdByUserId: string;
+  items: CycleCountItemData[];
+}
+
+export interface CycleCountTransitionData {
+  cycleCountId: string;
+  tenantId: string;
+  actorUserId: string;
+}
+
+export interface CountCycleCountItemData extends CycleCountTransitionData {
+  itemId: string;
+  countedQuantity: number;
+}
+
+export interface ApproveCycleCountData extends CycleCountTransitionData {
+  reasonCode: string;
+  idempotencyKey: string;
+  notes?: string | null;
+}
+
+export interface CancelCycleCountData extends CycleCountTransitionData {
+  reasonCode: string;
+  notes?: string | null;
+}
+
+export interface CycleCountApprovalResult {
+  cycleCount: CycleCountWithItems;
+  movements: InventoryMovement[];
+  balances: InventoryBalance[];
+  outboxEvent?: { id: string; eventType: string };
+}
+
 export interface ListInventoryParams {
   tenantId: string;
   page?: number;
@@ -151,6 +201,14 @@ export interface ListInventoryTransfersParams {
   page?: number;
   perPage?: number;
   status?: InventoryTransferStatus;
+  warehouseId?: string;
+}
+
+export interface ListCycleCountsParams {
+  tenantId: string;
+  page?: number;
+  perPage?: number;
+  status?: CycleCountStatus;
   warehouseId?: string;
 }
 
@@ -181,4 +239,11 @@ export interface InventoryRepository {
   startTransfer(data: InventoryTransferTransitionData): Promise<InventoryTransferWithItems>;
   completeTransfer(data: CompleteInventoryTransferData): Promise<InventoryTransferCompletionResult>;
   cancelTransfer(data: CancelInventoryTransferData): Promise<InventoryTransferWithItems>;
+  createCycleCount(data: CreateCycleCountData): Promise<CycleCountWithItems>;
+  listCycleCounts(params: ListCycleCountsParams): Promise<PaginatedResult<CycleCountWithItems>>;
+  findCycleCountById(id: string, tenantId: string): Promise<CycleCountWithItems | null>;
+  openCycleCount(data: CycleCountTransitionData): Promise<CycleCountWithItems>;
+  countCycleCountItem(data: CountCycleCountItemData): Promise<CycleCountWithItems>;
+  approveCycleCount(data: ApproveCycleCountData): Promise<CycleCountApprovalResult>;
+  cancelCycleCount(data: CancelCycleCountData): Promise<CycleCountWithItems>;
 }

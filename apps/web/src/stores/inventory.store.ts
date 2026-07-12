@@ -3,10 +3,15 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { inventoryService } from '../services/inventory.service'
 import type {
+  ApproveCycleCountRequest,
+  CancelCycleCountRequest,
   CancelInventoryTransferRequest,
   CompleteInventoryTransferRequest,
+  CountCycleCountItemRequest,
+  CreateCycleCountRequest,
   CreateInventoryTransferRequest,
   CreateWarehouseRequest,
+  CycleCount,
   InventoryBalance,
   InventoryMovement,
   InventoryReservation,
@@ -25,11 +30,13 @@ export const useInventoryStore = defineStore('inventory', () => {
   const movements = ref<InventoryMovement[]>([])
   const reservations = ref<InventoryReservation[]>([])
   const transfers = ref<InventoryTransfer[]>([])
+  const cycleCounts = ref<CycleCount[]>([])
   const warehouseMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const balanceMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const movementMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const reservationMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const transferMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
+  const cycleCountMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
 
   const isLoading = ref(false)
   const isMutating = ref(false)
@@ -86,6 +93,12 @@ export const useInventoryStore = defineStore('inventory', () => {
     const response = await inventoryService.listTransfers()
     transfers.value = response.data
     transferMeta.value = response.meta
+  }
+
+  const fetchCycleCounts = async () => {
+    const response = await inventoryService.listCycleCounts()
+    cycleCounts.value = response.data
+    cycleCountMeta.value = response.meta
   }
 
   const fetchInventory = async () => {
@@ -247,17 +260,98 @@ export const useInventoryStore = defineStore('inventory', () => {
     }
   }
 
+  const createCycleCount = async (payload: CreateCycleCountRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.createCycleCount(payload)
+      await fetchCycleCounts()
+      return response.cycleCount
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const openCycleCount = async (id: string) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.openCycleCount(id)
+      await fetchCycleCounts()
+      return response.cycleCount
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const countCycleCountItem = async (
+    id: string,
+    itemId: string,
+    payload: CountCycleCountItemRequest,
+  ) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.countCycleCountItem(id, itemId, payload)
+      await fetchCycleCounts()
+      return response.cycleCount
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const approveCycleCount = async (id: string, payload: ApproveCycleCountRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.approveCycleCount(id, payload)
+      await Promise.all([fetchCycleCounts(), fetchBalances(), fetchMovements()])
+      return response
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const cancelCycleCount = async (id: string, payload: CancelCycleCountRequest) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await inventoryService.cancelCycleCount(id, payload)
+      await fetchCycleCounts()
+      return response.cycleCount
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
   return {
     warehouses,
     balances,
     movements,
     reservations,
     transfers,
+    cycleCounts,
     warehouseMeta,
     balanceMeta,
     movementMeta,
     reservationMeta,
     transferMeta,
+    cycleCountMeta,
     activeWarehouses,
     isLoading,
     isMutating,
@@ -268,6 +362,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     fetchMovements,
     fetchReservations,
     fetchTransfers,
+    fetchCycleCounts,
     createWarehouse,
     updateWarehouse,
     recordAdjustment,
@@ -278,5 +373,10 @@ export const useInventoryStore = defineStore('inventory', () => {
     startTransfer,
     completeTransfer,
     cancelTransfer,
+    createCycleCount,
+    openCycleCount,
+    countCycleCountItem,
+    approveCycleCount,
+    cancelCycleCount,
   }
 })
