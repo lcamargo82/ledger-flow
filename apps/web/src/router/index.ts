@@ -23,6 +23,7 @@ import ChannelsView from '../views/ChannelsView.vue'
 import AnalyticsView from '../views/AnalyticsView.vue'
 import ExportsView from '../views/ExportsView.vue'
 import ReconciliationView from '../views/ReconciliationView.vue'
+import NotificationsView from '../views/NotificationsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,6 +75,17 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         requiresAuth: true,
+      },
+    },
+    {
+      path: '/notifications',
+      name: 'notifications',
+      component: NotificationsView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['notifications:read'],
+        capabilities: ['notifications.read'],
       },
     },
     {

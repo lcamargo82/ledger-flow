@@ -13,6 +13,7 @@ import { MercadoLivreChannelAdapter } from '../../infra/adapters/mercado-livre-c
 import { CHANNELS_REPOSITORY } from '../../domain/repositories/channels.repository';
 import type { ChannelsRepository } from '../../domain/repositories/channels.repository';
 import { MercadoLivreCredentialsService } from './mercado-livre-credentials.service';
+import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
 
 export interface InventoryBalanceChangedInput {
   tenantId: string;
@@ -32,6 +33,7 @@ export class ChannelInventorySyncService {
     private readonly mercadoLivreAdapter?: MercadoLivreChannelAdapter,
     private readonly credentialsEncryptionService?: GatewayCredentialsEncryptionService,
     private readonly mercadoLivreCredentialsService?: MercadoLivreCredentialsService,
+    private readonly notificationProducer?: NotificationProducerService,
   ) {}
 
   listStatus(
@@ -120,6 +122,12 @@ export class ChannelInventorySyncService {
         result.errorCode === 'INTEGRATION_NOT_SYNCABLE' ||
         state.attemptCount + 1 >= this.maxAttemptsBeforeCircuit
       ) {
+        await this.notificationProducer?.channelInventorySyncFailed({
+          tenantId,
+          syncStateId: state.id,
+          listingId: state.listingId,
+          attempt: state.attemptCount + 1,
+        });
         await this.channelsRepository.markInventorySyncCircuitOpen({
           id: state.id,
           circuitOpenedUntil: this.addSeconds(now, 300),

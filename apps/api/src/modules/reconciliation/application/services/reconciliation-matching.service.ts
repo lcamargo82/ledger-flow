@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   Payment,
-  PaymentProvider,
   PaymentStatus,
   Prisma,
   ProviderSettlementEvent,
@@ -10,6 +9,7 @@ import {
   ReconciliationMatchType,
 } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
+import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
 
 interface MatchSettlementResult {
   case: ReconciliationCase | null;
@@ -25,7 +25,10 @@ type MatchResult = {
 
 @Injectable()
 export class ReconciliationMatchingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationProducer?: NotificationProducerService,
+  ) {}
 
   async matchSettlement(settlementEventId: string): Promise<MatchSettlementResult> {
     const settlement = await this.prisma.providerSettlementEvent.findUnique({
@@ -49,6 +52,7 @@ export class ReconciliationMatchingService {
       },
     });
     if (existing) {
+      await this.notifyDivergence(existing);
       return { case: existing, created: false };
     }
 
@@ -57,8 +61,23 @@ export class ReconciliationMatchingService {
     const reconciliationCase = await this.prisma.reconciliationCase.create({
       data: this.buildCaseData(settlement, match, policy),
     });
+    await this.notifyDivergence(reconciliationCase);
 
     return { case: reconciliationCase, created: true };
+  }
+
+  private async notifyDivergence(reconciliationCase: ReconciliationCase) {
+    const divergentStatuses: ReconciliationCaseStatus[] = [
+      ReconciliationCaseStatus.AMOUNT_DIVERGENCE,
+      ReconciliationCaseStatus.CURRENCY_DIVERGENCE,
+      ReconciliationCaseStatus.STATUS_DIVERGENCE,
+    ];
+    if (!divergentStatuses.includes(reconciliationCase.status)) return;
+
+    await this.notificationProducer?.reconciliationDivergence({
+      tenantId: reconciliationCase.tenantId,
+      caseId: reconciliationCase.id,
+    });
   }
 
   private async findPolicy(settlement: ProviderSettlementEvent) {

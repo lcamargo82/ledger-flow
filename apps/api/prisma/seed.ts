@@ -71,6 +71,7 @@ async function main() {
     { key: 'gateways:update', description: 'Atualizar configurações de gateways' },
     { key: 'gateways:manage', description: 'Gerenciar credenciais e status de gateways' },
     { key: 'notifications:read', description: 'Visualizar notificações' },
+    { key: 'notifications:manage', description: 'Gerenciar notificações' },
     { key: 'audit:read', description: 'Visualizar trilha de auditoria' },
     { key: 'tenant:update', description: 'Atualizar configurações do tenant' },
     { key: 'catalog:read', description: 'Visualizar catálogo' },

@@ -64,7 +64,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/inventory/reservations` | Implementada (10.0.4) | `AppLayout`              | `inventory:read` + `inventory.manage` | Reservas administrativas, liberação e consumo total     |
 | `/orders`               | Implementada (10.0.5) | `AppLayout`                | `orders:read` + `orders.manage`       | Pedidos internos, reserva, cancelamento e fulfillment   |
 | `/reconciliation`       | Implementada (9A)     | `AppLayout`                | `reconciliation:read` + `reconciliation.read` | Conciliação, cases, dashboard e decisões        |
-| `/notifications`        | Planejada (10.2.0A)   | `AppLayout`                | `notifications:read` + `notifications.read` | Feed autorizado do usuário                     |
+| `/notifications`        | Implementada (10.2.0A) | `AppLayout`               | `notifications:read` + `notifications.read` | Feed autorizado do usuário                     |
 | `/inventory/transfers`  | Planejada (10.2.2)    | `AppLayout`                | `inventory:transfer` + `inventory.transfer` | Transferências atômicas                         |
 | `/inventory/cycle-counts` | Planejada (10.2.3)  | `AppLayout`                | `inventory:cycle-count` + `inventory.cycle_count` | Contagem física controlada                 |
 | `/exports`              | Implementada (10.0.10) | `AppLayout`              | `reports:export`                     | Exportações CSV rastreáveis com fila operacional        |
