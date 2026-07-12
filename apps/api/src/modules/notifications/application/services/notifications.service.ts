@@ -6,6 +6,7 @@ import {
   type RegisteredNotificationEventType,
 } from '../../domain/constants/notification-event-registry';
 import { NotificationAudienceResolverService } from './notification-audience-resolver.service';
+import { NotificationWebhookDeliveryPlannerService } from './notification-webhook-delivery-planner.service';
 
 export interface CreateNotificationEventInput {
   tenantId: string;
@@ -23,6 +24,7 @@ export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audienceResolver: NotificationAudienceResolverService,
+    private readonly deliveryPlanner: NotificationWebhookDeliveryPlannerService,
   ) {}
 
   async createEvent(input: CreateNotificationEventInput) {
@@ -71,6 +73,12 @@ export class NotificationsService {
             skipDuplicates: true,
           });
         }
+
+        await this.deliveryPlanner.plan(transaction, {
+          tenantId: input.tenantId,
+          notificationEventId: event.id,
+          eventType: input.eventType,
+        });
 
         return { event, created: true };
       });

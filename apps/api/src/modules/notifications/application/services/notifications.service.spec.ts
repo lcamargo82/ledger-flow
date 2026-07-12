@@ -22,12 +22,15 @@ describe('NotificationsService', () => {
   const audienceResolver = {
     resolve: jest.fn(),
   };
+  const deliveryPlanner = {
+    plan: jest.fn(),
+  };
 
   let service: NotificationsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new NotificationsService(prisma as never, audienceResolver as never);
+    service = new NotificationsService(prisma as never, audienceResolver as never, deliveryPlanner);
   });
 
   it('persists one registered event and its authorized recipients', async () => {
@@ -73,6 +76,11 @@ describe('NotificationsService', () => {
       ],
       skipDuplicates: true,
     });
+    expect(deliveryPlanner.plan).toHaveBeenCalledWith(transaction, {
+      tenantId: 'tenant-1',
+      notificationEventId: 'event-1',
+      eventType: 'channel.inventory_sync.failed',
+    });
   });
 
   it('does not create recipients when the idempotency key already exists', async () => {
@@ -92,6 +100,7 @@ describe('NotificationsService', () => {
 
     expect(transaction.notificationEvent.create).not.toHaveBeenCalled();
     expect(transaction.notificationRecipient.createMany).not.toHaveBeenCalled();
+    expect(deliveryPlanner.plan).not.toHaveBeenCalled();
   });
 
   it('returns the winning event when concurrent creation hits the unique constraint', async () => {
