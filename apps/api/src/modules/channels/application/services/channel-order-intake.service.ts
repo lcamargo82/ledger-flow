@@ -12,9 +12,13 @@ import {
   ChannelListingMatchStatus,
   ChannelProvider,
   ChannelWebhookStatus,
+  Prisma,
 } from '@prisma/client';
+import { createHash } from 'crypto';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { FinancialIntelligenceService } from '../../../financial-intelligence/application/services/financial-intelligence.service';
 import { GatewayCredentialsEncryptionService } from '../../../gateways/application/services/gateway-credentials-encryption.service';
+import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
 import { OrdersService } from '../../../orders/application/services/orders.service';
 import {
   ChannelOrderAdapter,
@@ -40,7 +44,9 @@ export class ChannelOrderIntakeService {
     private readonly ordersService: OrdersService,
     private readonly mercadoLivreAdapter: MercadoLivreChannelAdapter,
     private readonly credentialsEncryptionService: GatewayCredentialsEncryptionService,
+    private readonly prisma: PrismaService,
     private readonly financialIntelligenceService?: FinancialIntelligenceService,
+    private readonly notificationProducer?: NotificationProducerService,
     private readonly mercadoLivreCredentialsService?: MercadoLivreCredentialsService,
   ) {}
 
@@ -115,6 +121,12 @@ export class ChannelOrderIntakeService {
       actorUserId,
       inboxEvent.provider,
     );
+    await this.upsertShippingSummary(
+      order,
+      transitioned?.order.id ?? created.order.id,
+      integration.tenantId,
+      inboxEvent.provider,
+    );
 
     return {
       orderId: transitioned?.order.id ?? created.order.id,
@@ -141,6 +153,87 @@ export class ChannelOrderIntakeService {
         ...order.financial,
       },
     );
+  }
+
+  private async upsertShippingSummary(
+    order: ChannelOrderDetails,
+    orderId: string,
+    tenantId: string,
+    provider: ChannelProvider,
+  ) {
+    if (!order.shipping) return;
+
+    const data = {
+      tenantId,
+      orderId,
+      provider,
+      externalOrderId: order.externalOrderId,
+      externalShipmentId: order.shipping.externalShipmentId,
+      status: order.shipping.status,
+      substatus: order.shipping.substatus,
+      shippingMode: order.shipping.shippingMode,
+      logisticType: order.shipping.logisticType,
+      handlingEstimateAt: this.toDate(order.shipping.handlingEstimateAt),
+      deliveryEstimateAt: this.toDate(order.shipping.deliveryEstimateAt),
+      postedAt: this.toDate(order.shipping.postedAt),
+      trackingCodeMasked: order.shipping.trackingCodeMasked,
+      source: order.shipping.source,
+      confidence: order.shipping.confidence,
+      lastSyncedAt: new Date(),
+    };
+    const where = {
+      tenantId_orderId_provider: {
+        tenantId,
+        orderId,
+        provider,
+      },
+    };
+    const existing = await this.prisma.orderShippingSummary.findUnique({ where });
+    const changed = !existing || this.shippingChanged(existing, data);
+
+    const summary = await this.prisma.orderShippingSummary.upsert({
+      where,
+      create: data,
+      update: data,
+    });
+
+    if (!changed) return;
+
+    const payload = {
+      orderId,
+      provider,
+      externalOrderId: order.externalOrderId,
+      externalShipmentId: order.shipping.externalShipmentId,
+      status: order.shipping.status,
+      substatus: order.shipping.substatus,
+      shippingMode: order.shipping.shippingMode,
+      logisticType: order.shipping.logisticType,
+      trackingCodeMasked: order.shipping.trackingCodeMasked,
+      source: order.shipping.source,
+      confidence: order.shipping.confidence,
+    };
+
+    await this.prisma.outboxEvent.create({
+      data: {
+        tenantId,
+        aggregateType: 'OrderShippingSummary',
+        aggregateId: summary.id,
+        eventType: 'channel.order.shipping_summary.updated',
+        eventVersion: 1,
+        payload: payload as Prisma.InputJsonValue,
+        payloadHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
+      },
+    });
+
+    await this.notificationProducer?.channelOrderShippingSummaryUpdated({
+      tenantId,
+      shippingSummaryId: summary.id,
+      orderId,
+      externalOrderId: order.externalOrderId,
+      externalShipmentId: order.shipping.externalShipmentId ?? null,
+      status: order.shipping.status ?? null,
+      changedAt: summary.updatedAt,
+    });
   }
 
   private async mapOrderItems(integration: ChannelIntegration, items: ChannelOrderItem[]) {
@@ -266,5 +359,65 @@ export class ChannelOrderIntakeService {
 
   private asString(value: unknown) {
     return typeof value === 'string' ? value.trim() : '';
+  }
+
+  private toDate(value: string | undefined) {
+    if (!value) return undefined;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? undefined : date;
+  }
+
+  private shippingChanged(
+    existing: {
+      externalOrderId: string;
+      externalShipmentId: string | null;
+      status: string | null;
+      substatus: string | null;
+      shippingMode: string | null;
+      logisticType: string | null;
+      handlingEstimateAt: Date | null;
+      deliveryEstimateAt: Date | null;
+      postedAt: Date | null;
+      trackingCodeMasked: string | null;
+      source: string;
+      confidence: number;
+    },
+    next: {
+      externalOrderId: string;
+      externalShipmentId?: string;
+      status?: string;
+      substatus?: string;
+      shippingMode?: string;
+      logisticType?: string;
+      handlingEstimateAt?: Date;
+      deliveryEstimateAt?: Date;
+      postedAt?: Date;
+      trackingCodeMasked?: string;
+      source: string;
+      confidence: number;
+    },
+  ) {
+    return (
+      existing.externalOrderId !== next.externalOrderId ||
+      this.nullable(existing.externalShipmentId) !== this.nullable(next.externalShipmentId) ||
+      this.nullable(existing.status) !== this.nullable(next.status) ||
+      this.nullable(existing.substatus) !== this.nullable(next.substatus) ||
+      this.nullable(existing.shippingMode) !== this.nullable(next.shippingMode) ||
+      this.nullable(existing.logisticType) !== this.nullable(next.logisticType) ||
+      this.dateValue(existing.handlingEstimateAt) !== this.dateValue(next.handlingEstimateAt) ||
+      this.dateValue(existing.deliveryEstimateAt) !== this.dateValue(next.deliveryEstimateAt) ||
+      this.dateValue(existing.postedAt) !== this.dateValue(next.postedAt) ||
+      this.nullable(existing.trackingCodeMasked) !== this.nullable(next.trackingCodeMasked) ||
+      existing.source !== next.source ||
+      existing.confidence !== next.confidence
+    );
+  }
+
+  private nullable(value: string | undefined | null) {
+    return value ?? null;
+  }
+
+  private dateValue(value: Date | undefined | null) {
+    return value?.toISOString() ?? null;
   }
 }

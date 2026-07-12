@@ -139,10 +139,10 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Permissões:** `orders:read`, `orders:manage`
 - **Capability:** `orders.manage`
 - **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
-- **Objetivo:** Criar pedidos internos e executar o ciclo confirmar, cancelar e concluir usando reservas de estoque.
-- **Fluxos:** criação de pedido em rascunho, confirmação com reserva por item, cancelamento com liberação de reserva e conclusão com consumo da reserva.
+- **Objetivo:** Criar pedidos internos e executar o ciclo confirmar, cancelar e concluir usando reservas de estoque; em 10.1.11, exibir resumo logístico operacional quando disponível.
+- **Fluxos:** criação de pedido em rascunho, confirmação com reserva por item, cancelamento com liberação de reserva e conclusão com consumo da reserva. O resumo logístico mostra provider, status de shipment, shipment id string e tracking mascarado, sem semântica de fulfillment/SLA 10.3.
 - **Segurança:** O frontend oculta ações sem permissão; o backend valida `@RequirePermissions` e `@RequireCapabilities`.
-- **Fora de escopo:** marketplace, webhooks de canais, malha fina, backorder e financeiro por pedido.
+- **Fora de escopo:** marketplace settlement/payout, backorder, etiqueta, picking/packing e fulfillment avançado.
 - **i18n:** Namespace `orders.*` em pt-BR e en-US.
 
 ### Channels

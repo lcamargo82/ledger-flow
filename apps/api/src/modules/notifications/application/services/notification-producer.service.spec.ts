@@ -60,4 +60,35 @@ describe('NotificationProducerService', () => {
       }),
     );
   });
+
+  it('produces an idempotent channel order shipping summary update when enabled', async () => {
+    config.get.mockReturnValue('true');
+    notifications.createEvent.mockResolvedValue({ created: true });
+
+    await service.channelOrderShippingSummaryUpdated({
+      tenantId: 'tenant-1',
+      shippingSummaryId: 'shipping-summary-1',
+      orderId: 'order-1',
+      externalOrderId: '2000000001',
+      externalShipmentId: '987654321',
+      status: 'ready_to_ship',
+      changedAt: new Date('2026-07-12T18:00:00.000Z'),
+    });
+
+    expect(notifications.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'channel.order.shipping_summary.updated',
+        idempotencyKey:
+          'channel-order-shipping:shipping-summary-1:updated:2026-07-12T18:00:00.000Z',
+        sourceType: 'OrderShippingSummary',
+        sourceId: 'shipping-summary-1',
+        translationArgs: {
+          orderId: 'order-1',
+          externalOrderId: '2000000001',
+          externalShipmentId: '987654321',
+          status: 'ready_to_ship',
+        },
+      }),
+    );
+  });
 });

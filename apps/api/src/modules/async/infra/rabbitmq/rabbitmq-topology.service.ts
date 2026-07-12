@@ -59,6 +59,57 @@ export class RabbitMqTopologyService {
         dlx,
         'notification.webhook.dlq',
       );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.channel.webhook.events.q',
+        exchange,
+        'channel.webhook.received',
+        dlx,
+        'channel.webhook.dlq',
+      );
+
+      // Domain event queues without an internal consumer yet. They keep mandatory
+      // publishes routable and make the events available for future integrations.
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.export.events.q',
+        exchange,
+        'export.job.*',
+        dlx,
+        'export.dlq',
+      );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.inventory.events.q',
+        exchange,
+        'inventory.#',
+        dlx,
+        'inventory.dlq',
+      );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.orders.events.q',
+        exchange,
+        'orders.order.*',
+        dlx,
+        'orders.dlq',
+      );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.channel.events.q',
+        exchange,
+        'channel.#',
+        dlx,
+        'channel.dlq',
+      );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.financial.events.q',
+        exchange,
+        'financial.#',
+        dlx,
+        'financial.dlq',
+      );
 
       // Retry Queues
       const retryIntervals = [30000, 120000, 600000, 1800000]; // 30s, 2m, 10m, 30m
@@ -108,6 +159,24 @@ export class RabbitMqTopologyService {
         dlx,
         'notification.webhook.dlq',
       );
+
+      await channel.assertQueue('ledgerflow.channel.webhook.dlq', { durable: true });
+      await channel.bindQueue('ledgerflow.channel.webhook.dlq', dlx, 'channel.webhook.dlq');
+
+      await channel.assertQueue('ledgerflow.export.dlq', { durable: true });
+      await channel.bindQueue('ledgerflow.export.dlq', dlx, 'export.dlq');
+
+      await channel.assertQueue('ledgerflow.inventory.dlq', { durable: true });
+      await channel.bindQueue('ledgerflow.inventory.dlq', dlx, 'inventory.dlq');
+
+      await channel.assertQueue('ledgerflow.orders.dlq', { durable: true });
+      await channel.bindQueue('ledgerflow.orders.dlq', dlx, 'orders.dlq');
+
+      await channel.assertQueue('ledgerflow.channel.dlq', { durable: true });
+      await channel.bindQueue('ledgerflow.channel.dlq', dlx, 'channel.dlq');
+
+      await channel.assertQueue('ledgerflow.financial.dlq', { durable: true });
+      await channel.bindQueue('ledgerflow.financial.dlq', dlx, 'financial.dlq');
 
       await channel.close();
       await connection.close();

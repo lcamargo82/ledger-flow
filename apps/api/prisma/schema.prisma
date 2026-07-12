@@ -183,6 +183,7 @@ model Tenant {
   internalOrders                   InternalOrder[]
   internalOrderItems               InternalOrderItem[]
   orderFinancialFacts              OrderFinancialFact[]
+  orderShippingSummaries           OrderShippingSummary[]
   exportJobs                       ExportJob[]
   channelIntegrations              ChannelIntegration[]
   channelWebhookEvents             ChannelWebhookInboxEvent[]
@@ -793,9 +794,10 @@ model InternalOrder {
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
 
-  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  items          InternalOrderItem[]
-  financialFacts OrderFinancialFact[]
+  tenant            Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items             InternalOrderItem[]
+  financialFacts    OrderFinancialFact[]
+  shippingSummaries OrderShippingSummary[]
 
   @@unique([tenantId, orderNumber])
   @@unique([tenantId, idempotencyKey])
@@ -854,6 +856,36 @@ model OrderFinancialFact {
   @@index([tenantId, channelProvider, calculatedAt])
   @@index([tenantId, orderStatus])
   @@map("order_financial_facts")
+}
+
+model OrderShippingSummary {
+  id                 String          @id @default(uuid())
+  tenantId           String          @map("tenant_id")
+  orderId            String          @map("order_id")
+  provider           ChannelProvider
+  externalOrderId    String          @map("external_order_id")
+  externalShipmentId String?         @map("external_shipment_id")
+  status             String?
+  substatus          String?
+  shippingMode       String?         @map("shipping_mode")
+  logisticType       String?         @map("logistic_type")
+  handlingEstimateAt DateTime?       @map("handling_estimate_at")
+  deliveryEstimateAt DateTime?       @map("delivery_estimate_at")
+  postedAt           DateTime?       @map("posted_at")
+  trackingCodeMasked String?         @map("tracking_code_masked")
+  source             String          @default("MERCADO_LIVRE_ORDER")
+  confidence         Float           @default(0.5)
+  lastSyncedAt       DateTime        @map("last_synced_at")
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order  InternalOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, orderId, provider])
+  @@index([tenantId, provider, lastSyncedAt])
+  @@index([tenantId, externalShipmentId])
+  @@map("order_shipping_summaries")
 }
 
 model ChannelIntegration {

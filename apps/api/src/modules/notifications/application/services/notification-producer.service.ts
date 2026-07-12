@@ -42,6 +42,39 @@ export class NotificationProducerService {
     });
   }
 
+  async channelOrderShippingSummaryUpdated(input: {
+    tenantId: string;
+    shippingSummaryId: string;
+    orderId: string;
+    externalOrderId: string;
+    externalShipmentId?: string | null;
+    status?: string | null;
+    changedAt: Date;
+  }) {
+    if (!this.isEnabled()) return;
+
+    await this.notifications.createEvent({
+      tenantId: input.tenantId,
+      eventType: 'channel.order.shipping_summary.updated',
+      idempotencyKey: `channel-order-shipping:${input.shippingSummaryId}:updated:${input.changedAt.toISOString()}`,
+      sourceType: 'OrderShippingSummary',
+      sourceId: input.shippingSummaryId,
+      occurredAt: input.changedAt,
+      translationArgs: {
+        orderId: input.orderId,
+        externalOrderId: input.externalOrderId,
+        externalShipmentId: input.externalShipmentId ?? null,
+        status: input.status ?? null,
+      },
+      metadata: {
+        orderId: input.orderId,
+        externalOrderId: input.externalOrderId,
+        externalShipmentId: input.externalShipmentId ?? null,
+        status: input.status ?? null,
+      },
+    });
+  }
+
   private isEnabled() {
     return this.config.get<string>('NOTIFICATIONS_INTERNAL_PRODUCERS_ENABLED') === 'true';
   }

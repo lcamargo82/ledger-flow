@@ -207,6 +207,10 @@
         "title": "Inventory synchronization failed",
         "message": "Listing {listingId} could not be synchronized."
       },
+      "channelOrderShippingSummaryUpdated": {
+        "title": "Shipping summary updated",
+        "message": "Mercado Livre order {externalOrderId} had its shipping status updated to {status}."
+      },
       "reconciliationDivergence": {
         "title": "Reconciliation divergence identified",
         "message": "Case {caseId} requires review."
@@ -461,8 +465,14 @@
       "status": "Status",
       "customer": "Customer",
       "items": "Items",
+      "shipping": "Shipping",
       "createdAt": "Created at",
       "actions": "Actions"
+    },
+    "shipping": {
+      "shipment": "Shipment",
+      "tracking": "Tracking",
+      "statusUnknown": "Status not provided"
     },
     "form": {
       "createTitle": "New internal order",

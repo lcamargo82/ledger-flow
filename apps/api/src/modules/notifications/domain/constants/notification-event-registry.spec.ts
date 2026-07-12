@@ -16,6 +16,17 @@ describe('notification event registry', () => {
     });
   });
 
+  it('defines the authorized contract for channel order shipping summary updates', () => {
+    expect(getNotificationEventContract('channel.order.shipping_summary.updated')).toEqual({
+      category: NotificationCategory.CHANNELS,
+      severity: NotificationSeverity.INFO,
+      titleKey: 'notifications.events.channelOrderShippingSummaryUpdated.title',
+      messageKey: 'notifications.events.channelOrderShippingSummaryUpdated.message',
+      requiredPermissions: ['orders:read', 'channels:read'],
+      requiredCapabilities: ['notifications.read', 'orders.manage'],
+    });
+  });
+
   it('rejects event types that are not registered', () => {
     expect(() => getNotificationEventContract('arbitrary.event')).toThrow(
       'Notification event type is not registered: arbitrary.event',
@@ -24,5 +35,12 @@ describe('notification event registry', () => {
 
   it('requires current permission and every capability to expose an event type', () => {
     expect(getVisibleNotificationEventTypes(['channels:read'], ['notifications.read'])).toEqual([]);
+  });
+
+  it('exposes shipping summary notifications only to order-capable notification readers', () => {
+    expect(getVisibleNotificationEventTypes(['orders:read'], ['notifications.read'])).toEqual([]);
+    expect(
+      getVisibleNotificationEventTypes(['orders:read'], ['notifications.read', 'orders.manage']),
+    ).toContain('channel.order.shipping_summary.updated');
   });
 });

@@ -15,14 +15,14 @@ export class PrismaOrdersRepository implements OrdersRepository {
   findById(id: string, tenantId: string) {
     return this.prisma.internalOrder.findFirst({
       where: { id, tenantId },
-      include: { items: { orderBy: { createdAt: 'asc' } } },
+      include: this.orderInclude(),
     });
   }
 
   findByIdempotencyKey(tenantId: string, idempotencyKey: string) {
     return this.prisma.internalOrder.findUnique({
       where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
-      include: { items: { orderBy: { createdAt: 'asc' } } },
+      include: this.orderInclude(),
     });
   }
 
@@ -44,7 +44,7 @@ export class PrismaOrdersRepository implements OrdersRepository {
           })),
         },
       },
-      include: { items: { orderBy: { createdAt: 'asc' } } },
+      include: this.orderInclude(),
     });
   }
 
@@ -63,7 +63,7 @@ export class PrismaOrdersRepository implements OrdersRepository {
         status,
         ...timestampFieldByStatus[status],
       },
-      include: { items: { orderBy: { createdAt: 'asc' } } },
+      include: this.orderInclude(),
     });
   }
 
@@ -86,7 +86,7 @@ export class PrismaOrdersRepository implements OrdersRepository {
         skip,
         take,
         orderBy: { createdAt: 'desc' },
-        include: { items: { orderBy: { createdAt: 'asc' } } },
+        include: this.orderInclude(),
       }),
       this.prisma.internalOrder.count({ where }),
     ]);
@@ -99,5 +99,12 @@ export class PrismaOrdersRepository implements OrdersRepository {
 
   private createOrderNumber() {
     return `ORD-${Date.now().toString(36).toUpperCase()}-${randomUUID().slice(0, 8).toUpperCase()}`;
+  }
+
+  private orderInclude() {
+    return {
+      items: { orderBy: { createdAt: 'asc' as const } },
+      shippingSummaries: { orderBy: { lastSyncedAt: 'desc' as const } },
+    };
   }
 }

@@ -53,6 +53,8 @@ channels:
         $ref: '#/components/messages/ChannelInventorySyncRequested'
       channelInventorySyncCompleted:
         $ref: '#/components/messages/ChannelInventorySyncCompleted'
+      channelOrderShippingSummaryUpdated:
+        $ref: '#/components/messages/ChannelOrderShippingSummaryUpdated'
   financial.events:
     address: ledgerflow.financial.events
     messages:
@@ -271,6 +273,12 @@ components:
       summary: Event emitted when mock outbound inventory sync succeeds.
       payload:
         $ref: '#/components/schemas/ChannelInventorySyncPayload'
+    ChannelOrderShippingSummaryUpdated:
+      name: channel.order.shipping_summary.updated
+      title: Channel Order Shipping Summary Updated
+      summary: Event emitted when a channel order shipping summary is created or materially changed.
+      payload:
+        $ref: '#/components/schemas/ChannelOrderShippingSummaryPayload'
     FinancialOrderFactCreated:
       name: financial.order_fact.created
       title: Financial Order Fact Created
@@ -496,6 +504,40 @@ components:
           type: string
         grossMarginAmount:
           type: string
+    ChannelOrderShippingSummaryPayload:
+      type: object
+      required:
+        - orderId
+        - provider
+        - externalOrderId
+        - source
+        - confidence
+      properties:
+        orderId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - MOCK
+            - MERCADO_LIVRE
+        externalOrderId:
+          type: string
+        externalShipmentId:
+          type: string
+        status:
+          type: string
+        substatus:
+          type: string
+        shippingMode:
+          type: string
+        logisticType:
+          type: string
+        trackingCodeMasked:
+          type: string
+        source:
+          type: string
+        confidence:
+          type: number
     ExportJobCompletedPayload:
       type: object
       required:

@@ -12,6 +12,28 @@ export interface InternalOrderItem {
   updatedAt: string
 }
 
+export interface OrderShippingSummary {
+  id: string
+  tenantId: string
+  orderId: string
+  provider: 'MOCK' | 'MERCADO_LIVRE'
+  externalOrderId: string
+  externalShipmentId?: string | null
+  status?: string | null
+  substatus?: string | null
+  shippingMode?: string | null
+  logisticType?: string | null
+  handlingEstimateAt?: string | null
+  deliveryEstimateAt?: string | null
+  postedAt?: string | null
+  trackingCodeMasked?: string | null
+  source: string
+  confidence: number
+  lastSyncedAt: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface InternalOrder {
   id: string
   tenantId: string
@@ -27,6 +49,7 @@ export interface InternalOrder {
   createdAt: string
   updatedAt: string
   items: InternalOrderItem[]
+  shippingSummaries: OrderShippingSummary[]
 }
 
 export interface OrdersMeta {

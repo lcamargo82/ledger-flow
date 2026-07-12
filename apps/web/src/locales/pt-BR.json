@@ -206,6 +206,10 @@
         "title": "Falha na sincronização de estoque",
         "message": "Não foi possível sincronizar o anúncio {listingId}."
       },
+      "channelOrderShippingSummaryUpdated": {
+        "title": "Resumo logístico atualizado",
+        "message": "O pedido Mercado Livre {externalOrderId} teve o status logístico atualizado para {status}."
+      },
       "reconciliationDivergence": {
         "title": "Divergência de conciliação identificada",
         "message": "O caso {caseId} requer análise."
@@ -460,8 +464,14 @@
       "status": "Status",
       "customer": "Cliente",
       "items": "Itens",
+      "shipping": "Logística",
       "createdAt": "Criado em",
       "actions": "Ações"
+    },
+    "shipping": {
+      "shipment": "Envio",
+      "tracking": "Tracking",
+      "statusUnknown": "Status não informado"
     },
     "form": {
       "createTitle": "Novo pedido interno",
