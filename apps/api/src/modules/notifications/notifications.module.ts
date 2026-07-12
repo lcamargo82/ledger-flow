@@ -6,6 +6,10 @@ import { NotificationsService } from './application/services/notifications.servi
 import { NotificationFeedService } from './application/services/notification-feed.service';
 import { NotificationProducerService } from './application/services/notification-producer.service';
 import { NotificationsController } from './presentation/controllers/notifications.controller';
+import { NotificationWebhookEndpointPolicyService } from './application/services/notification-webhook-endpoint-policy.service';
+import { NotificationWebhookSignerService } from './application/services/notification-webhook-signer.service';
+import { NotificationWebhookHostResolver } from './domain/interfaces/notification-webhook-host-resolver';
+import { NodeNotificationWebhookHostResolver } from './infra/dns/node-notification-webhook-host-resolver';
 
 @Module({
   imports: [PlatformModule],
@@ -15,7 +19,13 @@ import { NotificationsController } from './presentation/controllers/notification
     NotificationAudienceResolverService,
     NotificationFeedService,
     NotificationProducerService,
+    NotificationWebhookEndpointPolicyService,
+    NotificationWebhookSignerService,
     NotificationsService,
+    {
+      provide: NotificationWebhookHostResolver,
+      useClass: NodeNotificationWebhookHostResolver,
+    },
   ],
   exports: [NotificationsService, NotificationProducerService],
 })
