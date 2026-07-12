@@ -39,6 +39,9 @@ describe('ChannelOrderIntakeService', () => {
   const financialIntelligenceService = {
     createChannelOrderOperationalFact: jest.fn(),
   };
+  const notificationProducer = {
+    channelOrderShippingSummaryUpdated: jest.fn(),
+  };
 
   const integration = {
     id: 'integration-1',
@@ -125,6 +128,7 @@ describe('ChannelOrderIntakeService', () => {
     prisma.orderShippingSummary.findUnique.mockResolvedValue(null);
     prisma.orderShippingSummary.upsert.mockResolvedValue({
       id: 'shipping-summary-1',
+      updatedAt: new Date('2026-07-12T18:00:00.000Z'),
     });
   });
 
@@ -136,6 +140,7 @@ describe('ChannelOrderIntakeService', () => {
       credentialsEncryptionService as never,
       prisma as never,
       financialIntelligenceService as never,
+      notificationProducer as never,
     );
   }
 
@@ -284,6 +289,15 @@ describe('ChannelOrderIntakeService', () => {
         }),
       }),
     });
+    expect(notificationProducer.channelOrderShippingSummaryUpdated).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      shippingSummaryId: 'shipping-summary-1',
+      orderId: 'order-1',
+      externalOrderId: '2000000001',
+      externalShipmentId: '987654321',
+      status: 'ready_to_ship',
+      changedAt: new Date('2026-07-12T18:00:00.000Z'),
+    });
     expect(JSON.stringify(prisma.outboxEvent.create.mock.calls)).not.toContain('ml-access-token');
   });
 
@@ -326,6 +340,7 @@ describe('ChannelOrderIntakeService', () => {
 
     expect(prisma.orderShippingSummary.upsert).toHaveBeenCalled();
     expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
+    expect(notificationProducer.channelOrderShippingSummaryUpdated).not.toHaveBeenCalled();
   });
 
   it('cancels existing Mercado Livre orders and lets OrdersService release reservations', async () => {

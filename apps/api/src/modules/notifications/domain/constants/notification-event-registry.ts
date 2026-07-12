@@ -27,6 +27,14 @@ const NOTIFICATION_EVENT_REGISTRY = {
       CommerceCapabilities.ChannelsSyncInventory,
     ],
   },
+  'channel.order.shipping_summary.updated': {
+    category: NotificationCategory.CHANNELS,
+    severity: NotificationSeverity.INFO,
+    titleKey: 'notifications.events.channelOrderShippingSummaryUpdated.title',
+    messageKey: 'notifications.events.channelOrderShippingSummaryUpdated.message',
+    requiredPermissions: ['orders:read', 'channels:read'],
+    requiredCapabilities: [NotificationCapabilities.Read, CommerceCapabilities.OrdersManage],
+  },
   'reconciliation.case.divergent': {
     category: NotificationCategory.RECONCILIATION,
     severity: NotificationSeverity.WARNING,

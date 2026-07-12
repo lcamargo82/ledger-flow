@@ -207,6 +207,10 @@
         "title": "Inventory synchronization failed",
         "message": "Listing {listingId} could not be synchronized."
       },
+      "channelOrderShippingSummaryUpdated": {
+        "title": "Shipping summary updated",
+        "message": "Mercado Livre order {externalOrderId} had its shipping status updated to {status}."
+      },
       "reconciliationDivergence": {
         "title": "Reconciliation divergence identified",
         "message": "Case {caseId} requires review."

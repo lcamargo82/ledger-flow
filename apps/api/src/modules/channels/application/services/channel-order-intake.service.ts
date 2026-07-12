@@ -18,6 +18,7 @@ import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { FinancialIntelligenceService } from '../../../financial-intelligence/application/services/financial-intelligence.service';
 import { GatewayCredentialsEncryptionService } from '../../../gateways/application/services/gateway-credentials-encryption.service';
+import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
 import { OrdersService } from '../../../orders/application/services/orders.service';
 import {
   ChannelOrderAdapter,
@@ -45,6 +46,7 @@ export class ChannelOrderIntakeService {
     private readonly credentialsEncryptionService: GatewayCredentialsEncryptionService,
     private readonly prisma: PrismaService,
     private readonly financialIntelligenceService?: FinancialIntelligenceService,
+    private readonly notificationProducer?: NotificationProducerService,
     private readonly mercadoLivreCredentialsService?: MercadoLivreCredentialsService,
   ) {}
 
@@ -221,6 +223,16 @@ export class ChannelOrderIntakeService {
         payload: payload as Prisma.InputJsonValue,
         payloadHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
       },
+    });
+
+    await this.notificationProducer?.channelOrderShippingSummaryUpdated({
+      tenantId,
+      shippingSummaryId: summary.id,
+      orderId,
+      externalOrderId: order.externalOrderId,
+      externalShipmentId: order.shipping.externalShipmentId ?? null,
+      status: order.shipping.status ?? null,
+      changedAt: summary.updatedAt,
     });
   }
 
