@@ -39,6 +39,13 @@ const NOTIFICATION_EVENT_REGISTRY = {
 
 export type RegisteredNotificationEventType = keyof typeof NOTIFICATION_EVENT_REGISTRY;
 
+export const getRegisteredNotificationEventTypes = (): RegisteredNotificationEventType[] =>
+  Object.keys(NOTIFICATION_EVENT_REGISTRY) as RegisteredNotificationEventType[];
+
+export const isRegisteredNotificationEventType = (
+  eventType: string,
+): eventType is RegisteredNotificationEventType => eventType in NOTIFICATION_EVENT_REGISTRY;
+
 export const getNotificationEventContract = (eventType: string): NotificationEventContract => {
   const contract = NOTIFICATION_EVENT_REGISTRY[eventType as RegisteredNotificationEventType];
 

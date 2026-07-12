@@ -25,6 +25,8 @@ docs/
 └─ adr/0034-reconciliation-domain-and-matching-strategy.md
 ```
 
+Contrato do consumidor outbound: `reference/notification-webhook-consumer.md`.
+
 Decisões de escopo inicial:
 
 - WebhookInboxEvent permanece como registro técnico de entrada; ProviderSettlementEvent será o fato financeiro normalizado da conciliação.

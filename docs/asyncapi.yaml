@@ -68,6 +68,11 @@ channels:
         $ref: '#/components/messages/ReconciliationSettlementReceived'
       syncCompleted:
         $ref: '#/components/messages/ReconciliationSyncCompleted'
+  notification.webhooks.q:
+    address: ledgerflow.notifications.webhooks.q
+    messages:
+      deliveryRequested:
+        $ref: '#/components/messages/NotificationWebhookDeliveryRequested'
 components:
   messages:
     PaymentChargeRequested:
@@ -235,7 +240,25 @@ components:
       summary: Event emitted when a controlled provider settlement sync finishes.
       payload:
         $ref: '#/components/schemas/ReconciliationSyncCompletedPayload'
+    NotificationWebhookDeliveryRequested:
+      name: notification.webhook.delivery_requested
+      title: Notification Webhook Delivery Requested
+      summary: Solicita ao worker uma tentativa idempotente de entrega outbound.
+      payload:
+        $ref: '#/components/schemas/NotificationWebhookDeliveryRequestedPayload'
   schemas:
+    NotificationWebhookDeliveryRequestedPayload:
+      type: object
+      required:
+        - deliveryId
+        - attempt
+      properties:
+        deliveryId:
+          type: string
+          format: uuid
+        attempt:
+          type: integer
+          minimum: 1
     ReconciliationSyncCompletedPayload:
       type: object
       required:

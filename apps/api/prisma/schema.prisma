@@ -118,6 +118,20 @@ enum NotificationSeverity {
   ERROR
 }
 
+enum NotificationWebhookSubscriptionStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum NotificationWebhookDeliveryStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  RETRY_SCHEDULED
+  DLQ
+  CANCELED
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -128,40 +142,42 @@ model Tenant {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  users                    User[]
-  roles                    Role[]
-  subscription             TenantSubscription?
-  authAttempts             AuthAttempt[]
-  customers                Customer[]
-  payments                 Payment[]
-  paymentEvents            PaymentEvent[]
-  gatewayConfigurations    GatewayConfiguration[]
-  gatewayReferences        GatewayCustomerReference[]
-  webhookInboxEvents       WebhookInboxEvent[]
-  adminInvitations         TenantAdminInvitation[]
-  outboxEvents             OutboxEvent[]
-  asyncJobExecutions       AsyncJobExecution[]
-  products                 Product[]
-  productSkus              ProductSku[]
-  warehouses               Warehouse[]
-  inventoryMovements       InventoryMovement[]
-  inventoryBalances        InventoryBalance[]
-  inventoryReservations    InventoryReservation[]
-  internalOrders           InternalOrder[]
-  internalOrderItems       InternalOrderItem[]
-  orderFinancialFacts      OrderFinancialFact[]
-  exportJobs               ExportJob[]
-  channelIntegrations      ChannelIntegration[]
-  channelWebhookEvents     ChannelWebhookInboxEvent[]
-  channelListings          ChannelListing[]
-  listingSkuMappings       ListingSkuMapping[]
-  channelInventorySyncs    ChannelInventorySyncState[]
-  providerSettlementEvents ProviderSettlementEvent[]
-  reconciliationCases      ReconciliationCase[]
-  reconciliationPolicies   ReconciliationPolicy[]
-  reconciliationDecisions  ReconciliationDecision[]
-  notificationEvents       NotificationEvent[]
-  notificationRecipients   NotificationRecipient[]
+  users                            User[]
+  roles                            Role[]
+  subscription                     TenantSubscription?
+  authAttempts                     AuthAttempt[]
+  customers                        Customer[]
+  payments                         Payment[]
+  paymentEvents                    PaymentEvent[]
+  gatewayConfigurations            GatewayConfiguration[]
+  gatewayReferences                GatewayCustomerReference[]
+  webhookInboxEvents               WebhookInboxEvent[]
+  adminInvitations                 TenantAdminInvitation[]
+  outboxEvents                     OutboxEvent[]
+  asyncJobExecutions               AsyncJobExecution[]
+  products                         Product[]
+  productSkus                      ProductSku[]
+  warehouses                       Warehouse[]
+  inventoryMovements               InventoryMovement[]
+  inventoryBalances                InventoryBalance[]
+  inventoryReservations            InventoryReservation[]
+  internalOrders                   InternalOrder[]
+  internalOrderItems               InternalOrderItem[]
+  orderFinancialFacts              OrderFinancialFact[]
+  exportJobs                       ExportJob[]
+  channelIntegrations              ChannelIntegration[]
+  channelWebhookEvents             ChannelWebhookInboxEvent[]
+  channelListings                  ChannelListing[]
+  listingSkuMappings               ListingSkuMapping[]
+  channelInventorySyncs            ChannelInventorySyncState[]
+  providerSettlementEvents         ProviderSettlementEvent[]
+  reconciliationCases              ReconciliationCase[]
+  reconciliationPolicies           ReconciliationPolicy[]
+  reconciliationDecisions          ReconciliationDecision[]
+  notificationEvents               NotificationEvent[]
+  notificationRecipients           NotificationRecipient[]
+  notificationWebhookSubscriptions NotificationWebhookSubscription[]
+  notificationWebhookDeliveries    NotificationWebhookDelivery[]
 
   @@map("tenants")
 }
@@ -181,14 +197,15 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  tenant                  Tenant                   @relation(fields: [tenantId], references: [id])
-  roles                   UserRole[]
-  refreshTokens           RefreshToken[]
-  sessions                UserSession[]
-  passwordResetTokens     PasswordResetToken[]
-  tenantAdminInvitations  TenantAdminInvitation[]
-  reconciliationDecisions ReconciliationDecision[]
-  notificationRecipients  NotificationRecipient[]
+  tenant                                  Tenant                            @relation(fields: [tenantId], references: [id])
+  roles                                   UserRole[]
+  refreshTokens                           RefreshToken[]
+  sessions                                UserSession[]
+  passwordResetTokens                     PasswordResetToken[]
+  tenantAdminInvitations                  TenantAdminInvitation[]
+  reconciliationDecisions                 ReconciliationDecision[]
+  notificationRecipients                  NotificationRecipient[]
+  createdNotificationWebhookSubscriptions NotificationWebhookSubscription[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -214,8 +231,9 @@ model NotificationEvent {
   occurredAt           DateTime
   createdAt            DateTime             @default(now())
 
-  tenant     Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  recipients NotificationRecipient[]
+  tenant            Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recipients        NotificationRecipient[]
+  webhookDeliveries NotificationWebhookDelivery[]
 
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, category, createdAt(sort: Desc)])
@@ -242,6 +260,56 @@ model NotificationRecipient {
   @@index([tenantId, userId, readAt, createdAt(sort: Desc)])
   @@index([tenantId, userId, dismissedAt, createdAt(sort: Desc)])
   @@map("notification_recipients")
+}
+
+model NotificationWebhookSubscription {
+  id                  String                                @id @default(uuid())
+  tenantId            String
+  name                String
+  endpointUrl         String
+  status              NotificationWebhookSubscriptionStatus @default(ACTIVE)
+  eventTypes          String[]                              @default([])
+  encryptedSecretJson Json                                  @map("encrypted_secret_json")
+  secretFingerprint   String                                @map("secret_fingerprint")
+  createdByUserId     String                                @map("created_by_user_id")
+  createdAt           DateTime                              @default(now())
+  updatedAt           DateTime                              @updatedAt
+
+  tenant        Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdByUser User                          @relation(fields: [createdByUserId], references: [id], onDelete: Restrict)
+  deliveries    NotificationWebhookDelivery[]
+
+  @@unique([tenantId, endpointUrl])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@map("notification_webhook_subscriptions")
+}
+
+model NotificationWebhookDelivery {
+  id                  String                            @id @default(uuid())
+  tenantId            String
+  subscriptionId      String                            @map("subscription_id")
+  notificationEventId String                            @map("notification_event_id")
+  status              NotificationWebhookDeliveryStatus @default(PENDING)
+  idempotencyKey      String                            @map("idempotency_key")
+  attemptCount        Int                               @default(0) @map("attempt_count")
+  maxAttempts         Int                               @default(8) @map("max_attempts")
+  nextAttemptAt       DateTime?                         @map("next_attempt_at")
+  lastAttemptAt       DateTime?                         @map("last_attempt_at")
+  deliveredAt         DateTime?                         @map("delivered_at")
+  responseStatusCode  Int?                              @map("response_status_code")
+  errorCode           String?                           @map("error_code")
+  createdAt           DateTime                          @default(now())
+  updatedAt           DateTime                          @updatedAt
+
+  tenant            Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription      NotificationWebhookSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+  notificationEvent NotificationEvent               @relation(fields: [notificationEventId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@unique([subscriptionId, notificationEventId])
+  @@index([tenantId, status, nextAttemptAt, createdAt])
+  @@index([subscriptionId, status, createdAt(sort: Desc)])
+  @@map("notification_webhook_deliveries")
 }
 
 model Role {

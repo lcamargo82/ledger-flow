@@ -51,6 +51,14 @@ export class RabbitMqTopologyService {
         dlx,
         'reconciliation.dlq',
       );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.notifications.webhooks.q',
+        exchange,
+        'notification.webhook.*',
+        dlx,
+        'notification.webhook.dlq',
+      );
 
       // Retry Queues
       const retryIntervals = [30000, 120000, 600000, 1800000]; // 30s, 2m, 10m, 30m
@@ -93,6 +101,13 @@ export class RabbitMqTopologyService {
         durable: true,
       });
       await channel.bindQueue('ledgerflow.reconciliation.dlq', dlx, 'reconciliation.dlq');
+
+      await channel.assertQueue('ledgerflow.notification.webhook.dlq', { durable: true });
+      await channel.bindQueue(
+        'ledgerflow.notification.webhook.dlq',
+        dlx,
+        'notification.webhook.dlq',
+      );
 
       await channel.close();
       await connection.close();
