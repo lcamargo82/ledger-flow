@@ -10,6 +10,7 @@ export type InventoryMovementType =
   | 'TRANSFER_IN'
 
 export type InventoryReservationStatus = 'ACTIVE' | 'RELEASED' | 'CONSUMED'
+export type InventoryTransferStatus = 'DRAFT' | 'IN_TRANSIT' | 'COMPLETED' | 'CANCELED'
 
 export interface Warehouse {
   id: string
@@ -70,6 +71,36 @@ export interface InventoryReservation {
   updatedAt: string
 }
 
+export interface InventoryTransferItem {
+  id: string
+  tenantId: string
+  transferId: string
+  skuId: string
+  quantity: string
+  unitCostSnapshot?: string | null
+  createdAt: string
+}
+
+export interface InventoryTransfer {
+  id: string
+  tenantId: string
+  transferNumber: string
+  sourceWarehouseId: string
+  destinationWarehouseId: string
+  status: InventoryTransferStatus
+  reasonCode: string
+  notes?: string | null
+  idempotencyKey: string
+  createdByUserId?: string | null
+  completedByUserId?: string | null
+  canceledByUserId?: string | null
+  completedAt?: string | null
+  canceledAt?: string | null
+  createdAt: string
+  updatedAt: string
+  items: InventoryTransferItem[]
+}
+
 export interface PaginatedMeta {
   page: number
   perPage: number
@@ -118,9 +149,44 @@ export interface ReservationTransitionRequest {
   notes?: string
 }
 
+export interface InventoryTransferItemRequest {
+  skuId: string
+  quantity: number
+}
+
+export interface CreateInventoryTransferRequest {
+  sourceWarehouseId: string
+  destinationWarehouseId: string
+  idempotencyKey: string
+  reasonCode: string
+  notes?: string
+  items: InventoryTransferItemRequest[]
+}
+
+export interface UpdateInventoryTransferRequest {
+  reasonCode?: string
+  notes?: string
+  items?: InventoryTransferItemRequest[]
+}
+
+export interface CompleteInventoryTransferRequest {
+  idempotencyKey: string
+}
+
+export interface CancelInventoryTransferRequest {
+  reasonCode: string
+  notes?: string
+}
+
 export interface InventoryAdjustmentResponse {
   movement: InventoryMovement
   balance: InventoryBalance
+}
+
+export interface InventoryTransferCompletionResponse {
+  transfer: InventoryTransfer
+  movements: InventoryMovement[]
+  balances: InventoryBalance[]
 }
 
 export interface InventoryReservationOperationResponse {

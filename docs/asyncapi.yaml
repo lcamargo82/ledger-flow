@@ -25,6 +25,8 @@ channels:
         $ref: '#/components/messages/InventoryBalanceChanged'
       reservationConsumed:
         $ref: '#/components/messages/InventoryReservationConsumed'
+      transferCompleted:
+        $ref: '#/components/messages/InventoryTransferCompleted'
   orders.events:
     address: ledgerflow.orders.events
     messages:
@@ -127,6 +129,36 @@ components:
             format: decimal
           movementId:
             type: string
+    InventoryTransferCompleted:
+      name: inventory.transfer.completed
+      title: Inventory Transfer Completed
+      summary: Event emitted when a warehouse transfer is completed atomically.
+      payload:
+        type: object
+        required:
+          - transferId
+          - transferNumber
+          - sourceWarehouseId
+          - destinationWarehouseId
+          - itemCount
+          - movementIds
+        properties:
+          transferId:
+            type: string
+          transferNumber:
+            type: string
+          sourceWarehouseId:
+            type: string
+          destinationWarehouseId:
+            type: string
+          idempotencyKey:
+            type: string
+          itemCount:
+            type: integer
+          movementIds:
+            type: array
+            items:
+              type: string
     InventoryBalanceChanged:
       name: inventory.balance.changed
       title: Inventory Balance Changed

@@ -4,16 +4,28 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { createHash } from 'crypto';
-import { InventoryMovementType, InventoryReservationStatus, Prisma } from '@prisma/client';
+import { createHash, randomUUID } from 'crypto';
+import {
+  InventoryBalance,
+  InventoryMovement,
+  InventoryMovementType,
+  InventoryReservationStatus,
+  InventoryTransferStatus,
+  Prisma,
+} from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import {
   AdjustmentData,
+  CancelInventoryTransferData,
+  CompleteInventoryTransferData,
+  CreateInventoryTransferData,
   InventoryRepository,
   ListInventoryParams,
+  ListInventoryTransfersParams,
   ListWarehousesParams,
   ReservationData,
   ReservationTransitionData,
+  UpdateInventoryTransferDraftData,
 } from '../../domain/repositories/inventory.repository';
 
 @Injectable()
@@ -323,6 +335,313 @@ export class PrismaInventoryRepository implements InventoryRepository {
     };
   }
 
+  async createTransfer(data: CreateInventoryTransferData) {
+    return this.prisma.$transaction(async (tx) => {
+      const existingTransfer = await tx.inventoryTransfer.findUnique({
+        where: {
+          tenantId_idempotencyKey: {
+            tenantId: data.tenantId,
+            idempotencyKey: data.idempotencyKey,
+          },
+        },
+        include: { items: true },
+      });
+
+      if (existingTransfer) return existingTransfer;
+
+      return tx.inventoryTransfer.create({
+        data: {
+          tenantId: data.tenantId,
+          transferNumber: this.createTransferNumber(),
+          sourceWarehouseId: data.sourceWarehouseId,
+          destinationWarehouseId: data.destinationWarehouseId,
+          reasonCode: data.reasonCode,
+          notes: data.notes,
+          idempotencyKey: data.idempotencyKey,
+          createdByUserId: data.createdByUserId,
+          items: {
+            create: data.items.map((item) => ({
+              tenantId: data.tenantId,
+              skuId: item.skuId,
+              quantity: item.quantity,
+              unitCostSnapshot: item.unitCostSnapshot ?? undefined,
+            })),
+          },
+        },
+        include: { items: true },
+      });
+    });
+  }
+
+  async listTransfers(params: ListInventoryTransfersParams) {
+    const { tenantId, page = 1, perPage = 10, status, warehouseId } = params;
+    const take = Math.min(perPage, 100);
+    const skip = (page - 1) * take;
+    const where: Prisma.InventoryTransferWhereInput = {
+      tenantId,
+      status,
+      ...(warehouseId && {
+        OR: [{ sourceWarehouseId: warehouseId }, { destinationWarehouseId: warehouseId }],
+      }),
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.inventoryTransfer.findMany({
+        where,
+        include: { items: true },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.inventoryTransfer.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: { page, perPage: take, total, totalPages: Math.ceil(total / take) },
+    };
+  }
+
+  findTransferById(id: string, tenantId: string) {
+    return this.prisma.inventoryTransfer.findFirst({
+      where: { id, tenantId },
+      include: { items: true },
+    });
+  }
+
+  async updateTransferDraft(data: UpdateInventoryTransferDraftData) {
+    return this.prisma.$transaction(async (tx) => {
+      const transfer = await tx.inventoryTransfer.findFirst({
+        where: { id: data.transferId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!transfer) throw new NotFoundException('Inventory transfer not found.');
+      if (transfer.status !== InventoryTransferStatus.DRAFT) {
+        throw new BadRequestException('Only draft transfers can be updated.');
+      }
+
+      if (data.items) {
+        await tx.inventoryTransferItem.deleteMany({
+          where: { tenantId: data.tenantId, transferId: data.transferId },
+        });
+      }
+
+      return tx.inventoryTransfer.update({
+        where: { id: data.transferId },
+        data: {
+          ...(data.reasonCode && { reasonCode: data.reasonCode }),
+          ...(typeof data.notes !== 'undefined' && { notes: data.notes }),
+          ...(data.items && {
+            items: {
+              create: data.items.map((item) => ({
+                tenantId: data.tenantId,
+                skuId: item.skuId,
+                quantity: item.quantity,
+                unitCostSnapshot: item.unitCostSnapshot ?? undefined,
+              })),
+            },
+          }),
+        },
+        include: { items: true },
+      });
+    });
+  }
+
+  async startTransfer(data: { transferId: string; tenantId: string; actorUserId: string }) {
+    return this.prisma.$transaction(async (tx) => {
+      const transfer = await tx.inventoryTransfer.findFirst({
+        where: { id: data.transferId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!transfer) throw new NotFoundException('Inventory transfer not found.');
+      if (transfer.status !== InventoryTransferStatus.DRAFT) {
+        throw new BadRequestException('Only draft transfers can be started.');
+      }
+      if (!transfer.items.length) {
+        throw new BadRequestException('Transfer must contain at least one item.');
+      }
+
+      return tx.inventoryTransfer.update({
+        where: { id: transfer.id },
+        data: { status: InventoryTransferStatus.IN_TRANSIT },
+        include: { items: true },
+      });
+    });
+  }
+
+  async completeTransfer(data: CompleteInventoryTransferData) {
+    return this.prisma.$transaction(async (tx) => {
+      const transfer = await tx.inventoryTransfer.findFirst({
+        where: { id: data.transferId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!transfer) throw new NotFoundException('Inventory transfer not found.');
+      if (transfer.status === InventoryTransferStatus.COMPLETED) {
+        return this.completedTransferResult(tx, transfer);
+      }
+      if (transfer.status === InventoryTransferStatus.CANCELED) {
+        throw new BadRequestException('Canceled transfers cannot be completed.');
+      }
+      if (!transfer.items.length) {
+        throw new BadRequestException('Transfer must contain at least one item.');
+      }
+
+      await this.lockTransferSourceBalances(tx, transfer);
+      const sourceBalances = await this.findTransferSourceBalances(tx, transfer);
+      this.assertTransferAvailability(transfer, sourceBalances);
+
+      const movements: InventoryMovement[] = [];
+      const balances: InventoryBalance[] = [];
+      const occurredAt = new Date();
+
+      for (const item of transfer.items) {
+        const quantity = Number(item.quantity);
+        const sourceBalance = sourceBalances.get(item.skuId);
+        if (!sourceBalance) throw new NotFoundException('Inventory balance not found.');
+
+        const movementOut = await tx.inventoryMovement.create({
+          data: {
+            tenantId: transfer.tenantId,
+            skuId: item.skuId,
+            warehouseId: transfer.sourceWarehouseId,
+            type: InventoryMovementType.TRANSFER_OUT,
+            quantityDelta: -quantity,
+            unitCost: item.unitCostSnapshot ?? undefined,
+            sourceType: 'INVENTORY_TRANSFER',
+            sourceId: transfer.id,
+            idempotencyKey: `transfer:${transfer.id}:${item.id}:out`,
+            reasonCode: transfer.reasonCode,
+            notes: transfer.notes,
+            occurredAt,
+            createdByUserId: data.actorUserId,
+          },
+        });
+        const movementIn = await tx.inventoryMovement.create({
+          data: {
+            tenantId: transfer.tenantId,
+            skuId: item.skuId,
+            warehouseId: transfer.destinationWarehouseId,
+            type: InventoryMovementType.TRANSFER_IN,
+            quantityDelta: quantity,
+            unitCost: item.unitCostSnapshot ?? undefined,
+            sourceType: 'INVENTORY_TRANSFER',
+            sourceId: transfer.id,
+            idempotencyKey: `transfer:${transfer.id}:${item.id}:in`,
+            reasonCode: transfer.reasonCode,
+            notes: transfer.notes,
+            occurredAt,
+            createdByUserId: data.actorUserId,
+          },
+        });
+
+        const reserved = Number(sourceBalance.reservedQuantity);
+        const sourceOnHand = Number(sourceBalance.onHandQuantity) - quantity;
+        const sourceAvailable = sourceOnHand - reserved;
+        const updatedSourceBalance = await tx.inventoryBalance.update({
+          where: {
+            tenantId_skuId_warehouseId: {
+              tenantId: transfer.tenantId,
+              skuId: item.skuId,
+              warehouseId: transfer.sourceWarehouseId,
+            },
+          },
+          data: {
+            onHandQuantity: sourceOnHand,
+            availableQuantity: sourceAvailable,
+            version: { increment: 1 },
+          },
+        });
+
+        const destinationBalance = await tx.inventoryBalance.upsert({
+          where: {
+            tenantId_skuId_warehouseId: {
+              tenantId: transfer.tenantId,
+              skuId: item.skuId,
+              warehouseId: transfer.destinationWarehouseId,
+            },
+          },
+          create: {
+            tenantId: transfer.tenantId,
+            skuId: item.skuId,
+            warehouseId: transfer.destinationWarehouseId,
+            onHandQuantity: quantity,
+            reservedQuantity: 0,
+            availableQuantity: quantity,
+            version: 1,
+          },
+          update: {
+            onHandQuantity: { increment: quantity },
+            availableQuantity: { increment: quantity },
+            version: { increment: 1 },
+          },
+        });
+
+        movements.push(movementOut, movementIn);
+        balances.push(updatedSourceBalance, destinationBalance);
+      }
+
+      const updatedTransfer = await tx.inventoryTransfer.update({
+        where: { id: transfer.id },
+        data: {
+          status: InventoryTransferStatus.COMPLETED,
+          completedByUserId: data.actorUserId,
+          completedAt: occurredAt,
+        },
+        include: { items: true },
+      });
+
+      const outboxEvent = await tx.outboxEvent.create({
+        data: this.createOutboxPayload({
+          tenantId: transfer.tenantId,
+          aggregateType: 'InventoryTransfer',
+          aggregateId: transfer.id,
+          eventType: 'inventory.transfer.completed',
+          payload: {
+            transferId: transfer.id,
+            transferNumber: transfer.transferNumber,
+            sourceWarehouseId: transfer.sourceWarehouseId,
+            destinationWarehouseId: transfer.destinationWarehouseId,
+            idempotencyKey: data.idempotencyKey,
+            itemCount: transfer.items.length,
+            movementIds: movements.map((movement) => movement.id),
+          },
+        }),
+      });
+
+      return { transfer: updatedTransfer, movements, balances, outboxEvent };
+    });
+  }
+
+  async cancelTransfer(data: CancelInventoryTransferData) {
+    return this.prisma.$transaction(async (tx) => {
+      const transfer = await tx.inventoryTransfer.findFirst({
+        where: { id: data.transferId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!transfer) throw new NotFoundException('Inventory transfer not found.');
+      if (transfer.status === InventoryTransferStatus.COMPLETED) {
+        throw new BadRequestException('Completed transfers cannot be canceled.');
+      }
+      if (transfer.status === InventoryTransferStatus.CANCELED) return transfer;
+
+      return tx.inventoryTransfer.update({
+        where: { id: transfer.id },
+        data: {
+          status: InventoryTransferStatus.CANCELED,
+          canceledByUserId: data.actorUserId,
+          canceledAt: new Date(),
+          reasonCode: data.reasonCode,
+          notes: data.notes,
+        },
+        include: { items: true },
+      });
+    });
+  }
+
   private async transitionReservation(
     data: ReservationTransitionData,
     operation: {
@@ -527,6 +846,7 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
   private createOutboxPayload(input: {
     tenantId: string;
+    aggregateType?: string;
     aggregateId: string;
     eventType: string;
     payload: Record<string, unknown>;
@@ -535,7 +855,7 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
     return {
       tenantId: input.tenantId,
-      aggregateType: 'InventoryReservation',
+      aggregateType: input.aggregateType ?? 'InventoryReservation',
       aggregateId: input.aggregateId,
       eventType: input.eventType,
       eventVersion: 1,
@@ -569,5 +889,81 @@ export class PrismaInventoryRepository implements InventoryRepository {
       data,
       meta: { page, perPage: take, total, totalPages: Math.ceil(total / take) },
     };
+  }
+
+  private createTransferNumber() {
+    return `TRF-${randomUUID().slice(0, 8).toUpperCase()}`;
+  }
+
+  private async completedTransferResult(
+    tx: Prisma.TransactionClient,
+    transfer: Prisma.InventoryTransferGetPayload<{ include: { items: true } }>,
+  ) {
+    const [movements, balances, outboxEvent] = await Promise.all([
+      tx.inventoryMovement.findMany({
+        where: {
+          tenantId: transfer.tenantId,
+          sourceType: 'INVENTORY_TRANSFER',
+          sourceId: transfer.id,
+        },
+        orderBy: { createdAt: 'asc' },
+      }),
+      tx.inventoryBalance.findMany({
+        where: {
+          tenantId: transfer.tenantId,
+          skuId: { in: transfer.items.map((item) => item.skuId) },
+          warehouseId: { in: [transfer.sourceWarehouseId, transfer.destinationWarehouseId] },
+        },
+      }),
+      tx.outboxEvent.findFirst({
+        where: {
+          tenantId: transfer.tenantId,
+          aggregateType: 'InventoryTransfer',
+          aggregateId: transfer.id,
+          eventType: 'inventory.transfer.completed',
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return { transfer, movements, balances, ...(outboxEvent && { outboxEvent }) };
+  }
+
+  private async lockTransferSourceBalances(
+    tx: Prisma.TransactionClient,
+    transfer: Prisma.InventoryTransferGetPayload<{ include: { items: true } }>,
+  ) {
+    const skuIds = [...new Set(transfer.items.map((item) => item.skuId))].sort();
+    for (const skuId of skuIds) {
+      await this.lockBalance(tx, transfer.tenantId, skuId, transfer.sourceWarehouseId);
+    }
+  }
+
+  private async findTransferSourceBalances(
+    tx: Prisma.TransactionClient,
+    transfer: Prisma.InventoryTransferGetPayload<{ include: { items: true } }>,
+  ) {
+    const balances = await tx.inventoryBalance.findMany({
+      where: {
+        tenantId: transfer.tenantId,
+        warehouseId: transfer.sourceWarehouseId,
+        skuId: { in: transfer.items.map((item) => item.skuId) },
+      },
+    });
+
+    return new Map(balances.map((balance) => [balance.skuId, balance]));
+  }
+
+  private assertTransferAvailability(
+    transfer: Prisma.InventoryTransferGetPayload<{ include: { items: true } }>,
+    sourceBalances: Map<string, { availableQuantity: Prisma.Decimal }>,
+  ) {
+    for (const item of transfer.items) {
+      const balance = sourceBalances.get(item.skuId);
+      if (!balance) throw new NotFoundException('Inventory balance not found.');
+      if (Number(balance.availableQuantity) < Number(item.quantity)) {
+        throw new BadRequestException('Insufficient available quantity for transfer.');
+      }
+    }
   }
 }

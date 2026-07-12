@@ -247,6 +247,51 @@
         "OTHER": "Outro"
       }
     },
+    "transfers": {
+      "title": "Transferências entre warehouses",
+      "description": "Crie, acompanhe e conclua transferências atômicas entre warehouses usando o ledger de estoque.",
+      "actions": {
+        "create": "Nova transferência",
+        "start": "Iniciar",
+        "complete": "Concluir",
+        "cancel": "Cancelar",
+        "addItem": "Adicionar item",
+        "removeItem": "Remover"
+      },
+      "table": {
+        "number": "Número",
+        "status": "Status",
+        "source": "Origem",
+        "destination": "Destino",
+        "items": "Itens",
+        "itemCount": "{count} item(ns)",
+        "reason": "Motivo",
+        "createdAt": "Criado em",
+        "actions": "Ações"
+      },
+      "form": {
+        "createTitle": "Nova transferência",
+        "cancelTitle": "Cancelar transferência",
+        "sourceWarehouse": "Warehouse de origem",
+        "destinationWarehouse": "Warehouse de destino"
+      },
+      "empty": {
+        "title": "Nenhuma transferência encontrada",
+        "description": "As transferências entre warehouses aparecerão aqui conforme forem criadas."
+      },
+      "errors": {
+        "title": "Não foi possível carregar transferências",
+        "sameWarehouse": "A origem e o destino devem ser warehouses diferentes.",
+        "invalid": "Revise os warehouses, SKUs, quantidades e motivo da transferência.",
+        "conflict": "Esta operação de transferência já foi utilizada ou está inconsistente."
+      }
+    },
+    "transferStatus": {
+      "DRAFT": "Rascunho",
+      "IN_TRANSIT": "Em trânsito",
+      "COMPLETED": "Concluída",
+      "CANCELED": "Cancelada"
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Saldos",

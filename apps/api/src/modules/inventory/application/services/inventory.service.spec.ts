@@ -17,6 +17,13 @@ describe('InventoryService', () => {
     listBalances: jest.fn(),
     listMovements: jest.fn(),
     listReservations: jest.fn(),
+    createTransfer: jest.fn(),
+    listTransfers: jest.fn(),
+    findTransferById: jest.fn(),
+    updateTransferDraft: jest.fn(),
+    startTransfer: jest.fn(),
+    completeTransfer: jest.fn(),
+    cancelTransfer: jest.fn(),
   };
 
   const prisma = {
@@ -283,5 +290,164 @@ describe('InventoryService', () => {
         idempotencyKey: 'consume-reservation-1',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('creates a draft transfer after validating warehouses and SKUs', async () => {
+    repository.findWarehouseById
+      .mockResolvedValueOnce({ id: 'warehouse-source', isActive: true })
+      .mockResolvedValueOnce({ id: 'warehouse-destination', isActive: true });
+    repository.findSkuById.mockResolvedValue({ id: 'sku-1' });
+    repository.createTransfer.mockResolvedValue({
+      id: 'transfer-1',
+      status: 'DRAFT',
+      items: [{ skuId: 'sku-1', quantity: '2' }],
+    });
+
+    const result = await service.createTransfer('tenant-1', 'user-1', {
+      sourceWarehouseId: 'warehouse-source',
+      destinationWarehouseId: 'warehouse-destination',
+      idempotencyKey: 'transfer-key-1',
+      reasonCode: 'REPLENISHMENT',
+      notes: 'Reposicao',
+      items: [{ skuId: 'sku-1', quantity: 2 }],
+    });
+
+    expect(repository.createTransfer).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        createdByUserId: 'user-1',
+        sourceWarehouseId: 'warehouse-source',
+        destinationWarehouseId: 'warehouse-destination',
+        idempotencyKey: 'transfer-key-1',
+        reasonCode: 'REPLENISHMENT',
+        items: [{ skuId: 'sku-1', quantity: 2 }],
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.transfer.created',
+        entityType: 'InventoryTransfer',
+        entityId: 'transfer-1',
+      }),
+    });
+    expect(result.status).toBe('DRAFT');
+  });
+
+  it('rejects a transfer using the same source and destination warehouse', async () => {
+    await expect(
+      service.createTransfer('tenant-1', 'user-1', {
+        sourceWarehouseId: 'warehouse-1',
+        destinationWarehouseId: 'warehouse-1',
+        idempotencyKey: 'transfer-key-1',
+        reasonCode: 'REPLENISHMENT',
+        items: [{ skuId: 'sku-1', quantity: 1 }],
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('starts a draft transfer and audits the transition', async () => {
+    repository.startTransfer.mockResolvedValue({
+      id: 'transfer-1',
+      status: 'IN_TRANSIT',
+    });
+
+    const result = await service.startTransfer('transfer-1', 'tenant-1', 'user-1');
+
+    expect(repository.startTransfer).toHaveBeenCalledWith({
+      transferId: 'transfer-1',
+      tenantId: 'tenant-1',
+      actorUserId: 'user-1',
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.transfer.started',
+        entityId: 'transfer-1',
+      }),
+    });
+    expect(result.status).toBe('IN_TRANSIT');
+  });
+
+  it('completes a transfer with paired movements, audit log and balance outbox events', async () => {
+    repository.completeTransfer.mockResolvedValue({
+      transfer: {
+        id: 'transfer-1',
+        status: 'COMPLETED',
+        items: [{ id: 'item-1', skuId: 'sku-1', quantity: '2' }],
+      },
+      movements: [
+        { id: 'movement-out', type: InventoryMovementType.TRANSFER_OUT },
+        { id: 'movement-in', type: InventoryMovementType.TRANSFER_IN },
+      ],
+      balances: [
+        {
+          id: 'balance-source',
+          skuId: 'sku-1',
+          warehouseId: 'warehouse-source',
+          onHandQuantity: '8',
+          reservedQuantity: '0',
+          availableQuantity: '8',
+          version: 2,
+        },
+        {
+          id: 'balance-destination',
+          skuId: 'sku-1',
+          warehouseId: 'warehouse-destination',
+          onHandQuantity: '2',
+          reservedQuantity: '0',
+          availableQuantity: '2',
+          version: 1,
+        },
+      ],
+      outboxEvent: { id: 'outbox-1', eventType: 'inventory.transfer.completed' },
+    });
+
+    const result = await service.completeTransfer('transfer-1', 'tenant-1', 'user-1', {
+      idempotencyKey: 'complete-transfer-1',
+    });
+
+    expect(repository.completeTransfer).toHaveBeenCalledWith({
+      transferId: 'transfer-1',
+      tenantId: 'tenant-1',
+      actorUserId: 'user-1',
+      idempotencyKey: 'complete-transfer-1',
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.transfer.completed',
+        entityId: 'transfer-1',
+      }),
+    });
+    expect(prisma.outboxEvent.create).toHaveBeenCalledTimes(2);
+    expect(result.movements.map((movement) => movement.type)).toEqual([
+      InventoryMovementType.TRANSFER_OUT,
+      InventoryMovementType.TRANSFER_IN,
+    ]);
+  });
+
+  it('cancels a non-completed transfer and audits the transition', async () => {
+    repository.cancelTransfer.mockResolvedValue({
+      id: 'transfer-1',
+      status: 'CANCELED',
+    });
+
+    const result = await service.cancelTransfer('transfer-1', 'tenant-1', 'user-1', {
+      reasonCode: 'OTHER',
+      notes: 'Cancelado pela operacao',
+    });
+
+    expect(repository.cancelTransfer).toHaveBeenCalledWith({
+      transferId: 'transfer-1',
+      tenantId: 'tenant-1',
+      actorUserId: 'user-1',
+      reasonCode: 'OTHER',
+      notes: 'Cancelado pela operacao',
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.transfer.canceled',
+        entityId: 'transfer-1',
+      }),
+    });
+    expect(result.status).toBe('CANCELED');
   });
 });

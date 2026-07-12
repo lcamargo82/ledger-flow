@@ -11,15 +11,27 @@ import { InventoryMovementType, Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { ChannelInventorySyncService } from '../../../channels/application/services/channel-inventory-sync.service';
+import { CreateInventoryTransferDto } from '../dto/create-inventory-transfer.dto';
 import { CreateWarehouseDto } from '../dto/create-warehouse.dto';
+import {
+  CompleteInventoryTransferDto,
+  CancelInventoryTransferDto,
+} from '../dto/inventory-transfer-transition.dto';
 import { ListInventoryQueryDto } from '../dto/list-inventory-query.dto';
+import { ListInventoryTransfersQueryDto } from '../dto/list-inventory-transfers-query.dto';
 import { ListWarehousesQueryDto } from '../dto/list-warehouses-query.dto';
 import { RecordAdjustmentDto } from '../dto/record-adjustment.dto';
 import { ReservationTransitionDto } from '../dto/reservation-transition.dto';
 import { ReserveStockDto } from '../dto/reserve-stock.dto';
+import { UpdateInventoryTransferDto } from '../dto/update-inventory-transfer.dto';
 import { UpdateWarehouseDto } from '../dto/update-warehouse.dto';
 import { INVENTORY_REPOSITORY } from '../../domain/repositories/inventory.repository';
 import type { InventoryRepository } from '../../domain/repositories/inventory.repository';
+import {
+  InventoryReasonContext,
+  getInventoryReasonCodes,
+  isInventoryReasonCode,
+} from '../../domain/constants/inventory-reason-code-registry';
 
 @Injectable()
 export class InventoryService {
@@ -203,6 +215,158 @@ export class InventoryService {
     return this.inventoryRepository.listReservations({ tenantId, ...query });
   }
 
+  async createTransfer(tenantId: string, actorUserId: string, dto: CreateInventoryTransferDto) {
+    this.assertTransferPayload(dto);
+    await this.assertTransferReferences(tenantId, dto);
+
+    const transfer = await this.inventoryRepository.createTransfer({
+      tenantId,
+      sourceWarehouseId: dto.sourceWarehouseId,
+      destinationWarehouseId: dto.destinationWarehouseId,
+      reasonCode: dto.reasonCode,
+      notes: dto.notes ?? null,
+      idempotencyKey: dto.idempotencyKey,
+      createdByUserId: actorUserId,
+      items: dto.items,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.transfer.created',
+      'InventoryTransfer',
+      transfer.id,
+      {
+        sourceWarehouseId: transfer.sourceWarehouseId,
+        destinationWarehouseId: transfer.destinationWarehouseId,
+        itemCount: transfer.items.length,
+        reasonCode: transfer.reasonCode,
+      },
+    );
+
+    return transfer;
+  }
+
+  listTransfers(tenantId: string, query: ListInventoryTransfersQueryDto) {
+    return this.inventoryRepository.listTransfers({ tenantId, ...query });
+  }
+
+  async getTransfer(id: string, tenantId: string) {
+    const transfer = await this.inventoryRepository.findTransferById(id, tenantId);
+    if (!transfer) {
+      throw new NotFoundException('Inventory transfer not found.');
+    }
+
+    return transfer;
+  }
+
+  async updateTransferDraft(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: UpdateInventoryTransferDto,
+  ) {
+    if (dto.reasonCode) this.assertTransferReason(dto.reasonCode, dto.notes);
+    if (dto.items) await this.assertTransferItems(tenantId, dto.items);
+
+    const transfer = await this.inventoryRepository.updateTransferDraft({
+      transferId: id,
+      tenantId,
+      reasonCode: dto.reasonCode,
+      notes: dto.notes,
+      items: dto.items,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.transfer.updated',
+      'InventoryTransfer',
+      transfer.id,
+      { itemCount: transfer.items.length },
+    );
+
+    return transfer;
+  }
+
+  async startTransfer(id: string, tenantId: string, actorUserId: string) {
+    const transfer = await this.inventoryRepository.startTransfer({
+      transferId: id,
+      tenantId,
+      actorUserId,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.transfer.started',
+      'InventoryTransfer',
+      transfer.id,
+    );
+
+    return transfer;
+  }
+
+  async completeTransfer(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: CompleteInventoryTransferDto,
+  ) {
+    const result = await this.inventoryRepository.completeTransfer({
+      transferId: id,
+      tenantId,
+      actorUserId,
+      idempotencyKey: dto.idempotencyKey,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.transfer.completed',
+      'InventoryTransfer',
+      result.transfer.id,
+      {
+        movementIds: result.movements.map((movement) => movement.id),
+        outboxEventId: result.outboxEvent?.id,
+      },
+    );
+
+    await Promise.all(
+      result.balances.map((balance) => this.publishBalanceChanged(balance.id, tenantId, balance)),
+    );
+
+    return result;
+  }
+
+  async cancelTransfer(
+    id: string,
+    tenantId: string,
+    actorUserId: string,
+    dto: CancelInventoryTransferDto,
+  ) {
+    this.assertTransferReason(dto.reasonCode, dto.notes);
+
+    const transfer = await this.inventoryRepository.cancelTransfer({
+      transferId: id,
+      tenantId,
+      actorUserId,
+      reasonCode: dto.reasonCode,
+      notes: dto.notes ?? null,
+    });
+
+    await this.auditLog(
+      tenantId,
+      actorUserId,
+      'inventory.transfer.canceled',
+      'InventoryTransfer',
+      transfer.id,
+      { reasonCode: dto.reasonCode },
+    );
+
+    return transfer;
+  }
+
   async releaseReservation(
     id: string,
     tenantId: string,
@@ -273,6 +437,70 @@ export class InventoryService {
   private assertReason(reasonCode: string) {
     if (!reasonCode?.trim()) {
       throw new BadRequestException('Reason code is required.');
+    }
+  }
+
+  private assertTransferPayload(dto: CreateInventoryTransferDto) {
+    this.assertTransferReason(dto.reasonCode, dto.notes);
+    if (dto.sourceWarehouseId === dto.destinationWarehouseId) {
+      throw new BadRequestException('Source and destination warehouses must be different.');
+    }
+
+    this.assertUniqueTransferItems(dto.items);
+  }
+
+  private async assertTransferReferences(
+    tenantId: string,
+    dto: Pick<CreateInventoryTransferDto, 'sourceWarehouseId' | 'destinationWarehouseId' | 'items'>,
+  ) {
+    const [sourceWarehouse, destinationWarehouse] = await Promise.all([
+      this.inventoryRepository.findWarehouseById(dto.sourceWarehouseId, tenantId),
+      this.inventoryRepository.findWarehouseById(dto.destinationWarehouseId, tenantId),
+    ]);
+
+    if (!sourceWarehouse?.isActive || !destinationWarehouse?.isActive) {
+      throw new NotFoundException('Warehouse not found.');
+    }
+
+    await this.assertTransferItems(tenantId, dto.items);
+  }
+
+  private async assertTransferItems(
+    tenantId: string,
+    items: Array<{ skuId: string; quantity: number }>,
+  ) {
+    this.assertUniqueTransferItems(items);
+
+    const skus = await Promise.all(
+      [...new Set(items.map((item) => item.skuId))].map((skuId) =>
+        this.inventoryRepository.findSkuById(skuId, tenantId),
+      ),
+    );
+
+    if (skus.some((sku) => !sku)) {
+      throw new NotFoundException('SKU not found.');
+    }
+  }
+
+  private assertUniqueTransferItems(items: Array<{ skuId: string }>) {
+    const skuIds = items.map((item) => item.skuId);
+    if (new Set(skuIds).size !== skuIds.length) {
+      throw new BadRequestException('Transfer items must not contain duplicated SKUs.');
+    }
+  }
+
+  private assertTransferReason(reasonCode: string, notes?: string | null) {
+    this.assertReason(reasonCode);
+
+    if (!isInventoryReasonCode(InventoryReasonContext.TRANSFER, reasonCode)) {
+      throw new BadRequestException('Invalid transfer reason code.');
+    }
+
+    const definition = getInventoryReasonCodes(InventoryReasonContext.TRANSFER).find(
+      (reason) => reason.code === reasonCode,
+    );
+    if (definition?.requiresNotes && !notes?.trim()) {
+      throw new BadRequestException('Notes are required for this transfer reason code.');
     }
   }
 

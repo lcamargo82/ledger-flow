@@ -54,6 +54,13 @@ enum InventoryReservationStatus {
   CONSUMED
 }
 
+enum InventoryTransferStatus {
+  DRAFT
+  IN_TRANSIT
+  COMPLETED
+  CANCELED
+}
+
 enum InternalOrderStatus {
   DRAFT
   CONFIRMED
@@ -161,6 +168,8 @@ model Tenant {
   inventoryMovements               InventoryMovement[]
   inventoryBalances                InventoryBalance[]
   inventoryReservations            InventoryReservation[]
+  inventoryTransfers               InventoryTransfer[]
+  inventoryTransferItems           InventoryTransferItem[]
   internalOrders                   InternalOrder[]
   internalOrderItems               InternalOrderItem[]
   orderFinancialFacts              OrderFinancialFact[]
@@ -206,6 +215,9 @@ model User {
   reconciliationDecisions                 ReconciliationDecision[]
   notificationRecipients                  NotificationRecipient[]
   createdNotificationWebhookSubscriptions NotificationWebhookSubscription[]
+  createdInventoryTransfers               InventoryTransfer[]                    @relation("InventoryTransferCreatedBy")
+  completedInventoryTransfers             InventoryTransfer[]                    @relation("InventoryTransferCompletedBy")
+  canceledInventoryTransfers              InventoryTransfer[]                    @relation("InventoryTransferCanceledBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -520,6 +532,7 @@ model ProductSku {
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
+  inventoryTransferItems InventoryTransferItem[]
   internalOrderItems    InternalOrderItem[]
   channelListings       ChannelListing[]
   listingSkuMappings    ListingSkuMapping[]
@@ -542,6 +555,8 @@ model Warehouse {
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
+  sourceTransfers       InventoryTransfer[]     @relation("InventoryTransferSourceWarehouse")
+  destinationTransfers  InventoryTransfer[]     @relation("InventoryTransferDestinationWarehouse")
   internalOrderItems    InternalOrderItem[]
 
   @@unique([tenantId, code])
@@ -627,6 +642,59 @@ model InventoryReservation {
   @@index([tenantId, skuId, warehouseId, status])
   @@index([tenantId, status])
   @@map("inventory_reservations")
+}
+
+model InventoryTransfer {
+  id                     String                  @id @default(uuid())
+  tenantId               String                  @map("tenant_id")
+  transferNumber         String                  @map("transfer_number")
+  sourceWarehouseId      String                  @map("source_warehouse_id")
+  destinationWarehouseId String                  @map("destination_warehouse_id")
+  status                 InventoryTransferStatus @default(DRAFT)
+  reasonCode             String                  @map("reason_code")
+  notes                  String?
+  idempotencyKey         String                  @map("idempotency_key")
+  createdByUserId        String?                 @map("created_by_user_id")
+  completedByUserId      String?                 @map("completed_by_user_id")
+  canceledByUserId       String?                 @map("canceled_by_user_id")
+  completedAt            DateTime?               @map("completed_at")
+  canceledAt             DateTime?               @map("canceled_at")
+  createdAt              DateTime                @default(now()) @map("created_at")
+  updatedAt              DateTime                @updatedAt @map("updated_at")
+
+  tenant               Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sourceWarehouse      Warehouse               @relation("InventoryTransferSourceWarehouse", fields: [sourceWarehouseId], references: [id], onDelete: Restrict)
+  destinationWarehouse Warehouse               @relation("InventoryTransferDestinationWarehouse", fields: [destinationWarehouseId], references: [id], onDelete: Restrict)
+  createdByUser        User?                   @relation("InventoryTransferCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  completedByUser      User?                   @relation("InventoryTransferCompletedBy", fields: [completedByUserId], references: [id], onDelete: SetNull)
+  canceledByUser       User?                   @relation("InventoryTransferCanceledBy", fields: [canceledByUserId], references: [id], onDelete: SetNull)
+  items                InventoryTransferItem[]
+
+  @@unique([tenantId, transferNumber])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@index([tenantId, sourceWarehouseId])
+  @@index([tenantId, destinationWarehouseId])
+  @@map("inventory_transfers")
+}
+
+model InventoryTransferItem {
+  id               String   @id @default(uuid())
+  tenantId         String   @map("tenant_id")
+  transferId       String   @map("transfer_id")
+  skuId            String   @map("sku_id")
+  quantity         Decimal  @db.Decimal(18, 6)
+  unitCostSnapshot Decimal? @map("unit_cost_snapshot") @db.Decimal(18, 4)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  transfer InventoryTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  sku      ProductSku        @relation(fields: [skuId], references: [id], onDelete: Restrict)
+
+  @@unique([transferId, skuId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, transferId])
+  @@map("inventory_transfer_items")
 }
 
 model InternalOrder {
