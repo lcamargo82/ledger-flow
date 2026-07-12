@@ -27,6 +27,7 @@ import { ChannelsModule } from './modules/channels/channels.module';
 import { FinancialIntelligenceModule } from './modules/financial-intelligence/financial-intelligence.module';
 import { ExportsModule } from './modules/exports/exports.module';
 import { ReconciliationModule } from './modules/reconciliation/reconciliation.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { ReconciliationModule } from './modules/reconciliation/reconciliation.mo
     FinancialIntelligenceModule,
     ExportsModule,
     ReconciliationModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

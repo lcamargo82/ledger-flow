@@ -152,7 +152,64 @@
     "tenantSettings": "Organization",
     "platformAsyncOperations": "Async Operations",
     "gatewayConnections": "Payment Integrations",
-    "platformGatewayConnections": "Integrations"
+    "platformGatewayConnections": "Integrations",
+    "notifications": "Notifications"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Track alerts and exceptions from the modules you can access.",
+    "bell": {
+      "label": "Notifications: {count} unread"
+    },
+    "version": {
+      "label": "LedgerFlow version: {version}",
+      "short": "v{version}"
+    },
+    "actions": {
+      "markRead": "Mark as read",
+      "markAllRead": "Mark all as read",
+      "dismiss": "Dismiss",
+      "loadMore": "Load more"
+    },
+    "filters": {
+      "category": "Category",
+      "status": "Status",
+      "allCategories": "All categories",
+      "allStatuses": "All statuses",
+      "unreadOnly": "Unread only"
+    },
+    "categories": {
+      "PAYMENTS": "Payments",
+      "INVENTORY": "Inventory",
+      "CHANNELS": "Channels",
+      "ORDERS": "Orders",
+      "RECONCILIATION": "Reconciliation",
+      "SYSTEM": "System"
+    },
+    "severity": {
+      "INFO": "Information",
+      "SUCCESS": "Success",
+      "WARNING": "Warning",
+      "ERROR": "Error"
+    },
+    "empty": {
+      "title": "No notifications found",
+      "description": "New authorized alerts will appear here."
+    },
+    "errors": {
+      "title": "Could not load notifications",
+      "load": "Please try again in a few moments."
+    },
+    "events": {
+      "channelInventorySyncFailed": {
+        "title": "Inventory synchronization failed",
+        "message": "Listing {listingId} could not be synchronized."
+      },
+      "reconciliationDivergence": {
+        "title": "Reconciliation divergence identified",
+        "message": "Case {caseId} requires review."
+      }
+    }
   },
   "inventory": {
     "title": "Inventory",

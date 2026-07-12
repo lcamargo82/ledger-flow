@@ -2,6 +2,7 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { AsyncModule } from '../async/async.module';
 import { AsyncHandlerRegistryService } from '../async/application/services/async-handler-registry.service';
 import { PrismaModule } from '../../database/prisma/prisma.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { ReconciliationSettlementReceivedAsyncHandler } from './application/async-handlers/reconciliation-settlement-received.handler';
 import { ReconciliationCasesService } from './application/services/reconciliation-cases.service';
 import { ReconciliationDecisionsService } from './application/services/reconciliation-decisions.service';
@@ -18,7 +19,7 @@ import { ReconciliationPoliciesController } from './presentation/controllers/rec
 import { ReconciliationSyncController } from './presentation/controllers/reconciliation-sync.controller';
 
 @Module({
-  imports: [PrismaModule, AsyncModule],
+  imports: [PrismaModule, AsyncModule, NotificationsModule],
   controllers: [
     ReconciliationFoundationController,
     ReconciliationCasesController,

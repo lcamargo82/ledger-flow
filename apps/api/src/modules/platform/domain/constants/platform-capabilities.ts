@@ -24,4 +24,15 @@ export const ReconciliationCapabilities = {
 export type ReconciliationCapability =
   (typeof ReconciliationCapabilities)[keyof typeof ReconciliationCapabilities];
 
-export type PlatformCapability = CommerceCapability | ReconciliationCapability;
+export const NotificationCapabilities = {
+  Read: 'notifications.read',
+  Manage: 'notifications.manage',
+} as const;
+
+export type NotificationCapability =
+  (typeof NotificationCapabilities)[keyof typeof NotificationCapabilities];
+
+export type PlatformCapability =
+  | CommerceCapability
+  | ReconciliationCapability
+  | NotificationCapability;

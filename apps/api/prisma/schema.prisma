@@ -102,6 +102,22 @@ enum ChannelCircuitState {
   HALF_OPEN
 }
 
+enum NotificationCategory {
+  PAYMENTS
+  INVENTORY
+  CHANNELS
+  ORDERS
+  RECONCILIATION
+  SYSTEM
+}
+
+enum NotificationSeverity {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -112,38 +128,40 @@ model Tenant {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  users                 User[]
-  roles                 Role[]
-  subscription          TenantSubscription?
-  authAttempts          AuthAttempt[]
-  customers             Customer[]
-  payments              Payment[]
-  paymentEvents         PaymentEvent[]
-  gatewayConfigurations GatewayConfiguration[]
-  gatewayReferences     GatewayCustomerReference[]
-  webhookInboxEvents    WebhookInboxEvent[]
-  adminInvitations      TenantAdminInvitation[]
-  outboxEvents          OutboxEvent[]
-  asyncJobExecutions    AsyncJobExecution[]
-  products              Product[]
-  productSkus           ProductSku[]
-  warehouses            Warehouse[]
-  inventoryMovements    InventoryMovement[]
-  inventoryBalances     InventoryBalance[]
-  inventoryReservations InventoryReservation[]
-  internalOrders        InternalOrder[]
-  internalOrderItems    InternalOrderItem[]
-  orderFinancialFacts   OrderFinancialFact[]
-  exportJobs            ExportJob[]
-  channelIntegrations   ChannelIntegration[]
-  channelWebhookEvents  ChannelWebhookInboxEvent[]
-  channelListings       ChannelListing[]
-  listingSkuMappings    ListingSkuMapping[]
-  channelInventorySyncs ChannelInventorySyncState[]
+  users                    User[]
+  roles                    Role[]
+  subscription             TenantSubscription?
+  authAttempts             AuthAttempt[]
+  customers                Customer[]
+  payments                 Payment[]
+  paymentEvents            PaymentEvent[]
+  gatewayConfigurations    GatewayConfiguration[]
+  gatewayReferences        GatewayCustomerReference[]
+  webhookInboxEvents       WebhookInboxEvent[]
+  adminInvitations         TenantAdminInvitation[]
+  outboxEvents             OutboxEvent[]
+  asyncJobExecutions       AsyncJobExecution[]
+  products                 Product[]
+  productSkus              ProductSku[]
+  warehouses               Warehouse[]
+  inventoryMovements       InventoryMovement[]
+  inventoryBalances        InventoryBalance[]
+  inventoryReservations    InventoryReservation[]
+  internalOrders           InternalOrder[]
+  internalOrderItems       InternalOrderItem[]
+  orderFinancialFacts      OrderFinancialFact[]
+  exportJobs               ExportJob[]
+  channelIntegrations      ChannelIntegration[]
+  channelWebhookEvents     ChannelWebhookInboxEvent[]
+  channelListings          ChannelListing[]
+  listingSkuMappings       ListingSkuMapping[]
+  channelInventorySyncs    ChannelInventorySyncState[]
   providerSettlementEvents ProviderSettlementEvent[]
   reconciliationCases      ReconciliationCase[]
   reconciliationPolicies   ReconciliationPolicy[]
   reconciliationDecisions  ReconciliationDecision[]
+  notificationEvents       NotificationEvent[]
+  notificationRecipients   NotificationRecipient[]
 
   @@map("tenants")
 }
@@ -163,18 +181,67 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  tenant                 Tenant                  @relation(fields: [tenantId], references: [id])
-  roles                  UserRole[]
-  refreshTokens          RefreshToken[]
-  sessions               UserSession[]
-  passwordResetTokens    PasswordResetToken[]
-  tenantAdminInvitations TenantAdminInvitation[]
+  tenant                  Tenant                   @relation(fields: [tenantId], references: [id])
+  roles                   UserRole[]
+  refreshTokens           RefreshToken[]
+  sessions                UserSession[]
+  passwordResetTokens     PasswordResetToken[]
+  tenantAdminInvitations  TenantAdminInvitation[]
   reconciliationDecisions ReconciliationDecision[]
+  notificationRecipients  NotificationRecipient[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
   @@index([email])
   @@map("users")
+}
+
+model NotificationEvent {
+  id                   String               @id @default(uuid())
+  tenantId             String
+  category             NotificationCategory
+  eventType            String
+  severity             NotificationSeverity @default(INFO)
+  titleKey             String
+  messageKey           String
+  translationArgsJson  Json?                @map("translation_args_json")
+  metadataJson         Json?                @map("metadata_json")
+  sourceType           String
+  sourceId             String?
+  idempotencyKey       String
+  requiredPermissions  String[]             @default([])
+  requiredCapabilities String[]             @default([])
+  occurredAt           DateTime
+  createdAt            DateTime             @default(now())
+
+  tenant     Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recipients NotificationRecipient[]
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, category, createdAt(sort: Desc)])
+  @@index([tenantId, sourceType, sourceId])
+  @@map("notification_events")
+}
+
+model NotificationRecipient {
+  id                  String    @id @default(uuid())
+  tenantId            String
+  notificationEventId String
+  userId              String
+  readAt              DateTime?
+  dismissedAt         DateTime?
+  deliveredAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  notificationEvent NotificationEvent @relation(fields: [notificationEventId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationEventId, userId])
+  @@index([tenantId, userId, readAt, createdAt(sort: Desc)])
+  @@index([tenantId, userId, dismissedAt, createdAt(sort: Desc)])
+  @@map("notification_recipients")
 }
 
 model Role {
@@ -914,12 +981,12 @@ model Payment {
   canceledAt             DateTime?
   refundedAt             DateTime?
 
-  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customer             Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
-  events               PaymentEvent[]
-  webhookInboxEvents   WebhookInboxEvent[]
-  reconciliationCases   ReconciliationCase[]
+  tenant                  Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer                Customer                 @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  gatewayConfiguration    GatewayConfiguration?    @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+  events                  PaymentEvent[]
+  webhookInboxEvents      WebhookInboxEvent[]
+  reconciliationCases     ReconciliationCase[]
   reconciliationDecisions ReconciliationDecision[]
 
   @@unique([tenantId, reference])
@@ -1019,9 +1086,9 @@ model WebhookInboxEvent {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
 
-  tenant               Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  payment              Payment?              @relation(fields: [paymentId], references: [id], onDelete: SetNull)
-  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+  tenant                   Tenant?                   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  payment                  Payment?                  @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  gatewayConfiguration     GatewayConfiguration?     @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
   providerSettlementEvents ProviderSettlementEvent[]
 
   @@unique([provider, providerEventId])
@@ -1172,31 +1239,31 @@ model ExportJob {
 }
 
 model ProviderSettlementEvent {
-  id                         String          @id @default(uuid())
-  tenantId                   String?         @map("tenant_id")
-  provider                   WebhookProvider
-  providerEventId            String          @map("provider_event_id")
-  providerSettlementId       String?         @map("provider_settlement_id")
-  providerPaymentId          String?         @map("provider_payment_id")
-  externalReference          String?         @map("external_reference")
-  eventType                  String          @map("event_type")
-  providerStatus             String?         @map("provider_status")
-  amountMinor                Decimal?        @map("amount_minor") @db.Decimal(18, 0)
-  feeAmountMinor             Decimal?        @map("fee_amount_minor") @db.Decimal(18, 0)
-  netAmountMinor             Decimal?        @map("net_amount_minor") @db.Decimal(18, 0)
-  currency                   String          @default("BRL")
-  currencyExponent           Int             @default(2) @map("currency_exponent")
-  occurredAt                 DateTime?       @map("occurred_at")
-  availableAt                DateTime?       @map("available_at")
-  payloadHash                String          @map("payload_hash")
-  normalizedPayload          Json?           @map("normalized_payload")
-  sourceWebhookInboxEventId  String?         @map("source_webhook_inbox_event_id")
-  receivedAt                 DateTime        @default(now()) @map("received_at")
-  createdAt                  DateTime        @default(now()) @map("created_at")
-  updatedAt                  DateTime        @updatedAt @map("updated_at")
+  id                        String          @id @default(uuid())
+  tenantId                  String?         @map("tenant_id")
+  provider                  WebhookProvider
+  providerEventId           String          @map("provider_event_id")
+  providerSettlementId      String?         @map("provider_settlement_id")
+  providerPaymentId         String?         @map("provider_payment_id")
+  externalReference         String?         @map("external_reference")
+  eventType                 String          @map("event_type")
+  providerStatus            String?         @map("provider_status")
+  amountMinor               Decimal?        @map("amount_minor") @db.Decimal(18, 0)
+  feeAmountMinor            Decimal?        @map("fee_amount_minor") @db.Decimal(18, 0)
+  netAmountMinor            Decimal?        @map("net_amount_minor") @db.Decimal(18, 0)
+  currency                  String          @default("BRL")
+  currencyExponent          Int             @default(2) @map("currency_exponent")
+  occurredAt                DateTime?       @map("occurred_at")
+  availableAt               DateTime?       @map("available_at")
+  payloadHash               String          @map("payload_hash")
+  normalizedPayload         Json?           @map("normalized_payload")
+  sourceWebhookInboxEventId String?         @map("source_webhook_inbox_event_id")
+  receivedAt                DateTime        @default(now()) @map("received_at")
+  createdAt                 DateTime        @default(now()) @map("created_at")
+  updatedAt                 DateTime        @updatedAt @map("updated_at")
 
-  tenant                  Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  sourceWebhookInboxEvent WebhookInboxEvent?  @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
+  tenant                  Tenant?              @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  sourceWebhookInboxEvent WebhookInboxEvent?   @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
   reconciliationCases     ReconciliationCase[]
 
   @@unique([provider, providerEventId])
@@ -1228,9 +1295,9 @@ model ReconciliationCase {
   createdAt             DateTime                 @default(now()) @map("created_at")
   updatedAt             DateTime                 @updatedAt @map("updated_at")
 
-  tenant          Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  settlementEvent ProviderSettlementEvent @relation(fields: [settlementEventId], references: [id], onDelete: Restrict)
-  payment         Payment?                @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  tenant          Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  settlementEvent ProviderSettlementEvent  @relation(fields: [settlementEventId], references: [id], onDelete: Restrict)
+  payment         Payment?                 @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   decisions       ReconciliationDecision[]
 
   @@unique([tenantId, settlementEventId])

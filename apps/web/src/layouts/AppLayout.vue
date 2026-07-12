@@ -316,6 +316,18 @@
       </nav>
 
       <div class="lf-sidebar__footer">
+        <div
+          class="flex items-center"
+          :class="isCollapsed ? 'justify-center' : 'justify-between'"
+        >
+          <NotificationBell
+            v-if="
+              authStore.checkAllPermissions(['notifications:read']) &&
+              authStore.checkAllCapabilities(['notifications.read'])
+            "
+          />
+          <SystemVersionLabel v-show="!isCollapsed" />
+        </div>
         <LanguageSwitcher v-show="!isCollapsed" />
         <div class="lf-sidebar__user" :class="{ 'lf-sidebar__user--collapsed': isCollapsed }">
           <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
@@ -357,6 +369,8 @@ import { useI18n } from '../composables/useI18n'
 import { brandAssets } from '../config/brand'
 import AppButton from '../components/common/AppButton.vue'
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue'
+import NotificationBell from '../components/notifications/NotificationBell.vue'
+import SystemVersionLabel from '../components/notifications/SystemVersionLabel.vue'
 
 const isCollapsed = ref(false)
 

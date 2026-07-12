@@ -5,6 +5,7 @@ import { AsyncModule } from '../async/async.module';
 import { FinancialIntelligenceModule } from '../financial-intelligence/financial-intelligence.module';
 import { GatewaysModule } from '../gateways/gateways.module';
 import { OrdersModule } from '../orders/orders.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { ChannelWebhookReceivedAsyncHandler } from './application/async-handlers/channel-webhook-received.handler';
 import { ChannelOrderIntakeService } from './application/services/channel-order-intake.service';
 import { ChannelsService } from './application/services/channels.service';
@@ -30,6 +31,7 @@ import { MercadoLivreOAuthController } from './presentation/controllers/mercado-
     FinancialIntelligenceModule,
     GatewaysModule,
     forwardRef(() => OrdersModule),
+    NotificationsModule,
   ],
   controllers: [
     ChannelsFoundationController,

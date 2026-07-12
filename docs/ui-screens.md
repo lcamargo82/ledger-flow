@@ -195,13 +195,14 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Fora de escopo:** XLSX real, storage externo, agendamento recorrente e worker definitivo.
 - **i18n:** Namespace `exports.*` em pt-BR e en-US.
 
-### Notifications (planejada 10.2.0A)
+### Notifications (implementada 10.2.0A)
 
 - **Rota:** `/notifications`
 - **Layout:** `AppLayout`, sino no footer da sidebar.
 - **Autorização:** recipient + revalidação backend de permission/capability.
 - **Componentes:** definidos em `docs/specs/10.2-components-i18n.md`.
 - **Estados:** loading, vazio, erro, forbidden, unread/read/dismissed.
+- **Polling:** contador a cada 30 segundos por padrão, configurável por `VITE_NOTIFICATIONS_POLLING_INTERVAL_MS` com piso de 10 segundos.
 
 ### Inventory Transfers e Cycle Counts (planejadas)
 

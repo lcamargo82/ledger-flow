@@ -151,7 +151,64 @@
     "tenantSettings": "Organização",
     "platformAsyncOperations": "Operações Assíncronas",
     "gatewayConnections": "Integrações de Pagamento",
-    "platformGatewayConnections": "Integrações"
+    "platformGatewayConnections": "Integrações",
+    "notifications": "Notificações"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "description": "Acompanhe alertas e exceções dos módulos aos quais você possui acesso.",
+    "bell": {
+      "label": "Notificações: {count} não lidas"
+    },
+    "version": {
+      "label": "Versão do LedgerFlow: {version}",
+      "short": "v{version}"
+    },
+    "actions": {
+      "markRead": "Marcar como lida",
+      "markAllRead": "Marcar todas como lidas",
+      "dismiss": "Descartar",
+      "loadMore": "Carregar mais"
+    },
+    "filters": {
+      "category": "Categoria",
+      "status": "Status",
+      "allCategories": "Todas as categorias",
+      "allStatuses": "Todos os status",
+      "unreadOnly": "Somente não lidas"
+    },
+    "categories": {
+      "PAYMENTS": "Pagamentos",
+      "INVENTORY": "Estoque",
+      "CHANNELS": "Canais",
+      "ORDERS": "Pedidos",
+      "RECONCILIATION": "Conciliação",
+      "SYSTEM": "Sistema"
+    },
+    "severity": {
+      "INFO": "Informação",
+      "SUCCESS": "Sucesso",
+      "WARNING": "Atenção",
+      "ERROR": "Erro"
+    },
+    "empty": {
+      "title": "Nenhuma notificação encontrada",
+      "description": "Novos alertas autorizados aparecerão aqui."
+    },
+    "errors": {
+      "title": "Não foi possível carregar as notificações",
+      "load": "Tente novamente em alguns instantes."
+    },
+    "events": {
+      "channelInventorySyncFailed": {
+        "title": "Falha na sincronização de estoque",
+        "message": "Não foi possível sincronizar o anúncio {listingId}."
+      },
+      "reconciliationDivergence": {
+        "title": "Divergência de conciliação identificada",
+        "message": "O caso {caseId} requer análise."
+      }
+    }
   },
   "inventory": {
     "title": "Estoque",

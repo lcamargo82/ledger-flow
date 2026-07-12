@@ -6,14 +6,14 @@ Entregar notificações internas idempotentes, tenant-safe e autorizadas, com fe
 
 ## Tasks
 
-- [ ] Fixar contratos, categorias, severidades e matriz de audiência → validar contra PRD/SDD/ADR 0036.
-- [ ] Criar schema/migration de evento e destinatário, além de permission/capability → `prisma validate` e migration test.
-- [ ] Implementar criação idempotente e resolução de audiência → testes de duplicata, tenant, RBAC e capability.
-- [ ] Implementar feed cursor-based, contador, leitura, leitura em massa e descarte → testes de autorização revogada e convergência.
-- [ ] Documentar APIs no Swagger/Redoc e evento realmente publicado no AsyncAPI → validar artefatos gerados.
-- [ ] Implementar sino, versão e `/notifications` com componentes existentes → testes de loading, empty, error e badge `99+`.
-- [ ] Adicionar pt-BR/en-US e produtores mínimos protegidos por feature flag → auditoria i18n e testes de flag.
-- [ ] Atualizar README, índices, PRD/SDD/backlog/runbook e UI docs → revisão de status e links.
+- [x] Fixar contratos, categorias, severidades e matriz de audiência → validado contra PRD/SDD/ADR 0036.
+- [x] Criar schema/migration de evento e destinatário, além de permission/capability → schema validado; migration pendente de staging.
+- [x] Implementar criação idempotente e resolução de audiência → testes de duplicata, concorrência, tenant, RBAC e capability.
+- [x] Implementar feed cursor-based, contador, leitura, leitura em massa e descarte → autorização revogada e convergência cobertas.
+- [x] Documentar APIs no Swagger/Redoc; AsyncAPI não alterado porque não há publisher assíncrono nesta fase.
+- [x] Implementar sino, versão e `/notifications` com componentes existentes → loading, empty, error e badge `99+`.
+- [x] Adicionar pt-BR/en-US e produtores mínimos protegidos por feature flag → auditoria i18n e testes de flag.
+- [x] Atualizar README, índices, PRD/SDD/backlog/runbook e UI docs → status e configuração revisados.
 - [ ] Executar a verificação transversal da sprint → API/Web tests, lint, type-check e builds verdes.
 
 ## Done When
