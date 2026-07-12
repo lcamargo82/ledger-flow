@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposto para 10.2.1–10.2.3.
+Aceito. A 10.2.1 implementa autorização, flags e reason codes; agregados e efeitos no ledger permanecem para 10.2.2–10.2.3.
 
 ## Contexto
 

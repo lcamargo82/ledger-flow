@@ -32,7 +32,20 @@ export const NotificationCapabilities = {
 export type NotificationCapability =
   (typeof NotificationCapabilities)[keyof typeof NotificationCapabilities];
 
+export const InventoryAdvancedCapabilities = {
+  Transfer: 'inventory.transfer',
+  CycleCount: 'inventory.cycle_count',
+  Approval: 'inventory.approval',
+  AlertsManage: 'inventory.alerts.manage',
+  AgingRead: 'inventory.aging.read',
+  KitsManage: 'inventory.kits.manage',
+} as const;
+
+export type InventoryAdvancedCapability =
+  (typeof InventoryAdvancedCapabilities)[keyof typeof InventoryAdvancedCapabilities];
+
 export type PlatformCapability =
   | CommerceCapability
   | ReconciliationCapability
-  | NotificationCapability;
+  | NotificationCapability
+  | InventoryAdvancedCapability;
