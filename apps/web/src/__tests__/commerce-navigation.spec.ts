@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import router from '../router'
+import router, { advancedInventoryRouteDefinitions } from '../router'
 import { useAuthStore } from '../stores/auth.store'
 import ptBR from '../locales/pt-BR.json'
 import enUS from '../locales/en-US.json'
@@ -102,5 +102,35 @@ describe('commerce navigation foundation', () => {
     expect(enUS.nav.reconciliation).toBe('Reconciliation')
     expect(ptBR.reconciliation.title).toBe('Conciliação financeira')
     expect(enUS.reconciliation.empty.title).toBe('No reconciliation cases yet')
+  })
+
+  it('defines advanced inventory routes with narrow entitlements', () => {
+    const transferRoute = advancedInventoryRouteDefinitions.find(
+      (route) => route.path === '/inventory/transfers',
+    )
+    const cycleCountRoute = advancedInventoryRouteDefinitions.find(
+      (route) => route.path === '/inventory/cycle-counts',
+    )
+
+    expect(transferRoute?.meta?.permissions).toEqual(['inventory:transfer'])
+    expect(transferRoute?.meta?.capabilities).toEqual(['inventory.transfer'])
+    expect(cycleCountRoute?.meta?.permissions).toEqual(['inventory:cycle-count'])
+    expect(cycleCountRoute?.meta?.capabilities).toEqual(['inventory.cycle_count'])
+  })
+
+  it('keeps advanced inventory routes unregistered while feature flags are disabled', () => {
+    expect(
+      router.getRoutes().find((route) => route.path === '/inventory/transfers'),
+    ).toBeUndefined()
+    expect(
+      router.getRoutes().find((route) => route.path === '/inventory/cycle-counts'),
+    ).toBeUndefined()
+  })
+
+  it('translates advanced inventory foundation states in both locales', () => {
+    expect(ptBR.inventory.advanced.transfers.title).toBe('Transferências entre warehouses')
+    expect(enUS.inventory.advanced.transfers.title).toBe('Warehouse transfers')
+    expect(ptBR.inventory.advanced.foundationOnly).toContain('não altera saldos')
+    expect(enUS.inventory.advanced.foundationOnly).toContain('does not change balances')
   })
 })

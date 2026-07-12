@@ -7,6 +7,8 @@ import { PrismaInventoryRepository } from './infra/repositories/prisma-inventory
 import { InventoryFoundationController } from './presentation/controllers/inventory-foundation.controller';
 import { InventoryLedgerController } from './presentation/controllers/inventory-ledger.controller';
 import { InventoryWarehousesController } from './presentation/controllers/inventory-warehouses.controller';
+import { InventoryAdvancedFoundationController } from './presentation/controllers/inventory-advanced-foundation.controller';
+import { InventoryAdvancedFeatureService } from './application/services/inventory-advanced-feature.service';
 
 @Module({
   imports: [PrismaModule, forwardRef(() => ChannelsModule)],
@@ -14,9 +16,11 @@ import { InventoryWarehousesController } from './presentation/controllers/invent
     InventoryFoundationController,
     InventoryWarehousesController,
     InventoryLedgerController,
+    InventoryAdvancedFoundationController,
   ],
   providers: [
     InventoryService,
+    InventoryAdvancedFeatureService,
     {
       provide: INVENTORY_REPOSITORY,
       useClass: PrismaInventoryRepository,

@@ -137,6 +137,8 @@
     "payments": "Pagamentos",
     "catalog": "Catálogo",
     "inventory": "Estoque",
+    "inventoryTransfers": "Transferências",
+    "inventoryCycleCounts": "Inventários cíclicos",
     "orders": "Pedidos",
     "channels": "Canais",
     "analytics": "Analytics",
@@ -213,6 +215,38 @@
   "inventory": {
     "title": "Estoque",
     "description": "Gerencie warehouses, ajustes de estoque, saldos projetados e ledger auditável.",
+    "advanced": {
+      "foundationStatus": "Fundação habilitada",
+      "contractsReady": "Contratos prontos para a próxima fase",
+      "foundationOnly": "Esta fundação não altera saldos nem executa workflows de estoque.",
+      "capabilityProtected": "Acesso protegido por permissão e capability específicas.",
+      "reasonCodesReady": "Motivos controlados e traduzíveis disponíveis no backend.",
+      "ledgerPreserved": "Movimentações futuras continuarão usando o ledger imutável existente.",
+      "transfers": {
+        "title": "Transferências entre warehouses",
+        "description": "Fundação técnica da movimentação controlada entre warehouses."
+      },
+      "cycleCounts": {
+        "title": "Inventários cíclicos",
+        "description": "Fundação técnica da contagem física com aprovação rastreável."
+      }
+    },
+    "reasonCodes": {
+      "transfer": {
+        "REPLENISHMENT": "Reposição",
+        "REBALANCING": "Rebalanceamento",
+        "RETURN_TO_STOCK": "Retorno ao estoque",
+        "DAMAGED_STOCK_RELOCATION": "Realocação de estoque danificado",
+        "OTHER": "Outro"
+      },
+      "cycleCount": {
+        "SCHEDULED_COUNT": "Contagem programada",
+        "DISCREPANCY_RECOUNT": "Recontagem por divergência",
+        "AUDIT_REQUEST": "Solicitação de auditoria",
+        "LOSS_OR_DAMAGE": "Perda ou avaria",
+        "OTHER": "Outro"
+      }
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Saldos",

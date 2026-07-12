@@ -138,6 +138,8 @@
     "payments": "Payments",
     "catalog": "Catalog",
     "inventory": "Inventory",
+    "inventoryTransfers": "Transfers",
+    "inventoryCycleCounts": "Cycle counts",
     "orders": "Orders",
     "channels": "Channels",
     "analytics": "Analytics",
@@ -214,6 +216,38 @@
   "inventory": {
     "title": "Inventory",
     "description": "Manage warehouses, stock adjustments, projected balances, and the auditable inventory ledger.",
+    "advanced": {
+      "foundationStatus": "Foundation enabled",
+      "contractsReady": "Contracts ready for the next phase",
+      "foundationOnly": "This foundation does not change balances or execute inventory workflows.",
+      "capabilityProtected": "Access is protected by specific permissions and capabilities.",
+      "reasonCodesReady": "Controlled and translatable reason codes are available from the backend.",
+      "ledgerPreserved": "Future movements will continue to use the existing immutable ledger.",
+      "transfers": {
+        "title": "Warehouse transfers",
+        "description": "Technical foundation for controlled movements between warehouses."
+      },
+      "cycleCounts": {
+        "title": "Cycle counts",
+        "description": "Technical foundation for physical counts with traceable approval."
+      }
+    },
+    "reasonCodes": {
+      "transfer": {
+        "REPLENISHMENT": "Replenishment",
+        "REBALANCING": "Rebalancing",
+        "RETURN_TO_STOCK": "Return to stock",
+        "DAMAGED_STOCK_RELOCATION": "Damaged stock relocation",
+        "OTHER": "Other"
+      },
+      "cycleCount": {
+        "SCHEDULED_COUNT": "Scheduled count",
+        "DISCREPANCY_RECOUNT": "Discrepancy recount",
+        "AUDIT_REQUEST": "Audit request",
+        "LOSS_OR_DAMAGE": "Loss or damage",
+        "OTHER": "Other"
+      }
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Balances",

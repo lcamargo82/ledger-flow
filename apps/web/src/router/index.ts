@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
 
 import AuthLayout from '../layouts/AuthLayout.vue'
@@ -24,6 +24,39 @@ import AnalyticsView from '../views/AnalyticsView.vue'
 import ExportsView from '../views/ExportsView.vue'
 import ReconciliationView from '../views/ReconciliationView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
+import InventoryAdvancedFoundationView from '../views/InventoryAdvancedFoundationView.vue'
+import { advancedInventoryFeatures } from '../config/features'
+
+export const advancedInventoryRouteDefinitions: RouteRecordRaw[] = [
+  {
+    path: '/inventory/transfers',
+    name: 'inventory-transfers',
+    component: InventoryAdvancedFoundationView,
+    meta: {
+      layout: AppLayout,
+      requiresAuth: true,
+      permissions: ['inventory:transfer'],
+      capabilities: ['inventory.transfer'],
+    },
+  },
+  {
+    path: '/inventory/cycle-counts',
+    name: 'inventory-cycle-counts',
+    component: InventoryAdvancedFoundationView,
+    meta: {
+      layout: AppLayout,
+      requiresAuth: true,
+      permissions: ['inventory:cycle-count'],
+      capabilities: ['inventory.cycle_count'],
+    },
+  },
+]
+
+const enabledAdvancedInventoryRoutes = advancedInventoryRouteDefinitions.filter((route) =>
+  route.name === 'inventory-transfers'
+    ? advancedInventoryFeatures.transfers
+    : advancedInventoryFeatures.cycleCounts,
+)
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -213,6 +246,7 @@ const router = createRouter({
         capabilities: ['inventory.manage'],
       },
     },
+    ...enabledAdvancedInventoryRoutes,
     {
       path: '/orders',
       name: 'orders',

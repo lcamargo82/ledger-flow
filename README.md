@@ -1505,6 +1505,7 @@ O pacote planejado seguinte está documentado sem declarar endpoints futuros com
 - 10.2 adiciona Notification Center e estoque avançado sobre o ledger existente.
 - 10.2.0A implementa Notification Center tenant-safe com feed autorizado, badge `99+`, polling padrão de 30 segundos e produtores mínimos controlados por `NOTIFICATIONS_INTERNAL_PRODUCERS_ENABLED`.
 - 10.2.0B implementa subscriptions multi-tenant, segredo cifrado/rotacionável, proteção SSRF, envio de teste, worker outbound durável com HMAC, timeout, retry exponencial com jitter, DLQ persistida, métricas sanitizadas e replay auditado.
+- 10.2.1 implementa capabilities/permissões estreitas, reason codes traduzíveis e flags desligadas por padrão para transferências e inventários cíclicos, sem criar workflows ou alterar saldos.
 - 10.1.11 enriquece fatos financeiros operacionais e resumo logístico.
 - 9B (settlement de marketplace) e 10.3 (fulfillment) permanecem discovery futuro.
 

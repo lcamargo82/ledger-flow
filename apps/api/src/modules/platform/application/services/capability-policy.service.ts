@@ -3,6 +3,7 @@ import { SubscriptionPlan, TenantSubscriptionStatus } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import {
   CommerceCapabilities,
+  InventoryAdvancedCapabilities,
   NotificationCapabilities,
   ReconciliationCapabilities,
   type PlatformCapability,
@@ -15,6 +16,8 @@ const erpBasicCapabilities: PlatformCapability[] = [
   CommerceCapabilities.InventoryAdjust,
   CommerceCapabilities.OrdersManage,
   CommerceCapabilities.InventoryReportsRead,
+  InventoryAdvancedCapabilities.Transfer,
+  InventoryAdvancedCapabilities.CycleCount,
 ];
 
 const commerceCapabilities: PlatformCapability[] = [
@@ -38,6 +41,10 @@ const masterCapabilities: PlatformCapability[] = [
   CommerceCapabilities.FinancialAnalyticsRead,
   ...reconciliationCapabilities,
   NotificationCapabilities.Manage,
+  InventoryAdvancedCapabilities.Approval,
+  InventoryAdvancedCapabilities.AlertsManage,
+  InventoryAdvancedCapabilities.AgingRead,
+  InventoryAdvancedCapabilities.KitsManage,
 ];
 
 const capabilitiesByPlan: Record<SubscriptionPlan, PlatformCapability[]> = {

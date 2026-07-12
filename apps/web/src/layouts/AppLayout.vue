@@ -42,9 +42,11 @@
             class="lf-sidebar-group-header"
           >
             <span>{{ t('nav.groups.operations') }}</span>
-            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.operations ? 'expand_less' : 'expand_more' }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{
+              expandedGroups.operations ? 'expand_less' : 'expand_more'
+            }}</span>
           </button>
-          
+
           <div v-show="expandedGroups.operations || isCollapsed" class="lf-sidebar-group-content">
             <router-link
               v-if="authStore.checkAllPermissions(['payments:read'])"
@@ -114,16 +116,35 @@
         </div>
 
         <!-- Group: Catalog & Inventory -->
-        <div v-if="(authStore.checkAllPermissions(['catalog:read']) && authStore.checkAllCapabilities(['catalog.manage'])) || (authStore.checkAllPermissions(['inventory:read']) && authStore.checkAllCapabilities(['inventory.manage']))" class="lf-sidebar-group">
+        <div
+          v-if="
+            (authStore.checkAllPermissions(['catalog:read']) &&
+              authStore.checkAllCapabilities(['catalog.manage'])) ||
+            (authStore.checkAllPermissions(['inventory:read']) &&
+              authStore.checkAllCapabilities(['inventory.manage'])) ||
+            (advancedInventoryFeatures.transfers &&
+              authStore.checkAllPermissions(['inventory:transfer']) &&
+              authStore.checkAllCapabilities(['inventory.transfer'])) ||
+            (advancedInventoryFeatures.cycleCounts &&
+              authStore.checkAllPermissions(['inventory:cycle-count']) &&
+              authStore.checkAllCapabilities(['inventory.cycle_count']))
+          "
+          class="lf-sidebar-group"
+        >
           <button
             v-if="!isCollapsed"
             @click="toggleGroup('catalogAndInventory')"
             class="lf-sidebar-group-header"
           >
             <span>{{ t('nav.groups.catalogAndInventory') }}</span>
-            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.catalogAndInventory ? 'expand_less' : 'expand_more' }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{
+              expandedGroups.catalogAndInventory ? 'expand_less' : 'expand_more'
+            }}</span>
           </button>
-          <div v-show="expandedGroups.catalogAndInventory || isCollapsed" class="lf-sidebar-group-content">
+          <div
+            v-show="expandedGroups.catalogAndInventory || isCollapsed"
+            class="lf-sidebar-group-content"
+          >
             <router-link
               v-if="
                 authStore.checkAllPermissions(['catalog:read']) &&
@@ -152,18 +173,53 @@
               >
               <span class="text" v-show="!isCollapsed">{{ t('nav.inventory') }}</span>
             </router-link>
+            <router-link
+              v-if="
+                advancedInventoryFeatures.transfers &&
+                authStore.checkAllPermissions(['inventory:transfer']) &&
+                authStore.checkAllCapabilities(['inventory.transfer'])
+              "
+              to="/inventory/transfers"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon">move_item</span>
+              <span class="text" v-show="!isCollapsed">{{ t('nav.inventoryTransfers') }}</span>
+            </router-link>
+            <router-link
+              v-if="
+                advancedInventoryFeatures.cycleCounts &&
+                authStore.checkAllPermissions(['inventory:cycle-count']) &&
+                authStore.checkAllCapabilities(['inventory.cycle_count'])
+              "
+              to="/inventory/cycle-counts"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon">fact_check</span>
+              <span class="text" v-show="!isCollapsed">{{ t('nav.inventoryCycleCounts') }}</span>
+            </router-link>
           </div>
         </div>
 
         <!-- Group: Analytics -->
-        <div v-if="(authStore.checkAllPermissions(['financial-intelligence:read']) && authStore.checkAllCapabilities(['financial.analytics.read'])) || authStore.checkAllPermissions(['reports:export'])" class="lf-sidebar-group">
+        <div
+          v-if="
+            (authStore.checkAllPermissions(['financial-intelligence:read']) &&
+              authStore.checkAllCapabilities(['financial.analytics.read'])) ||
+            authStore.checkAllPermissions(['reports:export'])
+          "
+          class="lf-sidebar-group"
+        >
           <button
             v-if="!isCollapsed"
             @click="toggleGroup('analytics')"
             class="lf-sidebar-group-header"
           >
             <span>{{ t('nav.groups.analytics') }}</span>
-            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.analytics ? 'expand_less' : 'expand_more' }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{
+              expandedGroups.analytics ? 'expand_less' : 'expand_more'
+            }}</span>
           </button>
           <div v-show="expandedGroups.analytics || isCollapsed" class="lf-sidebar-group-content">
             <router-link
@@ -195,14 +251,25 @@
         </div>
 
         <!-- Group: Settings -->
-        <div v-if="authStore.checkAllPermissions(['users:read']) || authStore.checkAllPermissions(['roles:manage']) || authStore.checkAllPermissions(['permissions:read']) || authStore.checkAllPermissions(['tenant:update']) || authStore.checkAllPermissions(['gateways:read'])" class="lf-sidebar-group">
+        <div
+          v-if="
+            authStore.checkAllPermissions(['users:read']) ||
+            authStore.checkAllPermissions(['roles:manage']) ||
+            authStore.checkAllPermissions(['permissions:read']) ||
+            authStore.checkAllPermissions(['tenant:update']) ||
+            authStore.checkAllPermissions(['gateways:read'])
+          "
+          class="lf-sidebar-group"
+        >
           <button
             v-if="!isCollapsed"
             @click="toggleGroup('settings')"
             class="lf-sidebar-group-header"
           >
             <span>{{ t('nav.groups.settings') }}</span>
-            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.settings ? 'expand_less' : 'expand_more' }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{
+              expandedGroups.settings ? 'expand_less' : 'expand_more'
+            }}</span>
           </button>
           <div v-show="expandedGroups.settings || isCollapsed" class="lf-sidebar-group-content">
             <router-link
@@ -264,19 +331,18 @@
         </div>
 
         <!-- Platform Admin Menu -->
-        <div
-          v-if="authStore.user?.isPlatformAdmin"
-          class="lf-sidebar-group--bordered"
-        >
+        <div v-if="authStore.user?.isPlatformAdmin" class="lf-sidebar-group--bordered">
           <button
             v-if="!isCollapsed"
             @click="toggleGroup('platform')"
             class="lf-sidebar-group-header"
           >
             <span>{{ t('nav.groups.platform') }}</span>
-            <span class="material-symbols-outlined lf-sidebar-group-icon">{{ expandedGroups.platform ? 'expand_less' : 'expand_more' }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{
+              expandedGroups.platform ? 'expand_less' : 'expand_more'
+            }}</span>
           </button>
-          
+
           <div v-show="expandedGroups.platform || isCollapsed" class="lf-sidebar-group-content">
             <router-link
               to="/platform/tenants"
@@ -316,10 +382,7 @@
       </nav>
 
       <div class="lf-sidebar__footer">
-        <div
-          class="flex items-center"
-          :class="isCollapsed ? 'justify-center' : 'justify-between'"
-        >
+        <div class="flex items-center" :class="isCollapsed ? 'justify-center' : 'justify-between'">
           <NotificationBell
             v-if="
               authStore.checkAllPermissions(['notifications:read']) &&
@@ -371,6 +434,7 @@ import AppButton from '../components/common/AppButton.vue'
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue'
 import NotificationBell from '../components/notifications/NotificationBell.vue'
 import SystemVersionLabel from '../components/notifications/SystemVersionLabel.vue'
+import { advancedInventoryFeatures } from '../config/features'
 
 const isCollapsed = ref(false)
 
