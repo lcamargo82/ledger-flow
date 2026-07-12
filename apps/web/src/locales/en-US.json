@@ -461,8 +461,14 @@
       "status": "Status",
       "customer": "Customer",
       "items": "Items",
+      "shipping": "Shipping",
       "createdAt": "Created at",
       "actions": "Actions"
+    },
+    "shipping": {
+      "shipment": "Shipment",
+      "tracking": "Tracking",
+      "statusUnknown": "Status not provided"
     },
     "form": {
       "createTitle": "New internal order",

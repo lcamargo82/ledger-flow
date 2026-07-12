@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { InternalOrderStatus } from '@prisma/client';
+import { ChannelProvider, InternalOrderStatus } from '@prisma/client';
 
 export class OrderItemResponseDto {
   @ApiProperty() id: string;
@@ -9,6 +9,28 @@ export class OrderItemResponseDto {
   @ApiProperty() warehouseId: string;
   @ApiProperty() quantity: string;
   @ApiPropertyOptional() reservationId?: string;
+  @ApiProperty() createdAt: Date;
+  @ApiProperty() updatedAt: Date;
+}
+
+export class OrderShippingSummaryResponseDto {
+  @ApiProperty() id: string;
+  @ApiProperty() tenantId: string;
+  @ApiProperty() orderId: string;
+  @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
+  @ApiProperty() externalOrderId: string;
+  @ApiPropertyOptional() externalShipmentId?: string;
+  @ApiPropertyOptional() status?: string;
+  @ApiPropertyOptional() substatus?: string;
+  @ApiPropertyOptional() shippingMode?: string;
+  @ApiPropertyOptional() logisticType?: string;
+  @ApiPropertyOptional() handlingEstimateAt?: Date;
+  @ApiPropertyOptional() deliveryEstimateAt?: Date;
+  @ApiPropertyOptional() postedAt?: Date;
+  @ApiPropertyOptional() trackingCodeMasked?: string;
+  @ApiProperty() source: string;
+  @ApiProperty() confidence: number;
+  @ApiProperty() lastSyncedAt: Date;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
 }
@@ -28,6 +50,8 @@ export class OrderResponseDto {
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
   @ApiProperty({ type: [OrderItemResponseDto] }) items: OrderItemResponseDto[];
+  @ApiProperty({ type: [OrderShippingSummaryResponseDto] })
+  shippingSummaries: OrderShippingSummaryResponseDto[];
 }
 
 export class PaginatedOrdersMetaDto {

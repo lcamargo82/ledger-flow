@@ -460,8 +460,14 @@
       "status": "Status",
       "customer": "Cliente",
       "items": "Itens",
+      "shipping": "Logística",
       "createdAt": "Criado em",
       "actions": "Ações"
+    },
+    "shipping": {
+      "shipment": "Envio",
+      "tracking": "Tracking",
+      "statusUnknown": "Status não informado"
     },
     "form": {
       "createTitle": "Novo pedido interno",

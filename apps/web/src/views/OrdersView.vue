@@ -41,6 +41,7 @@ const columns = computed(() => [
   { key: 'status', label: t('orders.table.status') },
   { key: 'customerName', label: t('orders.table.customer') },
   { key: 'items', label: t('orders.table.items') },
+  { key: 'shipping', label: t('orders.table.shipping') },
   { key: 'createdAt', label: t('orders.table.createdAt') },
   { key: 'actions', label: t('orders.table.actions'), align: 'right' as const },
 ])
@@ -119,6 +120,8 @@ const statusVariant = (status: InternalOrderStatus) => {
   if (status === 'CANCELLED') return 'default'
   return 'warning'
 }
+
+const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
 </script>
 
 <template>
@@ -183,6 +186,29 @@ const statusVariant = (status: InternalOrderStatus) => {
               <span> / {{ orderItem.warehouseId }} / {{ orderItem.quantity }}</span>
             </div>
           </div>
+        </template>
+
+        <template #shipping="{ item }">
+          <div v-if="primaryShipping(item)" class="space-y-1 text-sm">
+            <div class="flex items-center gap-2">
+              <AppBadge variant="info">
+                {{ primaryShipping(item)?.provider }}
+              </AppBadge>
+              <span>{{ primaryShipping(item)?.status || t('orders.shipping.statusUnknown') }}</span>
+            </div>
+            <div class="text-xs text-[var(--lf-text-secondary)]">
+              <span v-if="primaryShipping(item)?.externalShipmentId">
+                {{ t('orders.shipping.shipment') }}:
+                <span class="font-mono">{{ primaryShipping(item)?.externalShipmentId }}</span>
+              </span>
+              <span v-if="primaryShipping(item)?.trackingCodeMasked">
+                <span v-if="primaryShipping(item)?.externalShipmentId"> · </span>
+                {{ t('orders.shipping.tracking') }}:
+                <span class="font-mono">{{ primaryShipping(item)?.trackingCodeMasked }}</span>
+              </span>
+            </div>
+          </div>
+          <span v-else>-</span>
         </template>
 
         <template #createdAt="{ item }">
