@@ -27,6 +27,8 @@ channels:
         $ref: '#/components/messages/InventoryReservationConsumed'
       transferCompleted:
         $ref: '#/components/messages/InventoryTransferCompleted'
+      cycleCountAdjusted:
+        $ref: '#/components/messages/InventoryCycleCountAdjusted'
   orders.events:
     address: ledgerflow.orders.events
     messages:
@@ -154,6 +156,33 @@ components:
           idempotencyKey:
             type: string
           itemCount:
+            type: integer
+          movementIds:
+            type: array
+            items:
+              type: string
+    InventoryCycleCountAdjusted:
+      name: inventory.cycle_count.adjusted
+      title: Inventory Cycle Count Adjusted
+      summary: Event emitted when an approved cycle count creates inventory adjustments.
+      payload:
+        type: object
+        required:
+          - cycleCountId
+          - countNumber
+          - warehouseId
+          - adjustedItemCount
+          - movementIds
+        properties:
+          cycleCountId:
+            type: string
+          countNumber:
+            type: string
+          warehouseId:
+            type: string
+          idempotencyKey:
+            type: string
+          adjustedItemCount:
             type: integer
           movementIds:
             type: array

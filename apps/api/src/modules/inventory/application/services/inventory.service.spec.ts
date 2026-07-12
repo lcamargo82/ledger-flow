@@ -24,6 +24,13 @@ describe('InventoryService', () => {
     startTransfer: jest.fn(),
     completeTransfer: jest.fn(),
     cancelTransfer: jest.fn(),
+    createCycleCount: jest.fn(),
+    listCycleCounts: jest.fn(),
+    findCycleCountById: jest.fn(),
+    openCycleCount: jest.fn(),
+    countCycleCountItem: jest.fn(),
+    approveCycleCount: jest.fn(),
+    cancelCycleCount: jest.fn(),
   };
 
   const prisma = {
@@ -446,6 +453,161 @@ describe('InventoryService', () => {
       data: expect.objectContaining({
         action: 'inventory.transfer.canceled',
         entityId: 'transfer-1',
+      }),
+    });
+    expect(result.status).toBe('CANCELED');
+  });
+
+  it('creates a draft cycle count after validating warehouse and SKUs', async () => {
+    repository.findWarehouseById.mockResolvedValue({ id: 'warehouse-1', isActive: true });
+    repository.findSkuById.mockResolvedValue({ id: 'sku-1' });
+    repository.createCycleCount.mockResolvedValue({
+      id: 'count-1',
+      status: 'DRAFT',
+      items: [{ skuId: 'sku-1' }],
+    });
+
+    const result = await service.createCycleCount('tenant-1', 'user-1', {
+      warehouseId: 'warehouse-1',
+      idempotencyKey: 'count-key-1',
+      reasonCode: 'SCHEDULED_COUNT',
+      notes: 'Contagem mensal',
+      items: [{ skuId: 'sku-1' }],
+    });
+
+    expect(repository.createCycleCount).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        createdByUserId: 'user-1',
+        warehouseId: 'warehouse-1',
+        idempotencyKey: 'count-key-1',
+        reasonCode: 'SCHEDULED_COUNT',
+        items: [{ skuId: 'sku-1' }],
+      }),
+    );
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.cycle_count.created',
+        entityType: 'CycleCount',
+        entityId: 'count-1',
+      }),
+    });
+    expect(result.status).toBe('DRAFT');
+  });
+
+  it('opens a cycle count with balance snapshots and audits the transition', async () => {
+    repository.openCycleCount.mockResolvedValue({
+      id: 'count-1',
+      status: 'OPEN',
+      items: [{ id: 'item-1', systemOnHandAtOpen: '10', balanceVersionAtOpen: 3 }],
+    });
+
+    const result = await service.openCycleCount('count-1', 'tenant-1', 'user-1');
+
+    expect(repository.openCycleCount).toHaveBeenCalledWith({
+      cycleCountId: 'count-1',
+      tenantId: 'tenant-1',
+      actorUserId: 'user-1',
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.cycle_count.opened',
+        entityId: 'count-1',
+      }),
+    });
+    expect(result.status).toBe('OPEN');
+  });
+
+  it('records a counted quantity for an open cycle count item', async () => {
+    repository.countCycleCountItem.mockResolvedValue({
+      id: 'count-1',
+      status: 'COUNTED',
+      items: [{ id: 'item-1', countedQuantity: '8', varianceQuantity: '-2' }],
+    });
+
+    const result = await service.countCycleCountItem('count-1', 'item-1', 'tenant-1', 'user-1', {
+      countedQuantity: 8,
+    });
+
+    expect(repository.countCycleCountItem).toHaveBeenCalledWith({
+      cycleCountId: 'count-1',
+      itemId: 'item-1',
+      tenantId: 'tenant-1',
+      actorUserId: 'user-1',
+      countedQuantity: 8,
+    });
+    expect(result.status).toBe('COUNTED');
+  });
+
+  it('approves a counted cycle count with adjustments, audit log and balance outbox events', async () => {
+    repository.approveCycleCount.mockResolvedValue({
+      cycleCount: {
+        id: 'count-1',
+        status: 'APPROVED',
+        items: [{ id: 'item-1', skuId: 'sku-1', adjustmentMovementId: 'movement-1' }],
+      },
+      movements: [{ id: 'movement-1', type: InventoryMovementType.ADJUSTMENT_OUT }],
+      balances: [
+        {
+          id: 'balance-1',
+          skuId: 'sku-1',
+          warehouseId: 'warehouse-1',
+          onHandQuantity: '8',
+          reservedQuantity: '0',
+          availableQuantity: '8',
+          version: 4,
+        },
+      ],
+      outboxEvent: { id: 'outbox-1', eventType: 'inventory.cycle_count.adjusted' },
+    });
+
+    const result = await service.approveCycleCount('count-1', 'tenant-1', 'user-1', {
+      reasonCode: 'DISCREPANCY_RECOUNT',
+      idempotencyKey: 'approve-count-1',
+      notes: 'Aprovado pela auditoria',
+    });
+
+    expect(repository.approveCycleCount).toHaveBeenCalledWith({
+      cycleCountId: 'count-1',
+      tenantId: 'tenant-1',
+      actorUserId: 'user-1',
+      reasonCode: 'DISCREPANCY_RECOUNT',
+      idempotencyKey: 'approve-count-1',
+      notes: 'Aprovado pela auditoria',
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.cycle_count.approved',
+        entityId: 'count-1',
+      }),
+    });
+    expect(prisma.outboxEvent.create).toHaveBeenCalledTimes(1);
+    expect(result.movements[0].type).toBe(InventoryMovementType.ADJUSTMENT_OUT);
+  });
+
+  it('cancels a non-approved cycle count and audits the transition', async () => {
+    repository.cancelCycleCount.mockResolvedValue({
+      id: 'count-1',
+      status: 'CANCELED',
+      reasonCode: 'OTHER',
+    });
+
+    const result = await service.cancelCycleCount('count-1', 'tenant-1', 'user-1', {
+      reasonCode: 'OTHER',
+      notes: 'Cancelado pela operacao',
+    });
+
+    expect(repository.cancelCycleCount).toHaveBeenCalledWith({
+      cycleCountId: 'count-1',
+      tenantId: 'tenant-1',
+      actorUserId: 'user-1',
+      reasonCode: 'OTHER',
+      notes: 'Cancelado pela operacao',
+    });
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'inventory.cycle_count.canceled',
+        entityId: 'count-1',
       }),
     });
     expect(result.status).toBe('CANCELED');

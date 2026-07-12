@@ -292,6 +292,59 @@
       "COMPLETED": "Concluída",
       "CANCELED": "Cancelada"
     },
+    "cycleCounts": {
+      "title": "Inventários cíclicos",
+      "description": "Abra contagens físicas, registre quantidades e aprove ajustes rastreáveis no ledger.",
+      "actions": {
+        "create": "Novo inventário",
+        "open": "Abrir",
+        "approve": "Aprovar",
+        "cancel": "Cancelar",
+        "countItem": "Contar",
+        "addItem": "Adicionar item",
+        "removeItem": "Remover"
+      },
+      "table": {
+        "number": "Número",
+        "status": "Status",
+        "warehouse": "Warehouse",
+        "items": "Itens",
+        "itemCount": "{count} item(ns)",
+        "variance": "Divergência",
+        "reason": "Motivo",
+        "createdAt": "Criado em",
+        "actions": "Ações"
+      },
+      "detail": {
+        "snapshotHint": "Snapshot de saldo capturado na abertura; aprovação falha se o saldo mudar.",
+        "system": "Sistema",
+        "counted": "Contado",
+        "variance": "Divergência"
+      },
+      "form": {
+        "createTitle": "Novo inventário cíclico",
+        "countTitle": "Registrar contagem",
+        "approveTitle": "Aprovar inventário",
+        "cancelTitle": "Cancelar inventário",
+        "countedQuantity": "Quantidade contada"
+      },
+      "empty": {
+        "title": "Nenhum inventário cíclico encontrado",
+        "description": "As contagens físicas aparecerão aqui conforme forem criadas."
+      },
+      "errors": {
+        "title": "Não foi possível carregar inventários cíclicos",
+        "invalid": "Revise o warehouse, SKUs, quantidades e motivo do inventário.",
+        "stale": "O saldo mudou desde a abertura. Reabra ou recrie a contagem antes de aprovar."
+      }
+    },
+    "cycleCountStatus": {
+      "DRAFT": "Rascunho",
+      "OPEN": "Aberto",
+      "COUNTED": "Contado",
+      "APPROVED": "Aprovado",
+      "CANCELED": "Cancelado"
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Saldos",

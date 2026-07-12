@@ -24,8 +24,8 @@ import AnalyticsView from '../views/AnalyticsView.vue'
 import ExportsView from '../views/ExportsView.vue'
 import ReconciliationView from '../views/ReconciliationView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
-import InventoryAdvancedFoundationView from '../views/InventoryAdvancedFoundationView.vue'
 import InventoryTransfersView from '../views/InventoryTransfersView.vue'
+import InventoryCycleCountsView from '../views/InventoryCycleCountsView.vue'
 import { advancedInventoryFeatures } from '../config/features'
 
 export const advancedInventoryRouteDefinitions: RouteRecordRaw[] = [
@@ -43,7 +43,7 @@ export const advancedInventoryRouteDefinitions: RouteRecordRaw[] = [
   {
     path: '/inventory/cycle-counts',
     name: 'inventory-cycle-counts',
-    component: InventoryAdvancedFoundationView,
+    component: InventoryCycleCountsView,
     meta: {
       layout: AppLayout,
       requiresAuth: true,

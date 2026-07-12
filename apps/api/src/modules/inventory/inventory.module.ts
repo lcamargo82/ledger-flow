@@ -9,6 +9,7 @@ import { InventoryLedgerController } from './presentation/controllers/inventory-
 import { InventoryWarehousesController } from './presentation/controllers/inventory-warehouses.controller';
 import { InventoryAdvancedFoundationController } from './presentation/controllers/inventory-advanced-foundation.controller';
 import { InventoryTransfersController } from './presentation/controllers/inventory-transfers.controller';
+import { InventoryCycleCountsController } from './presentation/controllers/inventory-cycle-counts.controller';
 import { InventoryAdvancedFeatureService } from './application/services/inventory-advanced-feature.service';
 
 @Module({
@@ -19,6 +20,7 @@ import { InventoryAdvancedFeatureService } from './application/services/inventor
     InventoryLedgerController,
     InventoryAdvancedFoundationController,
     InventoryTransfersController,
+    InventoryCycleCountsController,
   ],
   providers: [
     InventoryService,

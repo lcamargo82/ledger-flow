@@ -212,9 +212,10 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Base:** reutiliza `AppPageHeader`, `AppTable`, `AppModal`, `AppSelect`, `AppNumberInput`, `AppBadge` e ledger Inventory existente.
 - **UX:** lista por estado, criação multi-item, ações iniciar/concluir/cancelar condicionadas ao estado e feedback de erro traduzido.
 
-### Cycle Counts (planejada)
+### Cycle Counts
 
 - **Rota:** `/inventory/cycle-counts`.
-- **Status:** Planejada 10.2.3.
-- **Base:** deve reutilizar `AppPageHeader`, `AppTable`, página/drawer de detalhe, `AppConfirmDialog`, `AppBadge` e ledger Inventory existente.
-- **UX:** ações condicionadas ao estado; aprovação mostra consequência e impede clique duplo.
+- **Status:** Implementada 10.2.3.
+- **Autorização:** `inventory:cycle-count` + `inventory.cycle_count`, com rota condicionada por feature flag.
+- **Base:** reutiliza `AppPageHeader`, `AppTable`, `AppModal`, `AppInput`, `AppTextarea`, `AppNumberInput`, `AppBadge` e ledger Inventory existente.
+- **UX:** lista por estado, criação multi-SKU, abertura com snapshot de saldo, contagem por item, resumo de divergência, aprovação/cancelamento condicionados ao estado e feedback traduzido para stale balance.

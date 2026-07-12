@@ -11,15 +11,21 @@ import {
   InventoryMovementType,
   InventoryReservationStatus,
   InventoryTransferStatus,
+  CycleCountStatus,
   Prisma,
 } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import {
   AdjustmentData,
+  ApproveCycleCountData,
+  CancelCycleCountData,
   CancelInventoryTransferData,
   CompleteInventoryTransferData,
+  CountCycleCountItemData,
+  CreateCycleCountData,
   CreateInventoryTransferData,
   InventoryRepository,
+  ListCycleCountsParams,
   ListInventoryParams,
   ListInventoryTransfersParams,
   ListWarehousesParams,
@@ -642,6 +648,336 @@ export class PrismaInventoryRepository implements InventoryRepository {
     });
   }
 
+  async createCycleCount(data: CreateCycleCountData) {
+    return this.prisma.$transaction(async (tx) => {
+      const existingCycleCount = await tx.cycleCount.findUnique({
+        where: {
+          tenantId_idempotencyKey: {
+            tenantId: data.tenantId,
+            idempotencyKey: data.idempotencyKey,
+          },
+        },
+        include: { items: true },
+      });
+
+      if (existingCycleCount) return existingCycleCount;
+
+      return tx.cycleCount.create({
+        data: {
+          tenantId: data.tenantId,
+          countNumber: this.createCycleCountNumber(),
+          warehouseId: data.warehouseId,
+          reasonCode: data.reasonCode,
+          notes: data.notes,
+          idempotencyKey: data.idempotencyKey,
+          createdByUserId: data.createdByUserId,
+          items: {
+            create: data.items.map((item) => ({
+              tenantId: data.tenantId,
+              skuId: item.skuId,
+            })),
+          },
+        },
+        include: { items: true },
+      });
+    });
+  }
+
+  async listCycleCounts(params: ListCycleCountsParams) {
+    const { tenantId, page = 1, perPage = 10, status, warehouseId } = params;
+    const take = Math.min(perPage, 100);
+    const skip = (page - 1) * take;
+    const where: Prisma.CycleCountWhereInput = { tenantId, status, warehouseId };
+
+    const [data, total] = await Promise.all([
+      this.prisma.cycleCount.findMany({
+        where,
+        include: { items: true },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.cycleCount.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: { page, perPage: take, total, totalPages: Math.ceil(total / take) },
+    };
+  }
+
+  findCycleCountById(id: string, tenantId: string) {
+    return this.prisma.cycleCount.findFirst({
+      where: { id, tenantId },
+      include: { items: true },
+    });
+  }
+
+  async openCycleCount(data: { cycleCountId: string; tenantId: string; actorUserId: string }) {
+    return this.prisma.$transaction(async (tx) => {
+      const cycleCount = await tx.cycleCount.findFirst({
+        where: { id: data.cycleCountId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!cycleCount) throw new NotFoundException('Cycle count not found.');
+      if (cycleCount.status !== CycleCountStatus.DRAFT) {
+        throw new BadRequestException('Only draft cycle counts can be opened.');
+      }
+      if (!cycleCount.items.length) {
+        throw new BadRequestException('Cycle count must contain at least one item.');
+      }
+
+      const now = new Date();
+      for (const item of cycleCount.items) {
+        await this.lockBalance(tx, cycleCount.tenantId, item.skuId, cycleCount.warehouseId);
+        const balance = await this.findLockedBalance(
+          tx,
+          cycleCount.tenantId,
+          item.skuId,
+          cycleCount.warehouseId,
+        );
+
+        await tx.cycleCountItem.update({
+          where: { id: item.id },
+          data: {
+            systemOnHandAtOpen: balance.onHandQuantity,
+            balanceVersionAtOpen: balance.version,
+          },
+        });
+      }
+
+      return tx.cycleCount.update({
+        where: { id: cycleCount.id },
+        data: {
+          status: CycleCountStatus.OPEN,
+          openedByUserId: data.actorUserId,
+          openedAt: now,
+        },
+        include: { items: true },
+      });
+    });
+  }
+
+  async countCycleCountItem(data: CountCycleCountItemData) {
+    return this.prisma.$transaction(async (tx) => {
+      const cycleCount = await tx.cycleCount.findFirst({
+        where: { id: data.cycleCountId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!cycleCount) throw new NotFoundException('Cycle count not found.');
+      if (
+        cycleCount.status !== CycleCountStatus.OPEN &&
+        cycleCount.status !== CycleCountStatus.COUNTED
+      ) {
+        throw new BadRequestException('Only open cycle counts can receive counts.');
+      }
+
+      const item = cycleCount.items.find((currentItem) => currentItem.id === data.itemId);
+      if (!item) throw new NotFoundException('Cycle count item not found.');
+      if (item.systemOnHandAtOpen === null || item.balanceVersionAtOpen === null) {
+        throw new BadRequestException('Cycle count item has not been opened.');
+      }
+
+      const countedQuantity = Math.abs(data.countedQuantity);
+      const varianceQuantity = countedQuantity - Number(item.systemOnHandAtOpen);
+      const now = new Date();
+
+      await tx.cycleCountItem.update({
+        where: { id: item.id },
+        data: {
+          countedQuantity,
+          varianceQuantity,
+          countedByUserId: data.actorUserId,
+          countedAt: now,
+        },
+      });
+
+      const remainingUncounted = await tx.cycleCountItem.count({
+        where: {
+          tenantId: data.tenantId,
+          cycleCountId: cycleCount.id,
+          countedQuantity: null,
+        },
+      });
+
+      return tx.cycleCount.update({
+        where: { id: cycleCount.id },
+        data: {
+          ...(remainingUncounted === 0 && {
+            status: CycleCountStatus.COUNTED,
+            countedAt: now,
+          }),
+        },
+        include: { items: true },
+      });
+    });
+  }
+
+  async approveCycleCount(data: ApproveCycleCountData) {
+    return this.prisma.$transaction(async (tx) => {
+      const cycleCount = await tx.cycleCount.findFirst({
+        where: { id: data.cycleCountId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!cycleCount) throw new NotFoundException('Cycle count not found.');
+      if (cycleCount.status === CycleCountStatus.APPROVED) {
+        return this.approvedCycleCountResult(tx, cycleCount);
+      }
+      if (cycleCount.status === CycleCountStatus.CANCELED) {
+        throw new BadRequestException('Canceled cycle counts cannot be approved.');
+      }
+      if (cycleCount.status !== CycleCountStatus.COUNTED) {
+        throw new BadRequestException('Only counted cycle counts can be approved.');
+      }
+
+      const movements: InventoryMovement[] = [];
+      const balances: InventoryBalance[] = [];
+      const occurredAt = new Date();
+
+      for (const item of cycleCount.items) {
+        if (
+          item.systemOnHandAtOpen === null ||
+          item.balanceVersionAtOpen === null ||
+          item.countedQuantity === null ||
+          item.varianceQuantity === null
+        ) {
+          throw new BadRequestException('Cycle count has uncounted items.');
+        }
+
+        await this.lockBalance(tx, cycleCount.tenantId, item.skuId, cycleCount.warehouseId);
+        const balance = await this.findLockedBalance(
+          tx,
+          cycleCount.tenantId,
+          item.skuId,
+          cycleCount.warehouseId,
+        );
+
+        if (balance.version !== item.balanceVersionAtOpen) {
+          throw new ConflictException('CYCLE_COUNT_STALE_BALANCE');
+        }
+
+        const variance = Number(item.varianceQuantity);
+        if (variance === 0) continue;
+
+        const nextOnHand = Number(balance.onHandQuantity) + variance;
+        const reserved = Number(balance.reservedQuantity);
+        if (nextOnHand < reserved) {
+          throw new BadRequestException('Cycle count adjustment would make stock unavailable.');
+        }
+
+        const movement = await tx.inventoryMovement.create({
+          data: {
+            tenantId: cycleCount.tenantId,
+            skuId: item.skuId,
+            warehouseId: cycleCount.warehouseId,
+            type:
+              variance > 0
+                ? InventoryMovementType.ADJUSTMENT_IN
+                : InventoryMovementType.ADJUSTMENT_OUT,
+            quantityDelta: variance,
+            sourceType: 'CYCLE_COUNT',
+            sourceId: cycleCount.id,
+            idempotencyKey: `cycle-count:${cycleCount.id}:${item.id}:adjustment`,
+            reasonCode: data.reasonCode,
+            notes: data.notes,
+            occurredAt,
+            createdByUserId: data.actorUserId,
+          },
+        });
+
+        await tx.cycleCountItem.update({
+          where: { id: item.id },
+          data: { adjustmentMovementId: movement.id },
+        });
+
+        const updatedBalance = await tx.inventoryBalance.update({
+          where: {
+            tenantId_skuId_warehouseId: {
+              tenantId: cycleCount.tenantId,
+              skuId: item.skuId,
+              warehouseId: cycleCount.warehouseId,
+            },
+          },
+          data: {
+            onHandQuantity: nextOnHand,
+            availableQuantity: nextOnHand - reserved,
+            version: { increment: 1 },
+          },
+        });
+
+        movements.push(movement);
+        balances.push(updatedBalance);
+      }
+
+      const updatedCycleCount = await tx.cycleCount.update({
+        where: { id: cycleCount.id },
+        data: {
+          status: CycleCountStatus.APPROVED,
+          reasonCode: data.reasonCode,
+          notes: data.notes,
+          approvedByUserId: data.actorUserId,
+          approvedAt: occurredAt,
+          adjustedAt: movements.length ? occurredAt : null,
+        },
+        include: { items: true },
+      });
+
+      const outboxEvent = await tx.outboxEvent.create({
+        data: this.createOutboxPayload({
+          tenantId: cycleCount.tenantId,
+          aggregateType: 'CycleCount',
+          aggregateId: cycleCount.id,
+          eventType: 'inventory.cycle_count.adjusted',
+          payload: {
+            cycleCountId: cycleCount.id,
+            countNumber: cycleCount.countNumber,
+            warehouseId: cycleCount.warehouseId,
+            idempotencyKey: data.idempotencyKey,
+            adjustedItemCount: movements.length,
+            movementIds: movements.map((movement) => movement.id),
+          },
+        }),
+      });
+
+      return {
+        cycleCount: updatedCycleCount,
+        movements,
+        balances,
+        outboxEvent,
+      };
+    });
+  }
+
+  async cancelCycleCount(data: CancelCycleCountData) {
+    return this.prisma.$transaction(async (tx) => {
+      const cycleCount = await tx.cycleCount.findFirst({
+        where: { id: data.cycleCountId, tenantId: data.tenantId },
+        include: { items: true },
+      });
+
+      if (!cycleCount) throw new NotFoundException('Cycle count not found.');
+      if (cycleCount.status === CycleCountStatus.APPROVED) {
+        throw new BadRequestException('Approved cycle counts cannot be canceled.');
+      }
+      if (cycleCount.status === CycleCountStatus.CANCELED) return cycleCount;
+
+      return tx.cycleCount.update({
+        where: { id: cycleCount.id },
+        data: {
+          status: CycleCountStatus.CANCELED,
+          reasonCode: data.reasonCode,
+          notes: data.notes,
+          canceledByUserId: data.actorUserId,
+          canceledAt: new Date(),
+        },
+        include: { items: true },
+      });
+    });
+  }
+
   private async transitionReservation(
     data: ReservationTransitionData,
     operation: {
@@ -895,6 +1231,10 @@ export class PrismaInventoryRepository implements InventoryRepository {
     return `TRF-${randomUUID().slice(0, 8).toUpperCase()}`;
   }
 
+  private createCycleCountNumber() {
+    return `CC-${randomUUID().slice(0, 8).toUpperCase()}`;
+  }
+
   private async completedTransferResult(
     tx: Prisma.TransactionClient,
     transfer: Prisma.InventoryTransferGetPayload<{ include: { items: true } }>,
@@ -965,5 +1305,39 @@ export class PrismaInventoryRepository implements InventoryRepository {
         throw new BadRequestException('Insufficient available quantity for transfer.');
       }
     }
+  }
+
+  private async approvedCycleCountResult(
+    tx: Prisma.TransactionClient,
+    cycleCount: Prisma.CycleCountGetPayload<{ include: { items: true } }>,
+  ) {
+    const [movements, balances, outboxEvent] = await Promise.all([
+      tx.inventoryMovement.findMany({
+        where: {
+          tenantId: cycleCount.tenantId,
+          sourceType: 'CYCLE_COUNT',
+          sourceId: cycleCount.id,
+        },
+        orderBy: { createdAt: 'asc' },
+      }),
+      tx.inventoryBalance.findMany({
+        where: {
+          tenantId: cycleCount.tenantId,
+          skuId: { in: cycleCount.items.map((item) => item.skuId) },
+          warehouseId: cycleCount.warehouseId,
+        },
+      }),
+      tx.outboxEvent.findFirst({
+        where: {
+          tenantId: cycleCount.tenantId,
+          aggregateType: 'CycleCount',
+          aggregateId: cycleCount.id,
+          eventType: 'inventory.cycle_count.adjusted',
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return { cycleCount, movements, balances, ...(outboxEvent && { outboxEvent }) };
   }
 }
