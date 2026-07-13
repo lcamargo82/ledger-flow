@@ -800,10 +800,11 @@ model InternalOrder {
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
 
-  tenant            Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  items             InternalOrderItem[]
-  financialFacts    OrderFinancialFact[]
-  shippingSummaries OrderShippingSummary[]
+  tenant              Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items               InternalOrderItem[]
+  financialFacts      OrderFinancialFact[]
+  shippingSummaries   OrderShippingSummary[]
+  reconciliationCases ReconciliationCase[]
 
   @@unique([tenantId, orderNumber])
   @@unique([tenantId, idempotencyKey])
@@ -839,6 +840,7 @@ model OrderFinancialFact {
   id                String              @id @default(uuid())
   tenantId          String              @map("tenant_id")
   orderId           String              @map("order_id")
+  externalOrderId   String?             @map("external_order_id")
   version           Int                 @default(1)
   orderNumber       String              @map("order_number")
   orderStatus       InternalOrderStatus @map("order_status")
@@ -860,6 +862,7 @@ model OrderFinancialFact {
   @@unique([tenantId, orderId, version])
   @@index([tenantId, calculatedAt])
   @@index([tenantId, channelProvider, calculatedAt])
+  @@index([tenantId, channelProvider, externalOrderId])
   @@index([tenantId, orderStatus])
   @@map("order_financial_facts")
 }
@@ -1452,6 +1455,7 @@ enum ReconciliationCaseStatus {
 enum ReconciliationMatchType {
   PROVIDER_PAYMENT_ID
   EXTERNAL_REFERENCE
+  MARKETPLACE_ORDER_ID
   EXPLICIT_LINK
   AMOUNT_CURRENCY_TIME_CANDIDATE
   NONE
@@ -1558,12 +1562,14 @@ model ReconciliationCase {
   tenant          Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   settlementEvent ProviderSettlementEvent  @relation(fields: [settlementEventId], references: [id], onDelete: Restrict)
   payment         Payment?                 @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  order           InternalOrder?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
   decisions       ReconciliationDecision[]
 
   @@unique([tenantId, settlementEventId])
   @@index([tenantId, status])
   @@index([tenantId, provider, createdAt])
   @@index([paymentId])
+  @@index([orderId])
   @@map("reconciliation_cases")
 }
 

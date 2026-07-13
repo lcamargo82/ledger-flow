@@ -18,6 +18,17 @@ export class ReconciliationCasePaymentSummaryDto {
   providerPaymentId?: string | null;
 }
 
+export class ReconciliationCaseOrderSummaryDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  orderNumber: string;
+
+  @ApiProperty()
+  status: string;
+}
+
 export class ReconciliationCaseSettlementSummaryDto {
   @ApiProperty()
   id: string;
@@ -83,6 +94,9 @@ export class ReconciliationCaseResponseDto {
 
   @ApiPropertyOptional({ type: ReconciliationCasePaymentSummaryDto })
   payment?: ReconciliationCasePaymentSummaryDto | null;
+
+  @ApiPropertyOptional({ type: ReconciliationCaseOrderSummaryDto })
+  order?: ReconciliationCaseOrderSummaryDto | null;
 }
 
 export class PaginatedReconciliationCasesResponseDto {

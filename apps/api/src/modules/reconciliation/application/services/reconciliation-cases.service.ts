@@ -22,6 +22,13 @@ const CASE_INCLUDE = {
       providerPaymentId: true,
     },
   },
+  order: {
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+    },
+  },
 } satisfies Prisma.ReconciliationCaseInclude;
 
 @Injectable()

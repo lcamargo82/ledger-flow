@@ -308,6 +308,7 @@ Fase 5A — Payments Core Backend Foundation
 - Cancel/refund MP-4: os endpoints genéricos de pagamentos chamam o Mercado Pago antes da mutação local, usam chaves de idempotência determinísticas, exigem motivo para estorno e persistem metadados sanitizados de provider em eventos/auditoria.
 - Marketplace settlement 9B-1: `/marketplace-settlement` cria contas financeiras Mercado Pago apenas quando a conexão está settlement-ready, registra saldo inicial em minor units, mantém `CashLedgerEntry` append-only e audita ajustes manuais de caixa.
 - Marketplace settlement 9B-2: sync manual por período busca pagamentos Mercado Pago com token settlement, normaliza bruto/taxas/líquido/refunds/datas de liberação em `ProviderSettlementEvent` sanitizado, vincula os eventos à conta financeira operacional e exibe totais/eventos importados em `/marketplace-settlement`.
+- Marketplace settlement 9B-3: matching passa a casar Mercado Pago com Mercado Livre por `providerPaymentId`, referências de pagamento e `OrderFinancialFact.externalOrderId`; divergências viram cases explícitos e candidatos por valor/data ficam pendentes para revisão manual.
 - Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
 - Documentação: ADR 0031.
 

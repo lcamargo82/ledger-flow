@@ -26,6 +26,12 @@ export interface ReconciliationCasePaymentSummary {
   providerPaymentId?: string | null
 }
 
+export interface ReconciliationCaseOrderSummary {
+  id: string
+  orderNumber: string
+  status: string
+}
+
 export interface ReconciliationCaseSettlementSummary {
   id: string
   providerEventId: string
@@ -51,6 +57,7 @@ export interface ReconciliationCase {
   updatedAt: string
   settlementEvent: ReconciliationCaseSettlementSummary
   payment?: ReconciliationCasePaymentSummary | null
+  order?: ReconciliationCaseOrderSummary | null
 }
 
 export interface ReconciliationCasesFilters {
