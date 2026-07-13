@@ -34,7 +34,7 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
       supportsCancel: false,
       supportsPartialRefund: false,
       supportsSandbox: true,
-      supportsWebhooks: false,
+      supportsWebhooks: true,
       supportsCheckoutRedirect: false,
       supportsEmbeddedCheckout: false,
     };
@@ -103,7 +103,9 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
     throw new GatewayNotImplementedError(this.provider);
   }
 
-  async getPaymentInstructions(input: GetGatewayPaymentInstructionsInput): Promise<GatewayPaymentInstructions> {
+  async getPaymentInstructions(
+    input: GetGatewayPaymentInstructionsInput,
+  ): Promise<GatewayPaymentInstructions> {
     if (!input.providerPaymentId) {
       throw new Error('providerPaymentId is required to fetch instructions');
     }
@@ -127,8 +129,13 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
     instructions.invoiceUrl = result.invoiceUrl || null;
     instructions.bankSlipUrl = result.bankSlipUrl || null;
     instructions.paymentUrl = result.checkoutUrl || null;
-    instructions.isExpired = instructions.status === PaymentStatus.FAILED || instructions.status === PaymentStatus.CANCELED || instructions.status === PaymentStatus.REFUNDED;
-    instructions.canCancel = instructions.status === PaymentStatus.PENDING || instructions.status === PaymentStatus.PROCESSING;
+    instructions.isExpired =
+      instructions.status === PaymentStatus.FAILED ||
+      instructions.status === PaymentStatus.CANCELED ||
+      instructions.status === PaymentStatus.REFUNDED;
+    instructions.canCancel =
+      instructions.status === PaymentStatus.PENDING ||
+      instructions.status === PaymentStatus.PROCESSING;
     instructions.canRefresh = !instructions.isExpired;
 
     if (input.method === PaymentMethod.PIX) {
@@ -159,13 +166,18 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
 
   private mapStatus(status: string): PaymentStatus {
     switch (status) {
-      case 'approved': return PaymentStatus.APPROVED;
+      case 'approved':
+        return PaymentStatus.APPROVED;
       case 'pending':
-      case 'in_process': return PaymentStatus.PENDING;
+      case 'in_process':
+        return PaymentStatus.PENDING;
       case 'rejected':
-      case 'cancelled': return PaymentStatus.FAILED; // Or CANCELED, depending on logic
-      case 'refunded': return PaymentStatus.REFUNDED;
-      default: return PaymentStatus.PENDING;
+      case 'cancelled':
+        return PaymentStatus.FAILED; // Or CANCELED, depending on logic
+      case 'refunded':
+        return PaymentStatus.REFUNDED;
+      default:
+        return PaymentStatus.PENDING;
     }
   }
 }

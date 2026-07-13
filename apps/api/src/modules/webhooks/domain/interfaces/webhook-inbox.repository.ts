@@ -11,6 +11,7 @@ export type CreateWebhookInboxEventInput = {
   payloadSummary?: any;
   tenantId?: string;
   paymentId?: string;
+  gatewayConfigurationId?: string;
 };
 
 export interface IWebhookInboxRepository {

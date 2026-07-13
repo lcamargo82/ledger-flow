@@ -1,5 +1,5 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
-import { WebhookProvider, Payment } from '@prisma/client';
+import { Payment, PaymentProvider, WebhookProvider } from '@prisma/client';
 import { WebhookAdapterRegistryService } from './webhook-adapter-registry.service';
 import { WebhookProcessorRegistryService } from './webhook-processor-registry.service';
 import type { IWebhookInboxRepository } from '../../domain/interfaces/webhook-inbox.repository';
@@ -71,6 +71,7 @@ export class WebhookIngressService {
 
     let tenantId: string | undefined;
     let paymentId: string | undefined;
+    let gatewayConfigurationId = normalizedEvent.gatewayConfigurationId;
 
     if (normalizedEvent.providerPaymentId || normalizedEvent.paymentReference) {
       let payment: Payment | null = null;
@@ -93,6 +94,7 @@ export class WebhookIngressService {
       if (payment) {
         tenantId = payment.tenantId;
         paymentId = payment.id;
+        gatewayConfigurationId = payment.gatewayConfigurationId ?? gatewayConfigurationId;
       } else {
         this.logger.warn(
           `[WebhookIngressService] Payment not found for event ${normalizedEvent.providerEventId}, matching failed.`,
@@ -115,6 +117,20 @@ export class WebhookIngressService {
       }
     }
 
+    if (!tenantId && normalizedEvent.metadata?.merchantId) {
+      const configuration = await this.prisma.gatewayConfiguration.findFirst({
+        where: {
+          provider: PaymentProvider.MERCADO_PAGO,
+          credentialsFingerprint: `mp_${String(normalizedEvent.metadata.merchantId)}`,
+        },
+      });
+
+      if (configuration) {
+        tenantId = configuration.tenantId;
+        gatewayConfigurationId = configuration.id;
+      }
+    }
+
     const inboxEvent = await this.inboxRepository.createReceived({
       provider: normalizedEvent.provider,
       providerEventId: normalizedEvent.providerEventId,
@@ -126,6 +142,7 @@ export class WebhookIngressService {
       payloadSummary: normalizedEvent.payloadSummary,
       tenantId,
       paymentId,
+      gatewayConfigurationId,
     });
     this.logger.log(`[WebhookIngressService] webhook.ingress.received id=${inboxEvent.id}`);
 
