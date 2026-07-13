@@ -1949,7 +1949,32 @@
       "paymentId": "Payment ID",
       "reasonCode": "Reason code",
       "comment": "Comment",
+      "commentRequired": "Comment required",
       "submit": "Register decision"
+    },
+    "fineMesh": {
+      "evidence": "Evidence",
+      "timeline": "Timeline",
+      "providerPayment": "Provider payment",
+      "netAmount": "Net amount",
+      "order": "Order",
+      "payment": "Payment"
+    },
+    "timeline": {
+      "SETTLEMENT_EVENT_RECEIVED": "Financial event received",
+      "CASE_CREATED": "Case created",
+      "DECISION_RECORDED": "Decision recorded"
+    },
+    "reasonCodes": {
+      "OPERATIONAL_NOTE": "Operational note",
+      "WAITING_PROVIDER_CONFIRMATION": "Waiting for provider confirmation",
+      "MANUAL_PAYMENT_CONFIRMED": "Payment manually confirmed",
+      "MARKETPLACE_ORDER_CONFIRMED": "Marketplace order confirmed",
+      "AMOUNT_TOLERANCE_ACCEPTED": "Difference within tolerance",
+      "PROVIDER_FEE_EXPLAINED": "Provider fee explained",
+      "DUPLICATE_PROVIDER_EVENT": "Duplicate provider event",
+      "PROVIDER_NOISE": "Operationally irrelevant event",
+      "REOPEN_FOR_NEW_EVIDENCE": "Reopen for new evidence"
     },
     "errors": {
       "default": "Could not load reconciliation.",

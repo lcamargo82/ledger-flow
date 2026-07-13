@@ -8,6 +8,9 @@ vi.mock('../services/reconciliation.service', () => ({
   reconciliationService: {
     listCases: vi.fn(),
     getDashboard: vi.fn(),
+    getCase: vi.fn(),
+    getTimeline: vi.fn(),
+    listReasonCodes: vi.fn(),
     createDecision: vi.fn(),
   },
 }))
@@ -71,6 +74,74 @@ describe('reconciliation manual review', () => {
       ],
       note: 'cash_reconciliation_not_operational_margin',
     })
+    vi.mocked(reconciliationService.getCase).mockResolvedValue({
+      id: 'case-1',
+      provider: 'ASAAS',
+      status: 'AMBIGUOUS',
+      matchType: 'AMOUNT_CURRENCY_TIME_CANDIDATE',
+      expectedAmountMinor: '12345',
+      receivedAmountMinor: '12345',
+      differenceAmountMinor: '0',
+      currency: 'BRL',
+      currencyExponent: 2,
+      policyVersion: 1,
+      createdAt: '2026-07-03T10:00:00.000Z',
+      updatedAt: '2026-07-03T10:00:00.000Z',
+      settlementEvent: {
+        id: 'settlement-1',
+        providerEventId: 'evt-1',
+        providerPaymentId: 'pay-1',
+        externalReference: 'LF-123',
+        occurredAt: '2026-07-03T10:00:00.000Z',
+      },
+      payment: null,
+    })
+    vi.mocked(reconciliationService.getTimeline).mockResolvedValue({
+      case: {
+        id: 'case-1',
+        provider: 'ASAAS',
+        status: 'AMBIGUOUS',
+        matchType: 'AMOUNT_CURRENCY_TIME_CANDIDATE',
+        expectedAmountMinor: '12345',
+        receivedAmountMinor: '12345',
+        differenceAmountMinor: '0',
+        currency: 'BRL',
+        currencyExponent: 2,
+        policyVersion: 1,
+        createdAt: '2026-07-03T10:00:00.000Z',
+        updatedAt: '2026-07-03T10:00:00.000Z',
+        settlementEvent: {
+          id: 'settlement-1',
+          providerEventId: 'evt-1',
+          providerPaymentId: 'pay-1',
+          externalReference: 'LF-123',
+          occurredAt: '2026-07-03T10:00:00.000Z',
+        },
+        payment: null,
+      },
+      evidence: {
+        settlementEvent: {
+          id: 'settlement-1',
+          providerEventId: 'evt-1',
+          providerPaymentId: 'pay-1',
+          externalReference: 'LF-123',
+          netAmountMinor: '12345',
+          occurredAt: '2026-07-03T10:00:00.000Z',
+        },
+        payment: null,
+        order: null,
+      },
+      decisions: [],
+      events: [{ type: 'CASE_CREATED', occurredAt: '2026-07-03T10:00:00.000Z' }],
+    })
+    vi.mocked(reconciliationService.listReasonCodes).mockResolvedValue([
+      {
+        code: 'OPERATIONAL_NOTE',
+        action: 'COMMENT',
+        labelKey: 'reconciliation.reasonCodes.OPERATIONAL_NOTE',
+        requiresComment: false,
+      },
+    ])
   })
 
   it('renders cases and opens the reusable decision modal with a required reason code', async () => {
@@ -90,6 +161,9 @@ describe('reconciliation manual review', () => {
     await wrapper.get('[data-testid="open-decision-modal"]').trigger('click')
 
     expect(wrapper.text()).toContain('Registrar decisão')
+    await flushPromises()
+    expect(wrapper.text()).toContain('Evidências')
+    expect(wrapper.text()).toContain('pay-1')
     expect(wrapper.get('[name="reasonCode"]').attributes('required')).toBeDefined()
   })
 })

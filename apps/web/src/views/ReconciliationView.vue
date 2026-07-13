@@ -33,6 +33,7 @@ onMounted(() => {
 const openDecisionModal = (reconciliationCase: ReconciliationCase) => {
   selectedCase.value = reconciliationCase
   isDecisionModalOpen.value = true
+  reconciliationStore.fetchReviewContext(reconciliationCase.id)
 }
 
 const submitDecision = async (payload: CreateReconciliationDecisionPayload) => {
@@ -222,7 +223,9 @@ const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.valu
     <ReconciliationDecisionModal
       v-model="isDecisionModalOpen"
       :reconciliation-case="selectedCase"
-      :loading="reconciliationStore.isMutating"
+      :timeline="reconciliationStore.selectedTimeline"
+      :reason-codes="reconciliationStore.reasonCodes"
+      :loading="reconciliationStore.isMutating || reconciliationStore.isReviewLoading"
       @submit="submitDecision"
     />
   </div>

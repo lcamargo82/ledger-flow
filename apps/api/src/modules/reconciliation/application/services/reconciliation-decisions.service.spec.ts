@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   PaymentProvider,
   ReconciliationCaseStatus,
@@ -140,6 +140,17 @@ describe('ReconciliationDecisionsService', () => {
       where: { id: 'case-1' },
       data: { status: ReconciliationCaseStatus.AMBIGUOUS },
     });
+  });
+
+  it('rejects decisions with reason codes not allowed for the selected action', async () => {
+    await expect(
+      service.createDecision('tenant-1', 'user-1', 'case-1', {
+        action: ReconciliationDecisionAction.IGNORE,
+        reasonCode: 'MANUAL_PAYMENT_CONFIRMED',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+
+    expect(prisma.reconciliationDecision.create).not.toHaveBeenCalled();
   });
 
   function reconciliationCase(overrides: Record<string, unknown> = {}) {
