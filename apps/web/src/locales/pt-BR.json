@@ -217,6 +217,10 @@
       "mercadoPagoConnectionReauthRequired": {
         "title": "Reconexão Mercado Pago necessária",
         "message": "A conexão {provider} precisa ser reconectada para continuar processando operações."
+      },
+      "mercadoPagoPaymentStatusUpdated": {
+        "title": "Pagamento Mercado Pago atualizado",
+        "message": "O pagamento {paymentReference} mudou de {previousStatus} para {currentStatus}."
       }
     }
   },

@@ -51,6 +51,14 @@ const NOTIFICATION_EVENT_REGISTRY = {
     requiredPermissions: ['gateways:read', 'gateways:manage'],
     requiredCapabilities: [NotificationCapabilities.Read],
   },
+  'mercado_pago.payment_status_updated': {
+    category: NotificationCategory.PAYMENTS,
+    severity: NotificationSeverity.INFO,
+    titleKey: 'notifications.events.mercadoPagoPaymentStatusUpdated.title',
+    messageKey: 'notifications.events.mercadoPagoPaymentStatusUpdated.message',
+    requiredPermissions: ['payments:read', 'payments:manage'],
+    requiredCapabilities: [NotificationCapabilities.Read],
+  },
 } satisfies Record<string, NotificationEventContract>;
 
 export type RegisteredNotificationEventType = keyof typeof NOTIFICATION_EVENT_REGISTRY;

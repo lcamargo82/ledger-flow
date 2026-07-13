@@ -29,6 +29,8 @@ export interface NormalizedWebhookEvent {
   billingType?: string;
   amountInCents?: number;
   currency?: string;
+  tenantId?: string;
+  paymentId?: string;
   gatewayConfigurationId?: string;
   payloadHash: string;
   payloadSummary: Record<string, any>;

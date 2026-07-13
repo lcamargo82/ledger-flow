@@ -304,6 +304,7 @@ Fase 5A — Payments Core Backend Foundation
 - Hardening MP-0: o frontend normaliza `mercado-pago`, `mercado_pago` e `MERCADO_PAGO`; a matriz de capabilities do adapter Mercado Pago anunciou apenas PIX, boleto e sandbox até a chegada da fundação de webhooks.
 - Refresh MP-1: `MercadoPagoCredentialManager` renova tokens próximos do vencimento com lock Redis, atualiza credenciais cifradas de forma otimista e marca `REAUTH_REQUIRED` em caso de refresh token inválido/revogado.
 - Webhook foundation MP-2: `POST /webhooks/mercado-pago` valida assinatura quando configurada, persiste inbox sanitizado/idempotente, enfileira `webhook.inbound_processing_requested` e mantém o worker provider-aware para não acionar ingestão de conciliação Asaas em eventos Mercado Pago.
+- Status sync MP-3: o worker Mercado Pago busca detalhes do pagamento com token válido, atualiza `Payment.status` de forma idempotente, bloqueia regressões terminais, registra chargeback como evento técnico sem mutar status e emite notificação autorizada `mercado_pago.payment_status_updated`.
 - Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
 - Documentação: ADR 0031.
 
