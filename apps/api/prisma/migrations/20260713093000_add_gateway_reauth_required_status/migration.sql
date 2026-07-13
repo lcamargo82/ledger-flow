@@ -1,0 +1,1 @@
+ALTER TYPE "GatewayConfigurationStatus" ADD VALUE IF NOT EXISTS 'REAUTH_REQUIRED';

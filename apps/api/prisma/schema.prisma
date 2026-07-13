@@ -1135,6 +1135,7 @@ enum GatewayConfigurationStatus {
   ACTIVE
   INACTIVE
   DISABLED
+  REAUTH_REQUIRED
 }
 
 enum GatewayHealthStatus {

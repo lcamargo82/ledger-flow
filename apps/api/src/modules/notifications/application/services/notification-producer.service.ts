@@ -75,6 +75,28 @@ export class NotificationProducerService {
     });
   }
 
+  async mercadoPagoConnectionReauthRequired(input: {
+    tenantId: string;
+    gatewayConfigurationId: string;
+  }) {
+    if (!this.isEnabled()) return;
+
+    await this.notifications.createEvent({
+      tenantId: input.tenantId,
+      eventType: 'mercado_pago.connection_reauth_required',
+      idempotencyKey: `mercado-pago:${input.gatewayConfigurationId}:reauth-required`,
+      sourceType: 'GatewayConfiguration',
+      sourceId: input.gatewayConfigurationId,
+      occurredAt: new Date(),
+      translationArgs: {
+        provider: 'Mercado Pago',
+      },
+      metadata: {
+        provider: 'MERCADO_PAGO',
+      },
+    });
+  }
+
   private isEnabled() {
     return this.config.get<string>('NOTIFICATIONS_INTERNAL_PRODUCERS_ENABLED') === 'true';
   }

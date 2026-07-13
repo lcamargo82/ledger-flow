@@ -89,7 +89,7 @@ export class MercadoPagoOAuthService {
       };
 
       const encryptedResponse = this.encryptionService.encrypt(credentials);
-      const encryptedCredentials = encryptedResponse.encryptedData;
+      const encryptedCredentials = JSON.stringify(encryptedResponse);
       const fingerprint = MercadoPagoCredentialsMapper.deriveFingerprint(credentials);
 
       const isTestMode = process.env.MERCADO_PAGO_TEST_MODE === 'true';
