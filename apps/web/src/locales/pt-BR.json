@@ -1950,7 +1950,32 @@
       "paymentId": "ID do pagamento",
       "reasonCode": "Código do motivo",
       "comment": "Comentário",
+      "commentRequired": "Comentário obrigatório",
       "submit": "Registrar decisão"
+    },
+    "fineMesh": {
+      "evidence": "Evidências",
+      "timeline": "Timeline",
+      "providerPayment": "Pagamento provider",
+      "netAmount": "Valor líquido",
+      "order": "Pedido",
+      "payment": "Pagamento"
+    },
+    "timeline": {
+      "SETTLEMENT_EVENT_RECEIVED": "Evento financeiro recebido",
+      "CASE_CREATED": "Caso criado",
+      "DECISION_RECORDED": "Decisão registrada"
+    },
+    "reasonCodes": {
+      "OPERATIONAL_NOTE": "Nota operacional",
+      "WAITING_PROVIDER_CONFIRMATION": "Aguardando confirmação do provider",
+      "MANUAL_PAYMENT_CONFIRMED": "Pagamento confirmado manualmente",
+      "MARKETPLACE_ORDER_CONFIRMED": "Pedido marketplace confirmado",
+      "AMOUNT_TOLERANCE_ACCEPTED": "Diferença dentro da tolerância",
+      "PROVIDER_FEE_EXPLAINED": "Taxa do provider explicada",
+      "DUPLICATE_PROVIDER_EVENT": "Evento duplicado do provider",
+      "PROVIDER_NOISE": "Evento sem impacto operacional",
+      "REOPEN_FOR_NEW_EVIDENCE": "Reabrir por nova evidência"
     },
     "errors": {
       "default": "Não foi possível carregar a conciliação.",

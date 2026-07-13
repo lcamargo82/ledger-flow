@@ -10,7 +10,15 @@ const CASE_INCLUDE = {
       providerEventId: true,
       providerPaymentId: true,
       externalReference: true,
+      eventType: true,
+      providerStatus: true,
+      amountMinor: true,
+      feeAmountMinor: true,
+      netAmountMinor: true,
+      currency: true,
+      availableAt: true,
       occurredAt: true,
+      receivedAt: true,
     },
   },
   payment: {
@@ -19,6 +27,7 @@ const CASE_INCLUDE = {
       reference: true,
       amount: true,
       currency: true,
+      status: true,
       providerPaymentId: true,
     },
   },
@@ -73,7 +82,7 @@ export class ReconciliationCasesService {
   async getTimeline(tenantId: string, id: string) {
     const reconciliationCase = await this.prisma.reconciliationCase.findFirst({
       where: { id, tenantId },
-      select: { id: true, status: true, createdAt: true, updatedAt: true },
+      include: CASE_INCLUDE,
     });
 
     if (!reconciliationCase) {
@@ -85,12 +94,44 @@ export class ReconciliationCasesService {
       orderBy: { createdAt: 'asc' },
     });
 
-    return {
-      case: reconciliationCase,
-      decisions: decisions.map((decision) => ({
-        ...decision,
-        metadata: decision.metadata ?? null,
+    const normalizedDecisions = decisions.map((decision) => ({
+      ...decision,
+      metadata: decision.metadata ?? null,
+    }));
+    const events = [
+      {
+        type: 'SETTLEMENT_EVENT_RECEIVED',
+        occurredAt:
+          reconciliationCase.settlementEvent.occurredAt ??
+          reconciliationCase.settlementEvent.receivedAt ??
+          reconciliationCase.createdAt,
+        settlementEvent: this.toSettlementEvidence(reconciliationCase.settlementEvent),
+      },
+      {
+        type: 'CASE_CREATED',
+        occurredAt: reconciliationCase.createdAt,
+        case: {
+          id: reconciliationCase.id,
+          status: reconciliationCase.status,
+          matchType: reconciliationCase.matchType,
+        },
+      },
+      ...normalizedDecisions.map((decision) => ({
+        type: 'DECISION_RECORDED',
+        occurredAt: decision.createdAt,
+        decision,
       })),
+    ].sort((left, right) => left.occurredAt.getTime() - right.occurredAt.getTime());
+
+    return {
+      case: this.toResponse(reconciliationCase),
+      evidence: {
+        settlementEvent: this.toSettlementEvidence(reconciliationCase.settlementEvent),
+        payment: reconciliationCase.payment ?? null,
+        order: reconciliationCase.order ?? null,
+      },
+      decisions: normalizedDecisions,
+      events,
     };
   }
 
@@ -122,6 +163,20 @@ export class ReconciliationCasesService {
       expectedAmountMinor: reconciliationCase.expectedAmountMinor?.toString() ?? null,
       receivedAmountMinor: reconciliationCase.receivedAmountMinor?.toString() ?? null,
       differenceAmountMinor: reconciliationCase.differenceAmountMinor?.toString() ?? null,
+      settlementEvent: this.toSettlementEvidence(reconciliationCase.settlementEvent),
+    };
+  }
+
+  private toSettlementEvidence(
+    settlementEvent: Prisma.ReconciliationCaseGetPayload<{
+      include: typeof CASE_INCLUDE;
+    }>['settlementEvent'],
+  ) {
+    return {
+      ...settlementEvent,
+      amountMinor: settlementEvent.amountMinor?.toString() ?? null,
+      feeAmountMinor: settlementEvent.feeAmountMinor?.toString() ?? null,
+      netAmountMinor: settlementEvent.netAmountMinor?.toString() ?? null,
     };
   }
 }

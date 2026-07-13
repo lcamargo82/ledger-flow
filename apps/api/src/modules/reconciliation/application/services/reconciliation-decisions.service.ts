@@ -7,6 +7,10 @@ import {
   ReconciliationMatchType,
 } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
+import {
+  findReconciliationReasonCode,
+  RECONCILIATION_REASON_CODES,
+} from '../../domain/constants/reconciliation-reason-code-registry';
 import { CreateReconciliationDecisionDto } from '../dto/create-reconciliation-decision.dto';
 
 @Injectable()
@@ -30,6 +34,7 @@ export class ReconciliationDecisionsService {
       if (dto.action === ReconciliationDecisionAction.MANUAL_MATCH && !dto.paymentId) {
         throw new BadRequestException('paymentId is required for manual match decisions.');
       }
+      this.assertReasonCode(dto);
 
       const payment = dto.paymentId
         ? await tx.payment.findFirst({ where: { id: dto.paymentId, tenantId } })
@@ -79,6 +84,22 @@ export class ReconciliationDecisionsService {
 
       return { decision, case: updatedCase };
     });
+  }
+
+  listReasonCodes() {
+    return {
+      data: RECONCILIATION_REASON_CODES,
+    };
+  }
+
+  private assertReasonCode(dto: CreateReconciliationDecisionDto) {
+    const reasonCode = findReconciliationReasonCode(dto.action, dto.reasonCode);
+    if (!reasonCode) {
+      throw new BadRequestException('Invalid reconciliation reason code for action.');
+    }
+    if (reasonCode.requiresComment && !dto.comment?.trim()) {
+      throw new BadRequestException('Comment is required for this reconciliation reason code.');
+    }
   }
 
   private resolveNextStatus(
