@@ -951,7 +951,11 @@
     "yes": "Sim",
     "no": "Não",
     "enabled": "Ativo",
-    "disabled": "Inativo"
+    "disabled": "Inativo",
+    "pagination": {
+      "total": "Total: {total}",
+      "pageOf": "Página {page} de {totalPages}"
+    }
   },
   "errors": {
     "forbiddenTitle": "Acesso Negado",

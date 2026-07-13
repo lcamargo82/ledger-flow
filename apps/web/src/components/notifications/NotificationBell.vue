@@ -47,24 +47,29 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 36px;
+  min-height: 36px;
   color: var(--lf-text-secondary);
   border-radius: var(--lf-radius);
+  transition: all 0.2s;
+}
+
+.notification-bell .material-symbols-outlined {
+  font-size: 20px;
 }
 
 .notification-bell:hover,
 .notification-bell:focus-visible {
   color: var(--lf-text-primary);
-  background: var(--lf-surface-secondary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .notification-bell__badge {
   position: absolute;
-  inset-block-start: 3px;
-  inset-inline-end: 1px;
-  min-width: 18px;
-  height: 18px;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
+  min-width: 16px;
+  height: 16px;
   padding-inline: 4px;
   display: inline-flex;
   align-items: center;

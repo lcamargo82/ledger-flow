@@ -396,34 +396,56 @@
       </nav>
 
       <div class="lf-sidebar__footer">
-        <div class="flex items-center" :class="isCollapsed ? 'justify-center' : 'justify-between'">
+        <LanguageSwitcher v-show="!isCollapsed" />
+
+        <!-- User Info & Notifications (Expanded) -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--lf-space-2);" v-show="!isCollapsed">
+          <div class="lf-sidebar__user" style="flex: 1; overflow: hidden; min-width: 0;">
+            <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
+            <div class="lf-sidebar__user-info">
+              <span class="lf-sidebar__user-name">{{ authStore.userName }}</span>
+              <span class="lf-sidebar__user-email">{{ authStore.userEmail }}</span>
+            </div>
+          </div>
+          <NotificationBell
+            style="flex-shrink: 0;"
+            v-if="
+              authStore.checkAllPermissions(['notifications:read']) &&
+              authStore.checkAllCapabilities(['notifications.read'])
+            "
+          />
+        </div>
+
+        <!-- User Info & Notifications (Collapsed) -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--lf-space-3);" v-show="isCollapsed">
+          <div class="lf-sidebar__user lf-sidebar__user--collapsed">
+            <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
+          </div>
           <NotificationBell
             v-if="
               authStore.checkAllPermissions(['notifications:read']) &&
               authStore.checkAllCapabilities(['notifications.read'])
             "
           />
-          <SystemVersionLabel v-show="!isCollapsed" />
         </div>
-        <LanguageSwitcher v-show="!isCollapsed" />
-        <div class="lf-sidebar__user" :class="{ 'lf-sidebar__user--collapsed': isCollapsed }">
-          <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
-          <div class="lf-sidebar__user-info" v-show="!isCollapsed">
-            <span class="lf-sidebar__user-name">{{ authStore.userName }}</span>
-            <span class="lf-sidebar__user-email">{{ authStore.userEmail }}</span>
+
+        <div style="display: flex; flex-direction: column;">
+          <button
+            class="lf-sidebar__logout"
+            @click="handleLogout"
+            :aria-label="t('common.logout')"
+            :class="{ 'lf-sidebar__logout--collapsed': isCollapsed }"
+          >
+            <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+              >logout</span
+            >
+            <span class="text" v-show="!isCollapsed">{{ t('common.logout') }}</span>
+          </button>
+          
+          <div v-show="!isCollapsed" style="margin-left: 32px; text-align: left; opacity: 0.6;">
+            <SystemVersionLabel />
           </div>
         </div>
-        <button
-          class="lf-sidebar__logout"
-          @click="handleLogout"
-          :aria-label="t('common.logout')"
-          :class="{ 'lf-sidebar__logout--collapsed': isCollapsed }"
-        >
-          <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-            >logout</span
-          >
-          <span class="text" v-show="!isCollapsed">{{ t('common.logout') }}</span>
-        </button>
       </div>
     </aside>
 

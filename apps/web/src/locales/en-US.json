@@ -952,7 +952,11 @@
     "yes": "Yes",
     "no": "No",
     "enabled": "Enabled",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "pagination": {
+      "total": "Total: {total}",
+      "pageOf": "Page {page} of {totalPages}"
+    }
   },
   "errors": {
     "forbiddenTitle": "Access Denied",
