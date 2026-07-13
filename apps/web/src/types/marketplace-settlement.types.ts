@@ -69,6 +69,35 @@ export interface MarketplaceSettlementSyncResult {
   to: string
 }
 
+export interface MarketplaceSettlementCashPosition {
+  openingBalanceMinor: string
+  currentBalanceMinor: string
+  releasedAmountMinor: string
+  pendingAmountMinor: string
+  blockedAmountMinor: string
+  refundedAmountMinor: string
+  payoutAmountMinor: string
+  currency: string
+}
+
+export interface MarketplaceSettlementOperationalPnl {
+  grossRevenueMinor: string
+  feeAmountMinor: string
+  shippingAmountMinor: string
+  refundAmountMinor: string
+  cogsAmountMinor: string
+  netRevenueMinor: string
+  grossMarginMinor: string
+  matchedOrderCount: number
+  currency: string
+}
+
+export interface MarketplaceSettlementDashboard {
+  cashPosition: MarketplaceSettlementCashPosition
+  operationalPnl: MarketplaceSettlementOperationalPnl
+  note: string
+}
+
 export interface MarketplaceFinancialAccountsResponse {
   data: MarketplaceFinancialAccount[]
 }

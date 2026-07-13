@@ -1970,7 +1970,9 @@
     },
     "sections": {
       "ledger": "Ledger de caixa",
-      "importedEvents": "Eventos importados"
+      "importedEvents": "Eventos importados",
+      "cashPosition": "Posição de caixa",
+      "operationalPnl": "P&L operacional"
     },
     "totals": {
       "events": "Eventos",
@@ -1992,6 +1994,19 @@
       "to": "Fim",
       "maxPages": "Máximo de páginas",
       "result": "Sincronização concluída: {received} recebidos, {created} novos e {duplicates} duplicados."
+    },
+    "dashboard": {
+      "note": "Visão operacional de gestão; não substitui contabilidade oficial.",
+      "released": "Liberado",
+      "pending": "Pendente",
+      "blocked": "Bloqueado",
+      "refunded": "Estornado",
+      "payout": "Payout",
+      "netRevenue": "Receita líquida",
+      "cogs": "COGS",
+      "shipping": "Frete",
+      "margin": "Margem",
+      "matchedOrders": "{count} pedidos conciliados entram neste P&L operacional."
     },
     "events": {
       "providerPaymentId": "Pagamento",

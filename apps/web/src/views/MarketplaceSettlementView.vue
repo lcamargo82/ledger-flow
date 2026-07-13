@@ -286,6 +286,127 @@ const submitSync = async () => {
             }}
           </section>
 
+          <section v-if="settlementStore.dashboard" class="lf-settlement-dashboard">
+            <div class="lf-settlement-section-heading">
+              <h3>{{ t('marketplaceSettlement.sections.cashPosition') }}</h3>
+              <p>{{ t('marketplaceSettlement.dashboard.note') }}</p>
+            </div>
+            <div class="lf-settlement-totals">
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.released') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.cashPosition.releasedAmountMinor,
+                      settlementStore.dashboard.cashPosition.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.pending') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.cashPosition.pendingAmountMinor,
+                      settlementStore.dashboard.cashPosition.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.blocked') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.cashPosition.blockedAmountMinor,
+                      settlementStore.dashboard.cashPosition.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.refunded') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.cashPosition.refundedAmountMinor,
+                      settlementStore.dashboard.cashPosition.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.payout') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.cashPosition.payoutAmountMinor,
+                      settlementStore.dashboard.cashPosition.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+            </div>
+
+            <div class="lf-settlement-section-heading">
+              <h3>{{ t('marketplaceSettlement.sections.operationalPnl') }}</h3>
+              <p>
+                {{
+                  t('marketplaceSettlement.dashboard.matchedOrders', {
+                    count: settlementStore.dashboard.operationalPnl.matchedOrderCount,
+                  })
+                }}
+              </p>
+            </div>
+            <div class="lf-settlement-totals">
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.netRevenue') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.operationalPnl.netRevenueMinor,
+                      settlementStore.dashboard.operationalPnl.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.cogs') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.operationalPnl.cogsAmountMinor,
+                      settlementStore.dashboard.operationalPnl.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.shipping') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.operationalPnl.shippingAmountMinor,
+                      settlementStore.dashboard.operationalPnl.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+              <article>
+                <span>{{ t('marketplaceSettlement.dashboard.margin') }}</span>
+                <strong>
+                  {{
+                    formatMinor(
+                      settlementStore.dashboard.operationalPnl.grossMarginMinor,
+                      settlementStore.dashboard.operationalPnl.currency,
+                    )
+                  }}
+                </strong>
+              </article>
+            </div>
+          </section>
+
           <div class="lf-settlement-table-wrap">
             <h3>{{ t('marketplaceSettlement.sections.ledger') }}</h3>
             <table class="lf-settlement-table">
@@ -548,9 +669,23 @@ const submitSync = async () => {
   margin-top: var(--lf-space-4);
 }
 
-.lf-settlement-table-wrap h3 {
+.lf-settlement-table-wrap h3,
+.lf-settlement-section-heading h3 {
   margin: 0 0 var(--lf-space-3);
   font-size: 1rem;
+}
+
+.lf-settlement-dashboard {
+  margin-top: var(--lf-space-4);
+}
+
+.lf-settlement-section-heading {
+  margin: var(--lf-space-4) 0 var(--lf-space-3);
+}
+
+.lf-settlement-section-heading p {
+  margin: 0;
+  color: var(--lf-text-muted);
 }
 
 .lf-settlement-totals {

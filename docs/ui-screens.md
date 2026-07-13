@@ -214,14 +214,15 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Readiness financeira MP-6:** `GatewayConnectionCard` mostra `financialReadiness` apenas para Mercado Pago, distinguindo `PAYMENT_ONLY`, `SETTLEMENT_READY`, `REAUTH_REQUIRED` e `UNHEALTHY`, com escopos ausentes e motivos traduzidos. Essa indicação não executa ingestion de settlement; apenas prepara o usuário para a próxima fase 9B.
 - **i18n:** Namespace `gateways.*` em pt-BR e en-US; não usar texto hardcoded em estados OAuth.
 
-### Marketplace Settlement 9B-1/9B-2
+### Marketplace Settlement 9B-1/9B-4
 
 - **Rota:** `/marketplace-settlement`.
-- **Status:** Implementadas a fundação de contas financeiras, saldo inicial e sync manual de eventos financeiros Mercado Pago.
-- **Objetivo:** criar contas operacionais Mercado Pago somente para conexões `SETTLEMENT_READY`, exibir saldo atual/abertura, ledger append-only e eventos/totais importados.
+- **Status:** Implementadas a fundação de contas financeiras, saldo inicial, sync manual de eventos financeiros Mercado Pago, cash position e P&L operacional.
+- **Objetivo:** criar contas operacionais Mercado Pago somente para conexões `SETTLEMENT_READY`, exibir saldo atual/abertura, ledger append-only, eventos/totais importados, buckets de caixa e P&L operacional.
 - **Ações:** criar conta com saldo inicial, motivo e observação; registrar ajuste manual auditado sem editar lançamentos anteriores; sincronizar Mercado Pago por período.
+- **Dashboard:** mostra liberado, pendente, bloqueado, estornado, payout, receita líquida, COGS, frete e margem com disclaimer operacional.
 - **Guards:** `marketplace-settlement:read/manage` + `marketplace_settlement.read/manage`.
-- **Fora de escopo:** sync agendada, matching ML x MP, cash dashboard consolidado e P&L 9B-4.
+- **Fora de escopo:** sync agendada, export CSV específico da tela, automações finais de fine mesh e contabilidade oficial.
 - **i18n:** Namespace `marketplaceSettlement.*` em pt-BR e en-US.
 
 ### Reconciliation fine mesh 9B-3 evidence

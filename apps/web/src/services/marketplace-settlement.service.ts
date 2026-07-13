@@ -5,6 +5,7 @@ import type {
   CreateMarketplaceFinancialAccountPayload,
   MarketplaceFinancialAccount,
   MarketplaceFinancialAccountsResponse,
+  MarketplaceSettlementDashboard,
   MarketplaceSettlementEventsResponse,
   MarketplaceSettlementImportedTotals,
   MarketplaceSettlementSyncResult,
@@ -67,6 +68,13 @@ export class MarketplaceSettlementService {
   async getTotals(accountId: string): Promise<MarketplaceSettlementImportedTotals> {
     const { data } = await httpClient.get<MarketplaceSettlementImportedTotals>(
       `/marketplace-settlement/financial-accounts/${accountId}/totals`,
+    )
+    return data
+  }
+
+  async getDashboard(accountId: string): Promise<MarketplaceSettlementDashboard> {
+    const { data } = await httpClient.get<MarketplaceSettlementDashboard>(
+      `/marketplace-settlement/financial-accounts/${accountId}/dashboard`,
     )
     return data
   }

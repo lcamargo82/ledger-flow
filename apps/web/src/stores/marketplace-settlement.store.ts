@@ -7,6 +7,7 @@ import type {
   CreateCashPositionAdjustmentPayload,
   CreateMarketplaceFinancialAccountPayload,
   MarketplaceFinancialAccount,
+  MarketplaceSettlementDashboard,
   MarketplaceSettlementEvent,
   MarketplaceSettlementImportedTotals,
   MarketplaceSettlementSyncResult,
@@ -18,6 +19,7 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
   const ledgerEntries = ref<CashLedgerEntry[]>([])
   const importedEvents = ref<MarketplaceSettlementEvent[]>([])
   const importedTotals = ref<MarketplaceSettlementImportedTotals | null>(null)
+  const dashboard = ref<MarketplaceSettlementDashboard | null>(null)
   const lastSyncResult = ref<MarketplaceSettlementSyncResult | null>(null)
   const selectedAccountId = ref<string | null>(null)
   const isLoading = ref(false)
@@ -62,15 +64,17 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
 
   const fetchLedger = async (accountId: string) => {
     selectedAccountId.value = accountId
-    const [ledgerResponse, eventsResponse, totalsResponse] = await Promise.all([
+    const [ledgerResponse, eventsResponse, totalsResponse, dashboardResponse] = await Promise.all([
       marketplaceSettlementService.listLedger(accountId),
       marketplaceSettlementService.listEvents(accountId),
       marketplaceSettlementService.getTotals(accountId),
+      marketplaceSettlementService.getDashboard(accountId),
     ])
     const response = ledgerResponse
     ledgerEntries.value = response.data
     importedEvents.value = eventsResponse.data
     importedTotals.value = totalsResponse
+    dashboard.value = dashboardResponse
   }
 
   const createAccount = async (payload: CreateMarketplaceFinancialAccountPayload) => {
@@ -130,6 +134,7 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
     ledgerEntries,
     importedEvents,
     importedTotals,
+    dashboard,
     lastSyncResult,
     selectedAccountId,
     selectedAccount,

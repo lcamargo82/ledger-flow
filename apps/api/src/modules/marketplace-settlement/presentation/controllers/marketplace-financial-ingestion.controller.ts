@@ -15,6 +15,8 @@ import { RequirePermissions } from '../../../auth/presentation/decorators/requir
 import { ReconciliationCapabilities } from '../../../platform/domain/constants/platform-capabilities';
 import {
   ListMarketplaceSettlementEventsQueryDto,
+  MarketplaceSettlementDashboardQueryDto,
+  MarketplaceSettlementDashboardResponseDto,
   MarketplaceSettlementEventsResponseDto,
   MarketplaceSettlementImportedTotalsDto,
   MarketplaceSettlementSyncResponseDto,
@@ -71,5 +73,20 @@ export class MarketplaceFinancialIngestionController {
     @Param('id') id: string,
   ): Promise<MarketplaceSettlementImportedTotalsDto> {
     return this.ingestionService.getImportedTotals(user.tenantId, id);
+  }
+
+  @Get('dashboard')
+  @RequirePermissions('marketplace-settlement:read')
+  @RequireCapabilities(ReconciliationCapabilities.MarketplaceSettlementRead)
+  @ApiOperation({ summary: 'Consultar cash position e P&L operacional marketplace' })
+  @ApiOkResponse({ type: MarketplaceSettlementDashboardResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de marketplace settlement' })
+  getDashboard(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Query() query: MarketplaceSettlementDashboardQueryDto,
+  ): Promise<MarketplaceSettlementDashboardResponseDto> {
+    return this.ingestionService.getDashboard(user.tenantId, id, query);
   }
 }
