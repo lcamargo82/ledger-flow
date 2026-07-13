@@ -614,6 +614,8 @@ components:
           enum:
             - ORDER_FINANCIAL_FACTS
             - CATALOG_PRODUCTS
+            - RECONCILIATION_CASES
+            - MARKETPLACE_SETTLEMENT_EVENTS
         format:
           type: string
           enum:
@@ -639,6 +641,8 @@ components:
           enum:
             - ORDER_FINANCIAL_FACTS
             - CATALOG_PRODUCTS
+            - RECONCILIATION_CASES
+            - MARKETPLACE_SETTLEMENT_EVENTS
         format:
           type: string
           enum:
