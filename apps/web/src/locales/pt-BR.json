@@ -1809,6 +1809,7 @@
     "status": {
       "ACTIVE": "Ativo",
       "INACTIVE": "Inativo",
+      "REAUTH_REQUIRED": "Reconexão necessária",
       "DISABLED": "Desabilitado"
     },
     "connection": {
@@ -1819,8 +1820,38 @@
     "health": {
       "UNKNOWN": "Desconhecido",
       "HEALTHY": "Saudável",
+      "DEGRADED": "Degradado",
+      "UNHEALTHY": "Indisponível",
       "ATTENTION": "Atenção",
       "CRITICAL": "Crítico"
+    },
+    "financialReadiness": {
+      "label": "Readiness financeira",
+      "missingScopes": "Escopos ausentes",
+      "state": {
+        "UNSUPPORTED_PROVIDER": "Não suportado",
+        "NOT_CONFIGURED": "Não configurado",
+        "REAUTH_REQUIRED": "Reconexão necessária",
+        "UNHEALTHY": "Bloqueado por saúde",
+        "PAYMENT_ONLY": "Somente pagamentos",
+        "SETTLEMENT_READY": "Pronto para financeiro"
+      },
+      "description": {
+        "UNSUPPORTED_PROVIDER": "Este provedor ainda não alimenta fluxos financeiros.",
+        "NOT_CONFIGURED": "Configure a conexão antes de usar dados financeiros.",
+        "REAUTH_REQUIRED": "Reconecte o Mercado Pago para restaurar o acesso.",
+        "UNHEALTHY": "A conexão precisa voltar a um estado saudável antes da sincronização financeira.",
+        "PAYMENT_ONLY": "A conexão pode operar pagamentos, mas ainda não possui escopos financeiros suficientes.",
+        "SETTLEMENT_READY": "A conexão possui escopos e saúde suficientes para leituras financeiras futuras."
+      },
+      "reason": {
+        "MERCADO_PAGO_CREDENTIALS_NOT_CONFIGURED": "As credenciais Mercado Pago não estão configuradas.",
+        "MERCADO_PAGO_REAUTH_REQUIRED": "Reconecte o Mercado Pago para renovar a autorização.",
+        "MERCADO_PAGO_CONNECTION_NOT_ACTIVE": "A conexão precisa estar ativa para leituras financeiras.",
+        "MERCADO_PAGO_CONNECTION_UNHEALTHY": "A conexão Mercado Pago está degradada ou indisponível.",
+        "MERCADO_PAGO_REFRESH_TRANSIENT_FAILURE": "A última tentativa de refresh falhou temporariamente.",
+        "MERCADO_PAGO_FINANCIAL_SCOPE_MISSING": "A conexão ainda não recebeu todos os escopos necessários para settlement."
+      }
     },
     "actions": {
       "connect": "Conectar conta",

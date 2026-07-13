@@ -211,6 +211,7 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Componentes:** `GatewayConnectionForm`, `GatewayConnectionCard`, `GatewayConnectionEmptyState`, modais de status/credencial/desconexão e `AppButton`.
 - **Objetivo:** Gerenciar conexões de gateway por tenant sem expor segredos. Mercado Pago usa OAuth; credenciais da loja não são digitadas nem exibidas no painel.
 - **Capability matrix atual:** Mercado Pago anuncia PIX, boleto, sandbox, fundação de webhook inbound, sincronização de status por webhook/fetch, cancelamento e estorno total. Refresh automático backend-only está implementado em MP-1; cartão e checkout avançado entram em sprints futuras.
+- **Readiness financeira MP-6:** `GatewayConnectionCard` mostra `financialReadiness` apenas para Mercado Pago, distinguindo `PAYMENT_ONLY`, `SETTLEMENT_READY`, `REAUTH_REQUIRED` e `UNHEALTHY`, com escopos ausentes e motivos traduzidos. Essa indicação não executa ingestion de settlement; apenas prepara o usuário para a próxima fase 9B.
 - **i18n:** Namespace `gateways.*` em pt-BR e en-US; não usar texto hardcoded em estados OAuth.
 
 ### Inventory Transfers

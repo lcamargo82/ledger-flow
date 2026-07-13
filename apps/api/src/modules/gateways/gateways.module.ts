@@ -17,6 +17,7 @@ import { PagarmePaymentGatewayAdapter } from './infra/adapters/pagarme-payment-g
 import { GatewayCredentialsEncryptionService } from './application/services/gateway-credentials-encryption.service';
 import { Aes256GcmCredentialsEncryptionService } from './infra/crypto/aes-256-gcm-credentials-encryption.service';
 import { GatewayConnectionsService } from './application/services/gateway-connections.service';
+import { MercadoPagoFinancialReadinessService } from './application/services/mercado-pago-financial-readiness.service';
 import { GatewayConnectionsController } from './presentation/controllers/gateway-connections.controller';
 import { TenantsModule } from '../tenants/tenants.module';
 import { IProviderCustomerReferenceRepository } from './domain/interfaces/provider-customer-reference.repository';
@@ -36,6 +37,7 @@ import { MercadoPagoOAuthController } from './presentation/controllers/mercado-p
   providers: [
     CreateProviderChargeAsyncHandler,
     GatewayConnectionsService,
+    MercadoPagoFinancialReadinessService,
     {
       provide: GatewayConfigurationsRepository,
       useClass: PrismaGatewayConfigurationsRepository,

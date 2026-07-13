@@ -1808,6 +1808,7 @@
     "status": {
       "ACTIVE": "Active",
       "INACTIVE": "Inactive",
+      "REAUTH_REQUIRED": "Reconnection required",
       "DISABLED": "Disabled"
     },
     "connection": {
@@ -1818,8 +1819,38 @@
     "health": {
       "UNKNOWN": "Unknown",
       "HEALTHY": "Healthy",
+      "DEGRADED": "Degraded",
+      "UNHEALTHY": "Unavailable",
       "ATTENTION": "Attention",
       "CRITICAL": "Critical"
+    },
+    "financialReadiness": {
+      "label": "Financial readiness",
+      "missingScopes": "Missing scopes",
+      "state": {
+        "UNSUPPORTED_PROVIDER": "Not supported",
+        "NOT_CONFIGURED": "Not configured",
+        "REAUTH_REQUIRED": "Reconnection required",
+        "UNHEALTHY": "Blocked by health",
+        "PAYMENT_ONLY": "Payments only",
+        "SETTLEMENT_READY": "Financial-ready"
+      },
+      "description": {
+        "UNSUPPORTED_PROVIDER": "This provider does not feed financial flows yet.",
+        "NOT_CONFIGURED": "Configure the connection before using financial data.",
+        "REAUTH_REQUIRED": "Reconnect Mercado Pago to restore access.",
+        "UNHEALTHY": "The connection must return to a healthy state before financial sync.",
+        "PAYMENT_ONLY": "The connection can process payments, but does not have enough financial scopes yet.",
+        "SETTLEMENT_READY": "The connection has enough scopes and health for future financial reads."
+      },
+      "reason": {
+        "MERCADO_PAGO_CREDENTIALS_NOT_CONFIGURED": "Mercado Pago credentials are not configured.",
+        "MERCADO_PAGO_REAUTH_REQUIRED": "Reconnect Mercado Pago to renew authorization.",
+        "MERCADO_PAGO_CONNECTION_NOT_ACTIVE": "The connection must be active for financial reads.",
+        "MERCADO_PAGO_CONNECTION_UNHEALTHY": "The Mercado Pago connection is degraded or unavailable.",
+        "MERCADO_PAGO_REFRESH_TRANSIENT_FAILURE": "The last refresh attempt failed transiently.",
+        "MERCADO_PAGO_FINANCIAL_SCOPE_MISSING": "The connection has not received all required settlement scopes yet."
+      }
     },
     "actions": {
       "connect": "Connect account",
