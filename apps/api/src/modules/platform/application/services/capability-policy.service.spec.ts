@@ -42,7 +42,21 @@ describe('CapabilityPolicyService', () => {
     ).resolves.toBe(false);
   });
 
-  it('denies reconciliation capabilities for PROFESSIONAL tenants', async () => {
+  it('allows marketplace settlement capabilities for PROFESSIONAL tenants', async () => {
+    prisma.tenantSubscription.findUnique.mockResolvedValue({
+      plan: SubscriptionPlan.PROFESSIONAL,
+      status: TenantSubscriptionStatus.ACTIVE,
+    });
+
+    await expect(
+      service.hasCapabilities('tenant-1', [
+        ReconciliationCapabilities.MarketplaceSettlementRead,
+        ReconciliationCapabilities.MarketplaceSettlementManage,
+      ]),
+    ).resolves.toBe(true);
+  });
+
+  it('keeps full reconciliation capabilities reserved for ENTERPRISE/CUSTOM tenants', async () => {
     prisma.tenantSubscription.findUnique.mockResolvedValue({
       plan: SubscriptionPlan.PROFESSIONAL,
       status: TenantSubscriptionStatus.ACTIVE,

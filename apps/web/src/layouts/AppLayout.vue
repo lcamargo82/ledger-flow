@@ -221,7 +221,9 @@
           v-if="
             (authStore.checkAllPermissions(['financial-intelligence:read']) &&
               authStore.checkAllCapabilities(['financial.analytics.read'])) ||
-            authStore.checkAllPermissions(['reports:export'])
+            authStore.checkAllPermissions(['reports:export']) ||
+            (authStore.checkAllPermissions(['marketplace-settlement:read']) &&
+              authStore.checkAllCapabilities(['marketplace_settlement.read']))
           "
           class="lf-sidebar-group"
         >
@@ -260,6 +262,20 @@
                 >file_download</span
               >
               <span class="text" v-show="!isCollapsed">{{ t('nav.reports') }}</span>
+            </router-link>
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['marketplace-settlement:read']) &&
+                authStore.checkAllCapabilities(['marketplace_settlement.read'])
+              "
+              to="/marketplace-settlement"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >account_balance</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.marketplaceSettlement') }}</span>
             </router-link>
           </div>
         </div>
