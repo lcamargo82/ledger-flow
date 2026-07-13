@@ -31,8 +31,8 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
       supportsBoleto: true,
       supportsCard: false,
       supportsBankTransfer: false,
-      supportsRefund: false,
-      supportsCancel: false,
+      supportsRefund: true,
+      supportsCancel: true,
       supportsPartialRefund: false,
       supportsSandbox: true,
       supportsWebhooks: true,
@@ -97,11 +97,56 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
   }
 
   async cancelPayment(input: CancelGatewayPaymentInput): Promise<GatewayPaymentResult> {
-    throw new GatewayNotImplementedError(this.provider);
+    if (!input.providerPaymentId) {
+      throw new Error('providerPaymentId is required to cancel payment');
+    }
+    if (!input.credentials || !input.credentials.accessToken) {
+      throw new Error('Mercado Pago accessToken is missing from credentials.');
+    }
+
+    const response = await this.apiClient.cancelPayment(
+      input.credentials.accessToken,
+      input.providerPaymentId,
+      input.idempotencyKey,
+    );
+
+    return this.mapToGatewayPaymentResult(response);
   }
 
   async refundPayment(input: RefundGatewayPaymentInput): Promise<GatewayPaymentResult> {
-    throw new GatewayNotImplementedError(this.provider);
+    if (!input.providerPaymentId) {
+      throw new Error('providerPaymentId is required to refund payment');
+    }
+    if (!input.credentials || !input.credentials.accessToken) {
+      throw new Error('Mercado Pago accessToken is missing from credentials.');
+    }
+
+    const response = await this.apiClient.refundPayment(
+      input.credentials.accessToken,
+      input.providerPaymentId,
+      {
+        amount: input.amount ? input.amount / 100 : undefined,
+        idempotencyKey: input.idempotencyKey,
+      },
+    );
+
+    const result = new GatewayPaymentResult();
+    result.provider = this.provider;
+    result.providerPaymentId = input.providerPaymentId;
+    result.providerStatus = response.status;
+    result.normalizedStatus = PaymentStatus.REFUNDED;
+    result.metadata = {
+      refundId: response.id ? String(response.id) : undefined,
+      providerPaymentId: response.payment_id
+        ? String(response.payment_id)
+        : input.providerPaymentId,
+      refundStatus: response.status,
+      refundAmount: response.amount,
+      uniqueSequenceNumber: response.unique_sequence_number,
+      dateCreated: response.date_created,
+    };
+
+    return result;
   }
 
   async getPaymentInstructions(

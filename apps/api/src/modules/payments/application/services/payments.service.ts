@@ -5,7 +5,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PaymentStatus, PaymentExecutionMode } from '@prisma/client';
+import { PaymentStatus, PaymentExecutionMode, PaymentProvider } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { PrismaPaymentsRepository } from '../../infra/repositories/prisma-payments.repository';
@@ -17,6 +17,7 @@ import { RefundPaymentDto } from '../dto/refund-payment.dto';
 import { GatewayPaymentOrchestrationService } from '../../../gateways/application/services/gateway-payment-orchestration.service';
 import { PaymentGatewayResolverService } from '../../../gateways/application/services/payment-gateway-resolver.service';
 import { PaymentsExternalProcessingService } from './payments-external-processing.service';
+import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
 
 @Injectable()
 export class PaymentsService {
@@ -27,6 +28,7 @@ export class PaymentsService {
     private readonly gatewayOrchestrator: GatewayPaymentOrchestrationService,
     private readonly gatewayResolver: PaymentGatewayResolverService,
     private readonly externalProcessingService: PaymentsExternalProcessingService,
+    private readonly notifications: NotificationProducerService,
   ) {}
 
   async createPayment(
@@ -88,7 +90,7 @@ export class PaymentsService {
 
     // Create Payment (starts as PENDING)
     const reference = this.referenceService.generateReference();
-    
+
     let outboxEventData: any = undefined;
 
     if (executionMode === PaymentExecutionMode.EXTERNAL_GATEWAY) {
@@ -99,8 +101,11 @@ export class PaymentsService {
         gatewayConfigurationId,
         eventVersion: 1,
       };
-      
-      const payloadHash = crypto.createHash('sha256').update(JSON.stringify(eventPayload)).digest('hex');
+
+      const payloadHash = crypto
+        .createHash('sha256')
+        .update(JSON.stringify(eventPayload))
+        .digest('hex');
 
       outboxEventData = {
         tenantId,
@@ -113,30 +118,33 @@ export class PaymentsService {
       };
     }
 
-    const payment = await this.paymentsRepository.create({
-      tenantId,
-      customerId: data.customerId,
-      reference,
-      amount: data.amount,
-      currency: data.currency || 'BRL',
-      method: data.method,
-      executionMode,
-      gatewayConfigurationId,
-      provider: provider as any,
-      description: data.description,
-      dueDate,
-      metadata: data.metadata as any,
-      idempotencyKeyHash,
-      idempotencyRequestHash,
-      events: {
-        create: {
-          tenantId,
-          type: 'payment.created',
-          currentStatus: PaymentStatus.PENDING,
-          message: 'Payment created',
+    const payment = await this.paymentsRepository.create(
+      {
+        tenantId,
+        customerId: data.customerId,
+        reference,
+        amount: data.amount,
+        currency: data.currency || 'BRL',
+        method: data.method,
+        executionMode,
+        gatewayConfigurationId,
+        provider: provider as any,
+        description: data.description,
+        dueDate,
+        metadata: data.metadata as any,
+        idempotencyKeyHash,
+        idempotencyRequestHash,
+        events: {
+          create: {
+            tenantId,
+            type: 'payment.created',
+            currentStatus: PaymentStatus.PENDING,
+            message: 'Payment created',
+          },
         },
       },
-    }, outboxEventData);
+      outboxEventData,
+    );
 
     // Audit Log
     await this.auditLog(tenantId, actorUserId, 'payment.created', payment.id, {
@@ -196,7 +204,10 @@ export class PaymentsService {
         },
       });
     } catch (err) {
-      console.error(`Failed to update payment instructions metadata for payment ${payment.id}`, err);
+      console.error(
+        `Failed to update payment instructions metadata for payment ${payment.id}`,
+        err,
+      );
     }
 
     return instructions;
@@ -209,15 +220,27 @@ export class PaymentsService {
       throw new NotFoundException('Payment not found.');
     }
 
+    if (payment.status === PaymentStatus.CANCELED) {
+      return payment;
+    }
+
     if (!canTransitionPaymentStatus(payment.status, PaymentStatus.CANCELED)) {
       throw new ConflictException('Payment cannot be canceled in its current status.');
     }
 
+    let providerResult: Awaited<ReturnType<GatewayPaymentOrchestrationService['cancelPayment']>>;
     try {
-      await this.gatewayOrchestrator.cancelPayment(tenantId, payment);
+      providerResult = await this.gatewayOrchestrator.cancelPayment(tenantId, payment);
     } catch (err: any) {
       if (err.message && err.message.includes('[AsaasAdapter] Conflict:')) {
-        throw new ConflictException('O provedor recusou o cancelamento: A cobrança pode já estar paga, estornada ou inelegível. Aguarde a sincronização pelo webhook.');
+        throw new ConflictException(
+          'O provedor recusou o cancelamento: A cobrança pode já estar paga, estornada ou inelegível. Aguarde a sincronização pelo webhook.',
+        );
+      }
+      if (err?.statusCode === 400 || err?.statusCode === 409) {
+        throw new ConflictException(
+          'O provedor recusou o cancelamento: o pagamento pode já estar pago, estornado ou inelegível.',
+        );
       }
       throw new BadRequestException(`Falha ao cancelar pagamento no gateway: ${err.message}`);
     }
@@ -228,12 +251,34 @@ export class PaymentsService {
       previousStatus: payment.status,
       currentStatus: PaymentStatus.CANCELED,
       message: 'Payment canceled manually',
+      metadata: {
+        provider: payment.provider,
+        providerPaymentId: payment.providerPaymentId,
+        providerStatus:
+          providerResult && providerResult !== true ? providerResult.providerStatus : undefined,
+      },
     });
 
     await this.auditLog(tenantId, actorUserId, 'payment.canceled', payment.id, {
       reference: updatedPayment.reference,
       status: updatedPayment.status,
+      provider: payment.provider,
+      providerPaymentId: payment.providerPaymentId,
+      providerStatus:
+        providerResult && providerResult !== true ? providerResult.providerStatus : undefined,
     });
+
+    if (payment.provider === PaymentProvider.MERCADO_PAGO) {
+      await this.notifications.mercadoPagoPaymentStatusUpdated({
+        tenantId,
+        paymentId: updatedPayment.id,
+        paymentReference: updatedPayment.reference,
+        previousStatus: payment.status,
+        currentStatus: PaymentStatus.CANCELED,
+        providerPaymentId: payment.providerPaymentId,
+        providerEventId: `manual-cancel:${updatedPayment.id}`,
+      });
+    }
 
     return updatedPayment;
   }
@@ -243,6 +288,10 @@ export class PaymentsService {
 
     if (!payment) {
       throw new NotFoundException('Payment not found.');
+    }
+
+    if (payment.status === PaymentStatus.REFUNDED) {
+      return payment;
     }
 
     if (!canTransitionPaymentStatus(payment.status, PaymentStatus.REFUNDED)) {
@@ -255,18 +304,54 @@ export class PaymentsService {
       reason: data.reason,
     });
 
+    let providerResult: Awaited<ReturnType<GatewayPaymentOrchestrationService['refundPayment']>>;
+    try {
+      providerResult = await this.gatewayOrchestrator.refundPayment(tenantId, payment, {
+        reason: data.reason,
+      });
+    } catch (err: any) {
+      if (err?.statusCode === 400 || err?.statusCode === 409) {
+        throw new ConflictException(
+          'O provedor recusou o estorno: o pagamento pode já estar estornado, contestado ou inelegível.',
+        );
+      }
+      throw new BadRequestException(`Falha ao estornar pagamento no gateway: ${err.message}`);
+    }
+
     const updatedPayment = await this.paymentsRepository.refund(id, tenantId, {
       tenantId,
       type: 'payment.refunded',
       previousStatus: payment.status,
       currentStatus: PaymentStatus.REFUNDED,
       message: data.reason || 'Payment refunded manually',
+      metadata: {
+        provider: payment.provider,
+        providerPaymentId: payment.providerPaymentId,
+        providerStatus: providerResult?.providerStatus,
+        providerRefundId: providerResult?.metadata?.refundId,
+      },
     });
 
     await this.auditLog(tenantId, actorUserId, 'payment.refunded', payment.id, {
       reference: updatedPayment.reference,
       status: updatedPayment.status,
+      provider: payment.provider,
+      providerPaymentId: payment.providerPaymentId,
+      providerStatus: providerResult?.providerStatus,
+      providerRefundId: providerResult?.metadata?.refundId,
     });
+
+    if (payment.provider === PaymentProvider.MERCADO_PAGO) {
+      await this.notifications.mercadoPagoPaymentStatusUpdated({
+        tenantId,
+        paymentId: updatedPayment.id,
+        paymentReference: updatedPayment.reference,
+        previousStatus: payment.status,
+        currentStatus: PaymentStatus.REFUNDED,
+        providerPaymentId: payment.providerPaymentId,
+        providerEventId: `manual-refund:${updatedPayment.id}`,
+      });
+    }
 
     return updatedPayment;
   }
@@ -279,7 +364,9 @@ export class PaymentsService {
     }
 
     if (payment.executionMode !== PaymentExecutionMode.EXTERNAL_GATEWAY) {
-      throw new BadRequestException('Apenas pagamentos de gateways externos podem ser reprocessados.');
+      throw new BadRequestException(
+        'Apenas pagamentos de gateways externos podem ser reprocessados.',
+      );
     }
 
     if (payment.providerPaymentId) {
@@ -287,18 +374,22 @@ export class PaymentsService {
     }
 
     if (payment.status !== PaymentStatus.PENDING && payment.status !== PaymentStatus.PROCESSING) {
-      throw new ConflictException(`Não é possível reprocessar um pagamento com status ${payment.status}.`);
+      throw new ConflictException(
+        `Não é possível reprocessar um pagamento com status ${payment.status}.`,
+      );
     }
 
     const [enriched] = await this.externalProcessingService.enrichMany(tenantId, [payment]);
-    
+
     if (!enriched.externalProcessing.retryAvailable) {
-      throw new ConflictException('O pagamento não está elegível para tentativa manual de reprocessamento no momento.');
+      throw new ConflictException(
+        'O pagamento não está elegível para tentativa manual de reprocessamento no momento.',
+      );
     }
 
     const resolved = await this.gatewayResolver.resolveByMethod(tenantId, payment.method);
     const config = resolved.configuration;
-    
+
     if (config.id !== payment.gatewayConfigurationId || config.provider !== payment.provider) {
       // Configuration might have changed, we update payment to match the active one
       await this.prisma.payment.update({
@@ -306,14 +397,18 @@ export class PaymentsService {
         data: {
           gatewayConfigurationId: config.id,
           provider: config.provider as any,
-        }
+        },
       });
     }
 
     // Find previous outbox event for replayOfEventId
     const previousOutbox = await this.prisma.outboxEvent.findFirst({
-      where: { aggregateId: payment.id, aggregateType: 'Payment', eventType: 'payment.provider_charge_creation_requested' },
-      orderBy: { createdAt: 'desc' }
+      where: {
+        aggregateId: payment.id,
+        aggregateType: 'Payment',
+        eventType: 'payment.provider_charge_creation_requested',
+      },
+      orderBy: { createdAt: 'desc' },
     });
 
     const eventPayload = {
@@ -322,8 +417,11 @@ export class PaymentsService {
       gatewayConfigurationId: config.id,
       eventVersion: 1,
     };
-    
-    const payloadHash = crypto.createHash('sha256').update(JSON.stringify(eventPayload)).digest('hex');
+
+    const payloadHash = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(eventPayload))
+      .digest('hex');
 
     await this.prisma.$transaction(async (tx) => {
       await tx.outboxEvent.create({
@@ -346,9 +444,9 @@ export class PaymentsService {
           type: 'payment.provider_retry_requested',
           currentStatus: payment.status,
           message: 'Solicitado reprocessamento manual da criação de cobrança externa',
-        }
+        },
       });
-      
+
       await tx.auditLog.create({
         data: {
           tenantId,
@@ -361,8 +459,8 @@ export class PaymentsService {
             provider: config.provider,
             gatewayConfigurationId: config.id,
             replayOfEventId: previousOutbox?.id,
-          }
-        }
+          },
+        },
       });
     });
 
@@ -392,5 +490,4 @@ export class PaymentsService {
       console.error('Failed to create audit log', error);
     }
   }
-
 }

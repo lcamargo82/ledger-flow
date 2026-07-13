@@ -154,16 +154,50 @@ export class GatewayPaymentOrchestrationService {
 
     const credentials = await this.resolveCredentials(tenantId, configuration);
 
-    await adapter.cancelPayment({
+    return adapter.cancelPayment({
       tenantId,
       paymentId: payment.id,
       providerPaymentId: payment.providerPaymentId,
       gatewayConfigurationId: configuration.id,
       credentials,
       environment: configuration.environment,
+      idempotencyKey: `payment-cancel:${payment.id}:${payment.providerPaymentId}`,
     });
 
     return true;
+  }
+
+  async refundPayment(
+    tenantId: string,
+    payment: Payment,
+    input?: { reason?: string; amount?: number },
+  ) {
+    if (!payment.gatewayConfigurationId || !payment.providerPaymentId) {
+      return undefined;
+    }
+
+    const configuration = await this.prisma.gatewayConfiguration.findUnique({
+      where: { id: payment.gatewayConfigurationId },
+    });
+
+    if (!configuration || !configuration.encryptedCredentials) {
+      throw new Error('Gateway configuration not found or missing credentials.');
+    }
+
+    const adapter = (this.gatewayResolver as any).factory.getAdapter(configuration.provider);
+    const credentials = await this.resolveCredentials(tenantId, configuration);
+
+    return adapter.refundPayment({
+      tenantId,
+      paymentId: payment.id,
+      providerPaymentId: payment.providerPaymentId,
+      gatewayConfigurationId: configuration.id,
+      credentials,
+      environment: configuration.environment,
+      amount: input?.amount,
+      reason: input?.reason,
+      idempotencyKey: `payment-refund:${payment.id}:${payment.providerPaymentId}:${input?.amount ?? payment.amount}`,
+    });
   }
 
   private async createAuditAndEvent(

@@ -43,6 +43,20 @@ export interface MercadoPagoPaymentResponse {
   };
 }
 
+export interface MercadoPagoRefundResponse {
+  id?: number | string;
+  payment_id?: number | string;
+  status: string;
+  amount?: number;
+  source?: {
+    id?: string;
+    name?: string;
+    type?: string;
+  };
+  date_created?: string;
+  unique_sequence_number?: string;
+}
+
 export interface MercadoPagoCredentials {
   accessToken: string;
   refreshToken: string;

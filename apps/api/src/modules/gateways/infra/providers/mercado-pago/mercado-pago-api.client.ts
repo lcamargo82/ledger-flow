@@ -3,6 +3,7 @@ import {
   MercadoPagoOAuthTokenResponse,
   MercadoPagoCreatePaymentRequest,
   MercadoPagoPaymentResponse,
+  MercadoPagoRefundResponse,
 } from './mercado-pago.types';
 
 export class MercadoPagoApiError extends Error {
@@ -79,6 +80,45 @@ export class MercadoPagoApiClient {
     return this.get<MercadoPagoPaymentResponse>(`/v1/payments/${providerPaymentId}`, headers);
   }
 
+  async cancelPayment(
+    accessToken: string,
+    providerPaymentId: string,
+    idempotencyKey?: string,
+  ): Promise<MercadoPagoPaymentResponse> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    if (idempotencyKey) {
+      headers['X-Idempotency-Key'] = idempotencyKey;
+    }
+
+    return this.put<MercadoPagoPaymentResponse>(
+      `/v1/payments/${providerPaymentId}`,
+      { status: 'cancelled' },
+      headers,
+    );
+  }
+
+  async refundPayment(
+    accessToken: string,
+    providerPaymentId: string,
+    input?: { amount?: number; idempotencyKey?: string },
+  ): Promise<MercadoPagoRefundResponse> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    if (input?.idempotencyKey) {
+      headers['X-Idempotency-Key'] = input.idempotencyKey;
+    }
+
+    const payload = input?.amount ? { amount: input.amount } : {};
+    return this.post<MercadoPagoRefundResponse>(
+      `/v1/payments/${providerPaymentId}/refunds`,
+      payload,
+      headers,
+    );
+  }
+
   private async post<T>(
     endpoint: string,
     payload: any,
@@ -89,6 +129,14 @@ export class MercadoPagoApiClient {
 
   private async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
     return this.request<T>('GET', endpoint, undefined, headers);
+  }
+
+  private async put<T>(
+    endpoint: string,
+    payload: any,
+    headers?: Record<string, string>,
+  ): Promise<T> {
+    return this.request<T>('PUT', endpoint, payload, headers);
   }
 
   private async request<T>(

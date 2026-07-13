@@ -1428,6 +1428,12 @@
       "providerUnavailable": "The provider is currently unavailable. Please try again.",
       "providerCanceled": "Payment successfully canceled at the provider."
     },
+    "refund": {
+      "reasonRequired": "Enter the refund reason.",
+      "providerConflict": "The provider refused the refund. The payment may already be refunded, disputed, or ineligible.",
+      "providerUnavailable": "The provider is currently unavailable. Please try again.",
+      "providerRefunded": "Payment successfully refunded at the provider."
+    },
     "empty": {
       "title": "No payments found",
       "description": "Create a new payment or adjust filters to view results."
@@ -1437,7 +1443,9 @@
       "description": "Please try again in a few moments.",
       "createFailed": "Failed to create payment.",
       "cancelFailed": "Failed to cancel payment.",
+      "refundFailed": "Failed to refund payment.",
       "invalidStatus": "This payment can no longer be canceled in its current status.",
+      "invalidRefundStatus": "This payment cannot be refunded in its current status.",
       "customerRequired": "Customer required.",
       "amountInvalid": "Invalid amount.",
       "notFound": "There is no active gateway configured for Pix payments in this environment.",
