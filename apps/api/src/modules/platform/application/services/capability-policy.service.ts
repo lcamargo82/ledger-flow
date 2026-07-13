@@ -34,6 +34,8 @@ const reconciliationCapabilities: PlatformCapability[] = [
   ReconciliationCapabilities.Manage,
   ReconciliationCapabilities.Export,
   ReconciliationCapabilities.Sync,
+  ReconciliationCapabilities.MarketplaceSettlementRead,
+  ReconciliationCapabilities.MarketplaceSettlementManage,
 ];
 
 const masterCapabilities: PlatformCapability[] = [

@@ -28,6 +28,7 @@ import { FinancialIntelligenceModule } from './modules/financial-intelligence/fi
 import { ExportsModule } from './modules/exports/exports.module';
 import { ReconciliationModule } from './modules/reconciliation/reconciliation.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { MarketplaceSettlementModule } from './modules/marketplace-settlement/marketplace-settlement.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     ExportsModule,
     ReconciliationModule,
     NotificationsModule,
+    MarketplaceSettlementModule,
   ],
   controllers: [AppController],
   providers: [

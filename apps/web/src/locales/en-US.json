@@ -145,6 +145,7 @@
     "analytics": "Analytics",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
+    "marketplaceSettlement": "Marketplace Settlement",
     "reports": "Reports",
     "webhooks": "Webhooks",
     "settings": "Settings",
@@ -1949,6 +1950,60 @@
       "default": "Could not load reconciliation.",
       "forbidden": "You do not have access to reconciliation.",
       "invalid": "Review the decision data."
+    }
+  },
+  "marketplaceSettlement": {
+    "title": "Marketplace Settlement",
+    "description": "Configure Mercado Pago financial accounts, opening balance and append-only cash ledger for 9B.",
+    "empty": {
+      "title": "No financial accounts yet",
+      "description": "Create the first settlement-ready Mercado Pago account to initialize the operational cash position."
+    },
+    "readiness": {
+      "title": "Mercado Pago connection is not settlement-ready yet",
+      "description": "A financial account can only be created when the Mercado Pago connection is active, healthy and has financial-read scopes."
+    },
+    "account": {
+      "openingBalance": "Opening balance"
+    },
+    "actions": {
+      "newAccount": "New account",
+      "create": "Create account",
+      "newAdjustment": "New adjustment",
+      "recordAdjustment": "Record adjustment"
+    },
+    "form": {
+      "createTitle": "New financial account",
+      "adjustmentTitle": "Cash position adjustment",
+      "connection": "Mercado Pago connection",
+      "name": "Account name",
+      "openingBalance": "Opening balance",
+      "adjustmentAmount": "Adjustment amount",
+      "reasonCode": "Reason code",
+      "notes": "Notes"
+    },
+    "table": {
+      "type": "Type",
+      "amount": "Amount",
+      "balance": "Balance after",
+      "reason": "Reason",
+      "occurredAt": "Occurred at"
+    },
+    "ledgerType": {
+      "OPENING_BALANCE": "Opening balance",
+      "MANUAL_ADJUSTMENT": "Manual adjustment",
+      "SETTLEMENT_CREDIT": "Settlement credit",
+      "SETTLEMENT_DEBIT": "Settlement debit",
+      "PAYOUT": "Payout",
+      "REFUND": "Refund",
+      "FEE": "Fee"
+    },
+    "errors": {
+      "default": "Could not load marketplace settlement.",
+      "invalid": "Review account or adjustment data.",
+      "forbidden": "You do not have access to marketplace settlement.",
+      "notFound": "Financial account not found.",
+      "duplicate": "A financial account with this name already exists."
     }
   },
   "features": {

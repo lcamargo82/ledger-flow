@@ -306,6 +306,7 @@ Fase 5A — Payments Core Backend Foundation
 - Webhook foundation MP-2: `POST /webhooks/mercado-pago` valida assinatura quando configurada, persiste inbox sanitizado/idempotente, enfileira `webhook.inbound_processing_requested` e mantém o worker provider-aware para não acionar ingestão de conciliação Asaas em eventos Mercado Pago.
 - Status sync MP-3: o worker Mercado Pago busca detalhes do pagamento com token válido, atualiza `Payment.status` de forma idempotente, bloqueia regressões terminais, registra chargeback como evento técnico sem mutar status e emite notificação autorizada `mercado_pago.payment_status_updated`.
 - Cancel/refund MP-4: os endpoints genéricos de pagamentos chamam o Mercado Pago antes da mutação local, usam chaves de idempotência determinísticas, exigem motivo para estorno e persistem metadados sanitizados de provider em eventos/auditoria.
+- Marketplace settlement 9B-1: `/marketplace-settlement` cria contas financeiras Mercado Pago apenas quando a conexão está settlement-ready, registra saldo inicial em minor units, mantém `CashLedgerEntry` append-only e audita ajustes manuais de caixa.
 - Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
 - Documentação: ADR 0031.
 

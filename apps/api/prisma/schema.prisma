@@ -198,6 +198,9 @@ model Tenant {
   notificationRecipients           NotificationRecipient[]
   notificationWebhookSubscriptions NotificationWebhookSubscription[]
   notificationWebhookDeliveries    NotificationWebhookDelivery[]
+  operationalFinancialAccounts     OperationalFinancialAccount[]
+  cashLedgerEntries                CashLedgerEntry[]
+  cashPositionAdjustments          CashPositionAdjustment[]
 
   @@map("tenants")
 }
@@ -234,6 +237,9 @@ model User {
   approvedCycleCounts                     CycleCount[]                      @relation("CycleCountApprovedBy")
   canceledCycleCounts                     CycleCount[]                      @relation("CycleCountCanceledBy")
   countedCycleCountItems                  CycleCountItem[]                  @relation("CycleCountItemCountedBy")
+  createdOperationalFinancialAccounts     OperationalFinancialAccount[]      @relation("OperationalFinancialAccountCreatedBy")
+  createdCashLedgerEntries                CashLedgerEntry[]                 @relation("CashLedgerEntryCreatedBy")
+  createdCashPositionAdjustments          CashPositionAdjustment[]           @relation("CashPositionAdjustmentCreatedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -1166,6 +1172,7 @@ model GatewayConfiguration {
   payments           Payment[]
   gatewayReferences  GatewayCustomerReference[]
   webhookInboxEvents WebhookInboxEvent[]
+  operationalFinancialAccounts OperationalFinancialAccount[]
 
   @@unique([tenantId, provider, environment])
   @@index([tenantId])
@@ -1601,6 +1608,108 @@ model ReconciliationPolicy {
   @@unique([tenantId, provider, currency, version])
   @@index([tenantId, provider, currency, isActive])
   @@map("reconciliation_policies")
+}
+
+enum OperationalFinancialAccountStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CashLedgerEntryType {
+  OPENING_BALANCE
+  MANUAL_ADJUSTMENT
+  SETTLEMENT_CREDIT
+  SETTLEMENT_DEBIT
+  PAYOUT
+  REFUND
+  FEE
+}
+
+enum CashPositionAdjustmentType {
+  OPENING_BALANCE
+  MANUAL_CORRECTION
+}
+
+model OperationalFinancialAccount {
+  id                     String                            @id @default(uuid())
+  tenantId               String                            @map("tenant_id")
+  gatewayConfigurationId String                            @map("gateway_configuration_id")
+  provider               PaymentProvider
+  environment            GatewayEnvironment
+  name                   String
+  currency               String                            @default("BRL")
+  currencyExponent       Int                               @default(2) @map("currency_exponent")
+  status                 OperationalFinancialAccountStatus @default(ACTIVE)
+  openingBalanceMinor    Decimal                           @default(0) @map("opening_balance_minor") @db.Decimal(18, 0)
+  currentBalanceMinor    Decimal                           @default(0) @map("current_balance_minor") @db.Decimal(18, 0)
+  createdByUserId        String                            @map("created_by_user_id")
+  createdAt              DateTime                          @default(now()) @map("created_at")
+  updatedAt              DateTime                          @updatedAt @map("updated_at")
+  archivedAt             DateTime?                         @map("archived_at")
+
+  tenant               Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  gatewayConfiguration GatewayConfiguration   @relation(fields: [gatewayConfigurationId], references: [id], onDelete: Restrict)
+  createdByUser        User                   @relation("OperationalFinancialAccountCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  ledgerEntries        CashLedgerEntry[]
+  adjustments          CashPositionAdjustment[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, provider, status])
+  @@index([tenantId, gatewayConfigurationId])
+  @@index([tenantId, createdAt])
+  @@map("operational_financial_accounts")
+}
+
+model CashLedgerEntry {
+  id                 String              @id @default(uuid())
+  tenantId           String              @map("tenant_id")
+  accountId          String              @map("account_id")
+  type               CashLedgerEntryType
+  amountMinor        Decimal             @map("amount_minor") @db.Decimal(18, 0)
+  balanceAfterMinor  Decimal             @map("balance_after_minor") @db.Decimal(18, 0)
+  currency           String              @default("BRL")
+  currencyExponent   Int                 @default(2) @map("currency_exponent")
+  sourceType         String              @map("source_type")
+  sourceId           String              @map("source_id")
+  idempotencyKey     String              @map("idempotency_key")
+  reasonCode         String              @map("reason_code")
+  notes              String?
+  occurredAt         DateTime            @map("occurred_at")
+  createdByUserId    String              @map("created_by_user_id")
+  createdAt          DateTime            @default(now()) @map("created_at")
+
+  tenant        Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account       OperationalFinancialAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  createdByUser User                        @relation("CashLedgerEntryCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  adjustment    CashPositionAdjustment?
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, accountId, occurredAt])
+  @@index([tenantId, type])
+  @@index([sourceType, sourceId])
+  @@map("cash_ledger_entries")
+}
+
+model CashPositionAdjustment {
+  id                 String                     @id @default(uuid())
+  tenantId           String                     @map("tenant_id")
+  accountId          String                     @map("account_id")
+  cashLedgerEntryId  String                     @unique @map("cash_ledger_entry_id")
+  type               CashPositionAdjustmentType
+  amountMinor        Decimal                    @map("amount_minor") @db.Decimal(18, 0)
+  reasonCode         String                     @map("reason_code")
+  notes              String?
+  createdByUserId    String                     @map("created_by_user_id")
+  createdAt          DateTime                   @default(now()) @map("created_at")
+
+  tenant          Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account         OperationalFinancialAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  cashLedgerEntry CashLedgerEntry             @relation(fields: [cashLedgerEntryId], references: [id], onDelete: Restrict)
+  createdByUser   User                        @relation("CashPositionAdjustmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, accountId, createdAt])
+  @@index([tenantId, type])
+  @@map("cash_position_adjustments")
 }
 
 model OutboxEvent {

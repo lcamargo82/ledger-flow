@@ -144,6 +144,7 @@
     "analytics": "Analytics",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
+    "marketplaceSettlement": "Settlement marketplace",
     "reports": "Relatórios",
     "webhooks": "Webhooks",
     "settings": "Configurações",
@@ -1950,6 +1951,60 @@
       "default": "Não foi possível carregar a conciliação.",
       "forbidden": "Você não tem acesso à conciliação.",
       "invalid": "Revise os dados da decisão."
+    }
+  },
+  "marketplaceSettlement": {
+    "title": "Settlement marketplace",
+    "description": "Configure contas financeiras Mercado Pago, saldo inicial e ledger de caixa append-only para a fase 9B.",
+    "empty": {
+      "title": "Nenhuma conta financeira ainda",
+      "description": "Crie a primeira conta Mercado Pago settlement-ready para iniciar a posição de caixa operacional."
+    },
+    "readiness": {
+      "title": "Conexão Mercado Pago ainda não está settlement-ready",
+      "description": "A conta financeira só pode ser criada quando a conexão Mercado Pago estiver ativa, saudável e com escopos de leitura financeira."
+    },
+    "account": {
+      "openingBalance": "Saldo inicial"
+    },
+    "actions": {
+      "newAccount": "Nova conta",
+      "create": "Criar conta",
+      "newAdjustment": "Novo ajuste",
+      "recordAdjustment": "Registrar ajuste"
+    },
+    "form": {
+      "createTitle": "Nova conta financeira",
+      "adjustmentTitle": "Ajuste de posição de caixa",
+      "connection": "Conexão Mercado Pago",
+      "name": "Nome da conta",
+      "openingBalance": "Saldo inicial",
+      "adjustmentAmount": "Valor do ajuste",
+      "reasonCode": "Código do motivo",
+      "notes": "Observações"
+    },
+    "table": {
+      "type": "Tipo",
+      "amount": "Valor",
+      "balance": "Saldo após",
+      "reason": "Motivo",
+      "occurredAt": "Ocorrido em"
+    },
+    "ledgerType": {
+      "OPENING_BALANCE": "Saldo inicial",
+      "MANUAL_ADJUSTMENT": "Ajuste manual",
+      "SETTLEMENT_CREDIT": "Crédito settlement",
+      "SETTLEMENT_DEBIT": "Débito settlement",
+      "PAYOUT": "Payout",
+      "REFUND": "Estorno",
+      "FEE": "Taxa"
+    },
+    "errors": {
+      "default": "Não foi possível carregar settlement marketplace.",
+      "invalid": "Revise os dados da conta ou ajuste.",
+      "forbidden": "Você não tem acesso a settlement marketplace.",
+      "notFound": "Conta financeira não encontrada.",
+      "duplicate": "Já existe uma conta financeira com esse nome."
     }
   },
   "features": {
