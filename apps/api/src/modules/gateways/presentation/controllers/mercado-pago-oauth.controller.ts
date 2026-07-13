@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Query, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
+import { Public } from '../../../auth/presentation/decorators/public.decorator';
 import { RequirePermissions } from '../../../auth/presentation/decorators/require-permissions.decorator';
 import { JwtAuthGuard } from '../../../auth/presentation/guards/jwt-auth.guard';
 import { PermissionGuard } from '../../../auth/presentation/guards/permission.guard';
@@ -25,6 +26,7 @@ export class MercadoPagoOAuthController {
   }
 
   @Get('mercado-pago/oauth/callback')
+  @Public()
   async callback(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
     try {
       if (!code || !state) {
