@@ -61,6 +61,70 @@ describe('NotificationProducerService', () => {
     );
   });
 
+  it('produces a sanitized marketplace settlement event for n8n when enabled', async () => {
+    config.get.mockReturnValue('true');
+    notifications.createEvent.mockResolvedValue({ created: true });
+
+    await service.marketplaceSettlementEventReceived({
+      tenantId: 'tenant-1',
+      settlementEventId: 'settlement-1',
+      operationalFinancialAccountId: 'account-1',
+      provider: 'MERCADO_PAGO',
+      providerEventId: 'mp-payment:gateway-1:123',
+      providerPaymentId: '123',
+      netAmountMinor: '9500',
+      currency: 'BRL',
+    });
+
+    expect(notifications.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'marketplace_settlement.event_received',
+        idempotencyKey: 'marketplace-settlement:settlement-1:received',
+        sourceType: 'ProviderSettlementEvent',
+        sourceId: 'settlement-1',
+        translationArgs: {
+          provider: 'MERCADO_PAGO',
+          providerPaymentId: '123',
+          netAmountMinor: '9500',
+          currency: 'BRL',
+        },
+        metadata: {
+          operationalFinancialAccountId: 'account-1',
+          provider: 'MERCADO_PAGO',
+          providerEventId: 'mp-payment:gateway-1:123',
+          providerPaymentId: '123',
+        },
+      }),
+    );
+    expect(JSON.stringify(notifications.createEvent.mock.calls)).not.toContain('access_token');
+  });
+
+  it('produces an idempotent cash position difference alert when enabled', async () => {
+    config.get.mockReturnValue('true');
+    notifications.createEvent.mockResolvedValue({ created: true });
+
+    await service.cashPositionUnexplainedDifference({
+      tenantId: 'tenant-1',
+      accountId: 'account-1',
+      differenceAmountMinor: '345',
+      currency: 'BRL',
+      detectedAt: new Date('2026-07-13T10:00:00.000Z'),
+    });
+
+    expect(notifications.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'cash_position.unexplained_difference',
+        idempotencyKey: 'cash-position:account-1:345:2026-07-13T10:00:00.000Z',
+        sourceType: 'OperationalFinancialAccount',
+        sourceId: 'account-1',
+        translationArgs: {
+          differenceAmountMinor: '345',
+          currency: 'BRL',
+        },
+      }),
+    );
+  });
+
   it('produces an idempotent channel order shipping summary update when enabled', async () => {
     config.get.mockReturnValue('true');
     notifications.createEvent.mockResolvedValue({ created: true });

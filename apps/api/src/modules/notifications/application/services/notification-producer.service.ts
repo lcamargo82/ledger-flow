@@ -42,6 +42,66 @@ export class NotificationProducerService {
     });
   }
 
+  async marketplaceSettlementEventReceived(input: {
+    tenantId: string;
+    settlementEventId: string;
+    operationalFinancialAccountId?: string | null;
+    provider: string;
+    providerEventId: string;
+    providerPaymentId?: string | null;
+    netAmountMinor?: string | null;
+    currency: string;
+  }) {
+    if (!this.isEnabled()) return;
+
+    await this.notifications.createEvent({
+      tenantId: input.tenantId,
+      eventType: 'marketplace_settlement.event_received',
+      idempotencyKey: `marketplace-settlement:${input.settlementEventId}:received`,
+      sourceType: 'ProviderSettlementEvent',
+      sourceId: input.settlementEventId,
+      occurredAt: new Date(),
+      translationArgs: {
+        provider: input.provider,
+        providerPaymentId: input.providerPaymentId ?? null,
+        netAmountMinor: input.netAmountMinor ?? null,
+        currency: input.currency,
+      },
+      metadata: {
+        operationalFinancialAccountId: input.operationalFinancialAccountId ?? null,
+        provider: input.provider,
+        providerEventId: input.providerEventId,
+        providerPaymentId: input.providerPaymentId ?? null,
+      },
+    });
+  }
+
+  async cashPositionUnexplainedDifference(input: {
+    tenantId: string;
+    accountId: string;
+    differenceAmountMinor: string;
+    currency: string;
+    detectedAt: Date;
+  }) {
+    if (!this.isEnabled()) return;
+
+    await this.notifications.createEvent({
+      tenantId: input.tenantId,
+      eventType: 'cash_position.unexplained_difference',
+      idempotencyKey: `cash-position:${input.accountId}:${input.differenceAmountMinor}:${input.detectedAt.toISOString()}`,
+      sourceType: 'OperationalFinancialAccount',
+      sourceId: input.accountId,
+      occurredAt: input.detectedAt,
+      translationArgs: {
+        differenceAmountMinor: input.differenceAmountMinor,
+        currency: input.currency,
+      },
+      metadata: {
+        accountId: input.accountId,
+      },
+    });
+  }
+
   async channelOrderShippingSummaryUpdated(input: {
     tenantId: string;
     shippingSummaryId: string;

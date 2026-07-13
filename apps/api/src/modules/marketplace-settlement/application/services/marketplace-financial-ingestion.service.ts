@@ -14,6 +14,7 @@ import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { MercadoPagoFinancialReadinessService } from '../../../gateways/application/services/mercado-pago-financial-readiness.service';
 import { MercadoPagoCredentialManager } from '../../../gateways/infra/providers/mercado-pago/mercado-pago-credential.manager';
 import { ReconciliationSettlementIngestionService } from '../../../reconciliation/application/services/reconciliation-settlement-ingestion.service';
+import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
 import {
   ListMarketplaceSettlementEventsQueryDto,
   MarketplaceSettlementDashboardQueryDto,
@@ -37,6 +38,7 @@ export class MarketplaceFinancialIngestionService {
     private readonly credentialManager: MercadoPagoCredentialManager,
     private readonly mercadoPagoReadService: MercadoPagoFinancialReadService,
     private readonly reconciliationIngestion: ReconciliationSettlementIngestionService,
+    private readonly notificationProducer?: NotificationProducerService,
   ) {}
 
   async syncMercadoPagoByPeriod(
@@ -94,6 +96,17 @@ export class MarketplaceFinancialIngestionService {
         if (ingested.created && ingested.settlementEvent) {
           result.created += 1;
           await this.emitMarketplaceEventReceived(tenantId, ingested.settlementEvent);
+          await this.notificationProducer?.marketplaceSettlementEventReceived({
+            tenantId,
+            settlementEventId: ingested.settlementEvent.id,
+            operationalFinancialAccountId:
+              ingested.settlementEvent.operationalFinancialAccountId ?? account.id,
+            provider: ingested.settlementEvent.provider,
+            providerEventId: ingested.settlementEvent.providerEventId,
+            providerPaymentId: ingested.settlementEvent.providerPaymentId,
+            netAmountMinor: ingested.settlementEvent.netAmountMinor?.toString() ?? null,
+            currency: ingested.settlementEvent.currency,
+          });
         } else {
           result.duplicates += 1;
         }

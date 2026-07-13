@@ -43,6 +43,30 @@ const NOTIFICATION_EVENT_REGISTRY = {
     requiredPermissions: ['reconciliation:read', 'reconciliation:manage'],
     requiredCapabilities: [NotificationCapabilities.Read, ReconciliationCapabilities.Read],
   },
+  'marketplace_settlement.event_received': {
+    category: NotificationCategory.RECONCILIATION,
+    severity: NotificationSeverity.INFO,
+    titleKey: 'notifications.events.marketplaceSettlementEventReceived.title',
+    messageKey: 'notifications.events.marketplaceSettlementEventReceived.message',
+    requiredPermissions: ['reconciliation:read', 'marketplace-settlement:read'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      ReconciliationCapabilities.Read,
+      ReconciliationCapabilities.MarketplaceSettlementRead,
+    ],
+  },
+  'cash_position.unexplained_difference': {
+    category: NotificationCategory.RECONCILIATION,
+    severity: NotificationSeverity.WARNING,
+    titleKey: 'notifications.events.cashPositionUnexplainedDifference.title',
+    messageKey: 'notifications.events.cashPositionUnexplainedDifference.message',
+    requiredPermissions: ['reconciliation:read', 'marketplace-settlement:manage'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      ReconciliationCapabilities.Read,
+      ReconciliationCapabilities.MarketplaceSettlementManage,
+    ],
+  },
   'mercado_pago.connection_reauth_required': {
     category: NotificationCategory.PAYMENTS,
     severity: NotificationSeverity.ERROR,

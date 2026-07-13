@@ -52,7 +52,17 @@ describe('MarketplaceFinancialAccountsService', () => {
         ),
       },
       cashPositionAdjustment: {
-        create: jest.fn().mockResolvedValue({ id: 'adjustment-1' }),
+        create: jest.fn().mockImplementation(({ data }) =>
+          Promise.resolve({
+            id: 'adjustment-1',
+            ...data,
+            cashLedgerEntry: {
+              id: data.cashLedgerEntryId,
+              currency: 'BRL',
+              occurredAt: new Date('2026-07-13T10:00:00.000Z'),
+            },
+          }),
+        ),
       },
       auditLog: {
         create: jest.fn().mockResolvedValue({ id: 'audit-1' }),
@@ -163,5 +173,50 @@ describe('MarketplaceFinancialAccountsService', () => {
         reasonCode: 'initial_import',
       }),
     ).rejects.toThrow(ConflictException);
+  });
+
+  it('records a manual cash adjustment and publishes an unexplained difference alert', async () => {
+    const { prisma, tx } = makePrisma();
+    tx.operationalFinancialAccount.findFirst.mockResolvedValue({
+      id: 'account-1',
+      tenantId: 'tenant-1',
+      provider: PaymentProvider.MERCADO_PAGO,
+      status: 'ACTIVE',
+      currentBalanceMinor: 1000,
+      currency: 'BRL',
+      currencyExponent: 2,
+    });
+    const notificationProducer = {
+      cashPositionUnexplainedDifference: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new MarketplaceFinancialAccountsService(
+      prisma as never,
+      { assertSettlementReadable: jest.fn() } as never,
+      notificationProducer as never,
+    );
+
+    await service.createAdjustment('tenant-1', 'user-1', 'account-1', {
+      amountMinor: 345,
+      reasonCode: 'manual_cash_difference',
+      notes: 'Statement mismatch reviewed.',
+    });
+
+    expect(tx.cashLedgerEntry.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          type: 'MANUAL_ADJUSTMENT',
+          amountMinor: expect.anything(),
+          balanceAfterMinor: expect.anything(),
+          reasonCode: 'manual_cash_difference',
+        }),
+      }),
+    );
+    expect(notificationProducer.cashPositionUnexplainedDifference).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      accountId: 'account-1',
+      differenceAmountMinor: '345',
+      currency: 'BRL',
+      detectedAt: new Date('2026-07-13T10:00:00.000Z'),
+    });
   });
 });
