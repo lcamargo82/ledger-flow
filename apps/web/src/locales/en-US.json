@@ -1774,7 +1774,8 @@
       "connect": "Connect Mercado Pago",
       "connecting": "Connecting...",
       "connected": "Connected",
-      "connectionFailed": "Connection Failed"
+      "connectionFailed": "Connection Failed",
+      "oauthOnly": "Mercado Pago connects through secure OAuth. Store credentials are not typed or shown in the dashboard."
     },
     "form": {
       "provider": "Provider",

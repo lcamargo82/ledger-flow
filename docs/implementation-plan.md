@@ -283,6 +283,7 @@ Fase 5A — Payments Core Backend Foundation
 * Orquestrador de OAuth: `MercadoPagoOAuthService` (redirecionamento, handling de callback e criptografia de credenciais).
 * Controle de Acesso: Validação de RBAC (`gateways:create`, `gateways:read`, `gateways:manage`) e `TenantFeatureAccessService` (`mercado_pago_gateway`).
 * Frontend: UI no `GatewaysPage.vue` para Conectar Mercado Pago e tratamento do OAuth redirect (`?success=true` ou `?error=true`).
+* Hardening MP-0: o frontend normaliza `mercado-pago`, `mercado_pago` e `MERCADO_PAGO`; a matriz de capabilities do adapter Mercado Pago anuncia apenas PIX, boleto e sandbox até que webhooks, cancelamento, estorno e cartão sejam implementados.
 * Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
 * Documentação: ADR 0031.
 

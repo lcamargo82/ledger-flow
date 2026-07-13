@@ -101,6 +101,7 @@ import GatewayConnectionForm from '@components/gateways/GatewayConnectionForm.vu
 import GatewayCredentialUpdateModal from '@components/gateways/GatewayCredentialUpdateModal.vue';
 import GatewayConnectionStatusModal from '@components/gateways/GatewayConnectionStatusModal.vue';
 import GatewayConnectionDisconnectModal from '@components/gateways/GatewayConnectionDisconnectModal.vue';
+import { GATEWAY_PROVIDER, normalizeGatewayProvider } from '@/utils/gateway-provider';
 
 const { t } = useI18n();
 const toast = useToastStore();
@@ -156,10 +157,12 @@ const handleConnectMercadoPago = async () => {
 onMounted(async () => {
   await loadConnections();
 
-  if (route.query.success === 'true' && route.query.provider === 'mercado_pago') {
+  const oauthProvider = normalizeGatewayProvider(route.query.provider);
+
+  if (route.query.success === 'true' && oauthProvider === GATEWAY_PROVIDER.MERCADO_PAGO) {
     toast.success(t('gateways.messages.mpConnected'));
     router.replace({ query: {} });
-  } else if (route.query.error === 'true' && route.query.provider === 'mercado_pago') {
+  } else if (route.query.error === 'true' && oauthProvider === GATEWAY_PROVIDER.MERCADO_PAGO) {
     toast.error(t('gateways.errors.mpConnectionFailed'));
     router.replace({ query: {} });
   }

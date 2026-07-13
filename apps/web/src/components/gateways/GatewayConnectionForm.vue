@@ -27,8 +27,8 @@
       />
 
       <div v-if="form.provider === 'MERCADO_PAGO'" class="p-4 bg-surface-hover rounded border border-divider text-center">
-        <div class="i-ph-clock text-2xl mb-2 mx-auto opacity-50"></div>
-        <p class="text-secondary text-sm">Integração via OAuth em breve.</p>
+        <div class="i-ph-shield-check text-2xl mb-2 mx-auto opacity-50"></div>
+        <p class="text-secondary text-sm">{{ t('gateways.mercadoPago.oauthOnly') }}</p>
       </div>
 
       <template v-else>
@@ -143,5 +143,4 @@ const submit = () => {
   emit('saved', { ...form });
 };
 </script>
-
 
