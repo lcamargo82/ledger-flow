@@ -224,6 +224,13 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Fora de escopo:** sync agendada, matching ML x MP, cash dashboard consolidado e P&L 9B-4.
 - **i18n:** Namespace `marketplaceSettlement.*` em pt-BR e en-US.
 
+### Reconciliation fine mesh 9B-3 evidence
+
+- **Rota:** `/reconciliation`.
+- **Status:** Cases de conciliação agora podem carregar evidência de pedido Mercado Livre quando o matching vem de `OrderFinancialFact.externalOrderId`.
+- **Objetivo:** mostrar referência de pagamento ou pedido no mesmo grid de conciliação, sem expor payload bruto do Mercado Livre/Mercado Pago.
+- **i18n:** `reconciliation.table.order` em pt-BR e en-US.
+
 ### Inventory Transfers
 
 - **Rota:** `/inventory/transfers`.

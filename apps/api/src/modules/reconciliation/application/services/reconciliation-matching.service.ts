@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
+  ChannelProvider,
   Payment,
   PaymentStatus,
   Prisma,
@@ -18,9 +19,20 @@ interface MatchSettlementResult {
 }
 
 type MatchResult = {
-  payment: Payment | null;
+  payment?: Payment | null;
+  order?: MarketplaceOrderMatch | null;
   matchType: ReconciliationMatchType;
   ambiguous?: boolean;
+};
+
+type MarketplaceOrderMatch = {
+  id: string;
+  tenantId: string;
+  orderId: string;
+  externalOrderId: string | null;
+  revenueAmount: Prisma.Decimal;
+  currency: string;
+  calculatedAt: Date;
 };
 
 @Injectable()
@@ -126,16 +138,31 @@ export class ReconciliationMatchingService {
       }
     }
 
-    const candidates = await this.findAmountCandidates(settlement);
-    if (candidates.length === 1) {
+    const orderReferenceMatch = await this.findMarketplaceOrderReferenceMatch(settlement);
+    if (orderReferenceMatch) {
       return {
-        payment: candidates[0],
+        order: orderReferenceMatch,
+        matchType: ReconciliationMatchType.MARKETPLACE_ORDER_ID,
+      };
+    }
+
+    const candidates = await this.findAmountCandidates(settlement);
+    if (candidates.paymentCandidates.length === 1 && candidates.orderCandidates.length === 0) {
+      return {
+        payment: candidates.paymentCandidates[0],
         matchType: ReconciliationMatchType.AMOUNT_CURRENCY_TIME_CANDIDATE,
       };
     }
-    if (candidates.length > 1) {
+    if (candidates.orderCandidates.length === 1 && candidates.paymentCandidates.length === 0) {
+      return {
+        order: candidates.orderCandidates[0],
+        matchType: ReconciliationMatchType.AMOUNT_CURRENCY_TIME_CANDIDATE,
+      };
+    }
+    if (candidates.paymentCandidates.length + candidates.orderCandidates.length > 1) {
       return {
         payment: null,
+        order: null,
         matchType: ReconciliationMatchType.AMOUNT_CURRENCY_TIME_CANDIDATE,
         ambiguous: true,
       };
@@ -144,27 +171,65 @@ export class ReconciliationMatchingService {
     return null;
   }
 
+  private async findMarketplaceOrderReferenceMatch(settlement: ProviderSettlementEvent) {
+    if (!settlement.tenantId) return null;
+
+    const references = this.extractMarketplaceOrderReferences(settlement);
+    if (references.length === 0) return null;
+
+    return this.prisma.orderFinancialFact.findFirst({
+      where: {
+        tenantId: settlement.tenantId,
+        channelProvider: ChannelProvider.MERCADO_LIVRE,
+        externalOrderId: { in: references },
+      },
+      orderBy: [{ version: 'desc' }, { calculatedAt: 'desc' }],
+    });
+  }
+
   private async findAmountCandidates(settlement: ProviderSettlementEvent) {
     if (!settlement.tenantId || !settlement.amountMinor || !settlement.occurredAt) {
-      return [];
+      return { paymentCandidates: [], orderCandidates: [] };
     }
 
     const dayMs = 24 * 60 * 60 * 1000;
     const occurredAt = settlement.occurredAt.getTime();
 
-    return this.prisma.payment.findMany({
-      where: {
-        tenantId: settlement.tenantId,
-        provider: settlement.provider,
-        amount: Number(settlement.amountMinor.toString()),
-        currency: settlement.currency,
-        createdAt: {
-          gte: new Date(occurredAt - dayMs),
-          lte: new Date(occurredAt + dayMs),
+    const [paymentCandidates, rawOrderCandidates] = await Promise.all([
+      this.prisma.payment.findMany({
+        where: {
+          tenantId: settlement.tenantId,
+          provider: settlement.provider,
+          amount: Number(settlement.amountMinor.toString()),
+          currency: settlement.currency,
+          createdAt: {
+            gte: new Date(occurredAt - dayMs),
+            lte: new Date(occurredAt + dayMs),
+          },
         },
-      },
-      take: 2,
-    });
+        take: 2,
+      }),
+      this.prisma.orderFinancialFact.findMany({
+        where: {
+          tenantId: settlement.tenantId,
+          channelProvider: ChannelProvider.MERCADO_LIVRE,
+          currency: settlement.currency,
+          calculatedAt: {
+            gte: new Date(occurredAt - dayMs),
+            lte: new Date(occurredAt + dayMs),
+          },
+        },
+        orderBy: { calculatedAt: 'desc' },
+        take: 10,
+      }),
+    ]);
+    const orderCandidates = rawOrderCandidates
+      .filter((fact) =>
+        this.majorDecimalToMinor(fact.revenueAmount).equals(settlement.amountMinor!),
+      )
+      .slice(0, 2);
+
+    return { paymentCandidates, orderCandidates };
   }
 
   private buildCaseData(
@@ -172,9 +237,7 @@ export class ReconciliationMatchingService {
     match: MatchResult | null,
     policy: { version: number; amountToleranceMinor: Prisma.Decimal } | null,
   ): Prisma.ReconciliationCaseUncheckedCreateInput {
-    const expectedAmountMinor = match?.payment
-      ? new Prisma.Decimal(match.payment.amount)
-      : undefined;
+    const expectedAmountMinor = this.resolveExpectedAmountMinor(match);
     const receivedAmountMinor =
       settlement.amountMinor === null || settlement.amountMinor === undefined
         ? undefined
@@ -193,13 +256,14 @@ export class ReconciliationMatchingService {
       matchType: match?.matchType ?? ReconciliationMatchType.NONE,
       settlementEventId: settlement.id,
       paymentId: match?.payment?.id,
+      orderId: match?.order?.orderId,
       expectedAmountMinor,
       receivedAmountMinor,
       differenceAmountMinor,
       currency: settlement.currency,
       currencyExponent: settlement.currencyExponent,
       policyVersion: policy?.version ?? 1,
-      matchedAt: match?.payment ? new Date() : undefined,
+      matchedAt: match?.payment || match?.order ? new Date() : undefined,
       reconciledAt: status === ReconciliationCaseStatus.RECONCILED ? new Date() : undefined,
     };
   }
@@ -211,22 +275,57 @@ export class ReconciliationMatchingService {
     tolerance: Prisma.Decimal,
   ) {
     if (match?.ambiguous) return ReconciliationCaseStatus.AMBIGUOUS;
-    if (!match?.payment) return ReconciliationCaseStatus.UNMATCHED;
-    if (match.payment.currency !== settlement.currency) {
+    if (!match?.payment && !match?.order) return ReconciliationCaseStatus.UNMATCHED;
+    const matchedCurrency = match.payment?.currency ?? match.order?.currency;
+    if (matchedCurrency !== settlement.currency) {
       return ReconciliationCaseStatus.CURRENCY_DIVERGENCE;
     }
-    const providerPaymentStatus = this.normalizeProviderStatus(settlement.providerStatus);
-    if (providerPaymentStatus && providerPaymentStatus !== match.payment.status) {
+    const providerPaymentStatus = match.payment
+      ? this.normalizeProviderStatus(settlement.providerStatus)
+      : null;
+    if (providerPaymentStatus && providerPaymentStatus !== match.payment?.status) {
       return ReconciliationCaseStatus.STATUS_DIVERGENCE;
     }
     if (differenceAmountMinor && differenceAmountMinor.absoluteValue().gt(tolerance)) {
       return ReconciliationCaseStatus.AMOUNT_DIVERGENCE;
     }
     if (match.matchType === ReconciliationMatchType.AMOUNT_CURRENCY_TIME_CANDIDATE) {
-      return ReconciliationCaseStatus.AUTO_MATCHED;
+      return ReconciliationCaseStatus.PENDING;
     }
 
     return ReconciliationCaseStatus.RECONCILED;
+  }
+
+  private resolveExpectedAmountMinor(match: MatchResult | null) {
+    if (match?.payment) return new Prisma.Decimal(match.payment.amount);
+    if (match?.order) return this.majorDecimalToMinor(match.order.revenueAmount);
+    return undefined;
+  }
+
+  private extractMarketplaceOrderReferences(settlement: ProviderSettlementEvent) {
+    const references = new Set<string>();
+    this.addReference(references, settlement.externalReference);
+
+    const payload = settlement.normalizedPayload;
+    if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+      const record = payload as Record<string, unknown>;
+      this.addReference(references, record.externalOrderId);
+      this.addReference(references, record.marketplaceOrderId);
+      this.addReference(references, record.orderId);
+    }
+
+    return Array.from(references);
+  }
+
+  private addReference(references: Set<string>, value: unknown) {
+    if (typeof value !== 'string' && typeof value !== 'number') return;
+    const normalized = String(value).trim();
+    if (!normalized) return;
+    references.add(normalized);
+  }
+
+  private majorDecimalToMinor(value: Prisma.Decimal) {
+    return new Prisma.Decimal(value).mul(100).toDecimalPlaces(0);
   }
 
   private normalizeProviderStatus(providerStatus?: string | null) {

@@ -1927,6 +1927,7 @@
       "received": "Received",
       "difference": "Difference",
       "reference": "Reference",
+      "order": "Order",
       "createdAt": "Created at",
       "actions": "Actions"
     },

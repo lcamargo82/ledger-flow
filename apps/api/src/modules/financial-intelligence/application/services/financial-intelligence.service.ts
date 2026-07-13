@@ -66,6 +66,7 @@ export class FinancialIntelligenceService {
       data: {
         tenantId,
         orderId: order.id,
+        externalOrderId: input.externalOrderId,
         version: 1,
         orderNumber: order.orderNumber,
         orderStatus: order.status,
