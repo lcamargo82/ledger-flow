@@ -128,6 +128,7 @@
   "nav": {
     "groups": {
       "operations": "Operations",
+      "financial": "Financial",
       "catalogAndInventory": "Catalog & Inventory",
       "analytics": "Analytics",
       "settings": "Settings",

@@ -49,17 +49,6 @@
 
           <div v-show="expandedGroups.operations || isCollapsed" class="lf-sidebar-group-content">
             <router-link
-              v-if="authStore.checkAllPermissions(['payments:read'])"
-              to="/payments"
-              class="lf-nav-item"
-              active-class="lf-nav-item--active"
-            >
-              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-                >payments</span
-              >
-              <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
-            </router-link>
-            <router-link
               v-if="
                 authStore.checkAllPermissions(['orders:read']) &&
                 authStore.checkAllCapabilities(['orders.manage'])
@@ -98,6 +87,45 @@
               >
               <span class="text" v-show="!isCollapsed">{{ t('nav.channels') }}</span>
             </router-link>
+          </div>
+        </div>
+
+        <!-- Group: Financial -->
+        <div
+          v-if="
+            authStore.checkAllPermissions(['payments:read']) ||
+            (authStore.checkAllPermissions(['reconciliation:read']) &&
+              authStore.checkAllCapabilities(['reconciliation.read'])) ||
+            (authStore.checkAllPermissions(['marketplace-settlement:read']) &&
+              authStore.checkAllCapabilities(['marketplace_settlement.read'])) ||
+            authStore.checkAllPermissions(['reports:export']) ||
+            authStore.checkAllPermissions(['gateways:read'])
+          "
+          class="lf-sidebar-group"
+        >
+          <button
+            v-if="!isCollapsed"
+            @click="toggleGroup('financial')"
+            class="lf-sidebar-group-header"
+          >
+            <span>{{ t('nav.groups.financial') }}</span>
+            <span class="material-symbols-outlined lf-sidebar-group-icon">{{
+              expandedGroups.financial ? 'expand_less' : 'expand_more'
+            }}</span>
+          </button>
+
+          <div v-show="expandedGroups.financial || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              v-if="authStore.checkAllPermissions(['payments:read'])"
+              to="/payments"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >payments</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.payments') }}</span>
+            </router-link>
             <router-link
               v-if="
                 authStore.checkAllPermissions(['reconciliation:read']) &&
@@ -125,6 +153,28 @@
                 >account_balance_wallet</span
               >
               <span class="text" v-show="!isCollapsed">{{ t('nav.marketplaceSettlement') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['reports:export'])"
+              to="/exports"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >file_download</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.reports') }}</span>
+            </router-link>
+            <router-link
+              v-if="authStore.checkAllPermissions(['gateways:read'])"
+              to="/settings/gateway-connections"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >account_balance_wallet</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.gatewayConnections') }}</span>
             </router-link>
           </div>
         </div>
@@ -220,10 +270,7 @@
         <div
           v-if="
             (authStore.checkAllPermissions(['financial-intelligence:read']) &&
-              authStore.checkAllCapabilities(['financial.analytics.read'])) ||
-            authStore.checkAllPermissions(['reports:export']) ||
-            (authStore.checkAllPermissions(['marketplace-settlement:read']) &&
-              authStore.checkAllCapabilities(['marketplace_settlement.read']))
+              authStore.checkAllCapabilities(['financial.analytics.read']))
           "
           class="lf-sidebar-group"
         >
@@ -252,31 +299,6 @@
               >
               <span class="text" v-show="!isCollapsed">{{ t('nav.analytics') }}</span>
             </router-link>
-            <router-link
-              v-if="authStore.checkAllPermissions(['reports:export'])"
-              to="/exports"
-              class="lf-nav-item"
-              active-class="lf-nav-item--active"
-            >
-              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-                >file_download</span
-              >
-              <span class="text" v-show="!isCollapsed">{{ t('nav.reports') }}</span>
-            </router-link>
-            <router-link
-              v-if="
-                authStore.checkAllPermissions(['marketplace-settlement:read']) &&
-                authStore.checkAllCapabilities(['marketplace_settlement.read'])
-              "
-              to="/marketplace-settlement"
-              class="lf-nav-item"
-              active-class="lf-nav-item--active"
-            >
-              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-                >account_balance</span
-              >
-              <span class="text" v-show="!isCollapsed">{{ t('nav.marketplaceSettlement') }}</span>
-            </router-link>
           </div>
         </div>
 
@@ -286,8 +308,7 @@
             authStore.checkAllPermissions(['users:read']) ||
             authStore.checkAllPermissions(['roles:manage']) ||
             authStore.checkAllPermissions(['permissions:read']) ||
-            authStore.checkAllPermissions(['tenant:update']) ||
-            authStore.checkAllPermissions(['gateways:read'])
+            authStore.checkAllPermissions(['tenant:update'])
           "
           class="lf-sidebar-group"
         >
@@ -345,17 +366,6 @@
                 >account_balance</span
               >
               <span class="text" v-show="!isCollapsed">{{ t('nav.tenantSettings') }}</span>
-            </router-link>
-            <router-link
-              v-if="authStore.checkAllPermissions(['gateways:read'])"
-              to="/settings/gateway-connections"
-              class="lf-nav-item"
-              active-class="lf-nav-item--active"
-            >
-              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
-                >account_balance_wallet</span
-              >
-              <span class="text" v-show="!isCollapsed">{{ t('nav.gatewayConnections') }}</span>
             </router-link>
           </div>
         </div>
@@ -482,7 +492,6 @@ import { useAuthStore } from '../stores/auth.store'
 import { useConfirmDialogStore } from '../stores/confirm-dialog.store'
 import { useI18n } from '../composables/useI18n'
 import { brandAssets } from '../config/brand'
-import AppButton from '../components/common/AppButton.vue'
 import LanguageSwitcher from '../components/common/LanguageSwitcher.vue'
 import NotificationBell from '../components/notifications/NotificationBell.vue'
 import SystemVersionLabel from '../components/notifications/SystemVersionLabel.vue'
@@ -492,6 +501,7 @@ const isCollapsed = ref(false)
 
 const expandedGroups = reactive({
   operations: true,
+  financial: true,
   catalogAndInventory: true,
   analytics: false,
   settings: false,
