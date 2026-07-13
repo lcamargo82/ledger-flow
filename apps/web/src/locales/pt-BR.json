@@ -1428,6 +1428,12 @@
       "providerUnavailable": "O provedor está indisponível no momento. Tente novamente.",
       "providerCanceled": "Pagamento cancelado com sucesso no provedor."
     },
+    "refund": {
+      "reasonRequired": "Informe o motivo do estorno.",
+      "providerConflict": "O provedor recusou o estorno. O pagamento pode já estar estornado, contestado ou inelegível.",
+      "providerUnavailable": "O provedor está indisponível no momento. Tente novamente.",
+      "providerRefunded": "Pagamento estornado com sucesso no provedor."
+    },
     "empty": {
       "title": "Nenhum pagamento encontrado",
       "description": "Crie um novo pagamento ou ajuste os filtros para visualizar os resultados."
@@ -1438,7 +1444,9 @@
       "default": "Ocorreu um erro inesperado.",
       "createFailed": "Erro ao criar pagamento.",
       "cancelFailed": "Erro ao cancelar pagamento.",
+      "refundFailed": "Erro ao estornar pagamento.",
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
+      "invalidRefundStatus": "Este pagamento não pode ser estornado no status atual.",
       "customerRequired": "Cliente obrigatório.",
       "amountInvalid": "Valor inválido.",
       "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",

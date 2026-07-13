@@ -792,7 +792,7 @@ IPaymentGateway
 ```
 
 O Asaas (Sandbox) é o primeiro provider real implementado.
-O Mercado Pago possui fundação operacional via OAuth, credenciais cifradas por tenant, refresh automático backend-only, criação/consulta de pagamentos PIX e boleto, endpoint inbound `POST /webhooks/mercado-pago` com assinatura/inbox sanitizado e sincronização idempotente de status por webhook/fetch. Cancelamento, estorno, cartão e settlement permanecem planejados nas fases MP-4 a MP-6/9B e não são anunciados como produção até a respectiva sprint.
+O Mercado Pago possui fundação operacional via OAuth, credenciais cifradas por tenant, refresh automático backend-only, criação/consulta de pagamentos PIX e boleto, endpoint inbound `POST /webhooks/mercado-pago` com assinatura/inbox sanitizado, sincronização idempotente de status por webhook/fetch e operações de cancelamento/estorno quando o provedor e o estado interno permitem. Cartão, checkout avançado e settlement permanecem planejados nas fases MP-5 a MP-6/9B e não são anunciados como produção até a respectiva sprint.
 As credenciais dos gateways não são expostas na interface frontend (write-only) e são armazenadas no banco de dados com criptografia forte (AES-256-GCM). A variável `.env` `ASAAS_SANDBOX_API_KEY` serve apenas para testes rápidos e locais; o LedgerFlow deve obter credenciais do banco por tenant.
 
 O core de pagamento não importa SDKs externos diretamente. Eles ficam isolados no adapter.
