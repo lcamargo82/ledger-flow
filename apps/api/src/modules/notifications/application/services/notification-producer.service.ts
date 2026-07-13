@@ -97,6 +97,37 @@ export class NotificationProducerService {
     });
   }
 
+  async mercadoPagoPaymentStatusUpdated(input: {
+    tenantId: string;
+    paymentId: string;
+    paymentReference: string;
+    previousStatus: string;
+    currentStatus: string;
+    providerPaymentId?: string | null;
+    providerEventId: string;
+  }) {
+    if (!this.isEnabled()) return;
+
+    await this.notifications.createEvent({
+      tenantId: input.tenantId,
+      eventType: 'mercado_pago.payment_status_updated',
+      idempotencyKey: `mercado-pago-payment:${input.paymentId}:${input.currentStatus}:${input.providerEventId}`,
+      sourceType: 'Payment',
+      sourceId: input.paymentId,
+      occurredAt: new Date(),
+      translationArgs: {
+        paymentReference: input.paymentReference,
+        previousStatus: input.previousStatus,
+        currentStatus: input.currentStatus,
+      },
+      metadata: {
+        provider: 'MERCADO_PAGO',
+        paymentId: input.paymentId,
+        providerPaymentId: input.providerPaymentId ?? null,
+      },
+    });
+  }
+
   private isEnabled() {
     return this.config.get<string>('NOTIFICATIONS_INTERNAL_PRODUCERS_ENABLED') === 'true';
   }

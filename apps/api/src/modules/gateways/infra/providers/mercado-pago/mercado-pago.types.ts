@@ -30,6 +30,10 @@ export interface MercadoPagoPaymentResponse {
   status: string;
   status_detail: string;
   transaction_amount: number;
+  external_reference?: string;
+  payment_method_id?: string;
+  date_approved?: string;
+  date_last_updated?: string;
   point_of_interaction?: {
     transaction_data?: {
       qr_code?: string;

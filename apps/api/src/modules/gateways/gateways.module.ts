@@ -67,6 +67,8 @@ import { MercadoPagoOAuthController } from './presentation/controllers/mercado-p
     PaymentGatewayResolverService,
     GatewayCredentialsEncryptionService,
     GatewayPaymentOrchestrationService,
+    MercadoPagoCredentialManager,
+    MercadoPagoPaymentGatewayAdapter,
   ],
 })
 export class GatewaysModule implements OnModuleInit {

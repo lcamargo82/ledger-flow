@@ -3,6 +3,8 @@ import { AsyncHandlerRegistryService } from '../async/application/services/async
 import { AsaasWebhookProcessingAsyncHandler } from './application/async-handlers/asaas-webhook-processing.handler';
 import { Module, OnModuleInit } from '@nestjs/common';
 import { WebhookProvider } from '@prisma/client';
+import { GatewaysModule } from '../gateways/gateways.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { ReconciliationModule } from '../reconciliation/reconciliation.module';
 import { PrismaWebhookInboxRepository } from './infra/repositories/prisma-webhook-inbox.repository';
 import { WebhookIngressService } from './application/services/webhook-ingress.service';
@@ -28,7 +30,7 @@ import { PagBankWebhookAdapter } from './infra/providers/pagbank/pagbank-webhook
 import { PagarmeWebhookAdapter } from './infra/providers/pagarme/pagarme-webhook.adapter';
 
 @Module({
-  imports: [AsyncModule, ReconciliationModule],
+  imports: [AsyncModule, GatewaysModule, NotificationsModule, ReconciliationModule],
   controllers: [AsaasWebhooksController, MercadoPagoWebhooksController],
   providers: [
     AsaasWebhookProcessingAsyncHandler,

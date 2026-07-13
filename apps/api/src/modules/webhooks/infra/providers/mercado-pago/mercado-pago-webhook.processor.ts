@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WebhookProcessingStatus } from '@prisma/client';
 import { PrismaService } from '../../../../../database/prisma/prisma.service';
+import { PaymentWebhookSyncService } from '../../../application/services/payment-webhook-sync.service';
 import { NormalizedWebhookEvent } from '../../../domain/interfaces/provider-webhook-adapter.interface';
 import {
   WebhookEventProcessor,
@@ -11,30 +12,39 @@ import {
 export class MercadoPagoWebhookProcessor implements WebhookEventProcessor {
   private readonly logger = new Logger(MercadoPagoWebhookProcessor.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly paymentSyncService: PaymentWebhookSyncService,
+  ) {}
 
   async process(event: NormalizedWebhookEvent): Promise<WebhookProcessingResult> {
-    this.logger.log(`Mercado Pago webhook stored for MP-3 status sync: ${event.providerEventId}`);
+    this.logger.log(`Processing Mercado Pago webhook ${event.providerEventId}`);
 
-    const updated = await this.prisma.webhookInboxEvent.updateMany({
-      where: {
-        provider: event.provider,
-        providerEventId: event.providerEventId,
-        status: { in: [WebhookProcessingStatus.RECEIVED, WebhookProcessingStatus.PROCESSING] },
-      },
+    const result = await this.paymentSyncService.syncMercadoPagoPayment(event);
+    const finalStatus =
+      result.status === WebhookProcessingStatus.PROCESSED
+        ? WebhookProcessingStatus.PROCESSED
+        : WebhookProcessingStatus.IGNORED;
+
+    await this.prisma.webhookInboxEvent.updateMany({
+      where: { provider: event.provider, providerEventId: event.providerEventId },
       data: {
-        status: WebhookProcessingStatus.IGNORED,
+        status: finalStatus,
         processedAt: new Date(),
-        failureReason: 'Mercado Pago status sync will be handled in MP-3.',
+        failureReason: result.reason,
+        paymentId: result.paymentId,
+        tenantId: result.tenantId,
+        gatewayConfigurationId: result.gatewayConfigurationId,
       },
     });
 
     return {
-      status: 'IGNORED',
-      reason:
-        updated.count > 0
-          ? 'Mercado Pago status sync will be handled in MP-3.'
-          : 'Mercado Pago webhook already processed.',
+      status: finalStatus === WebhookProcessingStatus.PROCESSED ? 'PROCESSED' : 'IGNORED',
+      reason: result.reason,
+      paymentId: result.paymentId,
+      tenantId: result.tenantId,
+      previousStatus: result.previousStatus,
+      currentStatus: result.currentStatus,
     };
   }
 }

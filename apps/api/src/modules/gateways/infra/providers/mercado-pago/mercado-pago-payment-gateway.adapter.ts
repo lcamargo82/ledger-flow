@@ -17,6 +17,7 @@ import { GatewayNotImplementedError } from '../../../domain/errors/gateway-error
 import { MercadoPagoApiClient, MercadoPagoApiError } from './mercado-pago-api.client';
 import { MercadoPagoCredentialsMapper } from './mercado-pago-credentials.mapper';
 import { MercadoPagoCreatePaymentRequest } from './mercado-pago.types';
+import { MercadoPagoStatusMapper } from './mercado-pago-status.mapper';
 
 @Injectable()
 export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
@@ -153,6 +154,14 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
     result.providerPaymentId = String(response.id);
     result.providerStatus = response.status;
     result.normalizedStatus = this.mapStatus(response.status);
+    result.metadata = {
+      externalReference: response.external_reference,
+      statusDetail: response.status_detail,
+      paymentMethodId: response.payment_method_id,
+      transactionAmount: response.transaction_amount,
+      dateApproved: response.date_approved,
+      dateLastUpdated: response.date_last_updated,
+    };
 
     if (response.point_of_interaction?.transaction_data) {
       const data = response.point_of_interaction.transaction_data;
@@ -165,19 +174,6 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
   }
 
   private mapStatus(status: string): PaymentStatus {
-    switch (status) {
-      case 'approved':
-        return PaymentStatus.APPROVED;
-      case 'pending':
-      case 'in_process':
-        return PaymentStatus.PENDING;
-      case 'rejected':
-      case 'cancelled':
-        return PaymentStatus.FAILED; // Or CANCELED, depending on logic
-      case 'refunded':
-        return PaymentStatus.REFUNDED;
-      default:
-        return PaymentStatus.PENDING;
-    }
+    return MercadoPagoStatusMapper.toLedgerFlowStatus(status) ?? PaymentStatus.PENDING;
   }
 }

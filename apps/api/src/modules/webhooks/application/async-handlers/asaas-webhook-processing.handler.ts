@@ -63,6 +63,8 @@ export class AsaasWebhookProcessingAsyncHandler implements AsyncEventHandler {
       providerEventId: inboxEvent.providerEventId,
       eventType: inboxEvent.eventType,
       rawProviderEventType: inboxEvent.eventType,
+      tenantId: inboxEvent.tenantId ?? undefined,
+      paymentId: inboxEvent.paymentId ?? undefined,
       providerPaymentId: inboxEvent.providerPaymentId ?? undefined,
       paymentReference: inboxEvent.externalReference ?? undefined,
       providerStatus: inboxEvent.providerPaymentStatus ?? undefined,
