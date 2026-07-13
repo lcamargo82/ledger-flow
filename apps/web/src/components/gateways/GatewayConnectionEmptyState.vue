@@ -8,10 +8,10 @@
     </template>
     <template #action>
       <div class="flex gap-4">
-        <AppButton variant="primary" icon="ph-plus" @click="$emit('connectAsaas')">
+        <AppButton variant="primary" icon="ph-plus" @click="$emit('connect-asaas')">
           {{ t('gateways.asaas.connect') }}
         </AppButton>
-        <AppButton variant="secondary" icon="ph-link" @click="$emit('connectMercadoPago')">
+        <AppButton variant="secondary" icon="ph-link" @click="$emit('connect-mercado-pago')">
           {{ t('gateways.mercadoPago.connect') }}
         </AppButton>
       </div>
@@ -25,7 +25,6 @@ import AppEmptyState from '@components/common/AppEmptyState.vue';
 import AppButton from '@components/common/AppButton.vue';
 
 const { t } = useI18n();
-defineEmits(['connectAsaas', 'connectMercadoPago']);
+defineEmits(['connect-asaas', 'connect-mercado-pago']);
 </script>
-
 

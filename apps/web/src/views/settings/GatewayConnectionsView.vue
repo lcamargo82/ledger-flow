@@ -27,7 +27,11 @@
       </div>
 
       <template v-else>
-        <GatewayConnectionEmptyState v-if="!hasConnections" @connect="openCreateModal" />
+        <GatewayConnectionEmptyState
+          v-if="!hasConnections"
+          @connect-asaas="openCreateModal"
+          @connect-mercado-pago="handleConnectMercadoPago"
+        />
         
         <div v-else class="connections-list">
           <GatewayConnectionCard 
