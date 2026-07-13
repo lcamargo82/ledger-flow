@@ -127,6 +127,7 @@
   "nav": {
     "groups": {
       "operations": "Operações",
+      "financial": "Financeiro",
       "catalogAndInventory": "Catálogo e Estoque",
       "analytics": "Inteligência",
       "settings": "Configurações",
