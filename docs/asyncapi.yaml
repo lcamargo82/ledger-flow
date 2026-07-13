@@ -25,6 +25,10 @@ channels:
         $ref: '#/components/messages/InventoryBalanceChanged'
       reservationConsumed:
         $ref: '#/components/messages/InventoryReservationConsumed'
+      transferCompleted:
+        $ref: '#/components/messages/InventoryTransferCompleted'
+      cycleCountAdjusted:
+        $ref: '#/components/messages/InventoryCycleCountAdjusted'
   orders.events:
     address: ledgerflow.orders.events
     messages:
@@ -49,6 +53,8 @@ channels:
         $ref: '#/components/messages/ChannelInventorySyncRequested'
       channelInventorySyncCompleted:
         $ref: '#/components/messages/ChannelInventorySyncCompleted'
+      channelOrderShippingSummaryUpdated:
+        $ref: '#/components/messages/ChannelOrderShippingSummaryUpdated'
   financial.events:
     address: ledgerflow.financial.events
     messages:
@@ -68,6 +74,18 @@ channels:
         $ref: '#/components/messages/ReconciliationSettlementReceived'
       syncCompleted:
         $ref: '#/components/messages/ReconciliationSyncCompleted'
+  notification.webhooks.q:
+    address: ledgerflow.notifications.webhooks.q
+    messages:
+      deliveryRequested:
+        $ref: '#/components/messages/NotificationWebhookDeliveryRequested'
+  notification.outbound.events:
+    address: ledgerflow.notification.outbound.events
+    messages:
+      marketplaceSettlementEventReceived:
+        $ref: '#/components/messages/MarketplaceSettlementEventReceived'
+      cashPositionUnexplainedDifference:
+        $ref: '#/components/messages/CashPositionUnexplainedDifference'
 components:
   messages:
     PaymentChargeRequested:
@@ -122,6 +140,63 @@ components:
             format: decimal
           movementId:
             type: string
+    InventoryTransferCompleted:
+      name: inventory.transfer.completed
+      title: Inventory Transfer Completed
+      summary: Event emitted when a warehouse transfer is completed atomically.
+      payload:
+        type: object
+        required:
+          - transferId
+          - transferNumber
+          - sourceWarehouseId
+          - destinationWarehouseId
+          - itemCount
+          - movementIds
+        properties:
+          transferId:
+            type: string
+          transferNumber:
+            type: string
+          sourceWarehouseId:
+            type: string
+          destinationWarehouseId:
+            type: string
+          idempotencyKey:
+            type: string
+          itemCount:
+            type: integer
+          movementIds:
+            type: array
+            items:
+              type: string
+    InventoryCycleCountAdjusted:
+      name: inventory.cycle_count.adjusted
+      title: Inventory Cycle Count Adjusted
+      summary: Event emitted when an approved cycle count creates inventory adjustments.
+      payload:
+        type: object
+        required:
+          - cycleCountId
+          - countNumber
+          - warehouseId
+          - adjustedItemCount
+          - movementIds
+        properties:
+          cycleCountId:
+            type: string
+          countNumber:
+            type: string
+          warehouseId:
+            type: string
+          idempotencyKey:
+            type: string
+          adjustedItemCount:
+            type: integer
+          movementIds:
+            type: array
+            items:
+              type: string
     InventoryBalanceChanged:
       name: inventory.balance.changed
       title: Inventory Balance Changed
@@ -205,6 +280,12 @@ components:
       summary: Event emitted when mock outbound inventory sync succeeds.
       payload:
         $ref: '#/components/schemas/ChannelInventorySyncPayload'
+    ChannelOrderShippingSummaryUpdated:
+      name: channel.order.shipping_summary.updated
+      title: Channel Order Shipping Summary Updated
+      summary: Event emitted when a channel order shipping summary is created or materially changed.
+      payload:
+        $ref: '#/components/schemas/ChannelOrderShippingSummaryPayload'
     FinancialOrderFactCreated:
       name: financial.order_fact.created
       title: Financial Order Fact Created
@@ -235,7 +316,79 @@ components:
       summary: Event emitted when a controlled provider settlement sync finishes.
       payload:
         $ref: '#/components/schemas/ReconciliationSyncCompletedPayload'
+    NotificationWebhookDeliveryRequested:
+      name: notification.webhook.delivery_requested
+      title: Notification Webhook Delivery Requested
+      summary: Solicita ao worker uma tentativa idempotente de entrega outbound.
+      payload:
+        $ref: '#/components/schemas/NotificationWebhookDeliveryRequestedPayload'
+    MarketplaceSettlementEventReceived:
+      name: marketplace_settlement.event_received
+      title: Marketplace Settlement Event Received
+      summary: Normalized outbound notification payload for a new marketplace settlement fact.
+      payload:
+        $ref: '#/components/schemas/NotificationOutboundEventPayload'
+    CashPositionUnexplainedDifference:
+      name: cash_position.unexplained_difference
+      title: Cash Position Unexplained Difference
+      summary: Normalized outbound notification payload for a manual operational cash difference.
+      payload:
+        $ref: '#/components/schemas/NotificationOutboundEventPayload'
   schemas:
+    NotificationOutboundEventPayload:
+      type: object
+      required:
+        - id
+        - type
+        - category
+        - severity
+        - occurredAt
+        - source
+        - data
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - marketplace_settlement.event_received
+            - cash_position.unexplained_difference
+        category:
+          type: string
+          enum:
+            - RECONCILIATION
+        severity:
+          type: string
+          enum:
+            - INFO
+            - WARNING
+        occurredAt:
+          type: string
+          format: date-time
+        source:
+          type: object
+          properties:
+            type:
+              type: string
+            id:
+              type:
+                - string
+                - 'null'
+        data:
+          type: object
+    NotificationWebhookDeliveryRequestedPayload:
+      type: object
+      required:
+        - deliveryId
+        - attempt
+      properties:
+        deliveryId:
+          type: string
+          format: uuid
+        attempt:
+          type: integer
+          minimum: 1
     ReconciliationSyncCompletedPayload:
       type: object
       required:
@@ -412,6 +565,40 @@ components:
           type: string
         grossMarginAmount:
           type: string
+    ChannelOrderShippingSummaryPayload:
+      type: object
+      required:
+        - orderId
+        - provider
+        - externalOrderId
+        - source
+        - confidence
+      properties:
+        orderId:
+          type: string
+        provider:
+          type: string
+          enum:
+            - MOCK
+            - MERCADO_LIVRE
+        externalOrderId:
+          type: string
+        externalShipmentId:
+          type: string
+        status:
+          type: string
+        substatus:
+          type: string
+        shippingMode:
+          type: string
+        logisticType:
+          type: string
+        trackingCodeMasked:
+          type: string
+        source:
+          type: string
+        confidence:
+          type: number
     ExportJobCompletedPayload:
       type: object
       required:
@@ -427,6 +614,8 @@ components:
           enum:
             - ORDER_FINANCIAL_FACTS
             - CATALOG_PRODUCTS
+            - RECONCILIATION_CASES
+            - MARKETPLACE_SETTLEMENT_EVENTS
         format:
           type: string
           enum:
@@ -452,6 +641,8 @@ components:
           enum:
             - ORDER_FINANCIAL_FACTS
             - CATALOG_PRODUCTS
+            - RECONCILIATION_CASES
+            - MARKETPLACE_SETTLEMENT_EVENTS
         format:
           type: string
           enum:

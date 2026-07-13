@@ -5,9 +5,10 @@ import { PaymentsExternalProcessingService } from './application/services/paymen
 import { PrismaPaymentsRepository } from './infra/repositories/prisma-payments.repository';
 import { PaymentReferenceService } from './infra/services/payment-reference.service';
 import { GatewaysModule } from '../gateways/gateways.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [GatewaysModule],
+  imports: [GatewaysModule, NotificationsModule],
   controllers: [PaymentsController],
   providers: [
     PaymentsService,

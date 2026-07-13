@@ -14,6 +14,7 @@ import {
   PaymentProvider,
   GatewayConfigurationStatus,
   PaymentMethod,
+  GatewayHealthStatus,
 } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -106,6 +107,59 @@ export class UpdateGatewayConnectionStatusDto {
   status: GatewayConfigurationStatus;
 }
 
+export class GatewayFinancialReadinessDto {
+  @ApiProperty({
+    enum: [
+      'UNSUPPORTED_PROVIDER',
+      'NOT_CONFIGURED',
+      'REAUTH_REQUIRED',
+      'UNHEALTHY',
+      'PAYMENT_ONLY',
+      'SETTLEMENT_READY',
+    ],
+  })
+  state:
+    | 'UNSUPPORTED_PROVIDER'
+    | 'NOT_CONFIGURED'
+    | 'REAUTH_REQUIRED'
+    | 'UNHEALTHY'
+    | 'PAYMENT_ONLY'
+    | 'SETTLEMENT_READY';
+
+  @ApiProperty()
+  canReadSettlements: boolean;
+
+  @ApiProperty({ enum: PaymentProvider })
+  provider: PaymentProvider;
+
+  @ApiProperty({ enum: GatewayConfigurationStatus })
+  connectionStatus: GatewayConfigurationStatus;
+
+  @ApiProperty({ enum: GatewayHealthStatus })
+  healthStatus: GatewayHealthStatus;
+
+  @ApiProperty({ type: [String] })
+  requiredScopes: string[];
+
+  @ApiProperty({ type: [String] })
+  grantedScopes: string[];
+
+  @ApiProperty({ type: [String] })
+  missingScopes: string[];
+
+  @ApiProperty({ required: false })
+  reason?: string;
+
+  @ApiProperty({ required: false })
+  lastHealthCheckAt?: Date | null;
+
+  @ApiProperty({ required: false })
+  lastHealthCheckMessage?: string | null;
+
+  @ApiProperty({ required: false })
+  lastFinancialSyncAt?: Date | null;
+}
+
 export class GatewayConnectionResponseDto {
   @ApiProperty()
   id: string;
@@ -130,6 +184,14 @@ export class GatewayConnectionResponseDto {
 
   @ApiProperty()
   healthStatus: string;
+
+  @ApiProperty({
+    required: false,
+    type: () => GatewayFinancialReadinessDto,
+    description:
+      'Derived financial-read readiness for providers that can later feed settlement flows.',
+  })
+  financialReadiness?: GatewayFinancialReadinessDto;
 
   @ApiProperty()
   credentialsConfigured: boolean;

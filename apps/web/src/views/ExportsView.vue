@@ -29,6 +29,11 @@ const columns = computed(() => [
 const typeOptions = computed(() => [
   { value: 'CATALOG_PRODUCTS', label: t('exports.types.CATALOG_PRODUCTS') },
   { value: 'ORDER_FINANCIAL_FACTS', label: t('exports.types.ORDER_FINANCIAL_FACTS') },
+  { value: 'RECONCILIATION_CASES', label: t('exports.types.RECONCILIATION_CASES') },
+  {
+    value: 'MARKETPLACE_SETTLEMENT_EVENTS',
+    label: t('exports.types.MARKETPLACE_SETTLEMENT_EVENTS'),
+  },
 ])
 
 const statusOptions = computed(() => [

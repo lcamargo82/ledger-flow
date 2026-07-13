@@ -422,6 +422,7 @@ VITE_API_BASE_URL=<http://localhost:3010>
 VITE_WS_BASE_URL=ws://localhost:3010
 VITE_DEFAULT_LOCALE=pt-BR
 VITE_DEFAULT_TIMEZONE=America/Sao_Paulo
+VITE_NOTIFICATIONS_POLLING_INTERVAL_MS=30000
 
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
@@ -587,6 +588,7 @@ curl <http://localhost:3010>/
 curl <http://localhost:3010>/health
 curl <http://localhost:3010>/health/liveness
 curl <http://localhost:3010>/health/readiness
+curl <http://localhost:3010>/health/settlement
 
 ```
 
@@ -791,6 +793,7 @@ IPaymentGateway
 ```
 
 O Asaas (Sandbox) é o primeiro provider real implementado.
+O Mercado Pago possui fundação operacional via OAuth, credenciais cifradas por tenant, refresh automático backend-only, criação/consulta de pagamentos PIX e boleto, endpoint inbound `POST /webhooks/mercado-pago` com assinatura/inbox sanitizado, sincronização idempotente de status por webhook/fetch e operações de cancelamento/estorno quando o provedor e o estado interno permitem. A validação operacional E2E é guiada por `docs/runbooks/mercado-pago-payment-e2e.md`, e a conexão já expõe readiness financeira derivada para distinguir payment-only de settlement-ready sem novo armazenamento de token. As fatias 9B criam contas financeiras Mercado Pago em `/marketplace-settlement`, com saldo inicial em minor units, ledger de caixa append-only, ajustes manuais auditados, sync manual por período de eventos financeiros Mercado Pago, totais importados, matching Mercado Livre x Mercado Pago por identificadores exatos, cash position, P&L operacional, malha fina com timeline/evidências/reason codes, notificações/outbound n8n sanitizados, exports CSV, health agregado e i18n pt-BR/en-US. Cartão, checkout avançado, sync agendada e dashboards oficiais de contabilidade permanecem planejados para fases futuras e não são anunciados como produção até a respectiva sprint.
 As credenciais dos gateways não são expostas na interface frontend (write-only) e são armazenadas no banco de dados com criptografia forte (AES-256-GCM). A variável `.env` `ASAAS_SANDBOX_API_KEY` serve apenas para testes rápidos e locais; o LedgerFlow deve obter credenciais do banco por tenant.
 
 O core de pagamento não importa SDKs externos diretamente. Eles ficam isolados no adapter.
@@ -1502,7 +1505,12 @@ O pacote planejado seguinte está documentado sem declarar endpoints futuros com
 
 - 10.1.10 fecha configuração operacional e UX OAuth do Mercado Livre.
 - 10.2 adiciona Notification Center e estoque avançado sobre o ledger existente.
-- 10.1.11 enriquece fatos financeiros operacionais e resumo logístico.
+- 10.2.0A implementa Notification Center tenant-safe com feed autorizado, badge `99+`, polling padrão de 30 segundos e produtores mínimos controlados por `NOTIFICATIONS_INTERNAL_PRODUCERS_ENABLED`.
+- 10.2.0B implementa subscriptions multi-tenant, segredo cifrado/rotacionável, proteção SSRF, envio de teste, worker outbound durável com HMAC, timeout, retry exponencial com jitter, DLQ persistida, métricas sanitizadas e replay auditado.
+- 10.2.1 implementa capabilities/permissões estreitas, reason codes traduzíveis e flags desligadas por padrão para transferências e inventários cíclicos, sem criar workflows ou alterar saldos.
+- 10.2.2 implementa transferências entre warehouses com documento operacional, itens multi-SKU, transições, conclusão atômica no ledger (`TRANSFER_OUT`/`TRANSFER_IN`), Outbox `inventory.transfer.completed`, UI e i18n.
+- 10.2.3 implementa inventário cíclico com snapshot/versionamento de saldos, contagem física multi-SKU, aprovação atômica com `ADJUSTMENT_IN/OUT`, stale guard `CYCLE_COUNT_STALE_BALANCE`, Outbox `inventory.cycle_count.adjusted`, UI e i18n.
+- 10.1.11 enriquece fatos financeiros operacionais e resumo logístico; os primeiros slices criam `OrderShippingSummary`, normalizam shipment Mercado Livre com IDs externos string/tracking mascarado, exibem logística operacional em pedidos e conectam `channel.order.shipping_summary.updated` ao Notification Center/outbound.
 - 9B (settlement de marketplace) e 10.3 (fulfillment) permanecem discovery futuro.
 
 Índice: `docs/README.md` e `docs/roadmap/post-10-1-sequence.md`. Cada sprint exige testes, Swagger/Redoc/OpenAPI, AsyncAPI quando houver eventos, i18n pt-BR/en-US e atualização dos documentos de produto, arquitetura, UI e operação.

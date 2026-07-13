@@ -33,6 +33,7 @@ onMounted(() => {
 const openDecisionModal = (reconciliationCase: ReconciliationCase) => {
   selectedCase.value = reconciliationCase
   isDecisionModalOpen.value = true
+  reconciliationStore.fetchReviewContext(reconciliationCase.id)
 }
 
 const submitDecision = async (payload: CreateReconciliationDecisionPayload) => {
@@ -44,6 +45,12 @@ const submitDecision = async (payload: CreateReconciliationDecisionPayload) => {
 const formatMinor = (value?: string | null, currency = 'BRL') => {
   if (!value) return '-'
   return formatMoneyFromCents(Number(value), currency, getLocale())
+}
+
+const referenceLabel = (item: ReconciliationCase) => {
+  if (item.payment?.reference) return item.payment.reference
+  if (item.order?.orderNumber) return `${t('reconciliation.table.order')} ${item.order.orderNumber}`
+  return item.settlementEvent.externalReference ?? '-'
 }
 
 const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.value) * 100)}%`
@@ -74,23 +81,43 @@ const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.valu
         <div class="lf-kpi-grid">
           <section class="lf-kpi">
             <span>{{ t('reconciliation.dashboard.expected') }}</span>
-            <strong>{{ formatMinor(reconciliationStore.dashboard.kpis.expectedAmountMinor) }}</strong>
-            <small>{{ reconciliationStore.dashboard.kpis.totalCases }} {{ t('reconciliation.dashboard.cases') }}</small>
+            <strong>{{
+              formatMinor(reconciliationStore.dashboard.kpis.expectedAmountMinor)
+            }}</strong>
+            <small
+              >{{ reconciliationStore.dashboard.kpis.totalCases }}
+              {{ t('reconciliation.dashboard.cases') }}</small
+            >
           </section>
           <section class="lf-kpi">
             <span>{{ t('reconciliation.dashboard.reconciled') }}</span>
-            <strong>{{ formatMinor(reconciliationStore.dashboard.kpis.reconciledAmountMinor) }}</strong>
-            <small>{{ reconciliationStore.dashboard.kpis.reconciledCases }} {{ t('reconciliation.dashboard.cases') }}</small>
+            <strong>{{
+              formatMinor(reconciliationStore.dashboard.kpis.reconciledAmountMinor)
+            }}</strong>
+            <small
+              >{{ reconciliationStore.dashboard.kpis.reconciledCases }}
+              {{ t('reconciliation.dashboard.cases') }}</small
+            >
           </section>
           <section class="lf-kpi">
             <span>{{ t('reconciliation.dashboard.pending') }}</span>
-            <strong>{{ formatMinor(reconciliationStore.dashboard.kpis.pendingAmountMinor) }}</strong>
-            <small>{{ reconciliationStore.dashboard.kpis.pendingCases }} {{ t('reconciliation.dashboard.cases') }}</small>
+            <strong>{{
+              formatMinor(reconciliationStore.dashboard.kpis.pendingAmountMinor)
+            }}</strong>
+            <small
+              >{{ reconciliationStore.dashboard.kpis.pendingCases }}
+              {{ t('reconciliation.dashboard.cases') }}</small
+            >
           </section>
           <section class="lf-kpi">
             <span>{{ t('reconciliation.dashboard.divergent') }}</span>
-            <strong>{{ formatMinor(reconciliationStore.dashboard.kpis.divergentAmountMinor) }}</strong>
-            <small>{{ reconciliationStore.dashboard.kpis.divergentCases }} {{ t('reconciliation.dashboard.cases') }}</small>
+            <strong>{{
+              formatMinor(reconciliationStore.dashboard.kpis.divergentAmountMinor)
+            }}</strong>
+            <small
+              >{{ reconciliationStore.dashboard.kpis.divergentCases }}
+              {{ t('reconciliation.dashboard.cases') }}</small
+            >
           </section>
         </div>
 
@@ -143,57 +170,62 @@ const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.valu
       />
 
       <template v-else>
-      <div class="lf-reconciliation-summary">
-        <span>{{ t('reconciliation.summary.total') }}</span>
-        <strong>{{ reconciliationStore.meta.total }}</strong>
-      </div>
+        <div class="lf-reconciliation-summary">
+          <span>{{ t('reconciliation.summary.total') }}</span>
+          <strong>{{ reconciliationStore.meta.total }}</strong>
+        </div>
 
-      <div class="lf-reconciliation-table-wrap">
-        <table class="lf-reconciliation-table">
-          <thead>
-            <tr>
-              <th>{{ t('reconciliation.table.case') }}</th>
-              <th>{{ t('reconciliation.table.status') }}</th>
-              <th>{{ t('reconciliation.table.provider') }}</th>
-              <th>{{ t('reconciliation.table.received') }}</th>
-              <th>{{ t('reconciliation.table.difference') }}</th>
-              <th>{{ t('reconciliation.table.reference') }}</th>
-              <th>{{ t('reconciliation.table.createdAt') }}</th>
-              <th class="lf-table-actions">{{ t('reconciliation.table.actions') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in reconciliationStore.cases" :key="item.id">
-              <td class="lf-mono">{{ item.id }}</td>
-              <td>
-                <span class="lf-status-pill">{{ item.status }}</span>
-              </td>
-              <td>{{ item.provider }}</td>
-              <td>{{ formatMinor(item.receivedAmountMinor, item.currency) }}</td>
-              <td>{{ formatMinor(item.differenceAmountMinor, item.currency) }}</td>
-              <td>{{ item.settlementEvent.externalReference ?? '-' }}</td>
-              <td>{{ formatDateTime(item.createdAt, getLocale()) }}</td>
-              <td class="lf-table-actions">
-                <AppButton
-                  size="small"
-                  variant="secondary"
-                  data-testid="open-decision-modal"
-                  @click="openDecisionModal(item)"
-                >
-                  {{ t('reconciliation.actions.review') }}
-                </AppButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <div class="lf-reconciliation-table-wrap">
+          <table class="lf-reconciliation-table">
+            <thead>
+              <tr>
+                <th>{{ t('reconciliation.table.case') }}</th>
+                <th>{{ t('reconciliation.table.status') }}</th>
+                <th>{{ t('reconciliation.table.provider') }}</th>
+                <th>{{ t('reconciliation.table.received') }}</th>
+                <th>{{ t('reconciliation.table.difference') }}</th>
+                <th>{{ t('reconciliation.table.reference') }}</th>
+                <th>{{ t('reconciliation.table.createdAt') }}</th>
+                <th class="lf-table-actions">{{ t('reconciliation.table.actions') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in reconciliationStore.cases" :key="item.id">
+                <td class="lf-mono">{{ item.id }}</td>
+                <td>
+                  <span class="lf-status-pill">{{ item.status }}</span>
+                </td>
+                <td>{{ item.provider }}</td>
+                <td>{{ formatMinor(item.receivedAmountMinor, item.currency) }}</td>
+                <td>{{ formatMinor(item.differenceAmountMinor, item.currency) }}</td>
+                <td>
+                  <span>{{ referenceLabel(item) }}</span>
+                  <small v-if="item.order">{{ item.order.status }}</small>
+                </td>
+                <td>{{ formatDateTime(item.createdAt, getLocale()) }}</td>
+                <td class="lf-table-actions">
+                  <AppButton
+                    size="small"
+                    variant="secondary"
+                    data-testid="open-decision-modal"
+                    @click="openDecisionModal(item)"
+                  >
+                    {{ t('reconciliation.actions.review') }}
+                  </AppButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </template>
     </div>
 
     <ReconciliationDecisionModal
       v-model="isDecisionModalOpen"
       :reconciliation-case="selectedCase"
-      :loading="reconciliationStore.isMutating"
+      :timeline="reconciliationStore.selectedTimeline"
+      :reason-codes="reconciliationStore.reasonCodes"
+      :loading="reconciliationStore.isMutating || reconciliationStore.isReviewLoading"
       @submit="submitDecision"
     />
   </div>

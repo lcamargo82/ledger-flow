@@ -138,11 +138,14 @@
     "payments": "Payments",
     "catalog": "Catalog",
     "inventory": "Inventory",
+    "inventoryTransfers": "Transfers",
+    "inventoryCycleCounts": "Cycle counts",
     "orders": "Orders",
     "channels": "Channels",
     "analytics": "Analytics",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
+    "marketplaceSettlement": "Marketplace Settlement",
     "reports": "Reports",
     "webhooks": "Webhooks",
     "settings": "Settings",
@@ -152,11 +155,218 @@
     "tenantSettings": "Organization",
     "platformAsyncOperations": "Async Operations",
     "gatewayConnections": "Payment Integrations",
-    "platformGatewayConnections": "Integrations"
+    "platformGatewayConnections": "Integrations",
+    "notifications": "Notifications"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Track alerts and exceptions from the modules you can access.",
+    "bell": {
+      "label": "Notifications: {count} unread"
+    },
+    "version": {
+      "label": "LedgerFlow version: {version}",
+      "short": "v{version}"
+    },
+    "actions": {
+      "markRead": "Mark as read",
+      "markAllRead": "Mark all as read",
+      "dismiss": "Dismiss",
+      "loadMore": "Load more"
+    },
+    "filters": {
+      "category": "Category",
+      "status": "Status",
+      "allCategories": "All categories",
+      "allStatuses": "All statuses",
+      "unreadOnly": "Unread only"
+    },
+    "categories": {
+      "PAYMENTS": "Payments",
+      "INVENTORY": "Inventory",
+      "CHANNELS": "Channels",
+      "ORDERS": "Orders",
+      "RECONCILIATION": "Reconciliation",
+      "SYSTEM": "System"
+    },
+    "severity": {
+      "INFO": "Information",
+      "SUCCESS": "Success",
+      "WARNING": "Warning",
+      "ERROR": "Error"
+    },
+    "empty": {
+      "title": "No notifications found",
+      "description": "New authorized alerts will appear here."
+    },
+    "errors": {
+      "title": "Could not load notifications",
+      "load": "Please try again in a few moments."
+    },
+    "events": {
+      "channelInventorySyncFailed": {
+        "title": "Inventory synchronization failed",
+        "message": "Listing {listingId} could not be synchronized."
+      },
+      "channelOrderShippingSummaryUpdated": {
+        "title": "Shipping summary updated",
+        "message": "Mercado Livre order {externalOrderId} had its shipping status updated to {status}."
+      },
+      "reconciliationDivergence": {
+        "title": "Reconciliation divergence identified",
+        "message": "Case {caseId} requires review."
+      },
+      "marketplaceSettlementEventReceived": {
+        "title": "Settlement event received",
+        "message": "{provider} confirmed financial event for payment {providerPaymentId} with net {netAmountMinor} {currency}."
+      },
+      "cashPositionUnexplainedDifference": {
+        "title": "Cash difference requires review",
+        "message": "An operational cash position difference of {differenceAmountMinor} {currency} was detected."
+      },
+      "mercadoPagoConnectionReauthRequired": {
+        "title": "Mercado Pago reconnection required",
+        "message": "The {provider} connection must be reconnected before operations can continue."
+      },
+      "mercadoPagoPaymentStatusUpdated": {
+        "title": "Mercado Pago payment updated",
+        "message": "Payment {paymentReference} changed from {previousStatus} to {currentStatus}."
+      }
+    }
   },
   "inventory": {
     "title": "Inventory",
     "description": "Manage warehouses, stock adjustments, projected balances, and the auditable inventory ledger.",
+    "advanced": {
+      "foundationStatus": "Foundation enabled",
+      "contractsReady": "Contracts ready for the next phase",
+      "foundationOnly": "This foundation does not change balances or execute inventory workflows.",
+      "capabilityProtected": "Access is protected by specific permissions and capabilities.",
+      "reasonCodesReady": "Controlled and translatable reason codes are available from the backend.",
+      "ledgerPreserved": "Future movements will continue to use the existing immutable ledger.",
+      "transfers": {
+        "title": "Warehouse transfers",
+        "description": "Technical foundation for controlled movements between warehouses."
+      },
+      "cycleCounts": {
+        "title": "Cycle counts",
+        "description": "Technical foundation for physical counts with traceable approval."
+      }
+    },
+    "reasonCodes": {
+      "transfer": {
+        "REPLENISHMENT": "Replenishment",
+        "REBALANCING": "Rebalancing",
+        "RETURN_TO_STOCK": "Return to stock",
+        "DAMAGED_STOCK_RELOCATION": "Damaged stock relocation",
+        "OTHER": "Other"
+      },
+      "cycleCount": {
+        "SCHEDULED_COUNT": "Scheduled count",
+        "DISCREPANCY_RECOUNT": "Discrepancy recount",
+        "AUDIT_REQUEST": "Audit request",
+        "LOSS_OR_DAMAGE": "Loss or damage",
+        "OTHER": "Other"
+      }
+    },
+    "transfers": {
+      "title": "Warehouse transfers",
+      "description": "Create, track, and complete atomic transfers between warehouses using the inventory ledger.",
+      "actions": {
+        "create": "New transfer",
+        "start": "Start",
+        "complete": "Complete",
+        "cancel": "Cancel",
+        "addItem": "Add item",
+        "removeItem": "Remove"
+      },
+      "table": {
+        "number": "Number",
+        "status": "Status",
+        "source": "Source",
+        "destination": "Destination",
+        "items": "Items",
+        "itemCount": "{count} item(s)",
+        "reason": "Reason",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "form": {
+        "createTitle": "New transfer",
+        "cancelTitle": "Cancel transfer",
+        "sourceWarehouse": "Source warehouse",
+        "destinationWarehouse": "Destination warehouse"
+      },
+      "empty": {
+        "title": "No transfers found",
+        "description": "Warehouse transfers will appear here as they are created."
+      },
+      "errors": {
+        "title": "Could not load transfers",
+        "sameWarehouse": "Source and destination must be different warehouses.",
+        "invalid": "Review the transfer warehouses, SKUs, quantities, and reason.",
+        "conflict": "This transfer operation has already been used or is inconsistent."
+      }
+    },
+    "transferStatus": {
+      "DRAFT": "Draft",
+      "IN_TRANSIT": "In transit",
+      "COMPLETED": "Completed",
+      "CANCELED": "Canceled"
+    },
+    "cycleCounts": {
+      "title": "Cycle counts",
+      "description": "Open physical counts, record quantities, and approve traceable ledger adjustments.",
+      "actions": {
+        "create": "New count",
+        "open": "Open",
+        "approve": "Approve",
+        "cancel": "Cancel",
+        "countItem": "Count",
+        "addItem": "Add item",
+        "removeItem": "Remove"
+      },
+      "table": {
+        "number": "Number",
+        "status": "Status",
+        "warehouse": "Warehouse",
+        "items": "Items",
+        "itemCount": "{count} item(s)",
+        "variance": "Variance",
+        "reason": "Reason",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "detail": {
+        "snapshotHint": "Balance snapshot captured when opened; approval fails if stock changed.",
+        "system": "System",
+        "counted": "Counted",
+        "variance": "Variance"
+      },
+      "form": {
+        "createTitle": "New cycle count",
+        "countTitle": "Record count",
+        "approveTitle": "Approve count",
+        "cancelTitle": "Cancel count",
+        "countedQuantity": "Counted quantity"
+      },
+      "empty": {
+        "title": "No cycle counts found",
+        "description": "Physical counts will appear here as they are created."
+      },
+      "errors": {
+        "title": "Could not load cycle counts",
+        "invalid": "Review the count warehouse, SKUs, quantities, and reason.",
+        "stale": "Stock changed since opening. Reopen or recreate the count before approving."
+      }
+    },
+    "cycleCountStatus": {
+      "DRAFT": "Draft",
+      "OPEN": "Open",
+      "COUNTED": "Counted",
+      "APPROVED": "Approved",
+      "CANCELED": "Canceled"
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Balances",
@@ -272,8 +482,14 @@
       "status": "Status",
       "customer": "Customer",
       "items": "Items",
+      "shipping": "Shipping",
       "createdAt": "Created at",
       "actions": "Actions"
+    },
+    "shipping": {
+      "shipment": "Shipment",
+      "tracking": "Tracking",
+      "statusUnknown": "Status not provided"
     },
     "form": {
       "createTitle": "New internal order",
@@ -499,7 +715,9 @@
     },
     "types": {
       "CATALOG_PRODUCTS": "Products and SKUs",
-      "ORDER_FINANCIAL_FACTS": "Financial facts"
+      "ORDER_FINANCIAL_FACTS": "Financial facts",
+      "RECONCILIATION_CASES": "Reconciliation cases",
+      "MARKETPLACE_SETTLEMENT_EVENTS": "Marketplace settlement events"
     },
     "status": {
       "PENDING": "Pending",
@@ -744,7 +962,11 @@
     "yes": "Yes",
     "no": "No",
     "enabled": "Enabled",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "pagination": {
+      "total": "Total: {total}",
+      "pageOf": "Page {page} of {totalPages}"
+    }
   },
   "errors": {
     "forbiddenTitle": "Access Denied",
@@ -1221,6 +1443,12 @@
       "providerUnavailable": "The provider is currently unavailable. Please try again.",
       "providerCanceled": "Payment successfully canceled at the provider."
     },
+    "refund": {
+      "reasonRequired": "Enter the refund reason.",
+      "providerConflict": "The provider refused the refund. The payment may already be refunded, disputed, or ineligible.",
+      "providerUnavailable": "The provider is currently unavailable. Please try again.",
+      "providerRefunded": "Payment successfully refunded at the provider."
+    },
     "empty": {
       "title": "No payments found",
       "description": "Create a new payment or adjust filters to view results."
@@ -1230,7 +1458,9 @@
       "description": "Please try again in a few moments.",
       "createFailed": "Failed to create payment.",
       "cancelFailed": "Failed to cancel payment.",
+      "refundFailed": "Failed to refund payment.",
       "invalidStatus": "This payment can no longer be canceled in its current status.",
+      "invalidRefundStatus": "This payment cannot be refunded in its current status.",
       "customerRequired": "Customer required.",
       "amountInvalid": "Invalid amount.",
       "notFound": "There is no active gateway configured for Pix payments in this environment.",
@@ -1575,7 +1805,8 @@
       "connect": "Connect Mercado Pago",
       "connecting": "Connecting...",
       "connected": "Connected",
-      "connectionFailed": "Connection Failed"
+      "connectionFailed": "Connection Failed",
+      "oauthOnly": "Mercado Pago connects through secure OAuth. Store credentials are not typed or shown in the dashboard."
     },
     "form": {
       "provider": "Provider",
@@ -1592,6 +1823,7 @@
     "status": {
       "ACTIVE": "Active",
       "INACTIVE": "Inactive",
+      "REAUTH_REQUIRED": "Reconnection required",
       "DISABLED": "Disabled"
     },
     "connection": {
@@ -1602,8 +1834,38 @@
     "health": {
       "UNKNOWN": "Unknown",
       "HEALTHY": "Healthy",
+      "DEGRADED": "Degraded",
+      "UNHEALTHY": "Unavailable",
       "ATTENTION": "Attention",
       "CRITICAL": "Critical"
+    },
+    "financialReadiness": {
+      "label": "Financial readiness",
+      "missingScopes": "Missing scopes",
+      "state": {
+        "UNSUPPORTED_PROVIDER": "Not supported",
+        "NOT_CONFIGURED": "Not configured",
+        "REAUTH_REQUIRED": "Reconnection required",
+        "UNHEALTHY": "Blocked by health",
+        "PAYMENT_ONLY": "Payments only",
+        "SETTLEMENT_READY": "Financial-ready"
+      },
+      "description": {
+        "UNSUPPORTED_PROVIDER": "This provider does not feed financial flows yet.",
+        "NOT_CONFIGURED": "Configure the connection before using financial data.",
+        "REAUTH_REQUIRED": "Reconnect Mercado Pago to restore access.",
+        "UNHEALTHY": "The connection must return to a healthy state before financial sync.",
+        "PAYMENT_ONLY": "The connection can process payments, but does not have enough financial scopes yet.",
+        "SETTLEMENT_READY": "The connection has enough scopes and health for future financial reads."
+      },
+      "reason": {
+        "MERCADO_PAGO_CREDENTIALS_NOT_CONFIGURED": "Mercado Pago credentials are not configured.",
+        "MERCADO_PAGO_REAUTH_REQUIRED": "Reconnect Mercado Pago to renew authorization.",
+        "MERCADO_PAGO_CONNECTION_NOT_ACTIVE": "The connection must be active for financial reads.",
+        "MERCADO_PAGO_CONNECTION_UNHEALTHY": "The Mercado Pago connection is degraded or unavailable.",
+        "MERCADO_PAGO_REFRESH_TRANSIENT_FAILURE": "The last refresh attempt failed transiently.",
+        "MERCADO_PAGO_FINANCIAL_SCOPE_MISSING": "The connection has not received all required settlement scopes yet."
+      }
     },
     "actions": {
       "connect": "Connect account",
@@ -1679,6 +1941,7 @@
       "received": "Received",
       "difference": "Difference",
       "reference": "Reference",
+      "order": "Order",
       "createdAt": "Created at",
       "actions": "Actions"
     },
@@ -1696,12 +1959,134 @@
       "paymentId": "Payment ID",
       "reasonCode": "Reason code",
       "comment": "Comment",
+      "commentRequired": "Comment required",
       "submit": "Register decision"
+    },
+    "fineMesh": {
+      "evidence": "Evidence",
+      "timeline": "Timeline",
+      "providerPayment": "Provider payment",
+      "netAmount": "Net amount",
+      "order": "Order",
+      "payment": "Payment"
+    },
+    "timeline": {
+      "SETTLEMENT_EVENT_RECEIVED": "Financial event received",
+      "CASE_CREATED": "Case created",
+      "DECISION_RECORDED": "Decision recorded"
+    },
+    "reasonCodes": {
+      "OPERATIONAL_NOTE": "Operational note",
+      "WAITING_PROVIDER_CONFIRMATION": "Waiting for provider confirmation",
+      "MANUAL_PAYMENT_CONFIRMED": "Payment manually confirmed",
+      "MARKETPLACE_ORDER_CONFIRMED": "Marketplace order confirmed",
+      "AMOUNT_TOLERANCE_ACCEPTED": "Difference within tolerance",
+      "PROVIDER_FEE_EXPLAINED": "Provider fee explained",
+      "DUPLICATE_PROVIDER_EVENT": "Duplicate provider event",
+      "PROVIDER_NOISE": "Operationally irrelevant event",
+      "REOPEN_FOR_NEW_EVIDENCE": "Reopen for new evidence"
     },
     "errors": {
       "default": "Could not load reconciliation.",
       "forbidden": "You do not have access to reconciliation.",
       "invalid": "Review the decision data."
+    }
+  },
+  "marketplaceSettlement": {
+    "title": "Marketplace Settlement",
+    "description": "Configure Mercado Pago financial accounts, opening balance and append-only cash ledger for 9B.",
+    "empty": {
+      "title": "No financial accounts yet",
+      "description": "Create the first settlement-ready Mercado Pago account to initialize the operational cash position."
+    },
+    "readiness": {
+      "title": "Mercado Pago connection is not settlement-ready yet",
+      "description": "A financial account can only be created when the Mercado Pago connection is active, healthy and has financial-read scopes."
+    },
+    "account": {
+      "openingBalance": "Opening balance"
+    },
+    "sections": {
+      "ledger": "Cash ledger",
+      "importedEvents": "Imported events",
+      "cashPosition": "Cash position",
+      "operationalPnl": "Operational P&L"
+    },
+    "totals": {
+      "events": "Events",
+      "gross": "Gross",
+      "fees": "Fees",
+      "net": "Net"
+    },
+    "actions": {
+      "newAccount": "New account",
+      "create": "Create account",
+      "newAdjustment": "New adjustment",
+      "recordAdjustment": "Record adjustment",
+      "sync": "Sync Mercado Pago"
+    },
+    "sync": {
+      "title": "Sync Mercado Pago events",
+      "description": "Select the period used to fetch payments, fees, net amount, refunds and release dates. The payload is sanitized before storage.",
+      "from": "Start",
+      "to": "End",
+      "maxPages": "Max pages",
+      "result": "Sync completed: {received} received, {created} new and {duplicates} duplicates."
+    },
+    "dashboard": {
+      "note": "Operational management view; not a replacement for official accounting.",
+      "released": "Released",
+      "pending": "Pending",
+      "blocked": "Blocked",
+      "refunded": "Refunded",
+      "payout": "Payout",
+      "netRevenue": "Net revenue",
+      "cogs": "COGS",
+      "shipping": "Shipping",
+      "margin": "Margin",
+      "matchedOrders": "{count} reconciled orders are included in this operational P&L."
+    },
+    "events": {
+      "providerPaymentId": "Payment",
+      "status": "Status",
+      "gross": "Gross",
+      "fees": "Fees",
+      "net": "Net",
+      "occurredAt": "Occurred at",
+      "empty": "No imported financial events yet."
+    },
+    "form": {
+      "createTitle": "New financial account",
+      "adjustmentTitle": "Cash position adjustment",
+      "connection": "Mercado Pago connection",
+      "name": "Account name",
+      "openingBalance": "Opening balance",
+      "adjustmentAmount": "Adjustment amount",
+      "reasonCode": "Reason code",
+      "notes": "Notes"
+    },
+    "table": {
+      "type": "Type",
+      "amount": "Amount",
+      "balance": "Balance after",
+      "reason": "Reason",
+      "occurredAt": "Occurred at"
+    },
+    "ledgerType": {
+      "OPENING_BALANCE": "Opening balance",
+      "MANUAL_ADJUSTMENT": "Manual adjustment",
+      "SETTLEMENT_CREDIT": "Settlement credit",
+      "SETTLEMENT_DEBIT": "Settlement debit",
+      "PAYOUT": "Payout",
+      "REFUND": "Refund",
+      "FEE": "Fee"
+    },
+    "errors": {
+      "default": "Could not load marketplace settlement.",
+      "invalid": "Review account or adjustment data.",
+      "forbidden": "You do not have access to marketplace settlement.",
+      "notFound": "Financial account not found.",
+      "duplicate": "A financial account with this name already exists."
     }
   },
   "features": {

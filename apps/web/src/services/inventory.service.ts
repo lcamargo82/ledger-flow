@@ -1,15 +1,27 @@
 import { httpClient } from './http-client'
 import type {
+  ApproveCycleCountRequest,
+  CancelCycleCountRequest,
+  CancelInventoryTransferRequest,
+  CompleteInventoryTransferRequest,
+  CountCycleCountItemRequest,
+  CreateCycleCountRequest,
+  CreateInventoryTransferRequest,
   CreateWarehouseRequest,
+  CycleCount,
+  CycleCountApprovalResponse,
   InventoryAdjustmentResponse,
   InventoryBalance,
   InventoryMovement,
   InventoryReservation,
   InventoryReservationOperationResponse,
+  InventoryTransfer,
+  InventoryTransferCompletionResponse,
   PaginatedResponse,
   RecordAdjustmentRequest,
   ReservationTransitionRequest,
   ReserveStockRequest,
+  UpdateInventoryTransferRequest,
   UpdateWarehouseRequest,
   Warehouse,
 } from '../types/inventory.types'
@@ -104,6 +116,123 @@ export class InventoryService {
   ): Promise<InventoryReservationOperationResponse> {
     const { data } = await httpClient.post<InventoryReservationOperationResponse>(
       `/inventory/reservations/${id}/consume`,
+      payload,
+    )
+    return data
+  }
+
+  async listTransfers(
+    params?: Record<string, unknown>,
+  ): Promise<PaginatedResponse<InventoryTransfer>> {
+    const { data } = await httpClient.get<PaginatedResponse<InventoryTransfer>>(
+      '/inventory/transfers',
+      { params },
+    )
+    return data
+  }
+
+  async createTransfer(
+    payload: CreateInventoryTransferRequest,
+  ): Promise<{ transfer: InventoryTransfer }> {
+    const { data } = await httpClient.post<{ transfer: InventoryTransfer }>(
+      '/inventory/transfers',
+      payload,
+    )
+    return data
+  }
+
+  async updateTransfer(
+    id: string,
+    payload: UpdateInventoryTransferRequest,
+  ): Promise<{ transfer: InventoryTransfer }> {
+    const { data } = await httpClient.patch<{ transfer: InventoryTransfer }>(
+      `/inventory/transfers/${id}`,
+      payload,
+    )
+    return data
+  }
+
+  async startTransfer(id: string): Promise<{ transfer: InventoryTransfer }> {
+    const { data } = await httpClient.post<{ transfer: InventoryTransfer }>(
+      `/inventory/transfers/${id}/start`,
+    )
+    return data
+  }
+
+  async completeTransfer(
+    id: string,
+    payload: CompleteInventoryTransferRequest,
+  ): Promise<InventoryTransferCompletionResponse> {
+    const { data } = await httpClient.post<InventoryTransferCompletionResponse>(
+      `/inventory/transfers/${id}/complete`,
+      payload,
+    )
+    return data
+  }
+
+  async cancelTransfer(
+    id: string,
+    payload: CancelInventoryTransferRequest,
+  ): Promise<{ transfer: InventoryTransfer }> {
+    const { data } = await httpClient.post<{ transfer: InventoryTransfer }>(
+      `/inventory/transfers/${id}/cancel`,
+      payload,
+    )
+    return data
+  }
+
+  async listCycleCounts(params?: Record<string, unknown>): Promise<PaginatedResponse<CycleCount>> {
+    const { data } = await httpClient.get<PaginatedResponse<CycleCount>>(
+      '/inventory/cycle-counts',
+      { params },
+    )
+    return data
+  }
+
+  async createCycleCount(payload: CreateCycleCountRequest): Promise<{ cycleCount: CycleCount }> {
+    const { data } = await httpClient.post<{ cycleCount: CycleCount }>(
+      '/inventory/cycle-counts',
+      payload,
+    )
+    return data
+  }
+
+  async openCycleCount(id: string): Promise<{ cycleCount: CycleCount }> {
+    const { data } = await httpClient.post<{ cycleCount: CycleCount }>(
+      `/inventory/cycle-counts/${id}/open`,
+    )
+    return data
+  }
+
+  async countCycleCountItem(
+    id: string,
+    itemId: string,
+    payload: CountCycleCountItemRequest,
+  ): Promise<{ cycleCount: CycleCount }> {
+    const { data } = await httpClient.put<{ cycleCount: CycleCount }>(
+      `/inventory/cycle-counts/${id}/items/${itemId}/count`,
+      payload,
+    )
+    return data
+  }
+
+  async approveCycleCount(
+    id: string,
+    payload: ApproveCycleCountRequest,
+  ): Promise<CycleCountApprovalResponse> {
+    const { data } = await httpClient.post<CycleCountApprovalResponse>(
+      `/inventory/cycle-counts/${id}/approve`,
+      payload,
+    )
+    return data
+  }
+
+  async cancelCycleCount(
+    id: string,
+    payload: CancelCycleCountRequest,
+  ): Promise<{ cycleCount: CycleCount }> {
+    const { data } = await httpClient.post<{ cycleCount: CycleCount }>(
+      `/inventory/cycle-counts/${id}/cancel`,
       payload,
     )
     return data

@@ -8,4 +8,5 @@ export class CancelGatewayPaymentInput {
   environment: GatewayEnvironment;
   credentials?: Record<string, string>;
   reason?: string;
+  idempotencyKey?: string;
 }

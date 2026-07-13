@@ -137,11 +137,14 @@
     "payments": "Pagamentos",
     "catalog": "Catálogo",
     "inventory": "Estoque",
+    "inventoryTransfers": "Transferências",
+    "inventoryCycleCounts": "Inventários cíclicos",
     "orders": "Pedidos",
     "channels": "Canais",
     "analytics": "Analytics",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
+    "marketplaceSettlement": "Settlement marketplace",
     "reports": "Relatórios",
     "webhooks": "Webhooks",
     "settings": "Configurações",
@@ -151,11 +154,218 @@
     "tenantSettings": "Organização",
     "platformAsyncOperations": "Operações Assíncronas",
     "gatewayConnections": "Integrações de Pagamento",
-    "platformGatewayConnections": "Integrações"
+    "platformGatewayConnections": "Integrações",
+    "notifications": "Notificações"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "description": "Acompanhe alertas e exceções dos módulos aos quais você possui acesso.",
+    "bell": {
+      "label": "Notificações: {count} não lidas"
+    },
+    "version": {
+      "label": "Versão do LedgerFlow: {version}",
+      "short": "v{version}"
+    },
+    "actions": {
+      "markRead": "Marcar como lida",
+      "markAllRead": "Marcar todas como lidas",
+      "dismiss": "Descartar",
+      "loadMore": "Carregar mais"
+    },
+    "filters": {
+      "category": "Categoria",
+      "status": "Status",
+      "allCategories": "Todas as categorias",
+      "allStatuses": "Todos os status",
+      "unreadOnly": "Somente não lidas"
+    },
+    "categories": {
+      "PAYMENTS": "Pagamentos",
+      "INVENTORY": "Estoque",
+      "CHANNELS": "Canais",
+      "ORDERS": "Pedidos",
+      "RECONCILIATION": "Conciliação",
+      "SYSTEM": "Sistema"
+    },
+    "severity": {
+      "INFO": "Informação",
+      "SUCCESS": "Sucesso",
+      "WARNING": "Atenção",
+      "ERROR": "Erro"
+    },
+    "empty": {
+      "title": "Nenhuma notificação encontrada",
+      "description": "Novos alertas autorizados aparecerão aqui."
+    },
+    "errors": {
+      "title": "Não foi possível carregar as notificações",
+      "load": "Tente novamente em alguns instantes."
+    },
+    "events": {
+      "channelInventorySyncFailed": {
+        "title": "Falha na sincronização de estoque",
+        "message": "Não foi possível sincronizar o anúncio {listingId}."
+      },
+      "channelOrderShippingSummaryUpdated": {
+        "title": "Resumo logístico atualizado",
+        "message": "O pedido Mercado Livre {externalOrderId} teve o status logístico atualizado para {status}."
+      },
+      "reconciliationDivergence": {
+        "title": "Divergência de conciliação identificada",
+        "message": "O caso {caseId} requer análise."
+      },
+      "marketplaceSettlementEventReceived": {
+        "title": "Evento de settlement recebido",
+        "message": "{provider} confirmou evento financeiro do pagamento {providerPaymentId} com líquido {netAmountMinor} {currency}."
+      },
+      "cashPositionUnexplainedDifference": {
+        "title": "Diferença de caixa exige revisão",
+        "message": "Foi detectada diferença de {differenceAmountMinor} {currency} na posição de caixa operacional."
+      },
+      "mercadoPagoConnectionReauthRequired": {
+        "title": "Reconexão Mercado Pago necessária",
+        "message": "A conexão {provider} precisa ser reconectada para continuar processando operações."
+      },
+      "mercadoPagoPaymentStatusUpdated": {
+        "title": "Pagamento Mercado Pago atualizado",
+        "message": "O pagamento {paymentReference} mudou de {previousStatus} para {currentStatus}."
+      }
+    }
   },
   "inventory": {
     "title": "Estoque",
     "description": "Gerencie warehouses, ajustes de estoque, saldos projetados e ledger auditável.",
+    "advanced": {
+      "foundationStatus": "Fundação habilitada",
+      "contractsReady": "Contratos prontos para a próxima fase",
+      "foundationOnly": "Esta fundação não altera saldos nem executa workflows de estoque.",
+      "capabilityProtected": "Acesso protegido por permissão e capability específicas.",
+      "reasonCodesReady": "Motivos controlados e traduzíveis disponíveis no backend.",
+      "ledgerPreserved": "Movimentações futuras continuarão usando o ledger imutável existente.",
+      "transfers": {
+        "title": "Transferências entre warehouses",
+        "description": "Fundação técnica da movimentação controlada entre warehouses."
+      },
+      "cycleCounts": {
+        "title": "Inventários cíclicos",
+        "description": "Fundação técnica da contagem física com aprovação rastreável."
+      }
+    },
+    "reasonCodes": {
+      "transfer": {
+        "REPLENISHMENT": "Reposição",
+        "REBALANCING": "Rebalanceamento",
+        "RETURN_TO_STOCK": "Retorno ao estoque",
+        "DAMAGED_STOCK_RELOCATION": "Realocação de estoque danificado",
+        "OTHER": "Outro"
+      },
+      "cycleCount": {
+        "SCHEDULED_COUNT": "Contagem programada",
+        "DISCREPANCY_RECOUNT": "Recontagem por divergência",
+        "AUDIT_REQUEST": "Solicitação de auditoria",
+        "LOSS_OR_DAMAGE": "Perda ou avaria",
+        "OTHER": "Outro"
+      }
+    },
+    "transfers": {
+      "title": "Transferências entre warehouses",
+      "description": "Crie, acompanhe e conclua transferências atômicas entre warehouses usando o ledger de estoque.",
+      "actions": {
+        "create": "Nova transferência",
+        "start": "Iniciar",
+        "complete": "Concluir",
+        "cancel": "Cancelar",
+        "addItem": "Adicionar item",
+        "removeItem": "Remover"
+      },
+      "table": {
+        "number": "Número",
+        "status": "Status",
+        "source": "Origem",
+        "destination": "Destino",
+        "items": "Itens",
+        "itemCount": "{count} item(ns)",
+        "reason": "Motivo",
+        "createdAt": "Criado em",
+        "actions": "Ações"
+      },
+      "form": {
+        "createTitle": "Nova transferência",
+        "cancelTitle": "Cancelar transferência",
+        "sourceWarehouse": "Warehouse de origem",
+        "destinationWarehouse": "Warehouse de destino"
+      },
+      "empty": {
+        "title": "Nenhuma transferência encontrada",
+        "description": "As transferências entre warehouses aparecerão aqui conforme forem criadas."
+      },
+      "errors": {
+        "title": "Não foi possível carregar transferências",
+        "sameWarehouse": "A origem e o destino devem ser warehouses diferentes.",
+        "invalid": "Revise os warehouses, SKUs, quantidades e motivo da transferência.",
+        "conflict": "Esta operação de transferência já foi utilizada ou está inconsistente."
+      }
+    },
+    "transferStatus": {
+      "DRAFT": "Rascunho",
+      "IN_TRANSIT": "Em trânsito",
+      "COMPLETED": "Concluída",
+      "CANCELED": "Cancelada"
+    },
+    "cycleCounts": {
+      "title": "Inventários cíclicos",
+      "description": "Abra contagens físicas, registre quantidades e aprove ajustes rastreáveis no ledger.",
+      "actions": {
+        "create": "Novo inventário",
+        "open": "Abrir",
+        "approve": "Aprovar",
+        "cancel": "Cancelar",
+        "countItem": "Contar",
+        "addItem": "Adicionar item",
+        "removeItem": "Remover"
+      },
+      "table": {
+        "number": "Número",
+        "status": "Status",
+        "warehouse": "Warehouse",
+        "items": "Itens",
+        "itemCount": "{count} item(ns)",
+        "variance": "Divergência",
+        "reason": "Motivo",
+        "createdAt": "Criado em",
+        "actions": "Ações"
+      },
+      "detail": {
+        "snapshotHint": "Snapshot de saldo capturado na abertura; aprovação falha se o saldo mudar.",
+        "system": "Sistema",
+        "counted": "Contado",
+        "variance": "Divergência"
+      },
+      "form": {
+        "createTitle": "Novo inventário cíclico",
+        "countTitle": "Registrar contagem",
+        "approveTitle": "Aprovar inventário",
+        "cancelTitle": "Cancelar inventário",
+        "countedQuantity": "Quantidade contada"
+      },
+      "empty": {
+        "title": "Nenhum inventário cíclico encontrado",
+        "description": "As contagens físicas aparecerão aqui conforme forem criadas."
+      },
+      "errors": {
+        "title": "Não foi possível carregar inventários cíclicos",
+        "invalid": "Revise o warehouse, SKUs, quantidades e motivo do inventário.",
+        "stale": "O saldo mudou desde a abertura. Reabra ou recrie a contagem antes de aprovar."
+      }
+    },
+    "cycleCountStatus": {
+      "DRAFT": "Rascunho",
+      "OPEN": "Aberto",
+      "COUNTED": "Contado",
+      "APPROVED": "Aprovado",
+      "CANCELED": "Cancelado"
+    },
     "tabs": {
       "warehouses": "Warehouses",
       "balances": "Saldos",
@@ -271,8 +481,14 @@
       "status": "Status",
       "customer": "Cliente",
       "items": "Itens",
+      "shipping": "Logística",
       "createdAt": "Criado em",
       "actions": "Ações"
+    },
+    "shipping": {
+      "shipment": "Envio",
+      "tracking": "Tracking",
+      "statusUnknown": "Status não informado"
     },
     "form": {
       "createTitle": "Novo pedido interno",
@@ -498,7 +714,9 @@
     },
     "types": {
       "CATALOG_PRODUCTS": "Produtos e SKUs",
-      "ORDER_FINANCIAL_FACTS": "Fatos financeiros"
+      "ORDER_FINANCIAL_FACTS": "Fatos financeiros",
+      "RECONCILIATION_CASES": "Casos de conciliação",
+      "MARKETPLACE_SETTLEMENT_EVENTS": "Eventos de settlement marketplace"
     },
     "status": {
       "PENDING": "Pendente",
@@ -743,7 +961,11 @@
     "yes": "Sim",
     "no": "Não",
     "enabled": "Ativo",
-    "disabled": "Inativo"
+    "disabled": "Inativo",
+    "pagination": {
+      "total": "Total: {total}",
+      "pageOf": "Página {page} de {totalPages}"
+    }
   },
   "errors": {
     "forbiddenTitle": "Acesso Negado",
@@ -1221,6 +1443,12 @@
       "providerUnavailable": "O provedor está indisponível no momento. Tente novamente.",
       "providerCanceled": "Pagamento cancelado com sucesso no provedor."
     },
+    "refund": {
+      "reasonRequired": "Informe o motivo do estorno.",
+      "providerConflict": "O provedor recusou o estorno. O pagamento pode já estar estornado, contestado ou inelegível.",
+      "providerUnavailable": "O provedor está indisponível no momento. Tente novamente.",
+      "providerRefunded": "Pagamento estornado com sucesso no provedor."
+    },
     "empty": {
       "title": "Nenhum pagamento encontrado",
       "description": "Crie um novo pagamento ou ajuste os filtros para visualizar os resultados."
@@ -1231,7 +1459,9 @@
       "default": "Ocorreu um erro inesperado.",
       "createFailed": "Erro ao criar pagamento.",
       "cancelFailed": "Erro ao cancelar pagamento.",
+      "refundFailed": "Erro ao estornar pagamento.",
       "invalidStatus": "Este pagamento não pode mais ser cancelado no status atual.",
+      "invalidRefundStatus": "Este pagamento não pode ser estornado no status atual.",
       "customerRequired": "Cliente obrigatório.",
       "amountInvalid": "Valor inválido.",
       "notFound": "Não há um gateway ativo configurado para pagamentos Pix neste ambiente.",
@@ -1576,7 +1806,8 @@
       "connect": "Conectar Mercado Pago",
       "connecting": "Conectando...",
       "connected": "Conectado",
-      "connectionFailed": "Falha na conexão"
+      "connectionFailed": "Falha na conexão",
+      "oauthOnly": "A conexão Mercado Pago é feita via OAuth seguro. Credenciais da loja não são digitadas nem exibidas no painel."
     },
     "form": {
       "provider": "Provedor",
@@ -1593,6 +1824,7 @@
     "status": {
       "ACTIVE": "Ativo",
       "INACTIVE": "Inativo",
+      "REAUTH_REQUIRED": "Reconexão necessária",
       "DISABLED": "Desabilitado"
     },
     "connection": {
@@ -1603,8 +1835,38 @@
     "health": {
       "UNKNOWN": "Desconhecido",
       "HEALTHY": "Saudável",
+      "DEGRADED": "Degradado",
+      "UNHEALTHY": "Indisponível",
       "ATTENTION": "Atenção",
       "CRITICAL": "Crítico"
+    },
+    "financialReadiness": {
+      "label": "Readiness financeira",
+      "missingScopes": "Escopos ausentes",
+      "state": {
+        "UNSUPPORTED_PROVIDER": "Não suportado",
+        "NOT_CONFIGURED": "Não configurado",
+        "REAUTH_REQUIRED": "Reconexão necessária",
+        "UNHEALTHY": "Bloqueado por saúde",
+        "PAYMENT_ONLY": "Somente pagamentos",
+        "SETTLEMENT_READY": "Pronto para financeiro"
+      },
+      "description": {
+        "UNSUPPORTED_PROVIDER": "Este provedor ainda não alimenta fluxos financeiros.",
+        "NOT_CONFIGURED": "Configure a conexão antes de usar dados financeiros.",
+        "REAUTH_REQUIRED": "Reconecte o Mercado Pago para restaurar o acesso.",
+        "UNHEALTHY": "A conexão precisa voltar a um estado saudável antes da sincronização financeira.",
+        "PAYMENT_ONLY": "A conexão pode operar pagamentos, mas ainda não possui escopos financeiros suficientes.",
+        "SETTLEMENT_READY": "A conexão possui escopos e saúde suficientes para leituras financeiras futuras."
+      },
+      "reason": {
+        "MERCADO_PAGO_CREDENTIALS_NOT_CONFIGURED": "As credenciais Mercado Pago não estão configuradas.",
+        "MERCADO_PAGO_REAUTH_REQUIRED": "Reconecte o Mercado Pago para renovar a autorização.",
+        "MERCADO_PAGO_CONNECTION_NOT_ACTIVE": "A conexão precisa estar ativa para leituras financeiras.",
+        "MERCADO_PAGO_CONNECTION_UNHEALTHY": "A conexão Mercado Pago está degradada ou indisponível.",
+        "MERCADO_PAGO_REFRESH_TRANSIENT_FAILURE": "A última tentativa de refresh falhou temporariamente.",
+        "MERCADO_PAGO_FINANCIAL_SCOPE_MISSING": "A conexão ainda não recebeu todos os escopos necessários para settlement."
+      }
     },
     "actions": {
       "connect": "Conectar conta",
@@ -1680,6 +1942,7 @@
       "received": "Recebido",
       "difference": "Diferença",
       "reference": "Referência",
+      "order": "Pedido",
       "createdAt": "Criado em",
       "actions": "Ações"
     },
@@ -1697,12 +1960,134 @@
       "paymentId": "ID do pagamento",
       "reasonCode": "Código do motivo",
       "comment": "Comentário",
+      "commentRequired": "Comentário obrigatório",
       "submit": "Registrar decisão"
+    },
+    "fineMesh": {
+      "evidence": "Evidências",
+      "timeline": "Timeline",
+      "providerPayment": "Pagamento provider",
+      "netAmount": "Valor líquido",
+      "order": "Pedido",
+      "payment": "Pagamento"
+    },
+    "timeline": {
+      "SETTLEMENT_EVENT_RECEIVED": "Evento financeiro recebido",
+      "CASE_CREATED": "Caso criado",
+      "DECISION_RECORDED": "Decisão registrada"
+    },
+    "reasonCodes": {
+      "OPERATIONAL_NOTE": "Nota operacional",
+      "WAITING_PROVIDER_CONFIRMATION": "Aguardando confirmação do provider",
+      "MANUAL_PAYMENT_CONFIRMED": "Pagamento confirmado manualmente",
+      "MARKETPLACE_ORDER_CONFIRMED": "Pedido marketplace confirmado",
+      "AMOUNT_TOLERANCE_ACCEPTED": "Diferença dentro da tolerância",
+      "PROVIDER_FEE_EXPLAINED": "Taxa do provider explicada",
+      "DUPLICATE_PROVIDER_EVENT": "Evento duplicado do provider",
+      "PROVIDER_NOISE": "Evento sem impacto operacional",
+      "REOPEN_FOR_NEW_EVIDENCE": "Reabrir por nova evidência"
     },
     "errors": {
       "default": "Não foi possível carregar a conciliação.",
       "forbidden": "Você não tem acesso à conciliação.",
       "invalid": "Revise os dados da decisão."
+    }
+  },
+  "marketplaceSettlement": {
+    "title": "Settlement marketplace",
+    "description": "Configure contas financeiras Mercado Pago, saldo inicial e ledger de caixa append-only para a fase 9B.",
+    "empty": {
+      "title": "Nenhuma conta financeira ainda",
+      "description": "Crie a primeira conta Mercado Pago settlement-ready para iniciar a posição de caixa operacional."
+    },
+    "readiness": {
+      "title": "Conexão Mercado Pago ainda não está settlement-ready",
+      "description": "A conta financeira só pode ser criada quando a conexão Mercado Pago estiver ativa, saudável e com escopos de leitura financeira."
+    },
+    "account": {
+      "openingBalance": "Saldo inicial"
+    },
+    "sections": {
+      "ledger": "Ledger de caixa",
+      "importedEvents": "Eventos importados",
+      "cashPosition": "Posição de caixa",
+      "operationalPnl": "P&L operacional"
+    },
+    "totals": {
+      "events": "Eventos",
+      "gross": "Bruto",
+      "fees": "Taxas",
+      "net": "Líquido"
+    },
+    "actions": {
+      "newAccount": "Nova conta",
+      "create": "Criar conta",
+      "newAdjustment": "Novo ajuste",
+      "recordAdjustment": "Registrar ajuste",
+      "sync": "Sincronizar Mercado Pago"
+    },
+    "sync": {
+      "title": "Sincronizar eventos Mercado Pago",
+      "description": "Informe o período para buscar pagamentos, taxas, líquido, refunds e datas de liberação. O payload é sanitizado antes de ser armazenado.",
+      "from": "Início",
+      "to": "Fim",
+      "maxPages": "Máximo de páginas",
+      "result": "Sincronização concluída: {received} recebidos, {created} novos e {duplicates} duplicados."
+    },
+    "dashboard": {
+      "note": "Visão operacional de gestão; não substitui contabilidade oficial.",
+      "released": "Liberado",
+      "pending": "Pendente",
+      "blocked": "Bloqueado",
+      "refunded": "Estornado",
+      "payout": "Payout",
+      "netRevenue": "Receita líquida",
+      "cogs": "COGS",
+      "shipping": "Frete",
+      "margin": "Margem",
+      "matchedOrders": "{count} pedidos conciliados entram neste P&L operacional."
+    },
+    "events": {
+      "providerPaymentId": "Pagamento",
+      "status": "Status",
+      "gross": "Bruto",
+      "fees": "Taxas",
+      "net": "Líquido",
+      "occurredAt": "Ocorrido em",
+      "empty": "Nenhum evento financeiro importado ainda."
+    },
+    "form": {
+      "createTitle": "Nova conta financeira",
+      "adjustmentTitle": "Ajuste de posição de caixa",
+      "connection": "Conexão Mercado Pago",
+      "name": "Nome da conta",
+      "openingBalance": "Saldo inicial",
+      "adjustmentAmount": "Valor do ajuste",
+      "reasonCode": "Código do motivo",
+      "notes": "Observações"
+    },
+    "table": {
+      "type": "Tipo",
+      "amount": "Valor",
+      "balance": "Saldo após",
+      "reason": "Motivo",
+      "occurredAt": "Ocorrido em"
+    },
+    "ledgerType": {
+      "OPENING_BALANCE": "Saldo inicial",
+      "MANUAL_ADJUSTMENT": "Ajuste manual",
+      "SETTLEMENT_CREDIT": "Crédito settlement",
+      "SETTLEMENT_DEBIT": "Débito settlement",
+      "PAYOUT": "Payout",
+      "REFUND": "Estorno",
+      "FEE": "Taxa"
+    },
+    "errors": {
+      "default": "Não foi possível carregar settlement marketplace.",
+      "invalid": "Revise os dados da conta ou ajuste.",
+      "forbidden": "Você não tem acesso a settlement marketplace.",
+      "notFound": "Conta financeira não encontrada.",
+      "duplicate": "Já existe uma conta financeira com esse nome."
     }
   },
   "features": {

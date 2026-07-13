@@ -254,6 +254,26 @@ export class ExportJobsService {
       ]);
       rowCount = await this.streamReconciliationCases(job, stream);
     }
+    if (job.type === ExportJobType.MARKETPLACE_SETTLEMENT_EVENTS) {
+      await this.writeLine(stream, [
+        'settlement_event_id',
+        'financial_account_id',
+        'provider',
+        'provider_event_id',
+        'provider_payment_id',
+        'external_reference',
+        'event_type',
+        'provider_status',
+        'gross_amount_minor',
+        'fee_amount_minor',
+        'net_amount_minor',
+        'currency',
+        'occurred_at',
+        'available_at',
+        'received_at',
+      ]);
+      rowCount = await this.streamMarketplaceSettlementEvents(job, stream);
+    }
 
     stream.end();
     await once(stream, 'finish');
@@ -412,6 +432,76 @@ export class ExportJobsService {
     if (currency) where.currency = currency;
     if (dateFrom || dateTo) {
       where.createdAt = {
+        ...(dateFrom && { gte: new Date(dateFrom) }),
+        ...(dateTo && { lte: new Date(dateTo) }),
+      };
+    }
+
+    return where;
+  }
+
+  private async streamMarketplaceSettlementEvents(
+    job: ExportJob,
+    stream: NodeJS.WritableStream,
+  ) {
+    let cursor: string | undefined;
+    let rowCount = 0;
+    const where = this.buildMarketplaceSettlementEventsWhere(job);
+
+    while (true) {
+      const rows = await this.prisma.providerSettlementEvent.findMany({
+        where,
+        orderBy: { id: 'asc' },
+        take: BATCH_SIZE,
+        ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+      });
+
+      if (rows.length === 0) break;
+      for (const event of rows) {
+        await this.writeLine(stream, [
+          this.preserveAsSpreadsheetText(event.id),
+          event.operationalFinancialAccountId ?? '',
+          event.provider,
+          event.providerEventId,
+          event.providerPaymentId ?? '',
+          event.externalReference ?? '',
+          event.eventType,
+          event.providerStatus ?? '',
+          event.amountMinor?.toString() ?? '',
+          event.feeAmountMinor?.toString() ?? '',
+          event.netAmountMinor?.toString() ?? '',
+          event.currency,
+          event.occurredAt?.toISOString() ?? '',
+          event.availableAt?.toISOString() ?? '',
+          event.receivedAt.toISOString(),
+        ]);
+        rowCount += 1;
+      }
+      cursor = rows[rows.length - 1].id;
+    }
+
+    return rowCount;
+  }
+
+  private buildMarketplaceSettlementEventsWhere(
+    job: ExportJob,
+  ): Prisma.ProviderSettlementEventWhereInput {
+    const parameters = (job.parameters ?? {}) as Record<string, unknown>;
+    const where: Prisma.ProviderSettlementEventWhereInput = { tenantId: job.tenantId };
+    const accountId =
+      typeof parameters.operationalFinancialAccountId === 'string'
+        ? parameters.operationalFinancialAccountId
+        : undefined;
+    const provider = typeof parameters.provider === 'string' ? parameters.provider : undefined;
+    const currency = typeof parameters.currency === 'string' ? parameters.currency : undefined;
+    const dateFrom = typeof parameters.dateFrom === 'string' ? parameters.dateFrom : undefined;
+    const dateTo = typeof parameters.dateTo === 'string' ? parameters.dateTo : undefined;
+
+    if (accountId) where.operationalFinancialAccountId = accountId;
+    if (provider) where.provider = provider as never;
+    if (currency) where.currency = currency;
+    if (dateFrom || dateTo) {
+      where.occurredAt = {
         ...(dateFrom && { gte: new Date(dateFrom) }),
         ...(dateTo && { lte: new Date(dateTo) }),
       };

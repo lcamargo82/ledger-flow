@@ -3,6 +3,8 @@ import {
   MercadoPagoOAuthTokenResponse,
   MercadoPagoCreatePaymentRequest,
   MercadoPagoPaymentResponse,
+  MercadoPagoPaymentSearchResponse,
+  MercadoPagoRefundResponse,
 } from './mercado-pago.types';
 
 export class MercadoPagoApiError extends Error {
@@ -79,6 +81,74 @@ export class MercadoPagoApiClient {
     return this.get<MercadoPagoPaymentResponse>(`/v1/payments/${providerPaymentId}`, headers);
   }
 
+  async searchPayments(
+    accessToken: string,
+    input: {
+      from?: Date;
+      to?: Date;
+      offset?: number;
+      limit?: number;
+      sort?: 'date_created' | 'date_last_updated';
+      criteria?: 'asc' | 'desc';
+    },
+  ): Promise<MercadoPagoPaymentSearchResponse> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    const params = new URLSearchParams();
+    params.set('sort', input.sort ?? 'date_created');
+    params.set('criteria', input.criteria ?? 'asc');
+    params.set('limit', String(input.limit ?? 50));
+    params.set('offset', String(input.offset ?? 0));
+
+    if (input.from || input.to) {
+      params.set('range', input.sort ?? 'date_created');
+      if (input.from) params.set('begin_date', input.from.toISOString());
+      if (input.to) params.set('end_date', input.to.toISOString());
+    }
+
+    return this.get<MercadoPagoPaymentSearchResponse>(`/v1/payments/search?${params}`, headers);
+  }
+
+  async cancelPayment(
+    accessToken: string,
+    providerPaymentId: string,
+    idempotencyKey?: string,
+  ): Promise<MercadoPagoPaymentResponse> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    if (idempotencyKey) {
+      headers['X-Idempotency-Key'] = idempotencyKey;
+    }
+
+    return this.put<MercadoPagoPaymentResponse>(
+      `/v1/payments/${providerPaymentId}`,
+      { status: 'cancelled' },
+      headers,
+    );
+  }
+
+  async refundPayment(
+    accessToken: string,
+    providerPaymentId: string,
+    input?: { amount?: number; idempotencyKey?: string },
+  ): Promise<MercadoPagoRefundResponse> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    if (input?.idempotencyKey) {
+      headers['X-Idempotency-Key'] = input.idempotencyKey;
+    }
+
+    const payload = input?.amount ? { amount: input.amount } : {};
+    return this.post<MercadoPagoRefundResponse>(
+      `/v1/payments/${providerPaymentId}/refunds`,
+      payload,
+      headers,
+    );
+  }
+
   private async post<T>(
     endpoint: string,
     payload: any,
@@ -89,6 +159,14 @@ export class MercadoPagoApiClient {
 
   private async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
     return this.request<T>('GET', endpoint, undefined, headers);
+  }
+
+  private async put<T>(
+    endpoint: string,
+    payload: any,
+    headers?: Record<string, string>,
+  ): Promise<T> {
+    return this.request<T>('PUT', endpoint, payload, headers);
   }
 
   private async request<T>(

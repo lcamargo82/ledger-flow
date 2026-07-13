@@ -19,7 +19,8 @@ Criar módulo Reconciliation separado de Payments e Financial Intelligence.
 - Sync/polling futuro deve fazer upsert por chave de negócio estável e não duplicar fatos criados por webhook.
 - `ReconciliationCase` armazena o resultado/processo por tenant.
 - `ReconciliationDecision` é append-only.
-- Matching: providerPaymentId → externalReference → explicit link → amount/currency/time como candidato para revisão.
+- Matching: providerPaymentId → payment externalReference/reference → Mercado Livre externalOrderId → explicit link → amount/currency/time como candidato para revisão.
+- Candidate-only amount/date matches remain manual-review evidence and must not produce final auto-reconciliation.
 - Valores conciliáveis usam Money em minor units: `amountMinor`, `currency`, `exponent`.
 - `Payment.amount` permanece como inteiro em centavos; Reconciliation persiste snapshots normalizados em minor units.
 - Normalizadores de provider usam Decimal.js ou equivalente para converter valores externos sem `number`.

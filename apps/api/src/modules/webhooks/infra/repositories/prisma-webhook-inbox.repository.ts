@@ -44,6 +44,7 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
           status: WebhookProcessingStatus.RECEIVED,
           tenantId: data.tenantId,
           paymentId: data.paymentId,
+          gatewayConfigurationId: data.gatewayConfigurationId,
         },
       });
 
@@ -79,6 +80,9 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
         payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
         status: WebhookProcessingStatus.IGNORED,
         failureReason: reason,
+        tenantId: data.tenantId,
+        paymentId: data.paymentId,
+        gatewayConfigurationId: data.gatewayConfigurationId,
       },
     });
   }
@@ -99,6 +103,9 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
         payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
         status: WebhookProcessingStatus.INVALID,
         failureReason: reason,
+        tenantId: data.tenantId,
+        paymentId: data.paymentId,
+        gatewayConfigurationId: data.gatewayConfigurationId,
       },
     });
   }
@@ -119,6 +126,9 @@ export class PrismaWebhookInboxRepository implements IWebhookInboxRepository {
         payloadSummary: (data.payloadSummary as Prisma.InputJsonValue) ?? undefined,
         status: WebhookProcessingStatus.UNMATCHED,
         failureReason: reason,
+        tenantId: data.tenantId,
+        paymentId: data.paymentId,
+        gatewayConfigurationId: data.gatewayConfigurationId,
       },
     });
   }

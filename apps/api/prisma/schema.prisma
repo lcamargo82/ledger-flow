@@ -54,6 +54,21 @@ enum InventoryReservationStatus {
   CONSUMED
 }
 
+enum InventoryTransferStatus {
+  DRAFT
+  IN_TRANSIT
+  COMPLETED
+  CANCELED
+}
+
+enum CycleCountStatus {
+  DRAFT
+  OPEN
+  COUNTED
+  APPROVED
+  CANCELED
+}
+
 enum InternalOrderStatus {
   DRAFT
   CONFIRMED
@@ -102,6 +117,36 @@ enum ChannelCircuitState {
   HALF_OPEN
 }
 
+enum NotificationCategory {
+  PAYMENTS
+  INVENTORY
+  CHANNELS
+  ORDERS
+  RECONCILIATION
+  SYSTEM
+}
+
+enum NotificationSeverity {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum NotificationWebhookSubscriptionStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum NotificationWebhookDeliveryStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  RETRY_SCHEDULED
+  DLQ
+  CANCELED
+}
+
 model Tenant {
   id        String     @id @default(uuid())
   name      String
@@ -112,38 +157,50 @@ model Tenant {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  users                 User[]
-  roles                 Role[]
-  subscription          TenantSubscription?
-  authAttempts          AuthAttempt[]
-  customers             Customer[]
-  payments              Payment[]
-  paymentEvents         PaymentEvent[]
-  gatewayConfigurations GatewayConfiguration[]
-  gatewayReferences     GatewayCustomerReference[]
-  webhookInboxEvents    WebhookInboxEvent[]
-  adminInvitations      TenantAdminInvitation[]
-  outboxEvents          OutboxEvent[]
-  asyncJobExecutions    AsyncJobExecution[]
-  products              Product[]
-  productSkus           ProductSku[]
-  warehouses            Warehouse[]
-  inventoryMovements    InventoryMovement[]
-  inventoryBalances     InventoryBalance[]
-  inventoryReservations InventoryReservation[]
-  internalOrders        InternalOrder[]
-  internalOrderItems    InternalOrderItem[]
-  orderFinancialFacts   OrderFinancialFact[]
-  exportJobs            ExportJob[]
-  channelIntegrations   ChannelIntegration[]
-  channelWebhookEvents  ChannelWebhookInboxEvent[]
-  channelListings       ChannelListing[]
-  listingSkuMappings    ListingSkuMapping[]
-  channelInventorySyncs ChannelInventorySyncState[]
-  providerSettlementEvents ProviderSettlementEvent[]
-  reconciliationCases      ReconciliationCase[]
-  reconciliationPolicies   ReconciliationPolicy[]
-  reconciliationDecisions  ReconciliationDecision[]
+  users                            User[]
+  roles                            Role[]
+  subscription                     TenantSubscription?
+  authAttempts                     AuthAttempt[]
+  customers                        Customer[]
+  payments                         Payment[]
+  paymentEvents                    PaymentEvent[]
+  gatewayConfigurations            GatewayConfiguration[]
+  gatewayReferences                GatewayCustomerReference[]
+  webhookInboxEvents               WebhookInboxEvent[]
+  adminInvitations                 TenantAdminInvitation[]
+  outboxEvents                     OutboxEvent[]
+  asyncJobExecutions               AsyncJobExecution[]
+  products                         Product[]
+  productSkus                      ProductSku[]
+  warehouses                       Warehouse[]
+  inventoryMovements               InventoryMovement[]
+  inventoryBalances                InventoryBalance[]
+  inventoryReservations            InventoryReservation[]
+  inventoryTransfers               InventoryTransfer[]
+  inventoryTransferItems           InventoryTransferItem[]
+  cycleCounts                      CycleCount[]
+  cycleCountItems                  CycleCountItem[]
+  internalOrders                   InternalOrder[]
+  internalOrderItems               InternalOrderItem[]
+  orderFinancialFacts              OrderFinancialFact[]
+  orderShippingSummaries           OrderShippingSummary[]
+  exportJobs                       ExportJob[]
+  channelIntegrations              ChannelIntegration[]
+  channelWebhookEvents             ChannelWebhookInboxEvent[]
+  channelListings                  ChannelListing[]
+  listingSkuMappings               ListingSkuMapping[]
+  channelInventorySyncs            ChannelInventorySyncState[]
+  providerSettlementEvents         ProviderSettlementEvent[]
+  reconciliationCases              ReconciliationCase[]
+  reconciliationPolicies           ReconciliationPolicy[]
+  reconciliationDecisions          ReconciliationDecision[]
+  notificationEvents               NotificationEvent[]
+  notificationRecipients           NotificationRecipient[]
+  notificationWebhookSubscriptions NotificationWebhookSubscription[]
+  notificationWebhookDeliveries    NotificationWebhookDelivery[]
+  operationalFinancialAccounts     OperationalFinancialAccount[]
+  cashLedgerEntries                CashLedgerEntry[]
+  cashPositionAdjustments          CashPositionAdjustment[]
 
   @@map("tenants")
 }
@@ -163,18 +220,130 @@ model User {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
-  tenant                 Tenant                  @relation(fields: [tenantId], references: [id])
-  roles                  UserRole[]
-  refreshTokens          RefreshToken[]
-  sessions               UserSession[]
-  passwordResetTokens    PasswordResetToken[]
-  tenantAdminInvitations TenantAdminInvitation[]
-  reconciliationDecisions ReconciliationDecision[]
+  tenant                                  Tenant                            @relation(fields: [tenantId], references: [id])
+  roles                                   UserRole[]
+  refreshTokens                           RefreshToken[]
+  sessions                                UserSession[]
+  passwordResetTokens                     PasswordResetToken[]
+  tenantAdminInvitations                  TenantAdminInvitation[]
+  reconciliationDecisions                 ReconciliationDecision[]
+  notificationRecipients                  NotificationRecipient[]
+  createdNotificationWebhookSubscriptions NotificationWebhookSubscription[]
+  createdInventoryTransfers               InventoryTransfer[]               @relation("InventoryTransferCreatedBy")
+  completedInventoryTransfers             InventoryTransfer[]               @relation("InventoryTransferCompletedBy")
+  canceledInventoryTransfers              InventoryTransfer[]               @relation("InventoryTransferCanceledBy")
+  createdCycleCounts                      CycleCount[]                      @relation("CycleCountCreatedBy")
+  openedCycleCounts                       CycleCount[]                      @relation("CycleCountOpenedBy")
+  approvedCycleCounts                     CycleCount[]                      @relation("CycleCountApprovedBy")
+  canceledCycleCounts                     CycleCount[]                      @relation("CycleCountCanceledBy")
+  countedCycleCountItems                  CycleCountItem[]                  @relation("CycleCountItemCountedBy")
+  createdOperationalFinancialAccounts     OperationalFinancialAccount[]     @relation("OperationalFinancialAccountCreatedBy")
+  createdCashLedgerEntries                CashLedgerEntry[]                 @relation("CashLedgerEntryCreatedBy")
+  createdCashPositionAdjustments          CashPositionAdjustment[]          @relation("CashPositionAdjustmentCreatedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
   @@index([email])
   @@map("users")
+}
+
+model NotificationEvent {
+  id                   String               @id @default(uuid())
+  tenantId             String
+  category             NotificationCategory
+  eventType            String
+  severity             NotificationSeverity @default(INFO)
+  titleKey             String
+  messageKey           String
+  translationArgsJson  Json?                @map("translation_args_json")
+  metadataJson         Json?                @map("metadata_json")
+  sourceType           String
+  sourceId             String?
+  idempotencyKey       String
+  requiredPermissions  String[]             @default([])
+  requiredCapabilities String[]             @default([])
+  occurredAt           DateTime
+  createdAt            DateTime             @default(now())
+
+  tenant            Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  recipients        NotificationRecipient[]
+  webhookDeliveries NotificationWebhookDelivery[]
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, category, createdAt(sort: Desc)])
+  @@index([tenantId, sourceType, sourceId])
+  @@map("notification_events")
+}
+
+model NotificationRecipient {
+  id                  String    @id @default(uuid())
+  tenantId            String
+  notificationEventId String
+  userId              String
+  readAt              DateTime?
+  dismissedAt         DateTime?
+  deliveredAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  tenant            Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  notificationEvent NotificationEvent @relation(fields: [notificationEventId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationEventId, userId])
+  @@index([tenantId, userId, readAt, createdAt(sort: Desc)])
+  @@index([tenantId, userId, dismissedAt, createdAt(sort: Desc)])
+  @@map("notification_recipients")
+}
+
+model NotificationWebhookSubscription {
+  id                  String                                @id @default(uuid())
+  tenantId            String
+  name                String
+  endpointUrl         String
+  status              NotificationWebhookSubscriptionStatus @default(ACTIVE)
+  eventTypes          String[]                              @default([])
+  encryptedSecretJson Json                                  @map("encrypted_secret_json")
+  secretFingerprint   String                                @map("secret_fingerprint")
+  createdByUserId     String                                @map("created_by_user_id")
+  createdAt           DateTime                              @default(now())
+  updatedAt           DateTime                              @updatedAt
+
+  tenant        Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdByUser User                          @relation(fields: [createdByUserId], references: [id], onDelete: Restrict)
+  deliveries    NotificationWebhookDelivery[]
+
+  @@unique([tenantId, endpointUrl])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@map("notification_webhook_subscriptions")
+}
+
+model NotificationWebhookDelivery {
+  id                  String                            @id @default(uuid())
+  tenantId            String
+  subscriptionId      String                            @map("subscription_id")
+  notificationEventId String                            @map("notification_event_id")
+  status              NotificationWebhookDeliveryStatus @default(PENDING)
+  idempotencyKey      String                            @map("idempotency_key")
+  attemptCount        Int                               @default(0) @map("attempt_count")
+  maxAttempts         Int                               @default(8) @map("max_attempts")
+  nextAttemptAt       DateTime?                         @map("next_attempt_at")
+  lastAttemptAt       DateTime?                         @map("last_attempt_at")
+  deliveredAt         DateTime?                         @map("delivered_at")
+  responseStatusCode  Int?                              @map("response_status_code")
+  errorCode           String?                           @map("error_code")
+  createdAt           DateTime                          @default(now())
+  updatedAt           DateTime                          @updatedAt
+
+  tenant            Tenant                          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription      NotificationWebhookSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+  notificationEvent NotificationEvent               @relation(fields: [notificationEventId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@unique([subscriptionId, notificationEventId])
+  @@index([tenantId, status, nextAttemptAt, createdAt])
+  @@index([subscriptionId, status, createdAt(sort: Desc)])
+  @@map("notification_webhook_deliveries")
 }
 
 model Role {
@@ -380,14 +549,16 @@ model ProductSku {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  product               Product                @relation(fields: [productId], references: [id], onDelete: Restrict)
-  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  inventoryMovements    InventoryMovement[]
-  inventoryBalances     InventoryBalance[]
-  inventoryReservations InventoryReservation[]
-  internalOrderItems    InternalOrderItem[]
-  channelListings       ChannelListing[]
-  listingSkuMappings    ListingSkuMapping[]
+  product                Product                 @relation(fields: [productId], references: [id], onDelete: Restrict)
+  tenant                 Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  inventoryMovements     InventoryMovement[]
+  inventoryBalances      InventoryBalance[]
+  inventoryReservations  InventoryReservation[]
+  inventoryTransferItems InventoryTransferItem[]
+  cycleCountItems        CycleCountItem[]
+  internalOrderItems     InternalOrderItem[]
+  channelListings        ChannelListing[]
+  listingSkuMappings     ListingSkuMapping[]
 
   @@unique([tenantId, skuCanonical])
   @@index([tenantId, barcode])
@@ -407,6 +578,9 @@ model Warehouse {
   inventoryMovements    InventoryMovement[]
   inventoryBalances     InventoryBalance[]
   inventoryReservations InventoryReservation[]
+  sourceTransfers       InventoryTransfer[]    @relation("InventoryTransferSourceWarehouse")
+  destinationTransfers  InventoryTransfer[]    @relation("InventoryTransferDestinationWarehouse")
+  cycleCounts           CycleCount[]
   internalOrderItems    InternalOrderItem[]
 
   @@unique([tenantId, code])
@@ -432,9 +606,10 @@ model InventoryMovement {
   createdByUserId String?               @map("created_by_user_id")
   createdAt       DateTime              @default(now()) @map("created_at")
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
-  warehouse Warehouse  @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sku             ProductSku       @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  warehouse       Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  cycleCountItems CycleCountItem[]
 
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, skuId, warehouseId, occurredAt])
@@ -494,6 +669,122 @@ model InventoryReservation {
   @@map("inventory_reservations")
 }
 
+model InventoryTransfer {
+  id                     String                  @id @default(uuid())
+  tenantId               String                  @map("tenant_id")
+  transferNumber         String                  @map("transfer_number")
+  sourceWarehouseId      String                  @map("source_warehouse_id")
+  destinationWarehouseId String                  @map("destination_warehouse_id")
+  status                 InventoryTransferStatus @default(DRAFT)
+  reasonCode             String                  @map("reason_code")
+  notes                  String?
+  idempotencyKey         String                  @map("idempotency_key")
+  createdByUserId        String?                 @map("created_by_user_id")
+  completedByUserId      String?                 @map("completed_by_user_id")
+  canceledByUserId       String?                 @map("canceled_by_user_id")
+  completedAt            DateTime?               @map("completed_at")
+  canceledAt             DateTime?               @map("canceled_at")
+  createdAt              DateTime                @default(now()) @map("created_at")
+  updatedAt              DateTime                @updatedAt @map("updated_at")
+
+  tenant               Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sourceWarehouse      Warehouse               @relation("InventoryTransferSourceWarehouse", fields: [sourceWarehouseId], references: [id], onDelete: Restrict)
+  destinationWarehouse Warehouse               @relation("InventoryTransferDestinationWarehouse", fields: [destinationWarehouseId], references: [id], onDelete: Restrict)
+  createdByUser        User?                   @relation("InventoryTransferCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  completedByUser      User?                   @relation("InventoryTransferCompletedBy", fields: [completedByUserId], references: [id], onDelete: SetNull)
+  canceledByUser       User?                   @relation("InventoryTransferCanceledBy", fields: [canceledByUserId], references: [id], onDelete: SetNull)
+  items                InventoryTransferItem[]
+
+  @@unique([tenantId, transferNumber])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@index([tenantId, sourceWarehouseId])
+  @@index([tenantId, destinationWarehouseId])
+  @@map("inventory_transfers")
+}
+
+model InventoryTransferItem {
+  id               String   @id @default(uuid())
+  tenantId         String   @map("tenant_id")
+  transferId       String   @map("transfer_id")
+  skuId            String   @map("sku_id")
+  quantity         Decimal  @db.Decimal(18, 6)
+  unitCostSnapshot Decimal? @map("unit_cost_snapshot") @db.Decimal(18, 4)
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  tenant   Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  transfer InventoryTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  sku      ProductSku        @relation(fields: [skuId], references: [id], onDelete: Restrict)
+
+  @@unique([transferId, skuId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, transferId])
+  @@map("inventory_transfer_items")
+}
+
+model CycleCount {
+  id               String           @id @default(uuid())
+  tenantId         String           @map("tenant_id")
+  countNumber      String           @map("count_number")
+  warehouseId      String           @map("warehouse_id")
+  status           CycleCountStatus @default(DRAFT)
+  reasonCode       String?          @map("reason_code")
+  notes            String?
+  idempotencyKey   String           @map("idempotency_key")
+  createdByUserId  String?          @map("created_by_user_id")
+  openedByUserId   String?          @map("opened_by_user_id")
+  approvedByUserId String?          @map("approved_by_user_id")
+  canceledByUserId String?          @map("canceled_by_user_id")
+  openedAt         DateTime?        @map("opened_at")
+  countedAt        DateTime?        @map("counted_at")
+  approvedAt       DateTime?        @map("approved_at")
+  adjustedAt       DateTime?        @map("adjusted_at")
+  canceledAt       DateTime?        @map("canceled_at")
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  warehouse      Warehouse        @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  createdByUser  User?            @relation("CycleCountCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  openedByUser   User?            @relation("CycleCountOpenedBy", fields: [openedByUserId], references: [id], onDelete: SetNull)
+  approvedByUser User?            @relation("CycleCountApprovedBy", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  canceledByUser User?            @relation("CycleCountCanceledBy", fields: [canceledByUserId], references: [id], onDelete: SetNull)
+  items          CycleCountItem[]
+
+  @@unique([tenantId, countNumber])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, warehouseId, status, createdAt(sort: Desc)])
+  @@index([tenantId, status, createdAt(sort: Desc)])
+  @@map("cycle_counts")
+}
+
+model CycleCountItem {
+  id                   String    @id @default(uuid())
+  tenantId             String    @map("tenant_id")
+  cycleCountId         String    @map("cycle_count_id")
+  skuId                String    @map("sku_id")
+  systemOnHandAtOpen   Decimal?  @map("system_on_hand_at_open") @db.Decimal(18, 6)
+  balanceVersionAtOpen Int?      @map("balance_version_at_open")
+  countedQuantity      Decimal?  @map("counted_quantity") @db.Decimal(18, 6)
+  varianceQuantity     Decimal?  @map("variance_quantity") @db.Decimal(18, 6)
+  countedByUserId      String?   @map("counted_by_user_id")
+  countedAt            DateTime? @map("counted_at")
+  adjustmentMovementId String?   @map("adjustment_movement_id")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  tenant             Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cycleCount         CycleCount         @relation(fields: [cycleCountId], references: [id], onDelete: Cascade)
+  sku                ProductSku         @relation(fields: [skuId], references: [id], onDelete: Restrict)
+  countedByUser      User?              @relation("CycleCountItemCountedBy", fields: [countedByUserId], references: [id], onDelete: SetNull)
+  adjustmentMovement InventoryMovement? @relation(fields: [adjustmentMovementId], references: [id], onDelete: SetNull)
+
+  @@unique([cycleCountId, skuId])
+  @@index([tenantId, skuId])
+  @@index([tenantId, cycleCountId])
+  @@map("cycle_count_items")
+}
+
 model InternalOrder {
   id              String              @id @default(uuid())
   tenantId        String              @map("tenant_id")
@@ -509,9 +800,11 @@ model InternalOrder {
   createdAt       DateTime            @default(now()) @map("created_at")
   updatedAt       DateTime            @updatedAt @map("updated_at")
 
-  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  items          InternalOrderItem[]
-  financialFacts OrderFinancialFact[]
+  tenant              Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items               InternalOrderItem[]
+  financialFacts      OrderFinancialFact[]
+  shippingSummaries   OrderShippingSummary[]
+  reconciliationCases ReconciliationCase[]
 
   @@unique([tenantId, orderNumber])
   @@unique([tenantId, idempotencyKey])
@@ -547,6 +840,7 @@ model OrderFinancialFact {
   id                String              @id @default(uuid())
   tenantId          String              @map("tenant_id")
   orderId           String              @map("order_id")
+  externalOrderId   String?             @map("external_order_id")
   version           Int                 @default(1)
   orderNumber       String              @map("order_number")
   orderStatus       InternalOrderStatus @map("order_status")
@@ -568,8 +862,39 @@ model OrderFinancialFact {
   @@unique([tenantId, orderId, version])
   @@index([tenantId, calculatedAt])
   @@index([tenantId, channelProvider, calculatedAt])
+  @@index([tenantId, channelProvider, externalOrderId])
   @@index([tenantId, orderStatus])
   @@map("order_financial_facts")
+}
+
+model OrderShippingSummary {
+  id                 String          @id @default(uuid())
+  tenantId           String          @map("tenant_id")
+  orderId            String          @map("order_id")
+  provider           ChannelProvider
+  externalOrderId    String          @map("external_order_id")
+  externalShipmentId String?         @map("external_shipment_id")
+  status             String?
+  substatus          String?
+  shippingMode       String?         @map("shipping_mode")
+  logisticType       String?         @map("logistic_type")
+  handlingEstimateAt DateTime?       @map("handling_estimate_at")
+  deliveryEstimateAt DateTime?       @map("delivery_estimate_at")
+  postedAt           DateTime?       @map("posted_at")
+  trackingCodeMasked String?         @map("tracking_code_masked")
+  source             String          @default("MERCADO_LIVRE_ORDER")
+  confidence         Float           @default(0.5)
+  lastSyncedAt       DateTime        @map("last_synced_at")
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+
+  tenant Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  order  InternalOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, orderId, provider])
+  @@index([tenantId, provider, lastSyncedAt])
+  @@index([tenantId, externalShipmentId])
+  @@map("order_shipping_summaries")
 }
 
 model ChannelIntegration {
@@ -819,6 +1144,7 @@ enum GatewayConfigurationStatus {
   ACTIVE
   INACTIVE
   DISABLED
+  REAUTH_REQUIRED
 }
 
 enum GatewayHealthStatus {
@@ -845,10 +1171,11 @@ model GatewayConfiguration {
   createdAt              DateTime                   @default(now())
   updatedAt              DateTime                   @updatedAt
 
-  tenant             Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  payments           Payment[]
-  gatewayReferences  GatewayCustomerReference[]
-  webhookInboxEvents WebhookInboxEvent[]
+  tenant                       Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments                     Payment[]
+  gatewayReferences            GatewayCustomerReference[]
+  webhookInboxEvents           WebhookInboxEvent[]
+  operationalFinancialAccounts OperationalFinancialAccount[]
 
   @@unique([tenantId, provider, environment])
   @@index([tenantId])
@@ -914,12 +1241,12 @@ model Payment {
   canceledAt             DateTime?
   refundedAt             DateTime?
 
-  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  customer             Customer              @relation(fields: [customerId], references: [id], onDelete: Restrict)
-  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
-  events               PaymentEvent[]
-  webhookInboxEvents   WebhookInboxEvent[]
-  reconciliationCases   ReconciliationCase[]
+  tenant                  Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer                Customer                 @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  gatewayConfiguration    GatewayConfiguration?    @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+  events                  PaymentEvent[]
+  webhookInboxEvents      WebhookInboxEvent[]
+  reconciliationCases     ReconciliationCase[]
   reconciliationDecisions ReconciliationDecision[]
 
   @@unique([tenantId, reference])
@@ -1019,9 +1346,9 @@ model WebhookInboxEvent {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
 
-  tenant               Tenant?               @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  payment              Payment?              @relation(fields: [paymentId], references: [id], onDelete: SetNull)
-  gatewayConfiguration GatewayConfiguration? @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
+  tenant                   Tenant?                   @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  payment                  Payment?                  @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  gatewayConfiguration     GatewayConfiguration?     @relation(fields: [gatewayConfigurationId], references: [id], onDelete: SetNull)
   providerSettlementEvents ProviderSettlementEvent[]
 
   @@unique([provider, providerEventId])
@@ -1109,6 +1436,7 @@ enum ExportJobType {
   ORDER_FINANCIAL_FACTS
   CATALOG_PRODUCTS
   RECONCILIATION_CASES
+  MARKETPLACE_SETTLEMENT_EVENTS
 }
 
 enum ReconciliationCaseStatus {
@@ -1128,6 +1456,7 @@ enum ReconciliationCaseStatus {
 enum ReconciliationMatchType {
   PROVIDER_PAYMENT_ID
   EXTERNAL_REFERENCE
+  MARKETPLACE_ORDER_ID
   EXPLICIT_LINK
   AMOUNT_CURRENCY_TIME_CANDIDATE
   NONE
@@ -1172,38 +1501,41 @@ model ExportJob {
 }
 
 model ProviderSettlementEvent {
-  id                         String          @id @default(uuid())
-  tenantId                   String?         @map("tenant_id")
-  provider                   WebhookProvider
-  providerEventId            String          @map("provider_event_id")
-  providerSettlementId       String?         @map("provider_settlement_id")
-  providerPaymentId          String?         @map("provider_payment_id")
-  externalReference          String?         @map("external_reference")
-  eventType                  String          @map("event_type")
-  providerStatus             String?         @map("provider_status")
-  amountMinor                Decimal?        @map("amount_minor") @db.Decimal(18, 0)
-  feeAmountMinor             Decimal?        @map("fee_amount_minor") @db.Decimal(18, 0)
-  netAmountMinor             Decimal?        @map("net_amount_minor") @db.Decimal(18, 0)
-  currency                   String          @default("BRL")
-  currencyExponent           Int             @default(2) @map("currency_exponent")
-  occurredAt                 DateTime?       @map("occurred_at")
-  availableAt                DateTime?       @map("available_at")
-  payloadHash                String          @map("payload_hash")
-  normalizedPayload          Json?           @map("normalized_payload")
-  sourceWebhookInboxEventId  String?         @map("source_webhook_inbox_event_id")
-  receivedAt                 DateTime        @default(now()) @map("received_at")
-  createdAt                  DateTime        @default(now()) @map("created_at")
-  updatedAt                  DateTime        @updatedAt @map("updated_at")
+  id                            String          @id @default(uuid())
+  tenantId                      String?         @map("tenant_id")
+  operationalFinancialAccountId String?         @map("operational_financial_account_id")
+  provider                      WebhookProvider
+  providerEventId               String          @map("provider_event_id")
+  providerSettlementId          String?         @map("provider_settlement_id")
+  providerPaymentId             String?         @map("provider_payment_id")
+  externalReference             String?         @map("external_reference")
+  eventType                     String          @map("event_type")
+  providerStatus                String?         @map("provider_status")
+  amountMinor                   Decimal?        @map("amount_minor") @db.Decimal(18, 0)
+  feeAmountMinor                Decimal?        @map("fee_amount_minor") @db.Decimal(18, 0)
+  netAmountMinor                Decimal?        @map("net_amount_minor") @db.Decimal(18, 0)
+  currency                      String          @default("BRL")
+  currencyExponent              Int             @default(2) @map("currency_exponent")
+  occurredAt                    DateTime?       @map("occurred_at")
+  availableAt                   DateTime?       @map("available_at")
+  payloadHash                   String          @map("payload_hash")
+  normalizedPayload             Json?           @map("normalized_payload")
+  sourceWebhookInboxEventId     String?         @map("source_webhook_inbox_event_id")
+  receivedAt                    DateTime        @default(now()) @map("received_at")
+  createdAt                     DateTime        @default(now()) @map("created_at")
+  updatedAt                     DateTime        @updatedAt @map("updated_at")
 
-  tenant                  Tenant?             @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  sourceWebhookInboxEvent WebhookInboxEvent?  @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
-  reconciliationCases     ReconciliationCase[]
+  tenant                      Tenant?                      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  operationalFinancialAccount OperationalFinancialAccount? @relation(fields: [operationalFinancialAccountId], references: [id], onDelete: SetNull)
+  sourceWebhookInboxEvent     WebhookInboxEvent?           @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
+  reconciliationCases         ReconciliationCase[]
 
   @@unique([provider, providerEventId])
   @@index([provider, providerSettlementId])
   @@index([provider, providerPaymentId])
   @@index([provider, externalReference])
   @@index([tenantId, provider, occurredAt])
+  @@index([operationalFinancialAccountId, occurredAt])
   @@index([sourceWebhookInboxEventId])
   @@map("provider_settlement_events")
 }
@@ -1228,15 +1560,17 @@ model ReconciliationCase {
   createdAt             DateTime                 @default(now()) @map("created_at")
   updatedAt             DateTime                 @updatedAt @map("updated_at")
 
-  tenant          Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  settlementEvent ProviderSettlementEvent @relation(fields: [settlementEventId], references: [id], onDelete: Restrict)
-  payment         Payment?                @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  tenant          Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  settlementEvent ProviderSettlementEvent  @relation(fields: [settlementEventId], references: [id], onDelete: Restrict)
+  payment         Payment?                 @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  order           InternalOrder?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
   decisions       ReconciliationDecision[]
 
   @@unique([tenantId, settlementEventId])
   @@index([tenantId, status])
   @@index([tenantId, provider, createdAt])
   @@index([paymentId])
+  @@index([orderId])
   @@map("reconciliation_cases")
 }
 
@@ -1284,6 +1618,109 @@ model ReconciliationPolicy {
   @@unique([tenantId, provider, currency, version])
   @@index([tenantId, provider, currency, isActive])
   @@map("reconciliation_policies")
+}
+
+enum OperationalFinancialAccountStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum CashLedgerEntryType {
+  OPENING_BALANCE
+  MANUAL_ADJUSTMENT
+  SETTLEMENT_CREDIT
+  SETTLEMENT_DEBIT
+  PAYOUT
+  REFUND
+  FEE
+}
+
+enum CashPositionAdjustmentType {
+  OPENING_BALANCE
+  MANUAL_CORRECTION
+}
+
+model OperationalFinancialAccount {
+  id                     String                            @id @default(uuid())
+  tenantId               String                            @map("tenant_id")
+  gatewayConfigurationId String                            @map("gateway_configuration_id")
+  provider               PaymentProvider
+  environment            GatewayEnvironment
+  name                   String
+  currency               String                            @default("BRL")
+  currencyExponent       Int                               @default(2) @map("currency_exponent")
+  status                 OperationalFinancialAccountStatus @default(ACTIVE)
+  openingBalanceMinor    Decimal                           @default(0) @map("opening_balance_minor") @db.Decimal(18, 0)
+  currentBalanceMinor    Decimal                           @default(0) @map("current_balance_minor") @db.Decimal(18, 0)
+  createdByUserId        String                            @map("created_by_user_id")
+  createdAt              DateTime                          @default(now()) @map("created_at")
+  updatedAt              DateTime                          @updatedAt @map("updated_at")
+  archivedAt             DateTime?                         @map("archived_at")
+
+  tenant                   Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  gatewayConfiguration     GatewayConfiguration      @relation(fields: [gatewayConfigurationId], references: [id], onDelete: Restrict)
+  createdByUser            User                      @relation("OperationalFinancialAccountCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  ledgerEntries            CashLedgerEntry[]
+  adjustments              CashPositionAdjustment[]
+  providerSettlementEvents ProviderSettlementEvent[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId, provider, status])
+  @@index([tenantId, gatewayConfigurationId])
+  @@index([tenantId, createdAt])
+  @@map("operational_financial_accounts")
+}
+
+model CashLedgerEntry {
+  id                String              @id @default(uuid())
+  tenantId          String              @map("tenant_id")
+  accountId         String              @map("account_id")
+  type              CashLedgerEntryType
+  amountMinor       Decimal             @map("amount_minor") @db.Decimal(18, 0)
+  balanceAfterMinor Decimal             @map("balance_after_minor") @db.Decimal(18, 0)
+  currency          String              @default("BRL")
+  currencyExponent  Int                 @default(2) @map("currency_exponent")
+  sourceType        String              @map("source_type")
+  sourceId          String              @map("source_id")
+  idempotencyKey    String              @map("idempotency_key")
+  reasonCode        String              @map("reason_code")
+  notes             String?
+  occurredAt        DateTime            @map("occurred_at")
+  createdByUserId   String              @map("created_by_user_id")
+  createdAt         DateTime            @default(now()) @map("created_at")
+
+  tenant        Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account       OperationalFinancialAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  createdByUser User                        @relation("CashLedgerEntryCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  adjustment    CashPositionAdjustment?
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, accountId, occurredAt])
+  @@index([tenantId, type])
+  @@index([sourceType, sourceId])
+  @@map("cash_ledger_entries")
+}
+
+model CashPositionAdjustment {
+  id                String                     @id @default(uuid())
+  tenantId          String                     @map("tenant_id")
+  accountId         String                     @map("account_id")
+  cashLedgerEntryId String                     @unique @map("cash_ledger_entry_id")
+  type              CashPositionAdjustmentType
+  amountMinor       Decimal                    @map("amount_minor") @db.Decimal(18, 0)
+  reasonCode        String                     @map("reason_code")
+  notes             String?
+  createdByUserId   String                     @map("created_by_user_id")
+  createdAt         DateTime                   @default(now()) @map("created_at")
+
+  tenant          Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account         OperationalFinancialAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  cashLedgerEntry CashLedgerEntry             @relation(fields: [cashLedgerEntryId], references: [id], onDelete: Restrict)
+  createdByUser   User                        @relation("CashPositionAdjustmentCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, accountId, createdAt])
+  @@index([tenantId, type])
+  @@map("cash_position_adjustments")
 }
 
 model OutboxEvent {

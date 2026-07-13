@@ -10,6 +10,8 @@ export type InventoryMovementType =
   | 'TRANSFER_IN'
 
 export type InventoryReservationStatus = 'ACTIVE' | 'RELEASED' | 'CONSUMED'
+export type InventoryTransferStatus = 'DRAFT' | 'IN_TRANSIT' | 'COMPLETED' | 'CANCELED'
+export type CycleCountStatus = 'DRAFT' | 'OPEN' | 'COUNTED' | 'APPROVED' | 'CANCELED'
 
 export interface Warehouse {
   id: string
@@ -70,6 +72,75 @@ export interface InventoryReservation {
   updatedAt: string
 }
 
+export interface InventoryTransferItem {
+  id: string
+  tenantId: string
+  transferId: string
+  skuId: string
+  quantity: string
+  unitCostSnapshot?: string | null
+  createdAt: string
+}
+
+export interface InventoryTransfer {
+  id: string
+  tenantId: string
+  transferNumber: string
+  sourceWarehouseId: string
+  destinationWarehouseId: string
+  status: InventoryTransferStatus
+  reasonCode: string
+  notes?: string | null
+  idempotencyKey: string
+  createdByUserId?: string | null
+  completedByUserId?: string | null
+  canceledByUserId?: string | null
+  completedAt?: string | null
+  canceledAt?: string | null
+  createdAt: string
+  updatedAt: string
+  items: InventoryTransferItem[]
+}
+
+export interface CycleCountItem {
+  id: string
+  tenantId: string
+  cycleCountId: string
+  skuId: string
+  systemOnHandAtOpen?: string | null
+  balanceVersionAtOpen?: number | null
+  countedQuantity?: string | null
+  varianceQuantity?: string | null
+  countedByUserId?: string | null
+  countedAt?: string | null
+  adjustmentMovementId?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CycleCount {
+  id: string
+  tenantId: string
+  countNumber: string
+  warehouseId: string
+  status: CycleCountStatus
+  reasonCode?: string | null
+  notes?: string | null
+  idempotencyKey: string
+  createdByUserId?: string | null
+  openedByUserId?: string | null
+  approvedByUserId?: string | null
+  canceledByUserId?: string | null
+  openedAt?: string | null
+  countedAt?: string | null
+  approvedAt?: string | null
+  adjustedAt?: string | null
+  canceledAt?: string | null
+  createdAt: string
+  updatedAt: string
+  items: CycleCountItem[]
+}
+
 export interface PaginatedMeta {
   page: number
   perPage: number
@@ -118,13 +189,77 @@ export interface ReservationTransitionRequest {
   notes?: string
 }
 
+export interface InventoryTransferItemRequest {
+  skuId: string
+  quantity: number
+}
+
+export interface CreateInventoryTransferRequest {
+  sourceWarehouseId: string
+  destinationWarehouseId: string
+  idempotencyKey: string
+  reasonCode: string
+  notes?: string
+  items: InventoryTransferItemRequest[]
+}
+
+export interface UpdateInventoryTransferRequest {
+  reasonCode?: string
+  notes?: string
+  items?: InventoryTransferItemRequest[]
+}
+
+export interface CompleteInventoryTransferRequest {
+  idempotencyKey: string
+}
+
+export interface CancelInventoryTransferRequest {
+  reasonCode: string
+  notes?: string
+}
+
+export interface CreateCycleCountRequest {
+  warehouseId: string
+  idempotencyKey: string
+  reasonCode: string
+  notes?: string
+  items: Array<{ skuId: string }>
+}
+
+export interface CountCycleCountItemRequest {
+  countedQuantity: number
+}
+
+export interface ApproveCycleCountRequest {
+  reasonCode: string
+  idempotencyKey: string
+  notes?: string
+}
+
+export interface CancelCycleCountRequest {
+  reasonCode: string
+  notes?: string
+}
+
 export interface InventoryAdjustmentResponse {
   movement: InventoryMovement
   balance: InventoryBalance
+}
+
+export interface InventoryTransferCompletionResponse {
+  transfer: InventoryTransfer
+  movements: InventoryMovement[]
+  balances: InventoryBalance[]
 }
 
 export interface InventoryReservationOperationResponse {
   reservation: InventoryReservation
   movement: InventoryMovement
   balance: InventoryBalance
+}
+
+export interface CycleCountApprovalResponse {
+  cycleCount: CycleCount
+  movements: InventoryMovement[]
+  balances: InventoryBalance[]
 }

@@ -26,12 +26,26 @@ export interface ReconciliationCasePaymentSummary {
   providerPaymentId?: string | null
 }
 
+export interface ReconciliationCaseOrderSummary {
+  id: string
+  orderNumber: string
+  status: string
+}
+
 export interface ReconciliationCaseSettlementSummary {
   id: string
   providerEventId: string
   providerPaymentId?: string | null
   externalReference?: string | null
+  eventType?: string
+  providerStatus?: string | null
+  amountMinor?: string | null
+  feeAmountMinor?: string | null
+  netAmountMinor?: string | null
+  currency?: string
+  availableAt?: string | null
   occurredAt?: string | null
+  receivedAt?: string | null
 }
 
 export interface ReconciliationCase {
@@ -51,6 +65,7 @@ export interface ReconciliationCase {
   updatedAt: string
   settlementEvent: ReconciliationCaseSettlementSummary
   payment?: ReconciliationCasePaymentSummary | null
+  order?: ReconciliationCaseOrderSummary | null
 }
 
 export interface ReconciliationCasesFilters {
@@ -117,4 +132,42 @@ export interface CreateReconciliationDecisionPayload {
   reasonCode: string
   paymentId?: string
   comment?: string
+}
+
+export interface ReconciliationDecision {
+  id: string
+  action: ReconciliationDecisionAction
+  reasonCode: string
+  comment?: string | null
+  previousStatus: ReconciliationCaseStatus
+  nextStatus: ReconciliationCaseStatus
+  paymentId?: string | null
+  metadata?: Record<string, unknown> | null
+  createdAt: string
+}
+
+export interface ReconciliationTimelineEvent {
+  type: 'SETTLEMENT_EVENT_RECEIVED' | 'CASE_CREATED' | 'DECISION_RECORDED'
+  occurredAt: string
+  settlementEvent?: ReconciliationCaseSettlementSummary
+  case?: Pick<ReconciliationCase, 'id' | 'status' | 'matchType'>
+  decision?: ReconciliationDecision
+}
+
+export interface ReconciliationTimeline {
+  case: ReconciliationCase
+  evidence: {
+    settlementEvent: ReconciliationCaseSettlementSummary
+    payment?: ReconciliationCasePaymentSummary | null
+    order?: ReconciliationCaseOrderSummary | null
+  }
+  decisions: ReconciliationDecision[]
+  events: ReconciliationTimelineEvent[]
+}
+
+export interface ReconciliationReasonCode {
+  code: string
+  action: ReconciliationDecisionAction
+  labelKey: string
+  requiresComment: boolean
 }

@@ -1,7 +1,13 @@
-import { InternalOrder, InternalOrderItem, InternalOrderStatus } from '@prisma/client';
+import {
+  InternalOrder,
+  InternalOrderItem,
+  InternalOrderStatus,
+  OrderShippingSummary,
+} from '@prisma/client';
 
 export type InternalOrderWithItems = InternalOrder & {
   items: InternalOrderItem[];
+  shippingSummaries: OrderShippingSummary[];
 };
 
 export interface PaginatedOrdersResult {

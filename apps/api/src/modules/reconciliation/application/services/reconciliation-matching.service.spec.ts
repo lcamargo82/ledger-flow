@@ -1,4 +1,5 @@
 import {
+  ChannelProvider,
   PaymentProvider,
   PaymentStatus,
   ReconciliationCaseStatus,
@@ -23,6 +24,10 @@ describe('ReconciliationMatchingService', () => {
       findFirst: jest.fn(),
       findMany: jest.fn(),
     },
+    orderFinancialFact: {
+      findFirst: jest.fn(),
+      findMany: jest.fn(),
+    },
   };
 
   let service: ReconciliationMatchingService;
@@ -33,6 +38,8 @@ describe('ReconciliationMatchingService', () => {
     prisma.reconciliationCase.findUnique.mockResolvedValue(null);
     prisma.reconciliationPolicy.findFirst.mockResolvedValue(null);
     prisma.payment.findMany.mockResolvedValue([]);
+    prisma.orderFinancialFact.findFirst.mockResolvedValue(null);
+    prisma.orderFinancialFact.findMany.mockResolvedValue([]);
   });
 
   it('creates a reconciled case for an exact provider payment id match', async () => {
@@ -168,6 +175,99 @@ describe('ReconciliationMatchingService', () => {
     });
   });
 
+  it('matches Mercado Pago settlement to Mercado Livre order by marketplace order id', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({
+        provider: PaymentProvider.MERCADO_PAGO,
+        providerPaymentId: 'mp-pay-1',
+        externalReference: '2000000001',
+        amountMinor: '12050',
+      }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(null);
+    prisma.orderFinancialFact.findFirst.mockResolvedValue(
+      orderFact({ externalOrderId: '2000000001', revenueAmount: '120.50' }),
+    );
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-ml-mp' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.orderFinancialFact.findFirst).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        channelProvider: ChannelProvider.MERCADO_LIVRE,
+        externalOrderId: { in: ['2000000001'] },
+      },
+      orderBy: [{ version: 'desc' }, { calculatedAt: 'desc' }],
+    });
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.RECONCILED,
+        matchType: ReconciliationMatchType.MARKETPLACE_ORDER_ID,
+        orderId: 'order-1',
+        paymentId: undefined,
+        expectedAmountMinor: new Prisma.Decimal('12050'),
+        receivedAmountMinor: new Prisma.Decimal('12050'),
+        differenceAmountMinor: new Prisma.Decimal('0'),
+      }),
+    });
+  });
+
+  it('creates an amount divergence for exact Mercado Livre order id with different amount', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({
+        provider: PaymentProvider.MERCADO_PAGO,
+        externalReference: '2000000001',
+        amountMinor: '11500',
+      }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(null);
+    prisma.orderFinancialFact.findFirst.mockResolvedValue(
+      orderFact({ externalOrderId: '2000000001', revenueAmount: '120.50' }),
+    );
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-ml-divergence' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.AMOUNT_DIVERGENCE,
+        matchType: ReconciliationMatchType.MARKETPLACE_ORDER_ID,
+        orderId: 'order-1',
+        expectedAmountMinor: new Prisma.Decimal('12050'),
+        receivedAmountMinor: new Prisma.Decimal('11500'),
+        differenceAmountMinor: new Prisma.Decimal('-550'),
+      }),
+    });
+  });
+
+  it('keeps amount/date marketplace matches as manual review candidates', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({
+        provider: PaymentProvider.MERCADO_PAGO,
+        providerPaymentId: null,
+        externalReference: null,
+        amountMinor: '12050',
+      }),
+    );
+    prisma.orderFinancialFact.findMany.mockResolvedValue([
+      orderFact({ externalOrderId: '2000000001', revenueAmount: '120.50' }),
+    ]);
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-candidate' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.PENDING,
+        matchType: ReconciliationMatchType.AMOUNT_CURRENCY_TIME_CANDIDATE,
+        orderId: 'order-1',
+        expectedAmountMinor: new Prisma.Decimal('12050'),
+        receivedAmountMinor: new Prisma.Decimal('12050'),
+      }),
+    });
+  });
+
   it('does not create a tenant-scoped case when settlement has no tenant', async () => {
     prisma.providerSettlementEvent.findUnique.mockResolvedValue(settlement({ tenantId: null }));
 
@@ -207,6 +307,22 @@ describe('ReconciliationMatchingService', () => {
       status: PaymentStatus.APPROVED,
       createdAt: new Date('2026-07-03T09:55:00.000Z'),
       ...overrides,
+    };
+  }
+
+  function orderFact(overrides: Record<string, unknown> = {}) {
+    return {
+      id: 'fact-1',
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      externalOrderId: '2000000001',
+      channelProvider: ChannelProvider.MERCADO_LIVRE,
+      revenueAmount: new Prisma.Decimal('120.50'),
+      currency: 'BRL',
+      calculatedAt: new Date('2026-07-03T09:55:00.000Z'),
+      version: 1,
+      ...overrides,
+      revenueAmount: new Prisma.Decimal(String(overrides.revenueAmount ?? '120.50')),
     };
   }
 });

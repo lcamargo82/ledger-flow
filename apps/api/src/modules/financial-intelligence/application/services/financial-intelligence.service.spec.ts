@@ -132,6 +132,7 @@ describe('FinancialIntelligenceService', () => {
       data: expect.objectContaining({
         tenantId: 'tenant-1',
         orderId: 'order-ml-1',
+        externalOrderId: '2000000001',
         version: 1,
         orderNumber: 'ORD-ML-1',
         orderStatus: InternalOrderStatus.CONFIRMED,

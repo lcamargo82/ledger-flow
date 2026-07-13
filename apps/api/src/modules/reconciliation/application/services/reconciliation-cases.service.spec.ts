@@ -16,6 +16,9 @@ describe('ReconciliationCasesService', () => {
       count: jest.fn(),
       findFirst: jest.fn(),
     },
+    reconciliationDecision: {
+      findMany: jest.fn(),
+    },
   };
 
   let service: ReconciliationCasesService;
@@ -86,6 +89,53 @@ describe('ReconciliationCasesService', () => {
     prisma.reconciliationCase.findFirst.mockResolvedValue(null);
 
     await expect(service.getCase('tenant-1', 'case-1')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('returns a fine-mesh timeline with sanitized settlement, payment, order and decision evidence', async () => {
+    prisma.reconciliationCase.findFirst.mockResolvedValue(
+      reconciliationCase({
+        order: {
+          id: 'order-1',
+          orderNumber: 'ML-123',
+          status: 'PAID',
+        },
+        settlementEvent: {
+          id: 'settlement-1',
+          providerEventId: 'evt-1',
+          providerPaymentId: 'mp-payment-1',
+          externalReference: 'ML-123',
+          occurredAt: new Date('2026-07-03T10:00:00.000Z'),
+        },
+      }),
+    );
+    prisma.reconciliationDecision.findMany.mockResolvedValue([
+      {
+        id: 'decision-1',
+        action: 'RESOLVE_EXCEPTION',
+        reasonCode: 'PROVIDER_FEE_EXPLAINED',
+        comment: 'Provider fee confirmed.',
+        previousStatus: 'AMOUNT_DIVERGENCE',
+        nextStatus: 'RESOLVED_EXCEPTION',
+        paymentId: null,
+        metadata: { safe: true },
+        createdAt: new Date('2026-07-03T11:00:00.000Z'),
+      },
+    ]);
+
+    const result = await service.getTimeline('tenant-1', 'case-1');
+
+    expect(result.evidence.settlementEvent.providerPaymentId).toBe('mp-payment-1');
+    expect(result.evidence.order?.orderNumber).toBe('ML-123');
+    expect(result.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'CASE_CREATED' }),
+        expect.objectContaining({ type: 'SETTLEMENT_EVENT_RECEIVED' }),
+        expect.objectContaining({
+          type: 'DECISION_RECORDED',
+          decision: expect.objectContaining({ reasonCode: 'PROVIDER_FEE_EXPLAINED' }),
+        }),
+      ]),
+    );
   });
 
   function reconciliationCase(overrides: Record<string, unknown> = {}) {

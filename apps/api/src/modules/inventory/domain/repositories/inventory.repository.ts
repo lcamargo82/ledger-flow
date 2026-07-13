@@ -4,6 +4,12 @@ import {
   InventoryMovementType,
   InventoryReservation,
   InventoryReservationStatus,
+  InventoryTransfer,
+  InventoryTransferItem,
+  InventoryTransferStatus,
+  CycleCount,
+  CycleCountItem,
+  CycleCountStatus,
   ProductSku,
   Warehouse,
 } from '@prisma/client';
@@ -82,6 +88,104 @@ export interface ReservationOperationResult {
   outboxEvent?: { id: string; eventType: string };
 }
 
+export type InventoryTransferWithItems = InventoryTransfer & {
+  items: InventoryTransferItem[];
+};
+
+export interface InventoryTransferItemData {
+  skuId: string;
+  quantity: number;
+  unitCostSnapshot?: number | null;
+}
+
+export interface CreateInventoryTransferData {
+  tenantId: string;
+  sourceWarehouseId: string;
+  destinationWarehouseId: string;
+  reasonCode: string;
+  notes?: string | null;
+  idempotencyKey: string;
+  createdByUserId: string;
+  items: InventoryTransferItemData[];
+}
+
+export interface UpdateInventoryTransferDraftData {
+  transferId: string;
+  tenantId: string;
+  reasonCode?: string;
+  notes?: string | null;
+  items?: InventoryTransferItemData[];
+}
+
+export interface InventoryTransferTransitionData {
+  transferId: string;
+  tenantId: string;
+  actorUserId: string;
+}
+
+export interface CompleteInventoryTransferData extends InventoryTransferTransitionData {
+  idempotencyKey: string;
+}
+
+export interface CancelInventoryTransferData extends InventoryTransferTransitionData {
+  reasonCode: string;
+  notes?: string | null;
+}
+
+export interface InventoryTransferCompletionResult {
+  transfer: InventoryTransferWithItems;
+  movements: InventoryMovement[];
+  balances: InventoryBalance[];
+  outboxEvent?: { id: string; eventType: string };
+}
+
+export type CycleCountWithItems = CycleCount & {
+  items: CycleCountItem[];
+};
+
+export interface CycleCountItemData {
+  skuId: string;
+}
+
+export interface CreateCycleCountData {
+  tenantId: string;
+  warehouseId: string;
+  reasonCode?: string | null;
+  notes?: string | null;
+  idempotencyKey: string;
+  createdByUserId: string;
+  items: CycleCountItemData[];
+}
+
+export interface CycleCountTransitionData {
+  cycleCountId: string;
+  tenantId: string;
+  actorUserId: string;
+}
+
+export interface CountCycleCountItemData extends CycleCountTransitionData {
+  itemId: string;
+  countedQuantity: number;
+}
+
+export interface ApproveCycleCountData extends CycleCountTransitionData {
+  reasonCode: string;
+  idempotencyKey: string;
+  notes?: string | null;
+}
+
+export interface CancelCycleCountData extends CycleCountTransitionData {
+  reasonCode: string;
+  notes?: string | null;
+}
+
+export interface CycleCountApprovalResult {
+  cycleCount: CycleCountWithItems;
+  movements: InventoryMovement[];
+  balances: InventoryBalance[];
+  outboxEvent?: { id: string; eventType: string };
+}
+
 export interface ListInventoryParams {
   tenantId: string;
   page?: number;
@@ -90,6 +194,22 @@ export interface ListInventoryParams {
   warehouseId?: string;
   type?: InventoryMovementType;
   status?: InventoryReservationStatus;
+}
+
+export interface ListInventoryTransfersParams {
+  tenantId: string;
+  page?: number;
+  perPage?: number;
+  status?: InventoryTransferStatus;
+  warehouseId?: string;
+}
+
+export interface ListCycleCountsParams {
+  tenantId: string;
+  page?: number;
+  perPage?: number;
+  status?: CycleCountStatus;
+  warehouseId?: string;
 }
 
 export const INVENTORY_REPOSITORY = Symbol('INVENTORY_REPOSITORY');
@@ -110,4 +230,20 @@ export interface InventoryRepository {
   listReservations(params: ListInventoryParams): Promise<PaginatedResult<InventoryReservation>>;
   listBalances(params: ListInventoryParams): Promise<PaginatedResult<InventoryBalance>>;
   listMovements(params: ListInventoryParams): Promise<PaginatedResult<InventoryMovement>>;
+  createTransfer(data: CreateInventoryTransferData): Promise<InventoryTransferWithItems>;
+  listTransfers(
+    params: ListInventoryTransfersParams,
+  ): Promise<PaginatedResult<InventoryTransferWithItems>>;
+  findTransferById(id: string, tenantId: string): Promise<InventoryTransferWithItems | null>;
+  updateTransferDraft(data: UpdateInventoryTransferDraftData): Promise<InventoryTransferWithItems>;
+  startTransfer(data: InventoryTransferTransitionData): Promise<InventoryTransferWithItems>;
+  completeTransfer(data: CompleteInventoryTransferData): Promise<InventoryTransferCompletionResult>;
+  cancelTransfer(data: CancelInventoryTransferData): Promise<InventoryTransferWithItems>;
+  createCycleCount(data: CreateCycleCountData): Promise<CycleCountWithItems>;
+  listCycleCounts(params: ListCycleCountsParams): Promise<PaginatedResult<CycleCountWithItems>>;
+  findCycleCountById(id: string, tenantId: string): Promise<CycleCountWithItems | null>;
+  openCycleCount(data: CycleCountTransitionData): Promise<CycleCountWithItems>;
+  countCycleCountItem(data: CountCycleCountItemData): Promise<CycleCountWithItems>;
+  approveCycleCount(data: ApproveCycleCountData): Promise<CycleCountApprovalResult>;
+  cancelCycleCount(data: CancelCycleCountData): Promise<CycleCountWithItems>;
 }

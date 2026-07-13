@@ -440,6 +440,8 @@ const mapListing = async () => {
           :is-loading="channelsStore.isLoading"
           :empty-title="t('channels.empty.inboxTitle')"
           :empty-description="t('channels.empty.inboxDescription')"
+          :pagination="channelsStore.inboxMeta"
+          @update:page="channelsStore.setInboxPage"
         >
           <template #receivedAt="{ item }">
             {{ formatDateTime(item.receivedAt, currentLocale) }}
@@ -494,6 +496,8 @@ const mapListing = async () => {
           :is-loading="channelsStore.isLoading"
           :empty-title="t('channels.empty.listingsTitle')"
           :empty-description="t('channels.empty.listingsDescription')"
+          :pagination="channelsStore.listingsMeta"
+          @update:page="channelsStore.setListingPage"
         >
           <template #importedAt="{ item }">
             {{ formatDateTime(item.importedAt, currentLocale) }}
@@ -575,6 +579,8 @@ const mapListing = async () => {
           :is-loading="channelsStore.isLoading"
           :empty-title="t('channels.empty.syncTitle')"
           :empty-description="t('channels.empty.syncDescription')"
+          :pagination="channelsStore.inventorySyncMeta"
+          @update:page="channelsStore.setInventorySyncPage"
         >
           <template #updatedAt="{ item }">
             {{ formatDateTime(item.updatedAt, currentLocale) }}

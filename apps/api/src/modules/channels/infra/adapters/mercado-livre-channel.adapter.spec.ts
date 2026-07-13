@@ -174,4 +174,50 @@ describe('MercadoLivreChannelAdapter', () => {
     });
     expect(JSON.stringify(order)).not.toContain('ml-access-token');
   });
+
+  it('normalizes Mercado Livre shipping summary with string IDs and masked tracking', async () => {
+    apiClient.getOrder.mockResolvedValue({
+      id: 2000000001,
+      status: 'paid',
+      shipping: {
+        id: 987654321,
+        status: 'ready_to_ship',
+        substatus: 'printed',
+        mode: 'me2',
+        logistic_type: 'drop_off',
+        date_handling: '2026-07-12T10:00:00.000-03:00',
+        estimated_delivery: {
+          date: '2026-07-15T10:00:00.000-03:00',
+        },
+        tracking_number: 'BR123456789ML',
+      },
+      order_items: [
+        {
+          quantity: 1,
+          item: { id: 'MLB123', title: 'Produto Teste' },
+        },
+      ],
+    });
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const order = await adapter.fetchOrder({
+      accessToken: 'ml-access-token',
+      resource: '/orders/2000000001',
+    });
+
+    expect(order.shipping).toEqual({
+      externalShipmentId: '987654321',
+      status: 'ready_to_ship',
+      substatus: 'printed',
+      shippingMode: 'me2',
+      logisticType: 'drop_off',
+      handlingEstimateAt: '2026-07-12T13:00:00.000Z',
+      deliveryEstimateAt: '2026-07-15T13:00:00.000Z',
+      trackingCodeMasked: '*********89ML',
+      source: 'MERCADO_LIVRE_ORDER',
+      confidence: 0.7,
+    });
+    expect(JSON.stringify(order)).not.toContain('BR123456789ML');
+    expect(JSON.stringify(order)).not.toContain('ml-access-token');
+  });
 });

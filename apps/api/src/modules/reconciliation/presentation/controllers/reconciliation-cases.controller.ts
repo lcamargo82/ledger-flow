@@ -44,6 +44,19 @@ export class ReconciliationCasesController {
     return this.reconciliationCasesService.listCases(user.tenantId, query);
   }
 
+  @Get('reason-codes')
+  @RequirePermissions('reconciliation:read')
+  @RequireCapabilities(ReconciliationCapabilities.Read)
+  @ApiOperation({ summary: 'Listar códigos de motivo de decisões de conciliação' })
+  @ApiOkResponse({ description: 'Códigos de motivo retornados' })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({
+    description: 'Sem permissão ou capability para acessar Reconciliation',
+  })
+  reasonCodes() {
+    return this.reconciliationDecisionsService.listReasonCodes();
+  }
+
   @Get(':id')
   @RequirePermissions('reconciliation:read')
   @RequireCapabilities(ReconciliationCapabilities.Read)

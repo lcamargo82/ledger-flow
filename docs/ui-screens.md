@@ -139,10 +139,10 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Permissões:** `orders:read`, `orders:manage`
 - **Capability:** `orders.manage`
 - **Componentes:** `AppPageHeader`, `AppCard`, `AppTable`, `AppModal`, `AppInput`, `AppSelect`, `AppBadge`, item de menu no `AppLayout`.
-- **Objetivo:** Criar pedidos internos e executar o ciclo confirmar, cancelar e concluir usando reservas de estoque.
-- **Fluxos:** criação de pedido em rascunho, confirmação com reserva por item, cancelamento com liberação de reserva e conclusão com consumo da reserva.
+- **Objetivo:** Criar pedidos internos e executar o ciclo confirmar, cancelar e concluir usando reservas de estoque; em 10.1.11, exibir resumo logístico operacional quando disponível.
+- **Fluxos:** criação de pedido em rascunho, confirmação com reserva por item, cancelamento com liberação de reserva e conclusão com consumo da reserva. O resumo logístico mostra provider, status de shipment, shipment id string e tracking mascarado, sem semântica de fulfillment/SLA 10.3.
 - **Segurança:** O frontend oculta ações sem permissão; o backend valida `@RequirePermissions` e `@RequireCapabilities`.
-- **Fora de escopo:** marketplace, webhooks de canais, malha fina, backorder e financeiro por pedido.
+- **Fora de escopo:** marketplace settlement/payout, backorder, etiqueta, picking/packing e fulfillment avançado.
 - **i18n:** Namespace `orders.*` em pt-BR e en-US.
 
 ### Channels
@@ -195,16 +195,55 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Fora de escopo:** XLSX real, storage externo, agendamento recorrente e worker definitivo.
 - **i18n:** Namespace `exports.*` em pt-BR e en-US.
 
-### Notifications (planejada 10.2.0A)
+### Notifications (implementada 10.2.0A)
 
 - **Rota:** `/notifications`
 - **Layout:** `AppLayout`, sino no footer da sidebar.
 - **Autorização:** recipient + revalidação backend de permission/capability.
 - **Componentes:** definidos em `docs/specs/10.2-components-i18n.md`.
 - **Estados:** loading, vazio, erro, forbidden, unread/read/dismissed.
+- **Polling:** contador a cada 30 segundos por padrão, configurável por `VITE_NOTIFICATIONS_POLLING_INTERVAL_MS` com piso de 10 segundos.
 
-### Inventory Transfers e Cycle Counts (planejadas)
+### Payment Gateway Connections
 
-- **Rotas:** `/inventory/transfers` e `/inventory/cycle-counts`.
-- **Base:** reutilizam `AppPageHeader`, `AppTable`, `AppModal`/página de detalhe, `AppConfirmDialog`, `AppBadge` e ledger Inventory existente.
-- **UX:** ações condicionadas ao estado; conclusão/aprovação mostram consequência e impedem clique duplo.
+- **Rota:** `/settings/gateway-connections`.
+- **Status Mercado Pago:** MP-0 hardening implementado; OAuth feedback normaliza `mercado-pago`, `mercado_pago` e `MERCADO_PAGO`.
+- **Componentes:** `GatewayConnectionForm`, `GatewayConnectionCard`, `GatewayConnectionEmptyState`, modais de status/credencial/desconexão e `AppButton`.
+- **Objetivo:** Gerenciar conexões de gateway por tenant sem expor segredos. Mercado Pago usa OAuth; credenciais da loja não são digitadas nem exibidas no painel.
+- **Capability matrix atual:** Mercado Pago anuncia PIX, boleto, sandbox, fundação de webhook inbound, sincronização de status por webhook/fetch, cancelamento e estorno total. Refresh automático backend-only está implementado em MP-1; cartão e checkout avançado entram em sprints futuras.
+- **Readiness financeira MP-6:** `GatewayConnectionCard` mostra `financialReadiness` apenas para Mercado Pago, distinguindo `PAYMENT_ONLY`, `SETTLEMENT_READY`, `REAUTH_REQUIRED` e `UNHEALTHY`, com escopos ausentes e motivos traduzidos. Essa indicação não executa ingestion de settlement; apenas prepara o usuário para a próxima fase 9B.
+- **i18n:** Namespace `gateways.*` em pt-BR e en-US; não usar texto hardcoded em estados OAuth.
+
+### Marketplace Settlement 9B-1/9B-4
+
+- **Rota:** `/marketplace-settlement`.
+- **Status:** Implementadas a fundação de contas financeiras, saldo inicial, sync manual de eventos financeiros Mercado Pago, cash position e P&L operacional.
+- **Objetivo:** criar contas operacionais Mercado Pago somente para conexões `SETTLEMENT_READY`, exibir saldo atual/abertura, ledger append-only, eventos/totais importados, buckets de caixa e P&L operacional.
+- **Ações:** criar conta com saldo inicial, motivo e observação; registrar ajuste manual auditado sem editar lançamentos anteriores; sincronizar Mercado Pago por período.
+- **Dashboard:** mostra liberado, pendente, bloqueado, estornado, payout, receita líquida, COGS, frete e margem com disclaimer operacional.
+- **Guards:** `marketplace-settlement:read/manage` + `marketplace_settlement.read/manage`.
+- **Fora de escopo:** sync agendada, export CSV específico da tela, automações finais de fine mesh e contabilidade oficial.
+- **i18n:** Namespace `marketplaceSettlement.*` em pt-BR e en-US.
+
+### Reconciliation fine mesh 9B-3 evidence
+
+- **Rota:** `/reconciliation`.
+- **Status:** Cases de conciliação agora podem carregar evidência de pedido Mercado Livre quando o matching vem de `OrderFinancialFact.externalOrderId`.
+- **Objetivo:** mostrar referência de pagamento ou pedido no mesmo grid de conciliação, sem expor payload bruto do Mercado Livre/Mercado Pago.
+- **i18n:** `reconciliation.table.order` em pt-BR e en-US.
+
+### Inventory Transfers
+
+- **Rota:** `/inventory/transfers`.
+- **Status:** Implementada 10.2.2.
+- **Autorização:** `inventory:transfer` + `inventory.transfer`, com rota condicionada por feature flag.
+- **Base:** reutiliza `AppPageHeader`, `AppTable`, `AppModal`, `AppSelect`, `AppNumberInput`, `AppBadge` e ledger Inventory existente.
+- **UX:** lista por estado, criação multi-item, ações iniciar/concluir/cancelar condicionadas ao estado e feedback de erro traduzido.
+
+### Cycle Counts
+
+- **Rota:** `/inventory/cycle-counts`.
+- **Status:** Implementada 10.2.3.
+- **Autorização:** `inventory:cycle-count` + `inventory.cycle_count`, com rota condicionada por feature flag.
+- **Base:** reutiliza `AppPageHeader`, `AppTable`, `AppModal`, `AppInput`, `AppTextarea`, `AppNumberInput`, `AppBadge` e ledger Inventory existente.
+- **UX:** lista por estado, criação multi-SKU, abertura com snapshot de saldo, contagem por item, resumo de divergência, aprovação/cancelamento condicionados ao estado e feedback traduzido para stale balance.

@@ -201,15 +201,30 @@ export const useChannelsStore = defineStore('channels', () => {
     fetchChannels()
   }
 
+  const setInboxPage = (page: number) => {
+    filters.value.page = page
+    fetchChannels()
+  }
+
   const setListingStatus = (status?: ChannelListingMatchStatus) => {
     listingFilters.value.status = status
     listingFilters.value.page = 1
     fetchListings()
   }
 
+  const setListingPage = (page: number) => {
+    listingFilters.value.page = page
+    fetchListings()
+  }
+
   const setInventorySyncStatus = (status?: ChannelInventorySyncStatus) => {
     inventorySyncFilters.value.status = status
     inventorySyncFilters.value.page = 1
+    fetchInventorySyncStatus()
+  }
+
+  const setInventorySyncPage = (page: number) => {
+    inventorySyncFilters.value.page = page
     fetchInventorySyncStatus()
   }
 
@@ -286,8 +301,11 @@ export const useChannelsStore = defineStore('channels', () => {
     reactivateIntegration,
     disconnectMercadoLivre,
     setInboxStatus,
+    setInboxPage,
     setListingStatus,
+    setListingPage,
     setInventorySyncStatus,
+    setInventorySyncPage,
     importListings,
     mapListing,
     processInventorySync,

@@ -335,6 +335,19 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
 }
+.lf-sidebar__nav::-webkit-scrollbar {
+  width: 4px;
+}
+.lf-sidebar__nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.lf-sidebar__nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+.lf-sidebar__nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
 .lf-nav-item {
   display: flex;
   align-items: center;

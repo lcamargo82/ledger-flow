@@ -12,13 +12,13 @@ O desenvolvimento será dividido em fases incrementais para evitar excesso de es
 
 Cada fase deve entregar:
 
-* Código funcional.
-* Testes mínimos.
-* Documentação atualizada.
-* Critérios de aceite cumpridos.
-* Evidências no README, como prints, diagramas ou exemplos de payload.
-* Docker Compose funcionando.
-* Commits organizados usando Conventional Commits.
+- Código funcional.
+- Testes mínimos.
+- Documentação atualizada.
+- Critérios de aceite cumpridos.
+- Evidências no README, como prints, diagramas ou exemplos de payload.
+- Docker Compose funcionando.
+- Commits organizados usando Conventional Commits.
 
 ---
 
@@ -27,12 +27,13 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Estrutura inicial
-* Docker Compose
-* API NestJS
-* Frontend Vue
-* Health checks
-* Ambiente local validado
+
+- Estrutura inicial
+- Docker Compose
+- API NestJS
+- Frontend Vue
+- Health checks
+- Ambiente local validado
 
 ---
 
@@ -41,16 +42,17 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Prisma
-* PostgreSQL
-* Tenant
-* User
-* Role
-* Permission
-* UserRole
-* RolePermission
-* Seed inicial
-* Readiness com banco
+
+- Prisma
+- PostgreSQL
+- Tenant
+- User
+- Role
+- Permission
+- UserRole
+- RolePermission
+- Seed inicial
+- Readiness com banco
 
 ---
 
@@ -59,11 +61,12 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* RefreshToken
-* UserSession
-* AuthAttempt
-* Campos de segurança no User
-* Prisma Studio
+
+- RefreshToken
+- UserSession
+- AuthAttempt
+- Campos de segurança no User
+- Prisma Studio
 
 ---
 
@@ -72,15 +75,16 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Login
-* Refresh
-* Logout
-* JWT
-* Refresh token com hash
-* Sessão única
-* Captura de IP/User-Agent
-* AuthAttempt
-* Bloqueio temporário
+
+- Login
+- Refresh
+- Logout
+- JWT
+- Refresh token com hash
+- Sessão única
+- Captura de IP/User-Agent
+- AuthAttempt
+- Bloqueio temporário
 
 ---
 
@@ -89,14 +93,15 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* JwtAuthGuard
-* JwtStrategy
-* CurrentUser
-* Public
-* RequirePermissions
-* PermissionGuard
-* /auth/me
-* Validação de usuário/tenant/sessão ativa
+
+- JwtAuthGuard
+- JwtStrategy
+- CurrentUser
+- Public
+- RequirePermissions
+- PermissionGuard
+- /auth/me
+- Validação de usuário/tenant/sessão ativa
 
 ---
 
@@ -105,15 +110,16 @@ Cada fase deve entregar:
 **Status:** Concluída ou Em validação
 
 **Itens:**
-* LoginView
-* AuthStore
-* Axios interceptor
-* Router guards
-* AppLayout
-* AuthLayout
-* Dashboard placeholder
-* Logout
-* PermissionGate
+
+- LoginView
+- AuthStore
+- Axios interceptor
+- Router guards
+- AppLayout
+- AuthLayout
+- Dashboard placeholder
+- Logout
+- PermissionGate
 
 ---
 
@@ -122,12 +128,13 @@ Cada fase deve entregar:
 **Status:** Concluída ou Em andamento
 
 **Itens:**
-* Swagger UI
-* Redoc
-* OpenAPI JSON
-* DTOs documentados
-* Bearer Auth
-* App/Health/Auth documentados
+
+- Swagger UI
+- Redoc
+- OpenAPI JSON
+- DTOs documentados
+- Bearer Auth
+- App/Health/Auth documentados
 
 ---
 
@@ -136,16 +143,17 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Toasts globais (AppToast, AppToastContainer, toast.store)
-* Modais de confirmação (AppModal, AppConfirmDialog, confirm-dialog.store)
-* Tratamento global de erros (http-error.ts)
-* Estados de loading (AppLoading)
-* Empty states & Error states (AppEmptyState, AppErrorState)
-* Componentes base definitivos (AppButton, AppInput, AppPasswordInput, AppCard, AppAlert, AppBadge, LanguageSwitcher, AppPageHeader)
-* i18n implementado
-* Global CSS atualizado (Legibilidade, UI "Corporate Dark")
-* Telas e Layouts padronizados
-* Rota de forgot-password adicionada
+
+- Toasts globais (AppToast, AppToastContainer, toast.store)
+- Modais de confirmação (AppModal, AppConfirmDialog, confirm-dialog.store)
+- Tratamento global de erros (http-error.ts)
+- Estados de loading (AppLoading)
+- Empty states & Error states (AppEmptyState, AppErrorState)
+- Componentes base definitivos (AppButton, AppInput, AppPasswordInput, AppCard, AppAlert, AppBadge, LanguageSwitcher, AppPageHeader)
+- i18n implementado
+- Global CSS atualizado (Legibilidade, UI "Corporate Dark")
+- Telas e Layouts padronizados
+- Rota de forgot-password adicionada
 
 ---
 
@@ -154,11 +162,12 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Backend: CRUD de usuários (Listagem paginada e detalhe)
-* RBAC: Proteção de rotas e menus (`users:read`)
-* Frontend: Tela de listagem de usuários e detalhes
-* Frontend: AppTable componente base
-* Documentação OpenAPI e Swagger
+
+- Backend: CRUD de usuários (Listagem paginada e detalhe)
+- RBAC: Proteção de rotas e menus (`users:read`)
+- Frontend: Tela de listagem de usuários e detalhes
+- Frontend: AppTable componente base
+- Documentação OpenAPI e Swagger
 
 ---
 
@@ -167,13 +176,14 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Backend: Endpoints de criação (POST) e atualização (PATCH) de usuários.
-* Backend: Troca de status de usuário (active/inactive) gerenciando revogação de tokens.
-* Backend: Atribuição de roles a usuários protegida pelo tenant e OWNER.
-* Frontend: Modais de criação e edição.
-* Frontend: Formulário integrado com o users store.
-* Frontend: Toast e I18N.
-* Funcionalidade testada localmente.
+
+- Backend: Endpoints de criação (POST) e atualização (PATCH) de usuários.
+- Backend: Troca de status de usuário (active/inactive) gerenciando revogação de tokens.
+- Backend: Atribuição de roles a usuários protegida pelo tenant e OWNER.
+- Frontend: Modais de criação e edição.
+- Frontend: Formulário integrado com o users store.
+- Frontend: Toast e I18N.
+- Funcionalidade testada localmente.
 
 ---
 
@@ -182,18 +192,19 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Roles backend
-* Permissions backend
-* Tenant settings backend
-* Roles frontend
-* Permissions frontend
-* Tenant settings frontend
-* OpenAPI
-* i18n
-* documentação
-* Gestão de roles e permissões customizadas
-* Tela de perfil
-* Gestão do tenant
+
+- Roles backend
+- Permissions backend
+- Tenant settings backend
+- Roles frontend
+- Permissions frontend
+- Tenant settings frontend
+- OpenAPI
+- i18n
+- documentação
+- Gestão de roles e permissões customizadas
+- Tela de perfil
+- Gestão do tenant
 
 ---
 
@@ -202,10 +213,11 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Correção de tradução flat/aninhada no frontend.
-* Ajustes finais no botão "Novo Usuário".
-* Script de validação de i18n adicionado.
-* Atualização final do plano de desenvolvimento.
+
+- Correção de tradução flat/aninhada no frontend.
+- Ajustes finais no botão "Novo Usuário".
+- Script de validação de i18n adicionado.
+- Atualização final do plano de desenvolvimento.
 
 ---
 
@@ -214,31 +226,34 @@ Cada fase deve entregar:
 **Status:** Concluída
 
 **Itens:**
-* Backend: Módulo Customers com isolamento por Tenant e proteção RBAC.
-* Backend: CRUD básico implementado com paginação, busca e filtros.
-* Backend: Integração do Mailpit para envio de e-mails locais.
-* Backend: Implementação do fluxo seguro de redefinição de senha (`forgot-password` e `reset-password`).
-* Banco de Dados: Tabelas `Customer`, `PasswordResetToken` e `AuditLog`.
-* Swagger/OpenAPI: Endpoints documentados.
+
+- Backend: Módulo Customers com isolamento por Tenant e proteção RBAC.
+- Backend: CRUD básico implementado com paginação, busca e filtros.
+- Backend: Integração do Mailpit para envio de e-mails locais.
+- Backend: Implementação do fluxo seguro de redefinição de senha (`forgot-password` e `reset-password`).
+- Banco de Dados: Tabelas `Customer`, `PasswordResetToken` e `AuditLog`.
+- Swagger/OpenAPI: Endpoints documentados.
 
 ## Fase 5 — Payments MVP
 
 **Status:** Em andamento
 
 ### Fase 5B — Payments Frontend
+
 Fase 5A — Payments Core Backend Foundation
 
 **Status:** Concluída
 
 **Itens:**
-* Modelos do banco de dados (Payment, PaymentEvent).
-* Seed de permissões (create, read, cancel, refund).
-* Módulo NestJS isolado.
-* Repository com interface abstrata e implementação Prisma.
-* Serviço core com lógica de criação, validação de transição, cancelamento, reembolso e log de auditoria.
-* Idempotência garantida via header `Idempotency-Key` e hashes criptografados (`idempotencyKeyHash`, `idempotencyRequestHash`).
-* Proteção contra alteração arbitrária de status via payload (APIs específicas e restritas).
-* Testes isolados com rotas.
+
+- Modelos do banco de dados (Payment, PaymentEvent).
+- Seed de permissões (create, read, cancel, refund).
+- Módulo NestJS isolado.
+- Repository com interface abstrata e implementação Prisma.
+- Serviço core com lógica de criação, validação de transição, cancelamento, reembolso e log de auditoria.
+- Idempotência garantida via header `Idempotency-Key` e hashes criptografados (`idempotencyKeyHash`, `idempotencyRequestHash`).
+- Proteção contra alteração arbitrária de status via payload (APIs específicas e restritas).
+- Testes isolados com rotas.
 
 ---
 
@@ -247,13 +262,14 @@ Fase 5A — Payments Core Backend Foundation
 **Status:** Concluída
 
 **Itens:**
-* Banco de Dados: `GatewayConfiguration` e enums associados.
-* Segurança: Implementação de AES-256-GCM para criptografia das credenciais dos gateways.
-* Arquitetura: Criação do `GatewaysModule` com `PaymentGatewayFactoryService` e `PaymentGatewayResolverService`.
-* Abstração: Interfaces base (`IPaymentGateway`, `GatewayCapabilities`, `GatewayCredentials`).
-* Adapters Iniciais: Esqueletos para Stripe, Asaas, Mercado Pago, PagBank e Pagar.me com exceção `GatewayNotImplementedError`.
-* Core: `PaymentsService` adaptado para preparar roteamento através do Gateway Resolver.
-* Documentação: ADR 0018 criado e atualizações no plano e security SDD.
+
+- Banco de Dados: `GatewayConfiguration` e enums associados.
+- Segurança: Implementação de AES-256-GCM para criptografia das credenciais dos gateways.
+- Arquitetura: Criação do `GatewaysModule` com `PaymentGatewayFactoryService` e `PaymentGatewayResolverService`.
+- Abstração: Interfaces base (`IPaymentGateway`, `GatewayCapabilities`, `GatewayCredentials`).
+- Adapters Iniciais: Esqueletos para Stripe, Asaas, Mercado Pago, PagBank e Pagar.me com exceção `GatewayNotImplementedError`.
+- Core: `PaymentsService` adaptado para preparar roteamento através do Gateway Resolver.
+- Documentação: ADR 0018 criado e atualizações no plano e security SDD.
 
 ---
 
@@ -262,14 +278,15 @@ Fase 5A — Payments Core Backend Foundation
 **Status:** Concluída
 
 **Itens:**
-* Cliente API base configurado com Base URL apontada exclusivamente para Sandbox.
-* Mapping customizado de status (AsaasStatusMapper).
-* Orquestrador assíncrono simulado via `GatewayPaymentOrchestrationService`.
-* `AsaasPaymentGatewayAdapter` injetando credenciais desencriptadas da API e lidando com PIX e Boleto.
-* Criação persistente de clientes espelhados no gateway (`PrismaGatewayCustomerReferenceRepository`).
-* Validação rigorosa de idempotência (através de `externalReference` + `GET` prévio no provedor).
-* Script seguro de injeção de API Key criptografada no banco para uso do adapter (`configure-asaas-sandbox.ts`).
-* Configuração blindada para isolar segredos (`AES-256-GCM`).
+
+- Cliente API base configurado com Base URL apontada exclusivamente para Sandbox.
+- Mapping customizado de status (AsaasStatusMapper).
+- Orquestrador assíncrono simulado via `GatewayPaymentOrchestrationService`.
+- `AsaasPaymentGatewayAdapter` injetando credenciais desencriptadas da API e lidando com PIX e Boleto.
+- Criação persistente de clientes espelhados no gateway (`PrismaGatewayCustomerReferenceRepository`).
+- Validação rigorosa de idempotência (através de `externalReference` + `GET` prévio no provedor).
+- Script seguro de injeção de API Key criptografada no banco para uso do adapter (`configure-asaas-sandbox.ts`).
+- Configuração blindada para isolar segredos (`AES-256-GCM`).
 
 ---
 
@@ -278,13 +295,23 @@ Fase 5A — Payments Core Backend Foundation
 **Status:** Concluída
 
 **Itens:**
-* Cliente API base configurado para OAuth 2.0 (`/oauth/token`).
-* Backend: Gerenciamento seguro de state com Redis (`ioredis`) para prevenir CSRF e Replay Attacks.
-* Orquestrador de OAuth: `MercadoPagoOAuthService` (redirecionamento, handling de callback e criptografia de credenciais).
-* Controle de Acesso: Validação de RBAC (`gateways:create`, `gateways:read`, `gateways:manage`) e `TenantFeatureAccessService` (`mercado_pago_gateway`).
-* Frontend: UI no `GatewaysPage.vue` para Conectar Mercado Pago e tratamento do OAuth redirect (`?success=true` ou `?error=true`).
-* Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
-* Documentação: ADR 0031.
+
+- Cliente API base configurado para OAuth 2.0 (`/oauth/token`).
+- Backend: Gerenciamento seguro de state com Redis (`ioredis`) para prevenir CSRF e Replay Attacks.
+- Orquestrador de OAuth: `MercadoPagoOAuthService` (redirecionamento, handling de callback e criptografia de credenciais).
+- Controle de Acesso: Validação de RBAC (`gateways:create`, `gateways:read`, `gateways:manage`) e `TenantFeatureAccessService` (`mercado_pago_gateway`).
+- Frontend: UI no `GatewaysPage.vue` para Conectar Mercado Pago e tratamento do OAuth redirect (`?success=true` ou `?error=true`).
+- Hardening MP-0: o frontend normaliza `mercado-pago`, `mercado_pago` e `MERCADO_PAGO`; a matriz de capabilities do adapter Mercado Pago anunciou apenas PIX, boleto e sandbox até a chegada da fundação de webhooks.
+- Refresh MP-1: `MercadoPagoCredentialManager` renova tokens próximos do vencimento com lock Redis, atualiza credenciais cifradas de forma otimista e marca `REAUTH_REQUIRED` em caso de refresh token inválido/revogado.
+- Webhook foundation MP-2: `POST /webhooks/mercado-pago` valida assinatura quando configurada, persiste inbox sanitizado/idempotente, enfileira `webhook.inbound_processing_requested` e mantém o worker provider-aware para não acionar ingestão de conciliação Asaas em eventos Mercado Pago.
+- Status sync MP-3: o worker Mercado Pago busca detalhes do pagamento com token válido, atualiza `Payment.status` de forma idempotente, bloqueia regressões terminais, registra chargeback como evento técnico sem mutar status e emite notificação autorizada `mercado_pago.payment_status_updated`.
+- Cancel/refund MP-4: os endpoints genéricos de pagamentos chamam o Mercado Pago antes da mutação local, usam chaves de idempotência determinísticas, exigem motivo para estorno e persistem metadados sanitizados de provider em eventos/auditoria.
+- Marketplace settlement 9B-1: `/marketplace-settlement` cria contas financeiras Mercado Pago apenas quando a conexão está settlement-ready, registra saldo inicial em minor units, mantém `CashLedgerEntry` append-only e audita ajustes manuais de caixa.
+- Marketplace settlement 9B-2: sync manual por período busca pagamentos Mercado Pago com token settlement, normaliza bruto/taxas/líquido/refunds/datas de liberação em `ProviderSettlementEvent` sanitizado, vincula os eventos à conta financeira operacional e exibe totais/eventos importados em `/marketplace-settlement`.
+- Marketplace settlement 9B-3: matching passa a casar Mercado Pago com Mercado Livre por `providerPaymentId`, referências de pagamento e `OrderFinancialFact.externalOrderId`; divergências viram cases explícitos e candidatos por valor/data ficam pendentes para revisão manual.
+- Marketplace settlement 9B-4: dashboard operacional em `/marketplace-settlement` expõe cash position por bucket e P&L operacional com receita líquida, taxas, frete, refunds, COGS e margem, sempre com disclaimer de não-contabilidade oficial.
+- Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
+- Documentação: ADR 0031.
 
 ---
 
@@ -297,10 +324,11 @@ Fase 5A — Payments Core Backend Foundation
 **Status:** Concluída
 
 **Itens:**
-* Criação de tabelas de Inbox para idempotência de webhooks.
-* Implementação do Webhook Inbox Repository.
-* Recebimento de eventos do Asaas.
-* Sincronização segura de status de pagamento e logs de auditoria.
+
+- Criação de tabelas de Inbox para idempotência de webhooks.
+- Implementação do Webhook Inbox Repository.
+- Recebimento de eventos do Asaas.
+- Sincronização segura de status de pagamento e logs de auditoria.
 
 ---
 
@@ -309,16 +337,16 @@ Fase 5A — Payments Core Backend Foundation
 **Status:** Concluída
 
 **Itens:**
-* Refatoração da infraestrutura de webhooks para suportar múltiplos provedores (Stripe, Asaas, Mercado Pago, PagBank, Pagar.me).
-* Criação de `ProviderWebhookAdapter`, `ProviderWebhookAuthenticator` e `ProviderWebhookNormalizer`.
-* Implementação do Padrão Registry (`WebhookAdapterRegistryService` e `WebhookProcessorRegistryService`).
-* Refatoração do `WebhookIngressService` para orquestração genérica.
-* Adapters "esqueleto" para provedores não-Asaas preparados para Fase futura.
+
+- Refatoração da infraestrutura de webhooks para suportar múltiplos provedores (Stripe, Asaas, Mercado Pago, PagBank, Pagar.me).
+- Criação de `ProviderWebhookAdapter`, `ProviderWebhookAuthenticator` e `ProviderWebhookNormalizer`.
+- Implementação do Padrão Registry (`WebhookAdapterRegistryService` e `WebhookProcessorRegistryService`).
+- Refatoração do `WebhookIngressService` para orquestração genérica.
+- Adapters "esqueleto" para provedores não-Asaas preparados para Fase futura.
 
 ---
 
 ## Fase 7C — Reports
-
 
 ---
 
@@ -330,32 +358,34 @@ Status: Concluído
 
 Itens:
 
-* aplicar logo no frontend
-* aplicar favicon
-* aplicar README banner
-* criar docs/brand.md
-* aplicar tokens visuais
+- aplicar logo no frontend
+- aplicar favicon
+- aplicar README banner
+- criar docs/brand.md
+- aplicar tokens visuais
 
 ### Login UI Refinement
 
 Status: Concluído
 
 Itens:
-* O card de login foi refinado (proporção mais compacta, glassmorphism suavizado).
-* Os estados de erro foram suavizados (cores menos agressivas, espaçamento melhorado).
-* A tela de login mantém textos isolados no código, internacionalizados via i18n (pt-BR e en-US).
-* A linha de hero foi ajustada para "Auditoria" na UI em vez de "Auditabilidade".
-* O card está sem credenciais demo embutidas (segurança).
+
+- O card de login foi refinado (proporção mais compacta, glassmorphism suavizado).
+- Os estados de erro foram suavizados (cores menos agressivas, espaçamento melhorado).
+- A tela de login mantém textos isolados no código, internacionalizados via i18n (pt-BR e en-US).
+- A linha de hero foi ajustada para "Auditoria" na UI em vez de "Auditabilidade".
+- O card está sem credenciais demo embutidas (segurança).
 
 ### Layout Interno & Dashboard UX
 
 Status: Concluído
 
 Itens:
-* Extinção do Header Topo global, estabelecendo o uso de `AppPageHeader` por tela (Títulos e ações independentes em cada vista).
-* Reestruturação da Sidebar (`AppLayout`), incorporando um rodapé funcional com idioma, dados do usuário e botão "Sair" consolidado.
-* Reposicionamento do sistema de Toasts (`AppToastContainer`) para o canto inferior direito (bottom-right), preservando a visibilidade dos cards superiores.
-* Reorganização do Dashboard: banner (`ledgerflow-app-header2.png`) centralizado logo abaixo do cabeçalho da página, sem aparência de "botão/seta" fantasma; Cards do dashboard realinhados com tags de permissões mais compactas e controle de altura consistentes.
+
+- Extinção do Header Topo global, estabelecendo o uso de `AppPageHeader` por tela (Títulos e ações independentes em cada vista).
+- Reestruturação da Sidebar (`AppLayout`), incorporando um rodapé funcional com idioma, dados do usuário e botão "Sair" consolidado.
+- Reposicionamento do sistema de Toasts (`AppToastContainer`) para o canto inferior direito (bottom-right), preservando a visibilidade dos cards superiores.
+- Reorganização do Dashboard: banner (`ledgerflow-app-header2.png`) centralizado logo abaixo do cabeçalho da página, sem aparência de "botão/seta" fantasma; Cards do dashboard realinhados com tags de permissões mais compactas e controle de altura consistentes.
 
 ---
 
@@ -364,10 +394,11 @@ Itens:
 **Status:** Concluída
 
 **Itens:**
-* Fluxo de navegação mapeado.
-* Especificação de telas.
-* Componentes mapeados.
-* Plano de refatoração estruturado.
+
+- Fluxo de navegação mapeado.
+- Especificação de telas.
+- Componentes mapeados.
+- Plano de refatoração estruturado.
 
 ---
 
@@ -376,8 +407,9 @@ Itens:
 **Status:** Pendente
 
 **Itens:**
-* Refatorar telas conforme UI Blueprint (AppLayout, Sidebar, Login, Dashboard, Users, Roles, Permissions, Settings, etc).
-* Implementar Component Library.
+
+- Refatorar telas conforme UI Blueprint (AppLayout, Sidebar, Login, Dashboard, Users, Roles, Permissions, Settings, etc).
+- Implementar Component Library.
 
 ---
 
@@ -386,9 +418,10 @@ Itens:
 **Status:** Concluída após validação
 
 **Itens:**
-* Fluxo Forgot Password e Reset Password.
-* Integração backend.
-* Segurança de UI e mensagens genéricas.
+
+- Fluxo Forgot Password e Reset Password.
+- Integração backend.
+- Segurança de UI e mensagens genéricas.
 
 ---
 
@@ -397,6 +430,7 @@ Itens:
 **Status:** Pendente
 
 **Itens:**
-* Listagem de clientes com tabela e filtros.
-* Cadastro, edição e detalhes.
-* Integração de RBAC (customers:read, create, update).
+
+- Listagem de clientes com tabela e filtros.
+- Cadastro, edição e detalhes.
+- Integração de RBAC (customers:read, create, update).

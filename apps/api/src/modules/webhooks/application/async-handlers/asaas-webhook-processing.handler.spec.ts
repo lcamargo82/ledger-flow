@@ -67,4 +67,50 @@ describe('AsaasWebhookProcessingAsyncHandler', () => {
     );
     expect(reconciliationIngestion.ingestAsaasWebhookInbox).toHaveBeenCalledWith(inboxEvent);
   });
+
+  it('does not run Asaas reconciliation ingestion for Mercado Pago webhook inbox events', async () => {
+    const inboxEvent = {
+      id: 'inbox-mp-1',
+      provider: WebhookProvider.MERCADO_PAGO,
+      providerEventId: 'mp:payment:updated:123',
+      eventType: 'payment',
+      providerPaymentId: '123',
+      externalReference: null,
+      providerPaymentStatus: 'payment.updated',
+      gatewayConfigurationId: 'gateway-1',
+      status: WebhookProcessingStatus.RECEIVED,
+      payloadHash: 'hash-mp-123',
+      payloadSummary: {
+        resourceId: '123',
+        merchantId: '456',
+      },
+      receivedAt: new Date('2026-07-13T10:00:00.000Z'),
+    };
+    prisma.webhookInboxEvent.findUnique.mockResolvedValue(inboxEvent);
+
+    const handler = new AsaasWebhookProcessingAsyncHandler(
+      prisma as never,
+      processorRegistry as never,
+      reconciliationIngestion as never,
+    );
+
+    await handler.handle({
+      messageId: 'outbox-mp-1',
+      eventType: 'webhook.inbound_processing_requested',
+      eventVersion: 1,
+      aggregateType: 'WebhookInboxEvent',
+      aggregateId: 'inbox-mp-1',
+      occurredAt: '2026-07-13T10:00:00.000Z',
+      payload: {},
+    });
+
+    expect(processor.process).toHaveBeenCalledWith(
+      expect.objectContaining({
+        provider: WebhookProvider.MERCADO_PAGO,
+        providerEventId: 'mp:payment:updated:123',
+        gatewayConfigurationId: 'gateway-1',
+      }),
+    );
+    expect(reconciliationIngestion.ingestAsaasWebhookInbox).not.toHaveBeenCalled();
+  });
 });

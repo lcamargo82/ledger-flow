@@ -33,6 +33,7 @@ describe('ExportJobsService', () => {
       product: { findMany: jest.fn() },
       orderFinancialFact: { findMany: jest.fn() },
       reconciliationCase: { findMany: jest.fn() },
+      providerSettlementEvent: { findMany: jest.fn() },
       auditLog: { create: jest.fn() },
       outboxEvent: { create: jest.fn() },
     };
@@ -210,6 +211,93 @@ describe('ExportJobsService', () => {
           createdAt: {
             gte: new Date('2026-07-01T00:00:00.000Z'),
             lte: new Date('2026-07-03T23:59:59.999Z'),
+          },
+        },
+        take: 100,
+        orderBy: { id: 'asc' },
+      }),
+    );
+  });
+
+  it('streams marketplace settlement events into CSV with tenant-scoped account filters', async () => {
+    const pendingJob = {
+      id: 'job-marketplace-settlement',
+      tenantId: 'tenant-1',
+      requestedByUserId: 'user-1',
+      type: ExportJobType.MARKETPLACE_SETTLEMENT_EVENTS,
+      format: ExportJobFormat.CSV,
+      status: ExportJobStatus.PENDING,
+      parameters: {
+        operationalFinancialAccountId: 'account-1',
+        provider: WebhookProvider.MERCADO_PAGO,
+        dateFrom: '2026-07-01T00:00:00.000Z',
+        dateTo: '2026-07-31T23:59:59.999Z',
+      },
+      filePath: null,
+      fileName: null,
+      mimeType: null,
+      rowCount: 0,
+      errorCode: null,
+      errorSummary: null,
+      expiresAt: null,
+      startedAt: null,
+      completedAt: null,
+      cancelledAt: null,
+      createdAt: new Date('2026-07-13T10:00:00.000Z'),
+      updatedAt: new Date('2026-07-13T10:00:00.000Z'),
+    };
+    const processingJob = {
+      ...pendingJob,
+      status: ExportJobStatus.PROCESSING,
+      startedAt: new Date('2026-07-13T10:01:00.000Z'),
+    };
+    let completedJob: any;
+
+    prisma.exportJob.findMany.mockResolvedValueOnce([pendingJob]);
+    prisma.exportJob.update.mockImplementation(({ data }: any) => {
+      if (data.status === ExportJobStatus.PROCESSING) return Promise.resolve(processingJob);
+      completedJob = { ...processingJob, ...data };
+      return Promise.resolve(completedJob);
+    });
+    prisma.providerSettlementEvent.findMany
+      .mockResolvedValueOnce([
+        {
+          id: 'settlement-001',
+          operationalFinancialAccountId: 'account-1',
+          provider: WebhookProvider.MERCADO_PAGO,
+          providerEventId: 'mp-payment:gateway-1:123',
+          providerPaymentId: '123',
+          externalReference: '2000000001',
+          eventType: 'payment',
+          providerStatus: 'approved',
+          amountMinor: { toString: () => '10000' },
+          feeAmountMinor: { toString: () => '500' },
+          netAmountMinor: { toString: () => '9500' },
+          currency: 'BRL',
+          occurredAt: new Date('2026-07-13T09:00:00.000Z'),
+          availableAt: new Date('2026-07-14T09:00:00.000Z'),
+          receivedAt: new Date('2026-07-13T09:05:00.000Z'),
+        },
+      ])
+      .mockResolvedValueOnce([]);
+
+    await service.processPending('tenant-1', 'user-1');
+    const file = await readFile(completedJob.filePath, 'utf8');
+
+    expect(completedJob.rowCount).toBe(1);
+    expect(file).toContain('"settlement_event_id","financial_account_id","provider"');
+    expect(file).toContain('"=""settlement-001"""');
+    expect(file).toContain('"mp-payment:gateway-1:123"');
+    expect(file).toContain('"9500"');
+    expect(prisma.providerSettlementEvent.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          tenantId: 'tenant-1',
+          operationalFinancialAccountId: 'account-1',
+          provider: WebhookProvider.MERCADO_PAGO,
+          occurredAt: {
+            gte: new Date('2026-07-01T00:00:00.000Z'),
+            lte: new Date('2026-07-31T23:59:59.999Z'),
           },
         },
         take: 100,

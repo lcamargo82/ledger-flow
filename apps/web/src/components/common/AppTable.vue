@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from '../../composables/useI18n'
 import AppLoading from './AppLoading.vue'
 import AppEmptyState from './AppEmptyState.vue'
+import AppPagination from './AppPagination.vue'
 
 interface Column {
   key: string
@@ -16,6 +17,16 @@ const props = defineProps<{
   isLoading?: boolean
   emptyTitle?: string
   emptyDescription?: string
+  pagination?: {
+    page: number
+    totalPages: number
+    total?: number
+    perPage?: number
+  }
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:page', page: number): void
 }>()
 
 const { t } = useI18n()
@@ -90,5 +101,15 @@ const isEmpty = computed(() => !props.items || props.items.length === 0)
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    <AppPagination
+      v-if="pagination"
+      :page="pagination.page"
+      :total-pages="pagination.totalPages"
+      :total="pagination.total"
+      :per-page="pagination.perPage"
+      @update:page="emit('update:page', $event)"
+    />
   </div>
 </template>

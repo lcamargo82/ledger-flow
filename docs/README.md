@@ -25,6 +25,8 @@ docs/
 └─ adr/0034-reconciliation-domain-and-matching-strategy.md
 ```
 
+Contrato do consumidor outbound: `reference/notification-webhook-consumer.md`.
+
 Decisões de escopo inicial:
 
 - WebhookInboxEvent permanece como registro técnico de entrada; ProviderSettlementEvent será o fato financeiro normalizado da conciliação.
@@ -129,6 +131,17 @@ A 10.1.9 fecha o fluxo com checklist operacional em `docs/runbooks/10.1-mercado-
 - `backlog/10.2-notifications-advanced-inventory-backlog.md`
 - `runbooks/10.2-operational-readiness.md`
 - `roadmap/post-10-1-sequence.md`
+
+## Programa 10.2 — Mercado Pago Production Readiness & 9B Marketplace Settlement
+
+O pacote Mercado Pago/9B fecha a base operacional de pagamentos Mercado Pago e adiciona settlement marketplace com contas financeiras, ingestão financeira, matching ML x MP, dashboard operacional, malha fina, notificações/n8n, exports e health sanitizado.
+
+- `prd/10.2-mercado-pago-production-readiness-9b-prd.md`
+- `sdd/10.2-mercado-pago-production-readiness-9b-sdd.md`
+- `specs/10.2-mercado-pago-production-readiness-9b-plan.md`
+- `backlog/10.2-mercado-pago-production-readiness-9b-backlog.md`
+- `runbooks/mercado-pago-payment-e2e.md`
+- `runbooks/9B-marketplace-settlement-operational-readiness.md`
 
 ## Visões futuras
 

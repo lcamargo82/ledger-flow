@@ -3,6 +3,7 @@ import { CapabilityPolicyService } from './capability-policy.service';
 import {
   CommerceCapabilities,
   ReconciliationCapabilities,
+  InventoryAdvancedCapabilities,
 } from '../../domain/constants/platform-capabilities';
 
 describe('CapabilityPolicyService', () => {
@@ -50,6 +51,29 @@ describe('CapabilityPolicyService', () => {
     await expect(
       service.hasCapabilities('tenant-1', [ReconciliationCapabilities.Read]),
     ).resolves.toBe(false);
+  });
+
+  it('allows transfer and cycle count capabilities for PROFESSIONAL tenants', async () => {
+    prisma.tenantSubscription.findUnique.mockResolvedValue({
+      plan: SubscriptionPlan.PROFESSIONAL,
+      status: TenantSubscriptionStatus.ACTIVE,
+    });
+
+    await expect(
+      service.hasCapabilities('tenant-1', [
+        InventoryAdvancedCapabilities.Transfer,
+        InventoryAdvancedCapabilities.CycleCount,
+      ]),
+    ).resolves.toBe(true);
+  });
+
+  it('reserves inventory approval for ENTERPRISE and CUSTOM tenants', () => {
+    expect(service.getCapabilitiesForPlan(SubscriptionPlan.PROFESSIONAL)).not.toContain(
+      InventoryAdvancedCapabilities.Approval,
+    );
+    expect(service.getCapabilitiesForPlan(SubscriptionPlan.ENTERPRISE)).toContain(
+      InventoryAdvancedCapabilities.Approval,
+    );
   });
 
   it('denies capabilities for inactive subscriptions', async () => {

@@ -6,6 +6,8 @@ export class RefundGatewayPaymentInput {
   providerPaymentId: string;
   gatewayConfigurationId: string;
   environment: GatewayEnvironment;
+  credentials?: Record<string, string>;
   amount?: number; // if partial
   reason?: string;
+  idempotencyKey?: string;
 }

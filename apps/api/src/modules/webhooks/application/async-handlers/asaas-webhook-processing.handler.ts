@@ -3,7 +3,7 @@ import { AsyncEventHandler } from '../../../async/domain/interfaces/async-event-
 import { AsyncMessageEnvelope } from '../../../async/domain/entities/async-message-envelope';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { WebhookProcessorRegistryService } from '../services/webhook-processor-registry.service';
-import { WebhookProcessingStatus } from '@prisma/client';
+import { WebhookProcessingStatus, WebhookProvider } from '@prisma/client';
 import { NonRetryableAsyncJobError } from '../../../async/domain/errors/non-retryable-async-job.error';
 import { NormalizedWebhookEvent } from '../../domain/interfaces/provider-webhook-adapter.interface';
 import { AsaasWebhookStatusMapper } from '../mappers/asaas-webhook-status.mapper';
@@ -63,9 +63,12 @@ export class AsaasWebhookProcessingAsyncHandler implements AsyncEventHandler {
       providerEventId: inboxEvent.providerEventId,
       eventType: inboxEvent.eventType,
       rawProviderEventType: inboxEvent.eventType,
+      tenantId: inboxEvent.tenantId ?? undefined,
+      paymentId: inboxEvent.paymentId ?? undefined,
       providerPaymentId: inboxEvent.providerPaymentId ?? undefined,
       paymentReference: inboxEvent.externalReference ?? undefined,
       providerStatus: inboxEvent.providerPaymentStatus ?? undefined,
+      gatewayConfigurationId: inboxEvent.gatewayConfigurationId ?? undefined,
       payloadHash: inboxEvent.payloadHash,
       payloadSummary: (inboxEvent.payloadSummary as Record<string, string>) || {},
       occurredAt: inboxEvent.receivedAt,
@@ -80,7 +83,9 @@ export class AsaasWebhookProcessingAsyncHandler implements AsyncEventHandler {
       AsaasWebhookStatusMapper.toLedgerFlowStatus(inboxEvent.eventType) ?? undefined;
 
     await processor.process(normalizedEvent);
-    await this.reconciliationIngestion.ingestAsaasWebhookInbox(inboxEvent);
+    if (inboxEvent.provider === WebhookProvider.ASAAS) {
+      await this.reconciliationIngestion.ingestAsaasWebhookInbox(inboxEvent);
+    }
     this.logger.log(`Successfully processed webhook ${input.aggregateId}`);
   }
 }

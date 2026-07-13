@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '@/database/prisma/prisma.service';
+import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { GatewayCredentialsEncryptionService } from './gateway-credentials-encryption.service';
 import {
   GatewayEnvironment,
@@ -14,12 +14,14 @@ import {
   UpdateGatewayCredentialsDto,
   GatewayConnectionResponseDto,
 } from '../dto/gateway-connections.dto';
+import { MercadoPagoFinancialReadinessService } from './mercado-pago-financial-readiness.service';
 
 @Injectable()
 export class GatewayConnectionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly encryptionService: GatewayCredentialsEncryptionService,
+    private readonly mercadoPagoFinancialReadiness: MercadoPagoFinancialReadinessService,
   ) {}
 
   async listConnections(tenantId: string): Promise<GatewayConnectionResponseDto[]> {
@@ -239,6 +241,7 @@ export class GatewayConnectionsService {
       displayName: entity.displayName ?? undefined,
       supportedMethods: entity.supportedMethods as PaymentMethod[],
       healthStatus: entity.healthStatus,
+      financialReadiness: this.mercadoPagoFinancialReadiness.evaluate(entity),
       credentialsConfigured: !!entity.encryptedCredentials,
       lastFailureAt: entity.lastHealthCheckAt, // Mapping lastHealthCheckAt loosely to lastFailureAt if needed, or null
       lastSuccessfulOperationAt: null, // Placeholder as per instructions

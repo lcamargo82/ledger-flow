@@ -1,25 +1,33 @@
-/* eslint-disable @typescript-eslint/require-await, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Injectable } from '@nestjs/common';
 import { WebhookProvider } from '@prisma/client';
-import { WebhookProviderNotSupportedError } from '../../../domain/errors/webhook-errors';
 import {
   NormalizedWebhookEvent,
   ProviderWebhookAdapter,
   ProviderWebhookAuthenticationInput,
   ProviderWebhookPayloadInput,
 } from '../../../domain/interfaces/provider-webhook-adapter.interface';
+import { MercadoPagoWebhookAuthenticator } from './mercado-pago-webhook-authenticator';
+import { MercadoPagoWebhookNormalizer } from './mercado-pago-webhook-normalizer';
 
+@Injectable()
 export class MercadoPagoWebhookAdapter implements ProviderWebhookAdapter {
   readonly provider = WebhookProvider.MERCADO_PAGO;
 
+  constructor(
+    private readonly authenticator: MercadoPagoWebhookAuthenticator,
+    private readonly normalizer: MercadoPagoWebhookNormalizer,
+  ) {}
+
   async authenticate(input: ProviderWebhookAuthenticationInput): Promise<void> {
-    throw new WebhookProviderNotSupportedError('Mercado Pago webhook adapter not implemented.');
+    await this.authenticator.authenticate(input);
   }
 
   async normalize(input: ProviderWebhookPayloadInput): Promise<NormalizedWebhookEvent> {
-    throw new WebhookProviderNotSupportedError('Mercado Pago webhook adapter not implemented.');
+    return this.normalizer.normalize(input);
   }
 
   supportsEvent(eventType: string): boolean {
-    return false;
+    return this.normalizer.supportsEvent(eventType);
   }
 }

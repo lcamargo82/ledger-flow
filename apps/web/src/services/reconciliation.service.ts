@@ -1,9 +1,12 @@
 import { httpClient } from './http-client'
 import type {
   CreateReconciliationDecisionPayload,
+  ReconciliationCase,
   ReconciliationCasesFilters,
   ReconciliationCasesResponse,
   ReconciliationDashboard,
+  ReconciliationReasonCode,
+  ReconciliationTimeline,
 } from '../types/reconciliation.types'
 
 export class ReconciliationService {
@@ -19,6 +22,25 @@ export class ReconciliationService {
       params,
     })
     return data
+  }
+
+  async getCase(caseId: string): Promise<ReconciliationCase> {
+    const { data } = await httpClient.get<ReconciliationCase>(`/reconciliation/cases/${caseId}`)
+    return data
+  }
+
+  async getTimeline(caseId: string): Promise<ReconciliationTimeline> {
+    const { data } = await httpClient.get<ReconciliationTimeline>(
+      `/reconciliation/cases/${caseId}/timeline`,
+    )
+    return data
+  }
+
+  async listReasonCodes(): Promise<ReconciliationReasonCode[]> {
+    const { data } = await httpClient.get<{ data: ReconciliationReasonCode[] }>(
+      '/reconciliation/cases/reason-codes',
+    )
+    return data.data
   }
 
   async createDecision(caseId: string, payload: CreateReconciliationDecisionPayload) {
