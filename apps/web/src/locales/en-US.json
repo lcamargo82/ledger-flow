@@ -146,7 +146,7 @@
     "analytics": "Analytics",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
-    "marketplaceSettlement": "Marketplace Settlement",
+    "marketplaceSettlement": "Receivables",
     "reports": "Reports",
     "webhooks": "Webhooks",
     "settings": "Settings",
@@ -1994,21 +1994,21 @@
     }
   },
   "marketplaceSettlement": {
-    "title": "Marketplace Settlement",
-    "description": "Configure Mercado Pago financial accounts, opening balance and append-only cash ledger for 9B.",
+    "title": "Marketplace Receivables",
+    "description": "Track gross amounts, fees, net amounts, releases, and payment discrepancies from marketplace transactions.",
     "empty": {
       "title": "No financial accounts yet",
-      "description": "Create the first settlement-ready Mercado Pago account to initialize the operational cash position."
+      "description": "Create the first Mercado Pago account enabled for financial reads and start tracking receivables."
     },
     "readiness": {
-      "title": "Mercado Pago connection is not settlement-ready yet",
-      "description": "A financial account can only be created when the Mercado Pago connection is active, healthy and has financial-read scopes."
+      "title": "Mercado Pago connection is not ready for receivables yet",
+      "description": "A financial account can only be created when the Mercado Pago connection is active, healthy and has financial-read permissions."
     },
     "account": {
       "openingBalance": "Opening balance"
     },
     "sections": {
-      "ledger": "Cash ledger",
+      "ledger": "Cash statement",
       "importedEvents": "Imported events",
       "cashPosition": "Cash position",
       "operationalPnl": "Operational P&L"
@@ -2028,7 +2028,7 @@
     },
     "sync": {
       "title": "Sync Mercado Pago events",
-      "description": "Select the period used to fetch payments, fees, net amount, refunds and release dates. The payload is sanitized before storage.",
+      "description": "Select the period used to fetch payments, fees, net amount, refunds, and release dates.",
       "from": "Start",
       "to": "End",
       "maxPages": "Max pages",
@@ -2076,16 +2076,16 @@
     "ledgerType": {
       "OPENING_BALANCE": "Opening balance",
       "MANUAL_ADJUSTMENT": "Manual adjustment",
-      "SETTLEMENT_CREDIT": "Settlement credit",
-      "SETTLEMENT_DEBIT": "Settlement debit",
+      "SETTLEMENT_CREDIT": "Receivable credit",
+      "SETTLEMENT_DEBIT": "Receivable debit",
       "PAYOUT": "Payout",
       "REFUND": "Refund",
       "FEE": "Fee"
     },
     "errors": {
-      "default": "Could not load marketplace settlement.",
+      "default": "Could not load marketplace receivables.",
       "invalid": "Review account or adjustment data.",
-      "forbidden": "You do not have access to marketplace settlement.",
+      "forbidden": "You do not have access to marketplace receivables.",
       "notFound": "Financial account not found.",
       "duplicate": "A financial account with this name already exists."
     }
