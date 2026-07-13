@@ -2,6 +2,7 @@ import {
   GatewayConfigurationStatus,
   GatewayEnvironment,
   GatewayHealthStatus,
+  PaymentMethod,
   PaymentProvider,
 } from '@prisma/client';
 import { GatewayConnectionsService } from './gateway-connections.service';
@@ -76,6 +77,26 @@ describe('GatewayConnectionsService financial readiness', () => {
       grantedScopes: ['offline_access', 'read'],
       missingScopes: [],
     });
+  });
+
+  it('defaults legacy Mercado Pago connections without stored methods to PIX and BOLETO', async () => {
+    prisma.gatewayConfiguration.findMany.mockResolvedValue([
+      mercadoPagoConnection({
+        encryptedCredentials: 'encrypted-settlement-ready',
+        supportedMethods: [],
+      }),
+    ]);
+    encryption.decrypt.mockReturnValue({
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+      tokenExpiresAt: '2026-07-13T13:00:00.000Z',
+      merchantId: '123',
+      scope: 'read offline_access',
+    });
+
+    const [connection] = await service().listConnections('tenant-1');
+
+    expect(connection.supportedMethods).toEqual([PaymentMethod.PIX, PaymentMethod.BOLETO]);
   });
 
   it('blocks financial sync when Mercado Pago requires reauthorization', async () => {

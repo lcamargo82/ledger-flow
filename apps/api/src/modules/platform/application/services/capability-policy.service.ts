@@ -16,6 +16,8 @@ const erpBasicCapabilities: PlatformCapability[] = [
   CommerceCapabilities.InventoryAdjust,
   CommerceCapabilities.OrdersManage,
   CommerceCapabilities.InventoryReportsRead,
+  ReconciliationCapabilities.MarketplaceSettlementRead,
+  ReconciliationCapabilities.MarketplaceSettlementManage,
   InventoryAdvancedCapabilities.Transfer,
   InventoryAdvancedCapabilities.CycleCount,
 ];

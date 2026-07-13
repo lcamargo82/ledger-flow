@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GatewayConfigurationStatus, GatewayEnvironment, PaymentProvider } from '@prisma/client';
+import {
+  GatewayConfigurationStatus,
+  GatewayEnvironment,
+  PaymentMethod,
+  PaymentProvider,
+} from '@prisma/client';
 import { MercadoPagoApiClient } from './mercado-pago-api.client';
 import { MercadoPagoOAuthStateService } from './mercado-pago-oauth-state.service';
 import { MercadoPagoCredentialsMapper } from './mercado-pago-credentials.mapper';
@@ -113,7 +118,7 @@ export class MercadoPagoOAuthService {
         environment,
         status: statusToSet,
         displayName: 'Mercado Pago',
-        supportedMethods: [],
+        supportedMethods: [PaymentMethod.PIX, PaymentMethod.BOLETO],
         encryptedCredentials,
         credentialsFingerprint: fingerprint,
       });

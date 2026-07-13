@@ -239,7 +239,7 @@ export class GatewayConnectionsService {
       status: entity.status,
       priority: entity.priority,
       displayName: entity.displayName ?? undefined,
-      supportedMethods: entity.supportedMethods as PaymentMethod[],
+      supportedMethods: this.resolveSupportedMethods(entity),
       healthStatus: entity.healthStatus,
       financialReadiness: this.mercadoPagoFinancialReadiness.evaluate(entity),
       credentialsConfigured: !!entity.encryptedCredentials,
@@ -248,5 +248,21 @@ export class GatewayConnectionsService {
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
+  }
+
+  private resolveSupportedMethods(entity: GatewayConfiguration): PaymentMethod[] {
+    const methods = Array.isArray(entity.supportedMethods)
+      ? (entity.supportedMethods as PaymentMethod[])
+      : [];
+
+    if (methods.length > 0) {
+      return methods;
+    }
+
+    if (entity.provider === PaymentProvider.MERCADO_PAGO) {
+      return [PaymentMethod.PIX, PaymentMethod.BOLETO];
+    }
+
+    return methods;
   }
 }
