@@ -12,7 +12,7 @@ describe('MercadoPagoPaymentGatewayAdapter', () => {
       supportsRefund: false,
       supportsCancel: false,
       supportsPartialRefund: false,
-      supportsWebhooks: false,
+      supportsWebhooks: true,
       supportsCheckoutRedirect: false,
       supportsEmbeddedCheckout: false,
     });
