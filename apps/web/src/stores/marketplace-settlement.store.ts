@@ -7,14 +7,22 @@ import type {
   CreateCashPositionAdjustmentPayload,
   CreateMarketplaceFinancialAccountPayload,
   MarketplaceFinancialAccount,
+  MarketplaceSettlementEvent,
+  MarketplaceSettlementImportedTotals,
+  MarketplaceSettlementSyncResult,
+  SyncMarketplaceFinancialEventsPayload,
 } from '../types/marketplace-settlement.types'
 
 export const useMarketplaceSettlementStore = defineStore('marketplace-settlement', () => {
   const accounts = ref<MarketplaceFinancialAccount[]>([])
   const ledgerEntries = ref<CashLedgerEntry[]>([])
+  const importedEvents = ref<MarketplaceSettlementEvent[]>([])
+  const importedTotals = ref<MarketplaceSettlementImportedTotals | null>(null)
+  const lastSyncResult = ref<MarketplaceSettlementSyncResult | null>(null)
   const selectedAccountId = ref<string | null>(null)
   const isLoading = ref(false)
   const isMutating = ref(false)
+  const isSyncing = ref(false)
   const error = ref<string | null>(null)
 
   const selectedAccount = computed(
@@ -54,8 +62,15 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
 
   const fetchLedger = async (accountId: string) => {
     selectedAccountId.value = accountId
-    const response = await marketplaceSettlementService.listLedger(accountId)
+    const [ledgerResponse, eventsResponse, totalsResponse] = await Promise.all([
+      marketplaceSettlementService.listLedger(accountId),
+      marketplaceSettlementService.listEvents(accountId),
+      marketplaceSettlementService.getTotals(accountId),
+    ])
+    const response = ledgerResponse
     ledgerEntries.value = response.data
+    importedEvents.value = eventsResponse.data
+    importedTotals.value = totalsResponse
   }
 
   const createAccount = async (payload: CreateMarketplaceFinancialAccountPayload) => {
@@ -90,17 +105,42 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
     }
   }
 
+  const syncFinancialEvents = async (
+    accountId: string,
+    payload: SyncMarketplaceFinancialEventsPayload,
+  ) => {
+    isSyncing.value = true
+    error.value = null
+    try {
+      lastSyncResult.value = await marketplaceSettlementService.syncFinancialEvents(
+        accountId,
+        payload,
+      )
+      await fetchLedger(accountId)
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isSyncing.value = false
+    }
+  }
+
   return {
     accounts,
     ledgerEntries,
+    importedEvents,
+    importedTotals,
+    lastSyncResult,
     selectedAccountId,
     selectedAccount,
     isLoading,
     isMutating,
+    isSyncing,
     error,
     fetchAccounts,
     fetchLedger,
     createAccount,
     createAdjustment,
+    syncFinancialEvents,
   }
 })

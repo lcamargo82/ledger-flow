@@ -237,9 +237,9 @@ model User {
   approvedCycleCounts                     CycleCount[]                      @relation("CycleCountApprovedBy")
   canceledCycleCounts                     CycleCount[]                      @relation("CycleCountCanceledBy")
   countedCycleCountItems                  CycleCountItem[]                  @relation("CycleCountItemCountedBy")
-  createdOperationalFinancialAccounts     OperationalFinancialAccount[]      @relation("OperationalFinancialAccountCreatedBy")
+  createdOperationalFinancialAccounts     OperationalFinancialAccount[]     @relation("OperationalFinancialAccountCreatedBy")
   createdCashLedgerEntries                CashLedgerEntry[]                 @relation("CashLedgerEntryCreatedBy")
-  createdCashPositionAdjustments          CashPositionAdjustment[]           @relation("CashPositionAdjustmentCreatedBy")
+  createdCashPositionAdjustments          CashPositionAdjustment[]          @relation("CashPositionAdjustmentCreatedBy")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -1168,10 +1168,10 @@ model GatewayConfiguration {
   createdAt              DateTime                   @default(now())
   updatedAt              DateTime                   @updatedAt
 
-  tenant             Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  payments           Payment[]
-  gatewayReferences  GatewayCustomerReference[]
-  webhookInboxEvents WebhookInboxEvent[]
+  tenant                       Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  payments                     Payment[]
+  gatewayReferences            GatewayCustomerReference[]
+  webhookInboxEvents           WebhookInboxEvent[]
   operationalFinancialAccounts OperationalFinancialAccount[]
 
   @@unique([tenantId, provider, environment])
@@ -1496,38 +1496,41 @@ model ExportJob {
 }
 
 model ProviderSettlementEvent {
-  id                        String          @id @default(uuid())
-  tenantId                  String?         @map("tenant_id")
-  provider                  WebhookProvider
-  providerEventId           String          @map("provider_event_id")
-  providerSettlementId      String?         @map("provider_settlement_id")
-  providerPaymentId         String?         @map("provider_payment_id")
-  externalReference         String?         @map("external_reference")
-  eventType                 String          @map("event_type")
-  providerStatus            String?         @map("provider_status")
-  amountMinor               Decimal?        @map("amount_minor") @db.Decimal(18, 0)
-  feeAmountMinor            Decimal?        @map("fee_amount_minor") @db.Decimal(18, 0)
-  netAmountMinor            Decimal?        @map("net_amount_minor") @db.Decimal(18, 0)
-  currency                  String          @default("BRL")
-  currencyExponent          Int             @default(2) @map("currency_exponent")
-  occurredAt                DateTime?       @map("occurred_at")
-  availableAt               DateTime?       @map("available_at")
-  payloadHash               String          @map("payload_hash")
-  normalizedPayload         Json?           @map("normalized_payload")
-  sourceWebhookInboxEventId String?         @map("source_webhook_inbox_event_id")
-  receivedAt                DateTime        @default(now()) @map("received_at")
-  createdAt                 DateTime        @default(now()) @map("created_at")
-  updatedAt                 DateTime        @updatedAt @map("updated_at")
+  id                            String          @id @default(uuid())
+  tenantId                      String?         @map("tenant_id")
+  operationalFinancialAccountId String?         @map("operational_financial_account_id")
+  provider                      WebhookProvider
+  providerEventId               String          @map("provider_event_id")
+  providerSettlementId          String?         @map("provider_settlement_id")
+  providerPaymentId             String?         @map("provider_payment_id")
+  externalReference             String?         @map("external_reference")
+  eventType                     String          @map("event_type")
+  providerStatus                String?         @map("provider_status")
+  amountMinor                   Decimal?        @map("amount_minor") @db.Decimal(18, 0)
+  feeAmountMinor                Decimal?        @map("fee_amount_minor") @db.Decimal(18, 0)
+  netAmountMinor                Decimal?        @map("net_amount_minor") @db.Decimal(18, 0)
+  currency                      String          @default("BRL")
+  currencyExponent              Int             @default(2) @map("currency_exponent")
+  occurredAt                    DateTime?       @map("occurred_at")
+  availableAt                   DateTime?       @map("available_at")
+  payloadHash                   String          @map("payload_hash")
+  normalizedPayload             Json?           @map("normalized_payload")
+  sourceWebhookInboxEventId     String?         @map("source_webhook_inbox_event_id")
+  receivedAt                    DateTime        @default(now()) @map("received_at")
+  createdAt                     DateTime        @default(now()) @map("created_at")
+  updatedAt                     DateTime        @updatedAt @map("updated_at")
 
-  tenant                  Tenant?              @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  sourceWebhookInboxEvent WebhookInboxEvent?   @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
-  reconciliationCases     ReconciliationCase[]
+  tenant                      Tenant?                      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  operationalFinancialAccount OperationalFinancialAccount? @relation(fields: [operationalFinancialAccountId], references: [id], onDelete: SetNull)
+  sourceWebhookInboxEvent     WebhookInboxEvent?           @relation(fields: [sourceWebhookInboxEventId], references: [id], onDelete: SetNull)
+  reconciliationCases         ReconciliationCase[]
 
   @@unique([provider, providerEventId])
   @@index([provider, providerSettlementId])
   @@index([provider, providerPaymentId])
   @@index([provider, externalReference])
   @@index([tenantId, provider, occurredAt])
+  @@index([operationalFinancialAccountId, occurredAt])
   @@index([sourceWebhookInboxEventId])
   @@map("provider_settlement_events")
 }
@@ -1647,11 +1650,12 @@ model OperationalFinancialAccount {
   updatedAt              DateTime                          @updatedAt @map("updated_at")
   archivedAt             DateTime?                         @map("archived_at")
 
-  tenant               Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  gatewayConfiguration GatewayConfiguration   @relation(fields: [gatewayConfigurationId], references: [id], onDelete: Restrict)
-  createdByUser        User                   @relation("OperationalFinancialAccountCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  ledgerEntries        CashLedgerEntry[]
-  adjustments          CashPositionAdjustment[]
+  tenant                   Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  gatewayConfiguration     GatewayConfiguration      @relation(fields: [gatewayConfigurationId], references: [id], onDelete: Restrict)
+  createdByUser            User                      @relation("OperationalFinancialAccountCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  ledgerEntries            CashLedgerEntry[]
+  adjustments              CashPositionAdjustment[]
+  providerSettlementEvents ProviderSettlementEvent[]
 
   @@unique([tenantId, name])
   @@index([tenantId, provider, status])
@@ -1661,22 +1665,22 @@ model OperationalFinancialAccount {
 }
 
 model CashLedgerEntry {
-  id                 String              @id @default(uuid())
-  tenantId           String              @map("tenant_id")
-  accountId          String              @map("account_id")
-  type               CashLedgerEntryType
-  amountMinor        Decimal             @map("amount_minor") @db.Decimal(18, 0)
-  balanceAfterMinor  Decimal             @map("balance_after_minor") @db.Decimal(18, 0)
-  currency           String              @default("BRL")
-  currencyExponent   Int                 @default(2) @map("currency_exponent")
-  sourceType         String              @map("source_type")
-  sourceId           String              @map("source_id")
-  idempotencyKey     String              @map("idempotency_key")
-  reasonCode         String              @map("reason_code")
-  notes              String?
-  occurredAt         DateTime            @map("occurred_at")
-  createdByUserId    String              @map("created_by_user_id")
-  createdAt          DateTime            @default(now()) @map("created_at")
+  id                String              @id @default(uuid())
+  tenantId          String              @map("tenant_id")
+  accountId         String              @map("account_id")
+  type              CashLedgerEntryType
+  amountMinor       Decimal             @map("amount_minor") @db.Decimal(18, 0)
+  balanceAfterMinor Decimal             @map("balance_after_minor") @db.Decimal(18, 0)
+  currency          String              @default("BRL")
+  currencyExponent  Int                 @default(2) @map("currency_exponent")
+  sourceType        String              @map("source_type")
+  sourceId          String              @map("source_id")
+  idempotencyKey    String              @map("idempotency_key")
+  reasonCode        String              @map("reason_code")
+  notes             String?
+  occurredAt        DateTime            @map("occurred_at")
+  createdByUserId   String              @map("created_by_user_id")
+  createdAt         DateTime            @default(now()) @map("created_at")
 
   tenant        Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   account       OperationalFinancialAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)
@@ -1691,16 +1695,16 @@ model CashLedgerEntry {
 }
 
 model CashPositionAdjustment {
-  id                 String                     @id @default(uuid())
-  tenantId           String                     @map("tenant_id")
-  accountId          String                     @map("account_id")
-  cashLedgerEntryId  String                     @unique @map("cash_ledger_entry_id")
-  type               CashPositionAdjustmentType
-  amountMinor        Decimal                    @map("amount_minor") @db.Decimal(18, 0)
-  reasonCode         String                     @map("reason_code")
-  notes              String?
-  createdByUserId    String                     @map("created_by_user_id")
-  createdAt          DateTime                   @default(now()) @map("created_at")
+  id                String                     @id @default(uuid())
+  tenantId          String                     @map("tenant_id")
+  accountId         String                     @map("account_id")
+  cashLedgerEntryId String                     @unique @map("cash_ledger_entry_id")
+  type              CashPositionAdjustmentType
+  amountMinor       Decimal                    @map("amount_minor") @db.Decimal(18, 0)
+  reasonCode        String                     @map("reason_code")
+  notes             String?
+  createdByUserId   String                     @map("created_by_user_id")
+  createdAt         DateTime                   @default(now()) @map("created_at")
 
   tenant          Tenant                      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   account         OperationalFinancialAccount @relation(fields: [accountId], references: [id], onDelete: Restrict)

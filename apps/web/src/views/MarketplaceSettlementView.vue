@@ -26,6 +26,7 @@ const settlementStore = useMarketplaceSettlementStore()
 const connections = ref<GatewayConnection[]>([])
 const isCreateModalOpen = ref(false)
 const isAdjustmentModalOpen = ref(false)
+const isSyncModalOpen = ref(false)
 
 const accountForm = reactive({
   gatewayConfigurationId: '',
@@ -39,6 +40,12 @@ const adjustmentForm = reactive({
   amount: '0.00',
   reasonCode: 'manual_correction',
   notes: '',
+})
+
+const syncForm = reactive({
+  from: '',
+  to: '',
+  maxPages: 3,
 })
 
 const eligibleMercadoPagoConnections = computed(() =>
@@ -78,6 +85,27 @@ const formatMinor = (value?: string | null, currency = 'BRL') => {
 
 const toMinorUnits = (value: string) => Math.round(Number(value.replace(',', '.')) * 100)
 
+const toDateTimeLocal = (date: Date) => {
+  const offsetMs = date.getTimezoneOffset() * 60_000
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16)
+}
+
+const ensureDefaultSyncPeriod = () => {
+  if (syncForm.from && syncForm.to) return
+  const now = new Date()
+  const start = new Date(now)
+  start.setDate(now.getDate() - 7)
+  syncForm.from = toDateTimeLocal(start)
+  syncForm.to = toDateTimeLocal(now)
+}
+
+const openSyncModal = () => {
+  ensureDefaultSyncPeriod()
+  isSyncModalOpen.value = true
+}
+
+const toIsoDateTime = (value: string) => new Date(value).toISOString()
+
 const selectAccount = async (account: MarketplaceFinancialAccount) => {
   await settlementStore.fetchLedger(account.id)
 }
@@ -108,6 +136,16 @@ const submitAdjustment = async () => {
   isAdjustmentModalOpen.value = false
   adjustmentForm.amount = '0.00'
   adjustmentForm.notes = ''
+}
+
+const submitSync = async () => {
+  if (!settlementStore.selectedAccountId) return
+  await settlementStore.syncFinancialEvents(settlementStore.selectedAccountId, {
+    from: toIsoDateTime(syncForm.from),
+    to: toIsoDateTime(syncForm.to),
+    maxPages: Number(syncForm.maxPages) || 3,
+  })
+  isSyncModalOpen.value = false
 }
 </script>
 
@@ -184,12 +222,72 @@ const submitAdjustment = async () => {
                 }}
               </p>
             </div>
-            <AppButton v-if="canManage" variant="secondary" @click="isAdjustmentModalOpen = true">
-              {{ t('marketplaceSettlement.actions.newAdjustment') }}
-            </AppButton>
+            <div class="lf-settlement-actions">
+              <AppButton v-if="canManage" variant="secondary" @click="isAdjustmentModalOpen = true">
+                {{ t('marketplaceSettlement.actions.newAdjustment') }}
+              </AppButton>
+              <AppButton
+                v-if="canManage"
+                :loading="settlementStore.isSyncing"
+                @click="openSyncModal"
+              >
+                {{ t('marketplaceSettlement.actions.sync') }}
+              </AppButton>
+            </div>
           </div>
 
+          <div class="lf-settlement-totals">
+            <article>
+              <span>{{ t('marketplaceSettlement.totals.events') }}</span>
+              <strong>{{ settlementStore.importedTotals?.eventCount ?? 0 }}</strong>
+            </article>
+            <article>
+              <span>{{ t('marketplaceSettlement.totals.gross') }}</span>
+              <strong>
+                {{
+                  formatMinor(
+                    settlementStore.importedTotals?.grossAmountMinor,
+                    settlementStore.importedTotals?.currency || 'BRL',
+                  )
+                }}
+              </strong>
+            </article>
+            <article>
+              <span>{{ t('marketplaceSettlement.totals.fees') }}</span>
+              <strong>
+                {{
+                  formatMinor(
+                    settlementStore.importedTotals?.feeAmountMinor,
+                    settlementStore.importedTotals?.currency || 'BRL',
+                  )
+                }}
+              </strong>
+            </article>
+            <article>
+              <span>{{ t('marketplaceSettlement.totals.net') }}</span>
+              <strong>
+                {{
+                  formatMinor(
+                    settlementStore.importedTotals?.netAmountMinor,
+                    settlementStore.importedTotals?.currency || 'BRL',
+                  )
+                }}
+              </strong>
+            </article>
+          </div>
+
+          <section v-if="settlementStore.lastSyncResult" class="lf-settlement-sync-result">
+            {{
+              t('marketplaceSettlement.sync.result', {
+                received: settlementStore.lastSyncResult.received,
+                created: settlementStore.lastSyncResult.created,
+                duplicates: settlementStore.lastSyncResult.duplicates,
+              })
+            }}
+          </section>
+
           <div class="lf-settlement-table-wrap">
+            <h3>{{ t('marketplaceSettlement.sections.ledger') }}</h3>
             <table class="lf-settlement-table">
               <thead>
                 <tr>
@@ -210,6 +308,40 @@ const submitAdjustment = async () => {
                     <small v-if="entry.notes">{{ entry.notes }}</small>
                   </td>
                   <td>{{ formatDateTime(entry.occurredAt, getLocale()) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="lf-settlement-table-wrap">
+            <h3>{{ t('marketplaceSettlement.sections.importedEvents') }}</h3>
+            <table class="lf-settlement-table">
+              <thead>
+                <tr>
+                  <th>{{ t('marketplaceSettlement.events.providerPaymentId') }}</th>
+                  <th>{{ t('marketplaceSettlement.events.status') }}</th>
+                  <th>{{ t('marketplaceSettlement.events.gross') }}</th>
+                  <th>{{ t('marketplaceSettlement.events.fees') }}</th>
+                  <th>{{ t('marketplaceSettlement.events.net') }}</th>
+                  <th>{{ t('marketplaceSettlement.events.occurredAt') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="event in settlementStore.importedEvents" :key="event.id">
+                  <td>
+                    <span>{{ event.providerPaymentId || event.providerEventId }}</span>
+                    <small v-if="event.externalReference">{{ event.externalReference }}</small>
+                  </td>
+                  <td>{{ event.providerStatus || event.eventType }}</td>
+                  <td>{{ formatMinor(event.amountMinor, event.currency) }}</td>
+                  <td>{{ formatMinor(event.feeAmountMinor, event.currency) }}</td>
+                  <td>{{ formatMinor(event.netAmountMinor, event.currency) }}</td>
+                  <td>
+                    {{ event.occurredAt ? formatDateTime(event.occurredAt, getLocale()) : '-' }}
+                  </td>
+                </tr>
+                <tr v-if="settlementStore.importedEvents.length === 0">
+                  <td colspan="6">{{ t('marketplaceSettlement.events.empty') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -284,6 +416,40 @@ const submitAdjustment = async () => {
           </AppButton>
           <AppButton type="submit" :loading="settlementStore.isMutating">
             {{ t('marketplaceSettlement.actions.recordAdjustment') }}
+          </AppButton>
+        </div>
+      </form>
+    </AppModal>
+
+    <AppModal v-model="isSyncModalOpen" :title="t('marketplaceSettlement.sync.title')" size="lg">
+      <form class="lf-settlement-form" @submit.prevent="submitSync">
+        <p class="lf-settlement-help">{{ t('marketplaceSettlement.sync.description') }}</p>
+        <AppInput
+          v-model="syncForm.from"
+          type="datetime-local"
+          :label="t('marketplaceSettlement.sync.from')"
+          required
+        />
+        <AppInput
+          v-model="syncForm.to"
+          type="datetime-local"
+          :label="t('marketplaceSettlement.sync.to')"
+          required
+        />
+        <AppInput
+          v-model="syncForm.maxPages"
+          type="number"
+          min="1"
+          max="10"
+          :label="t('marketplaceSettlement.sync.maxPages')"
+          required
+        />
+        <div class="lf-modal-footer-actions">
+          <AppButton variant="secondary" @click="isSyncModalOpen = false">
+            {{ t('common.cancel') }}
+          </AppButton>
+          <AppButton type="submit" :loading="settlementStore.isSyncing">
+            {{ t('marketplaceSettlement.actions.sync') }}
           </AppButton>
         </div>
       </form>
@@ -363,6 +529,14 @@ const submitAdjustment = async () => {
   justify-content: space-between;
   gap: var(--lf-space-4);
   margin-bottom: var(--lf-space-4);
+  align-items: flex-start;
+}
+
+.lf-settlement-actions {
+  display: flex;
+  gap: var(--lf-space-3);
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .lf-settlement-ledger h2 {
@@ -371,6 +545,45 @@ const submitAdjustment = async () => {
 
 .lf-settlement-table-wrap {
   overflow-x: auto;
+  margin-top: var(--lf-space-4);
+}
+
+.lf-settlement-table-wrap h3 {
+  margin: 0 0 var(--lf-space-3);
+  font-size: 1rem;
+}
+
+.lf-settlement-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--lf-space-3);
+}
+
+.lf-settlement-totals article,
+.lf-settlement-sync-result {
+  padding: var(--lf-space-3);
+  border: 1px solid var(--lf-border-primary);
+  border-radius: var(--lf-radius);
+  background: var(--lf-bg-elevated, var(--lf-bg-card));
+}
+
+.lf-settlement-totals span {
+  display: block;
+  color: var(--lf-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.lf-settlement-totals strong {
+  display: block;
+  margin-top: var(--lf-space-1);
+  font-size: 1.25rem;
+}
+
+.lf-settlement-sync-result,
+.lf-settlement-help {
+  color: var(--lf-text-muted);
 }
 
 .lf-settlement-table {

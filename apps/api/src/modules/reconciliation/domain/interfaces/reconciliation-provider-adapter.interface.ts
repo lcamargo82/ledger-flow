@@ -2,6 +2,7 @@ import { WebhookProvider } from '@prisma/client';
 
 export interface NormalizedSettlementEvent {
   provider: WebhookProvider;
+  operationalFinancialAccountId?: string;
   providerEventId: string;
   providerSettlementId?: string;
   providerPaymentId?: string;

@@ -1966,11 +1966,39 @@
     "account": {
       "openingBalance": "Opening balance"
     },
+    "sections": {
+      "ledger": "Cash ledger",
+      "importedEvents": "Imported events"
+    },
+    "totals": {
+      "events": "Events",
+      "gross": "Gross",
+      "fees": "Fees",
+      "net": "Net"
+    },
     "actions": {
       "newAccount": "New account",
       "create": "Create account",
       "newAdjustment": "New adjustment",
-      "recordAdjustment": "Record adjustment"
+      "recordAdjustment": "Record adjustment",
+      "sync": "Sync Mercado Pago"
+    },
+    "sync": {
+      "title": "Sync Mercado Pago events",
+      "description": "Select the period used to fetch payments, fees, net amount, refunds and release dates. The payload is sanitized before storage.",
+      "from": "Start",
+      "to": "End",
+      "maxPages": "Max pages",
+      "result": "Sync completed: {received} received, {created} new and {duplicates} duplicates."
+    },
+    "events": {
+      "providerPaymentId": "Payment",
+      "status": "Status",
+      "gross": "Gross",
+      "fees": "Fees",
+      "net": "Net",
+      "occurredAt": "Occurred at",
+      "empty": "No imported financial events yet."
     },
     "form": {
       "createTitle": "New financial account",

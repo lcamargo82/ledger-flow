@@ -34,12 +34,57 @@ export interface CashLedgerEntry {
   createdAt: string
 }
 
+export interface MarketplaceSettlementEvent {
+  id: string
+  provider: string
+  providerEventId: string
+  providerPaymentId?: string | null
+  externalReference?: string | null
+  eventType: string
+  providerStatus?: string | null
+  amountMinor?: string | null
+  feeAmountMinor?: string | null
+  netAmountMinor?: string | null
+  currency: string
+  occurredAt?: string | null
+  availableAt?: string | null
+  receivedAt: string
+}
+
+export interface MarketplaceSettlementImportedTotals {
+  eventCount: number
+  grossAmountMinor: string
+  feeAmountMinor: string
+  netAmountMinor: string
+  currency: string
+}
+
+export interface MarketplaceSettlementSyncResult {
+  provider: string
+  pagesFetched: number
+  received: number
+  created: number
+  duplicates: number
+  from: string
+  to: string
+}
+
 export interface MarketplaceFinancialAccountsResponse {
   data: MarketplaceFinancialAccount[]
 }
 
 export interface CashLedgerEntriesResponse {
   data: CashLedgerEntry[]
+  meta: {
+    page: number
+    perPage: number
+    total: number
+    totalPages: number
+  }
+}
+
+export interface MarketplaceSettlementEventsResponse {
+  data: MarketplaceSettlementEvent[]
   meta: {
     page: number
     perPage: number
@@ -62,4 +107,10 @@ export interface CreateCashPositionAdjustmentPayload {
   amountMinor: number
   reasonCode: string
   notes: string
+}
+
+export interface SyncMarketplaceFinancialEventsPayload {
+  from: string
+  to: string
+  maxPages?: number
 }

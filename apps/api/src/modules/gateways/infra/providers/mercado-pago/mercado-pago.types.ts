@@ -33,7 +33,28 @@ export interface MercadoPagoPaymentResponse {
   external_reference?: string;
   payment_method_id?: string;
   date_approved?: string;
+  date_created?: string;
   date_last_updated?: string;
+  money_release_date?: string;
+  currency_id?: string;
+  fee_details?: Array<{
+    type?: string;
+    amount?: number;
+    fee_payer?: string;
+  }>;
+  transaction_details?: {
+    net_received_amount?: number;
+    total_paid_amount?: number;
+    overpaid_amount?: number;
+  };
+  refunds?: MercadoPagoRefundResponse[];
+  charges_details?: Array<{
+    id?: string;
+    name?: string;
+    type?: string;
+    accounts?: Record<string, unknown>;
+    amounts?: Record<string, unknown>;
+  }>;
   point_of_interaction?: {
     transaction_data?: {
       qr_code?: string;
@@ -55,6 +76,15 @@ export interface MercadoPagoRefundResponse {
   };
   date_created?: string;
   unique_sequence_number?: string;
+}
+
+export interface MercadoPagoPaymentSearchResponse {
+  paging?: {
+    total?: number;
+    limit?: number;
+    offset?: number;
+  };
+  results: MercadoPagoPaymentResponse[];
 }
 
 export interface MercadoPagoCredentials {

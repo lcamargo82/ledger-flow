@@ -3,6 +3,7 @@ import {
   MercadoPagoOAuthTokenResponse,
   MercadoPagoCreatePaymentRequest,
   MercadoPagoPaymentResponse,
+  MercadoPagoPaymentSearchResponse,
   MercadoPagoRefundResponse,
 } from './mercado-pago.types';
 
@@ -78,6 +79,35 @@ export class MercadoPagoApiClient {
     };
 
     return this.get<MercadoPagoPaymentResponse>(`/v1/payments/${providerPaymentId}`, headers);
+  }
+
+  async searchPayments(
+    accessToken: string,
+    input: {
+      from?: Date;
+      to?: Date;
+      offset?: number;
+      limit?: number;
+      sort?: 'date_created' | 'date_last_updated';
+      criteria?: 'asc' | 'desc';
+    },
+  ): Promise<MercadoPagoPaymentSearchResponse> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+    const params = new URLSearchParams();
+    params.set('sort', input.sort ?? 'date_created');
+    params.set('criteria', input.criteria ?? 'asc');
+    params.set('limit', String(input.limit ?? 50));
+    params.set('offset', String(input.offset ?? 0));
+
+    if (input.from || input.to) {
+      params.set('range', input.sort ?? 'date_created');
+      if (input.from) params.set('begin_date', input.from.toISOString());
+      if (input.to) params.set('end_date', input.to.toISOString());
+    }
+
+    return this.get<MercadoPagoPaymentSearchResponse>(`/v1/payments/search?${params}`, headers);
   }
 
   async cancelPayment(
