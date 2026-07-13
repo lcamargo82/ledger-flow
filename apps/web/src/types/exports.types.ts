@@ -1,6 +1,10 @@
 export type ExportJobStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'EXPIRED'
 export type ExportJobFormat = 'CSV' | 'XLSX'
-export type ExportJobType = 'ORDER_FINANCIAL_FACTS' | 'CATALOG_PRODUCTS'
+export type ExportJobType =
+  | 'ORDER_FINANCIAL_FACTS'
+  | 'CATALOG_PRODUCTS'
+  | 'RECONCILIATION_CASES'
+  | 'MARKETPLACE_SETTLEMENT_EVENTS'
 
 export interface ExportJob {
   id: string

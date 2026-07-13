@@ -74,4 +74,28 @@ export class HealthController {
   async getReadiness() {
     return this.healthService.getReadiness();
   }
+
+  @Public()
+  @Get('settlement')
+  @ApiOperation({
+    summary: 'Retorna snapshot sanitizado de saúde operacional do settlement marketplace',
+  })
+  @ApiOkResponse({
+    schema: {
+      example: {
+        status: 'attention',
+        check: 'marketplace-settlement',
+        window: '24h',
+        settlementEventsLast24h: 12,
+        openDivergenceCases: 2,
+        webhookDeliveriesInDlq: 0,
+        failedExports: 0,
+        sanitized: true,
+        timestamp: '2026-07-13T00:00:00.000Z',
+      },
+    },
+  })
+  async getSettlementHealth() {
+    return this.healthService.getSettlementHealth();
+  }
 }

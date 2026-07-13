@@ -715,7 +715,9 @@
     },
     "types": {
       "CATALOG_PRODUCTS": "Products and SKUs",
-      "ORDER_FINANCIAL_FACTS": "Financial facts"
+      "ORDER_FINANCIAL_FACTS": "Financial facts",
+      "RECONCILIATION_CASES": "Reconciliation cases",
+      "MARKETPLACE_SETTLEMENT_EVENTS": "Marketplace settlement events"
     },
     "status": {
       "PENDING": "Pending",
