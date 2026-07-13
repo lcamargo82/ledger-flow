@@ -72,8 +72,13 @@ describe('MarketplaceFinancialIngestionService', () => {
           provider: 'MERCADO_PAGO',
           providerEventId: 'mp-payment:gateway-1:123',
           providerPaymentId: '123',
+          netAmountMinor: new Prisma.Decimal('9500'),
+          currency: 'BRL',
         },
       }),
+    };
+    const notificationProducer = {
+      marketplaceSettlementEventReceived: jest.fn().mockResolvedValue(undefined),
     };
 
     return {
@@ -82,12 +87,14 @@ describe('MarketplaceFinancialIngestionService', () => {
       credentialManager,
       mercadoPagoRead,
       reconciliationIngestion,
+      notificationProducer,
       service: new MarketplaceFinancialIngestionService(
         (overrides.prisma as never) ?? (prisma as never),
         (overrides.readiness as never) ?? (readiness as never),
         (overrides.credentialManager as never) ?? (credentialManager as never),
         (overrides.mercadoPagoRead as never) ?? (mercadoPagoRead as never),
         (overrides.reconciliationIngestion as never) ?? (reconciliationIngestion as never),
+        (overrides.notificationProducer as never) ?? (notificationProducer as never),
       ),
     };
   }
@@ -99,6 +106,7 @@ describe('MarketplaceFinancialIngestionService', () => {
       credentialManager,
       mercadoPagoRead,
       reconciliationIngestion,
+      notificationProducer,
       prisma,
     } = makeService();
 
@@ -123,6 +131,16 @@ describe('MarketplaceFinancialIngestionService', () => {
       offset: 0,
     });
     expect(reconciliationIngestion.ingestNormalizedSettlement).toHaveBeenCalledTimes(1);
+    expect(notificationProducer.marketplaceSettlementEventReceived).toHaveBeenCalledWith({
+      tenantId: 'tenant-1',
+      settlementEventId: 'settlement-1',
+      operationalFinancialAccountId: 'account-1',
+      provider: 'MERCADO_PAGO',
+      providerEventId: 'mp-payment:gateway-1:123',
+      providerPaymentId: '123',
+      netAmountMinor: '9500',
+      currency: 'BRL',
+    });
     expect(prisma.outboxEvent.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         tenantId: 'tenant-1',
@@ -147,7 +165,10 @@ describe('MarketplaceFinancialIngestionService', () => {
         settlementEvent: { id: 'settlement-1' },
       }),
     };
-    const { service, prisma } = makeService({ reconciliationIngestion });
+    const notificationProducer = {
+      marketplaceSettlementEventReceived: jest.fn().mockResolvedValue(undefined),
+    };
+    const { service, prisma } = makeService({ reconciliationIngestion, notificationProducer });
 
     const result = await service.syncMercadoPagoByPeriod('tenant-1', 'user-1', 'account-1', {
       from: '2026-07-01T00:00:00.000Z',
@@ -156,6 +177,7 @@ describe('MarketplaceFinancialIngestionService', () => {
     });
 
     expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
+    expect(notificationProducer.marketplaceSettlementEventReceived).not.toHaveBeenCalled();
     expect(result.created).toBe(0);
     expect(result.duplicates).toBe(1);
   });

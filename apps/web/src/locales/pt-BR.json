@@ -215,6 +215,14 @@
         "title": "Divergência de conciliação identificada",
         "message": "O caso {caseId} requer análise."
       },
+      "marketplaceSettlementEventReceived": {
+        "title": "Evento de settlement recebido",
+        "message": "{provider} confirmou evento financeiro do pagamento {providerPaymentId} com líquido {netAmountMinor} {currency}."
+      },
+      "cashPositionUnexplainedDifference": {
+        "title": "Diferença de caixa exige revisão",
+        "message": "Foi detectada diferença de {differenceAmountMinor} {currency} na posição de caixa operacional."
+      },
       "mercadoPagoConnectionReauthRequired": {
         "title": "Reconexão Mercado Pago necessária",
         "message": "A conexão {provider} precisa ser reconectada para continuar processando operações."

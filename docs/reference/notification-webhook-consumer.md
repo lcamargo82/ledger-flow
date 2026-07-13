@@ -44,3 +44,7 @@ signature = v1=d5bc462c938d0ff4e121587c7e9383af1c9564e0ca2def7ba88cc86ea7e8a301
 Headers enviados: `Content-Type`, `User-Agent`, `Idempotency-Key`, `X-LedgerFlow-Delivery-Id`, `X-LedgerFlow-Timestamp` e `X-LedgerFlow-Signature`.
 
 O payload contém apenas o evento normalizado: `id`, `type`, `category`, `severity`, `occurredAt`, `source` e `data`. Tokens, segredo da subscription, payload bruto de provider e corpo da resposta externa nunca são incluídos.
+
+## Eventos 9B settlement
+
+Subscriptions podem incluir `marketplace_settlement.event_received` para automações de settlement e `cash_position.unexplained_difference` para alertas de diferença operacional de caixa. O consumidor deve tratar `Idempotency-Key` como chave de dedupe; não use `providerPaymentId` isoladamente como idempotência porque múltiplos fatos operacionais podem se referir ao mesmo pagamento.

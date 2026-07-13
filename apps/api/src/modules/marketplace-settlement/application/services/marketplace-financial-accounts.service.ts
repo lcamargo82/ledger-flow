@@ -19,6 +19,7 @@ import {
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { MercadoPagoFinancialReadinessService } from '../../../gateways/application/services/mercado-pago-financial-readiness.service';
+import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
 import {
   CashLedgerEntryResponseDto,
   CreateCashPositionAdjustmentDto,
@@ -41,6 +42,7 @@ export class MarketplaceFinancialAccountsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly financialReadiness: MercadoPagoFinancialReadinessService,
+    private readonly notificationProducer?: NotificationProducerService,
   ) {}
 
   async createAccount(
@@ -220,7 +222,7 @@ export class MarketplaceFinancialAccountsService {
     const sourceId = randomUUID();
     const idempotencyKey = `manual-adjustment:${tenantId}:${sourceId}`;
 
-    return this.prisma.$transaction(async (tx) => {
+    const adjustment = await this.prisma.$transaction(async (tx) => {
       const account = await tx.operationalFinancialAccount.findFirst({
         where: { id: accountId, tenantId, status: OperationalFinancialAccountStatus.ACTIVE },
       });
@@ -291,6 +293,16 @@ export class MarketplaceFinancialAccountsService {
 
       return adjustment;
     });
+
+    await this.notificationProducer?.cashPositionUnexplainedDifference({
+      tenantId,
+      accountId,
+      differenceAmountMinor: amount.toString(),
+      currency: adjustment.cashLedgerEntry.currency,
+      detectedAt: adjustment.cashLedgerEntry.occurredAt,
+    });
+
+    return adjustment;
   }
 
   mapAccount(account: OperationalFinancialAccount): MarketplaceFinancialAccountResponseDto {

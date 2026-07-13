@@ -216,6 +216,14 @@
         "title": "Reconciliation divergence identified",
         "message": "Case {caseId} requires review."
       },
+      "marketplaceSettlementEventReceived": {
+        "title": "Settlement event received",
+        "message": "{provider} confirmed financial event for payment {providerPaymentId} with net {netAmountMinor} {currency}."
+      },
+      "cashPositionUnexplainedDifference": {
+        "title": "Cash difference requires review",
+        "message": "An operational cash position difference of {differenceAmountMinor} {currency} was detected."
+      },
       "mercadoPagoConnectionReauthRequired": {
         "title": "Mercado Pago reconnection required",
         "message": "The {provider} connection must be reconnected before operations can continue."

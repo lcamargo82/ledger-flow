@@ -79,6 +79,13 @@ channels:
     messages:
       deliveryRequested:
         $ref: '#/components/messages/NotificationWebhookDeliveryRequested'
+  notification.outbound.events:
+    address: ledgerflow.notification.outbound.events
+    messages:
+      marketplaceSettlementEventReceived:
+        $ref: '#/components/messages/MarketplaceSettlementEventReceived'
+      cashPositionUnexplainedDifference:
+        $ref: '#/components/messages/CashPositionUnexplainedDifference'
 components:
   messages:
     PaymentChargeRequested:
@@ -315,7 +322,61 @@ components:
       summary: Solicita ao worker uma tentativa idempotente de entrega outbound.
       payload:
         $ref: '#/components/schemas/NotificationWebhookDeliveryRequestedPayload'
+    MarketplaceSettlementEventReceived:
+      name: marketplace_settlement.event_received
+      title: Marketplace Settlement Event Received
+      summary: Normalized outbound notification payload for a new marketplace settlement fact.
+      payload:
+        $ref: '#/components/schemas/NotificationOutboundEventPayload'
+    CashPositionUnexplainedDifference:
+      name: cash_position.unexplained_difference
+      title: Cash Position Unexplained Difference
+      summary: Normalized outbound notification payload for a manual operational cash difference.
+      payload:
+        $ref: '#/components/schemas/NotificationOutboundEventPayload'
   schemas:
+    NotificationOutboundEventPayload:
+      type: object
+      required:
+        - id
+        - type
+        - category
+        - severity
+        - occurredAt
+        - source
+        - data
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - marketplace_settlement.event_received
+            - cash_position.unexplained_difference
+        category:
+          type: string
+          enum:
+            - RECONCILIATION
+        severity:
+          type: string
+          enum:
+            - INFO
+            - WARNING
+        occurredAt:
+          type: string
+          format: date-time
+        source:
+          type: object
+          properties:
+            type:
+              type: string
+            id:
+              type:
+                - string
+                - 'null'
+        data:
+          type: object
     NotificationWebhookDeliveryRequestedPayload:
       type: object
       required:

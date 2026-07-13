@@ -55,6 +55,33 @@ describe('notification event registry', () => {
     });
   });
 
+  it('defines settlement notification contracts for n8n subscriptions', () => {
+    expect(getNotificationEventContract('marketplace_settlement.event_received')).toEqual({
+      category: NotificationCategory.RECONCILIATION,
+      severity: NotificationSeverity.INFO,
+      titleKey: 'notifications.events.marketplaceSettlementEventReceived.title',
+      messageKey: 'notifications.events.marketplaceSettlementEventReceived.message',
+      requiredPermissions: ['reconciliation:read', 'marketplace-settlement:read'],
+      requiredCapabilities: [
+        'notifications.read',
+        'reconciliation.read',
+        'marketplace_settlement.read',
+      ],
+    });
+    expect(getNotificationEventContract('cash_position.unexplained_difference')).toEqual({
+      category: NotificationCategory.RECONCILIATION,
+      severity: NotificationSeverity.WARNING,
+      titleKey: 'notifications.events.cashPositionUnexplainedDifference.title',
+      messageKey: 'notifications.events.cashPositionUnexplainedDifference.message',
+      requiredPermissions: ['reconciliation:read', 'marketplace-settlement:manage'],
+      requiredCapabilities: [
+        'notifications.read',
+        'reconciliation.read',
+        'marketplace_settlement.manage',
+      ],
+    });
+  });
+
   it('requires current permission and every capability to expose an event type', () => {
     expect(getVisibleNotificationEventTypes(['channels:read'], ['notifications.read'])).toEqual([]);
   });
@@ -77,5 +104,17 @@ describe('notification event registry', () => {
     expect(getVisibleNotificationEventTypes(['payments:read'], ['notifications.read'])).toContain(
       'mercado_pago.payment_status_updated',
     );
+  });
+
+  it('exposes settlement notifications only to settlement-capable readers', () => {
+    expect(
+      getVisibleNotificationEventTypes(['reconciliation:read'], ['notifications.read']),
+    ).not.toContain('marketplace_settlement.event_received');
+    expect(
+      getVisibleNotificationEventTypes(
+        ['reconciliation:read', 'marketplace-settlement:read'],
+        ['notifications.read', 'reconciliation.read', 'marketplace_settlement.read'],
+      ),
+    ).toContain('marketplace_settlement.event_received');
   });
 });
