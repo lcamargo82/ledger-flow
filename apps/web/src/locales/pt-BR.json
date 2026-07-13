@@ -145,7 +145,7 @@
     "analytics": "Analytics",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
-    "marketplaceSettlement": "Settlement marketplace",
+    "marketplaceSettlement": "Recebíveis",
     "reports": "Relatórios",
     "webhooks": "Webhooks",
     "settings": "Configurações",
@@ -717,7 +717,7 @@
       "CATALOG_PRODUCTS": "Produtos e SKUs",
       "ORDER_FINANCIAL_FACTS": "Fatos financeiros",
       "RECONCILIATION_CASES": "Casos de conciliação",
-      "MARKETPLACE_SETTLEMENT_EVENTS": "Eventos de settlement marketplace"
+      "MARKETPLACE_SETTLEMENT_EVENTS": "Eventos de recebíveis marketplace"
     },
     "status": {
       "PENDING": "Pendente",
@@ -1995,21 +1995,21 @@
     }
   },
   "marketplaceSettlement": {
-    "title": "Settlement marketplace",
-    "description": "Configure contas financeiras Mercado Pago, saldo inicial e ledger de caixa append-only para a fase 9B.",
+    "title": "Recebíveis Marketplace",
+    "description": "Acompanhe valores brutos, taxas, valores líquidos, liberações e divergências dos pagamentos do marketplace.",
     "empty": {
       "title": "Nenhuma conta financeira ainda",
-      "description": "Crie a primeira conta Mercado Pago settlement-ready para iniciar a posição de caixa operacional."
+      "description": "Crie a primeira conta Mercado Pago habilitada para leitura financeira e acompanhe seus recebíveis."
     },
     "readiness": {
-      "title": "Conexão Mercado Pago ainda não está settlement-ready",
-      "description": "A conta financeira só pode ser criada quando a conexão Mercado Pago estiver ativa, saudável e com escopos de leitura financeira."
+      "title": "Conexão Mercado Pago ainda não está pronta para recebíveis",
+      "description": "A conta financeira só pode ser criada quando a conexão Mercado Pago estiver ativa, saudável e com permissões de leitura financeira."
     },
     "account": {
       "openingBalance": "Saldo inicial"
     },
     "sections": {
-      "ledger": "Ledger de caixa",
+      "ledger": "Extrato de caixa",
       "importedEvents": "Eventos importados",
       "cashPosition": "Posição de caixa",
       "operationalPnl": "P&L operacional"
@@ -2029,7 +2029,7 @@
     },
     "sync": {
       "title": "Sincronizar eventos Mercado Pago",
-      "description": "Informe o período para buscar pagamentos, taxas, líquido, refunds e datas de liberação. O payload é sanitizado antes de ser armazenado.",
+      "description": "Informe o período para buscar pagamentos, taxas, valor líquido, estornos e datas de liberação.",
       "from": "Início",
       "to": "Fim",
       "maxPages": "Máximo de páginas",
@@ -2041,7 +2041,7 @@
       "pending": "Pendente",
       "blocked": "Bloqueado",
       "refunded": "Estornado",
-      "payout": "Payout",
+      "payout": "Repasse",
       "netRevenue": "Receita líquida",
       "cogs": "COGS",
       "shipping": "Frete",
@@ -2077,16 +2077,16 @@
     "ledgerType": {
       "OPENING_BALANCE": "Saldo inicial",
       "MANUAL_ADJUSTMENT": "Ajuste manual",
-      "SETTLEMENT_CREDIT": "Crédito settlement",
-      "SETTLEMENT_DEBIT": "Débito settlement",
-      "PAYOUT": "Payout",
+      "SETTLEMENT_CREDIT": "Crédito de recebível",
+      "SETTLEMENT_DEBIT": "Débito de recebível",
+      "PAYOUT": "Repasse",
       "REFUND": "Estorno",
       "FEE": "Taxa"
     },
     "errors": {
-      "default": "Não foi possível carregar settlement marketplace.",
+      "default": "Não foi possível carregar os recebíveis marketplace.",
       "invalid": "Revise os dados da conta ou ajuste.",
-      "forbidden": "Você não tem acesso a settlement marketplace.",
+      "forbidden": "Você não tem acesso aos recebíveis marketplace.",
       "notFound": "Conta financeira não encontrada.",
       "duplicate": "Já existe uma conta financeira com esse nome."
     }
