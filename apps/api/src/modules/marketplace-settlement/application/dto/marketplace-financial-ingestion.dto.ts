@@ -44,6 +44,18 @@ export class ListMarketplaceSettlementEventsQueryDto {
   perPage?: number = 20;
 }
 
+export class MarketplaceSettlementDashboardQueryDto {
+  @ApiPropertyOptional({ example: '2026-07-01T00:00:00.000Z' })
+  @IsOptional()
+  @IsDateString()
+  dateFrom?: string;
+
+  @ApiPropertyOptional({ example: '2026-07-31T23:59:59.999Z' })
+  @IsOptional()
+  @IsDateString()
+  dateTo?: string;
+}
+
 export class MarketplaceSettlementSyncResponseDto {
   @ApiProperty({ enum: WebhookProvider, example: WebhookProvider.MERCADO_PAGO })
   provider: WebhookProvider;
@@ -139,4 +151,70 @@ export class MarketplaceSettlementImportedTotalsDto {
 
   @ApiProperty()
   currency: string;
+}
+
+export class MarketplaceSettlementCashPositionDto {
+  @ApiProperty()
+  openingBalanceMinor: string;
+
+  @ApiProperty()
+  currentBalanceMinor: string;
+
+  @ApiProperty()
+  releasedAmountMinor: string;
+
+  @ApiProperty()
+  pendingAmountMinor: string;
+
+  @ApiProperty()
+  blockedAmountMinor: string;
+
+  @ApiProperty()
+  refundedAmountMinor: string;
+
+  @ApiProperty()
+  payoutAmountMinor: string;
+
+  @ApiProperty()
+  currency: string;
+}
+
+export class MarketplaceSettlementOperationalPnlDto {
+  @ApiProperty()
+  grossRevenueMinor: string;
+
+  @ApiProperty()
+  feeAmountMinor: string;
+
+  @ApiProperty()
+  shippingAmountMinor: string;
+
+  @ApiProperty()
+  refundAmountMinor: string;
+
+  @ApiProperty()
+  cogsAmountMinor: string;
+
+  @ApiProperty()
+  netRevenueMinor: string;
+
+  @ApiProperty()
+  grossMarginMinor: string;
+
+  @ApiProperty()
+  matchedOrderCount: number;
+
+  @ApiProperty()
+  currency: string;
+}
+
+export class MarketplaceSettlementDashboardResponseDto {
+  @ApiProperty({ type: () => MarketplaceSettlementCashPositionDto })
+  cashPosition: MarketplaceSettlementCashPositionDto;
+
+  @ApiProperty({ type: () => MarketplaceSettlementOperationalPnlDto })
+  operationalPnl: MarketplaceSettlementOperationalPnlDto;
+
+  @ApiProperty()
+  note: string;
 }

@@ -8,6 +8,9 @@ describe('MarketplaceFinancialIngestionService', () => {
     tenantId: 'tenant-1',
     gatewayConfigurationId: 'gateway-1',
     provider: 'MERCADO_PAGO',
+    openingBalanceMinor: new Prisma.Decimal(1000),
+    currentBalanceMinor: new Prisma.Decimal(9600),
+    currency: 'BRL',
     gatewayConfiguration: {
       id: 'gateway-1',
       tenantId: 'tenant-1',
@@ -24,6 +27,12 @@ describe('MarketplaceFinancialIngestionService', () => {
       providerSettlementEvent: {
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
+      },
+      reconciliationCase: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+      orderFinancialFact: {
+        findMany: jest.fn().mockResolvedValue([]),
       },
       outboxEvent: {
         create: jest.fn().mockResolvedValue({ id: 'outbox-1' }),
@@ -189,6 +198,127 @@ describe('MarketplaceFinancialIngestionService', () => {
       feeAmountMinor: '625',
       netAmountMinor: '11875',
       currency: 'BRL',
+    });
+  });
+
+  it('returns operational cash position and P&L dashboard scoped to the selected account', async () => {
+    const { service, prisma } = makeService();
+    prisma.providerSettlementEvent.findMany.mockResolvedValue([
+      {
+        id: 'event-released',
+        eventType: 'payment',
+        providerStatus: 'approved',
+        amountMinor: new Prisma.Decimal(10000),
+        feeAmountMinor: new Prisma.Decimal(500),
+        netAmountMinor: new Prisma.Decimal(9500),
+        currency: 'BRL',
+        availableAt: new Date('2026-07-01T00:00:00.000Z'),
+      },
+      {
+        id: 'event-pending',
+        eventType: 'payment',
+        providerStatus: 'approved',
+        amountMinor: new Prisma.Decimal(3000),
+        feeAmountMinor: new Prisma.Decimal(150),
+        netAmountMinor: new Prisma.Decimal(2850),
+        currency: 'BRL',
+        availableAt: new Date('2999-07-01T00:00:00.000Z'),
+      },
+      {
+        id: 'event-blocked',
+        eventType: 'payment',
+        providerStatus: 'pending',
+        amountMinor: new Prisma.Decimal(2000),
+        feeAmountMinor: new Prisma.Decimal(0),
+        netAmountMinor: new Prisma.Decimal(2000),
+        currency: 'BRL',
+        availableAt: null,
+      },
+      {
+        id: 'event-refund',
+        eventType: 'payment_refunded',
+        providerStatus: 'refunded',
+        amountMinor: new Prisma.Decimal(-1000),
+        feeAmountMinor: new Prisma.Decimal(0),
+        netAmountMinor: new Prisma.Decimal(-1000),
+        currency: 'BRL',
+        availableAt: new Date('2026-07-02T00:00:00.000Z'),
+      },
+    ]);
+    prisma.reconciliationCase.findMany.mockResolvedValue([
+      { orderId: 'order-1' },
+      { orderId: 'order-1' },
+      { orderId: 'order-2' },
+    ]);
+    prisma.orderFinancialFact.findMany.mockResolvedValue([
+      {
+        orderId: 'order-1',
+        revenueAmount: new Prisma.Decimal('100.00'),
+        cogsAmount: new Prisma.Decimal('40.00'),
+        components: { freight: { amount: '8.00' } },
+      },
+      {
+        orderId: 'order-2',
+        revenueAmount: new Prisma.Decimal('30.00'),
+        cogsAmount: new Prisma.Decimal('12.00'),
+        components: { freight: { amount: '4.00' } },
+      },
+    ]);
+
+    const dashboard = await service.getDashboard('tenant-1', 'account-1', {
+      dateFrom: '2026-07-01T00:00:00.000Z',
+      dateTo: '2026-07-31T23:59:59.999Z',
+    });
+
+    expect(prisma.providerSettlementEvent.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        operationalFinancialAccountId: 'account-1',
+        occurredAt: {
+          gte: new Date('2026-07-01T00:00:00.000Z'),
+          lte: new Date('2026-07-31T23:59:59.999Z'),
+        },
+      },
+      select: expect.any(Object),
+    });
+    expect(prisma.reconciliationCase.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        orderId: { not: null },
+        settlementEvent: {
+          tenantId: 'tenant-1',
+          operationalFinancialAccountId: 'account-1',
+          occurredAt: {
+            gte: new Date('2026-07-01T00:00:00.000Z'),
+            lte: new Date('2026-07-31T23:59:59.999Z'),
+          },
+        },
+      },
+      select: { orderId: true },
+    });
+    expect(dashboard).toEqual({
+      cashPosition: {
+        openingBalanceMinor: '1000',
+        currentBalanceMinor: '9600',
+        releasedAmountMinor: '9500',
+        pendingAmountMinor: '2850',
+        blockedAmountMinor: '2000',
+        refundedAmountMinor: '1000',
+        payoutAmountMinor: '0',
+        currency: 'BRL',
+      },
+      operationalPnl: {
+        grossRevenueMinor: '13000',
+        feeAmountMinor: '650',
+        shippingAmountMinor: '1200',
+        refundAmountMinor: '1000',
+        cogsAmountMinor: '5200',
+        netRevenueMinor: '11350',
+        grossMarginMinor: '4950',
+        matchedOrderCount: 2,
+        currency: 'BRL',
+      },
+      note: 'Operational management view only. This is not official accounting.',
     });
   });
 });

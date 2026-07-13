@@ -1969,7 +1969,9 @@
     },
     "sections": {
       "ledger": "Cash ledger",
-      "importedEvents": "Imported events"
+      "importedEvents": "Imported events",
+      "cashPosition": "Cash position",
+      "operationalPnl": "Operational P&L"
     },
     "totals": {
       "events": "Events",
@@ -1991,6 +1993,19 @@
       "to": "End",
       "maxPages": "Max pages",
       "result": "Sync completed: {received} received, {created} new and {duplicates} duplicates."
+    },
+    "dashboard": {
+      "note": "Operational management view; not a replacement for official accounting.",
+      "released": "Released",
+      "pending": "Pending",
+      "blocked": "Blocked",
+      "refunded": "Refunded",
+      "payout": "Payout",
+      "netRevenue": "Net revenue",
+      "cogs": "COGS",
+      "shipping": "Shipping",
+      "margin": "Margin",
+      "matchedOrders": "{count} reconciled orders are included in this operational P&L."
     },
     "events": {
       "providerPaymentId": "Payment",

@@ -309,6 +309,7 @@ Fase 5A — Payments Core Backend Foundation
 - Marketplace settlement 9B-1: `/marketplace-settlement` cria contas financeiras Mercado Pago apenas quando a conexão está settlement-ready, registra saldo inicial em minor units, mantém `CashLedgerEntry` append-only e audita ajustes manuais de caixa.
 - Marketplace settlement 9B-2: sync manual por período busca pagamentos Mercado Pago com token settlement, normaliza bruto/taxas/líquido/refunds/datas de liberação em `ProviderSettlementEvent` sanitizado, vincula os eventos à conta financeira operacional e exibe totais/eventos importados em `/marketplace-settlement`.
 - Marketplace settlement 9B-3: matching passa a casar Mercado Pago com Mercado Livre por `providerPaymentId`, referências de pagamento e `OrderFinancialFact.externalOrderId`; divergências viram cases explícitos e candidatos por valor/data ficam pendentes para revisão manual.
+- Marketplace settlement 9B-4: dashboard operacional em `/marketplace-settlement` expõe cash position por bucket e P&L operacional com receita líquida, taxas, frete, refunds, COGS e margem, sempre com disclaimer de não-contabilidade oficial.
 - Platform Admin: `PlatformGatewaysPage.vue` não expõe tokens.
 - Documentação: ADR 0031.
 

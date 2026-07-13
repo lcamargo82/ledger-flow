@@ -16,6 +16,8 @@ import { MercadoPagoCredentialManager } from '../../../gateways/infra/providers/
 import { ReconciliationSettlementIngestionService } from '../../../reconciliation/application/services/reconciliation-settlement-ingestion.service';
 import {
   ListMarketplaceSettlementEventsQueryDto,
+  MarketplaceSettlementDashboardQueryDto,
+  MarketplaceSettlementDashboardResponseDto,
   MarketplaceSettlementEventResponseDto,
   MarketplaceSettlementImportedTotalsDto,
   MarketplaceSettlementSyncResponseDto,
@@ -175,6 +177,58 @@ export class MarketplaceFinancialIngestionService {
     };
   }
 
+  async getDashboard(
+    tenantId: string,
+    accountId: string,
+    query: MarketplaceSettlementDashboardQueryDto,
+  ): Promise<MarketplaceSettlementDashboardResponseDto> {
+    const account = await this.assertAccountExists(tenantId, accountId);
+    const where: Prisma.ProviderSettlementEventWhereInput = {
+      tenantId,
+      operationalFinancialAccountId: accountId,
+      ...this.periodWhere(query),
+    };
+    const events = await this.prisma.providerSettlementEvent.findMany({
+      where,
+      select: {
+        id: true,
+        eventType: true,
+        providerStatus: true,
+        amountMinor: true,
+        feeAmountMinor: true,
+        netAmountMinor: true,
+        currency: true,
+        availableAt: true,
+      },
+    });
+    const cases = await this.prisma.reconciliationCase.findMany({
+      where: {
+        tenantId,
+        orderId: { not: null },
+        settlementEvent: where,
+      },
+      select: { orderId: true },
+    });
+    const orderIds = Array.from(
+      new Set(cases.map((reconciliationCase) => reconciliationCase.orderId).filter(Boolean)),
+    ) as string[];
+    const orderFacts = orderIds.length
+      ? await this.prisma.orderFinancialFact.findMany({
+          where: { tenantId, orderId: { in: orderIds } },
+          orderBy: [{ version: 'desc' }, { calculatedAt: 'desc' }],
+        })
+      : [];
+    const latestOrderFacts = this.latestOrderFacts(orderFacts);
+    const cashPosition = this.calculateCashPosition(account, events);
+    const operationalPnl = this.calculateOperationalPnl(events, latestOrderFacts, account.currency);
+
+    return {
+      cashPosition,
+      operationalPnl,
+      note: 'Operational management view only. This is not official accounting.',
+    };
+  }
+
   mapEvent(event: ProviderSettlementEvent): MarketplaceSettlementEventResponseDto {
     return {
       id: event.id,
@@ -217,11 +271,208 @@ export class MarketplaceFinancialIngestionService {
   private async assertAccountExists(tenantId: string, accountId: string) {
     const account = await this.prisma.operationalFinancialAccount.findFirst({
       where: { id: accountId, tenantId },
-      select: { id: true },
+      select: {
+        id: true,
+        openingBalanceMinor: true,
+        currentBalanceMinor: true,
+        currency: true,
+      },
     });
     if (!account) {
       throw new NotFoundException('Financial account not found.');
     }
+    return account;
+  }
+
+  private periodWhere(
+    query: MarketplaceSettlementDashboardQueryDto,
+  ): Prisma.ProviderSettlementEventWhereInput {
+    if (!query.dateFrom && !query.dateTo) return {};
+
+    return {
+      occurredAt: {
+        ...(query.dateFrom && { gte: new Date(query.dateFrom) }),
+        ...(query.dateTo && { lte: new Date(query.dateTo) }),
+      },
+    };
+  }
+
+  private calculateCashPosition(
+    account: {
+      openingBalanceMinor: Prisma.Decimal;
+      currentBalanceMinor: Prisma.Decimal;
+      currency: string;
+    },
+    events: Array<{
+      eventType: string;
+      providerStatus: string | null;
+      amountMinor: Prisma.Decimal | null;
+      netAmountMinor: Prisma.Decimal | null;
+      availableAt: Date | null;
+    }>,
+  ) {
+    const now = new Date();
+    const totals = events.reduce(
+      (acc, event) => {
+        const amount = this.eventCashAmount(event);
+        if (this.isRefundEvent(event)) {
+          acc.refundedAmountMinor = acc.refundedAmountMinor.add(amount.abs());
+          return acc;
+        }
+        if (this.isPayoutEvent(event)) {
+          acc.payoutAmountMinor = acc.payoutAmountMinor.add(amount.abs());
+          return acc;
+        }
+        if (this.isBlockedEvent(event)) {
+          acc.blockedAmountMinor = acc.blockedAmountMinor.add(amount);
+          return acc;
+        }
+        if (event.availableAt && event.availableAt.getTime() <= now.getTime()) {
+          acc.releasedAmountMinor = acc.releasedAmountMinor.add(amount);
+          return acc;
+        }
+        acc.pendingAmountMinor = acc.pendingAmountMinor.add(amount);
+        return acc;
+      },
+      {
+        releasedAmountMinor: new Prisma.Decimal(0),
+        pendingAmountMinor: new Prisma.Decimal(0),
+        blockedAmountMinor: new Prisma.Decimal(0),
+        refundedAmountMinor: new Prisma.Decimal(0),
+        payoutAmountMinor: new Prisma.Decimal(0),
+      },
+    );
+
+    return {
+      openingBalanceMinor: account.openingBalanceMinor.toString(),
+      currentBalanceMinor: account.currentBalanceMinor.toString(),
+      releasedAmountMinor: totals.releasedAmountMinor.toString(),
+      pendingAmountMinor: totals.pendingAmountMinor.toString(),
+      blockedAmountMinor: totals.blockedAmountMinor.toString(),
+      refundedAmountMinor: totals.refundedAmountMinor.toString(),
+      payoutAmountMinor: totals.payoutAmountMinor.toString(),
+      currency: account.currency,
+    };
+  }
+
+  private calculateOperationalPnl(
+    events: Array<{
+      eventType: string;
+      providerStatus: string | null;
+      amountMinor: Prisma.Decimal | null;
+      feeAmountMinor: Prisma.Decimal | null;
+      netAmountMinor: Prisma.Decimal | null;
+      currency: string;
+    }>,
+    orderFacts: Array<{
+      orderId: string;
+      revenueAmount: Prisma.Decimal;
+      cogsAmount: Prisma.Decimal;
+      components: Prisma.JsonValue;
+    }>,
+    currency: string,
+  ) {
+    const eventTotals = events.reduce(
+      (acc, event) => {
+        if (this.isRefundEvent(event)) {
+          acc.refundAmountMinor = acc.refundAmountMinor.add(this.eventCashAmount(event).abs());
+          return acc;
+        }
+        acc.feeAmountMinor = acc.feeAmountMinor.add(event.feeAmountMinor ?? 0);
+        return acc;
+      },
+      {
+        feeAmountMinor: new Prisma.Decimal(0),
+        refundAmountMinor: new Prisma.Decimal(0),
+      },
+    );
+    const factTotals = orderFacts.reduce(
+      (acc, fact) => {
+        acc.grossRevenueMinor = acc.grossRevenueMinor.add(this.majorToMinor(fact.revenueAmount));
+        acc.cogsAmountMinor = acc.cogsAmountMinor.add(this.majorToMinor(fact.cogsAmount));
+        acc.shippingAmountMinor = acc.shippingAmountMinor.add(this.shippingMinor(fact.components));
+        return acc;
+      },
+      {
+        grossRevenueMinor: new Prisma.Decimal(0),
+        cogsAmountMinor: new Prisma.Decimal(0),
+        shippingAmountMinor: new Prisma.Decimal(0),
+      },
+    );
+    const grossRevenueMinor = factTotals.grossRevenueMinor.isZero()
+      ? events.reduce((sum, event) => sum.add(event.amountMinor ?? 0), new Prisma.Decimal(0))
+      : factTotals.grossRevenueMinor;
+    const netRevenueMinor = grossRevenueMinor
+      .sub(eventTotals.feeAmountMinor)
+      .sub(eventTotals.refundAmountMinor);
+    const grossMarginMinor = netRevenueMinor
+      .sub(factTotals.cogsAmountMinor)
+      .sub(factTotals.shippingAmountMinor);
+
+    return {
+      grossRevenueMinor: grossRevenueMinor.toString(),
+      feeAmountMinor: eventTotals.feeAmountMinor.toString(),
+      shippingAmountMinor: factTotals.shippingAmountMinor.toString(),
+      refundAmountMinor: eventTotals.refundAmountMinor.toString(),
+      cogsAmountMinor: factTotals.cogsAmountMinor.toString(),
+      netRevenueMinor: netRevenueMinor.toString(),
+      grossMarginMinor: grossMarginMinor.toString(),
+      matchedOrderCount: orderFacts.length,
+      currency,
+    };
+  }
+
+  private latestOrderFacts<T extends { orderId: string }>(facts: T[]): T[] {
+    const seen = new Set<string>();
+    return facts.filter((fact) => {
+      if (seen.has(fact.orderId)) return false;
+      seen.add(fact.orderId);
+      return true;
+    });
+  }
+
+  private eventCashAmount(event: {
+    amountMinor: Prisma.Decimal | null;
+    netAmountMinor: Prisma.Decimal | null;
+  }) {
+    return event.netAmountMinor ?? event.amountMinor ?? new Prisma.Decimal(0);
+  }
+
+  private isRefundEvent(event: { eventType: string; providerStatus: string | null }) {
+    return (
+      event.eventType.toLowerCase().includes('refund') ||
+      event.providerStatus?.toLowerCase() === 'refunded'
+    );
+  }
+
+  private isPayoutEvent(event: { eventType: string }) {
+    return event.eventType.toLowerCase().includes('payout');
+  }
+
+  private isBlockedEvent(event: { providerStatus: string | null }) {
+    const status = event.providerStatus?.toLowerCase();
+    return Boolean(
+      status && ['pending', 'in_process', 'in_mediation', 'charged_back'].includes(status),
+    );
+  }
+
+  private majorToMinor(value: Prisma.Decimal) {
+    return new Prisma.Decimal(value).mul(100).toDecimalPlaces(0);
+  }
+
+  private shippingMinor(components: Prisma.JsonValue) {
+    if (!components || typeof components !== 'object' || Array.isArray(components)) {
+      return new Prisma.Decimal(0);
+    }
+    const freight = (components as Record<string, unknown>).freight;
+    if (!freight || typeof freight !== 'object' || Array.isArray(freight)) {
+      return new Prisma.Decimal(0);
+    }
+    const amount = (freight as Record<string, unknown>).amount;
+    if (typeof amount !== 'string' && typeof amount !== 'number') {
+      return new Prisma.Decimal(0);
+    }
+    return new Prisma.Decimal(amount).mul(100).toDecimalPlaces(0);
   }
 
   private async emitMarketplaceEventReceived(
