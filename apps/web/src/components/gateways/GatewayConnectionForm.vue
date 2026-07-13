@@ -5,7 +5,7 @@
     :title="isEdit ? t('gateways.actions.edit') : t('gateways.actions.connect')"
     @close="$emit('close')"
   >
-    <form @submit.prevent="submit" class="flex flex-col gap-4">
+    <form @submit.prevent="submit" class="connection-form">
       <AppSelect
         v-if="!isEdit"
         v-model="form.provider"
@@ -26,9 +26,9 @@
         :disabled="isEdit"
       />
 
-      <div v-if="form.provider === 'MERCADO_PAGO'" class="p-4 bg-surface-hover rounded border border-divider text-center">
-        <div class="i-ph-shield-check text-2xl mb-2 mx-auto opacity-50"></div>
-        <p class="text-secondary text-sm">{{ t('gateways.mercadoPago.oauthOnly') }}</p>
+      <div v-if="form.provider === 'MERCADO_PAGO'" class="info-alert">
+        <div class="material-symbols-outlined info-alert__icon" style="font-variation-settings: 'FILL' 0">security</div>
+        <p class="info-alert__text">{{ t('gateways.mercadoPago.oauthOnly') }}</p>
       </div>
 
       <template v-else>
@@ -55,19 +55,19 @@
         max="1000"
       />
 
-      <div class="flex flex-col gap-2">
-        <label class="text-sm font-medium">{{ t('gateways.form.supportedMethods') }}</label>
-        <div class="flex gap-4">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" value="PIX" v-model="form.supportedMethods" class="rounded border-gray-600 bg-gray-800 text-primary-500 focus:ring-primary-500" />
+      <div class="methods-group">
+        <label class="methods-group__label">{{ t('gateways.form.supportedMethods') }}</label>
+        <div class="methods-group__options">
+          <label class="method-checkbox">
+            <input type="checkbox" value="PIX" v-model="form.supportedMethods" />
             <span>PIX</span>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" value="BOLETO" v-model="form.supportedMethods" class="rounded border-gray-600 bg-gray-800 text-primary-500 focus:ring-primary-500" />
+          <label class="method-checkbox">
+            <input type="checkbox" value="BOLETO" v-model="form.supportedMethods" />
             <span>BOLETO</span>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" value="CREDIT_CARD" v-model="form.supportedMethods" class="rounded border-gray-600 bg-gray-800 text-primary-500 focus:ring-primary-500" />
+          <label class="method-checkbox">
+            <input type="checkbox" value="CREDIT_CARD" v-model="form.supportedMethods" />
             <span>Cartão de Crédito</span>
           </label>
         </div>
@@ -144,3 +144,70 @@ const submit = () => {
 };
 </script>
 
+<style scoped>
+.connection-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lf-space-4);
+  padding: var(--lf-space-2) 0;
+}
+
+.methods-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lf-space-2);
+  margin-top: var(--lf-space-2);
+}
+
+.methods-group__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--lf-text-primary);
+}
+
+.methods-group__options {
+  display: flex;
+  gap: var(--lf-space-4);
+  flex-wrap: wrap;
+}
+
+.method-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--lf-space-2);
+  cursor: pointer;
+  color: var(--lf-text-secondary);
+  font-size: 0.875rem;
+}
+
+.method-checkbox:hover {
+  color: var(--lf-text-primary);
+}
+
+.method-checkbox input {
+  accent-color: var(--lf-primary);
+  width: 16px;
+  height: 16px;
+}
+
+.info-alert {
+  padding: var(--lf-space-4);
+  background-color: var(--lf-surface-secondary);
+  border: 1px solid var(--lf-border-primary);
+  border-radius: var(--lf-radius);
+  text-align: center;
+}
+
+.info-alert__icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--lf-space-2);
+  opacity: 0.5;
+  color: var(--lf-text-muted);
+}
+
+.info-alert__text {
+  color: var(--lf-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+</style>
