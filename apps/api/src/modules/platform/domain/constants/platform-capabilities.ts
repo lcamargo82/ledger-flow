@@ -19,6 +19,8 @@ export const ReconciliationCapabilities = {
   Manage: 'reconciliation.manage',
   Export: 'reconciliation.export',
   Sync: 'reconciliation.sync',
+  MarketplaceSettlementRead: 'marketplace_settlement.read',
+  MarketplaceSettlementManage: 'marketplace_settlement.manage',
 } as const;
 
 export type ReconciliationCapability =

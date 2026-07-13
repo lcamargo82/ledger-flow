@@ -69,6 +69,7 @@ import { MercadoPagoOAuthController } from './presentation/controllers/mercado-p
     PaymentGatewayResolverService,
     GatewayCredentialsEncryptionService,
     GatewayPaymentOrchestrationService,
+    MercadoPagoFinancialReadinessService,
     MercadoPagoCredentialManager,
     MercadoPagoPaymentGatewayAdapter,
   ],

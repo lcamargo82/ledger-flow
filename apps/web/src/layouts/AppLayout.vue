@@ -112,6 +112,20 @@
               >
               <span class="text" v-show="!isCollapsed">{{ t('nav.reconciliation') }}</span>
             </router-link>
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['marketplace-settlement:read']) &&
+                authStore.checkAllCapabilities(['marketplace_settlement.read'])
+              "
+              to="/marketplace-settlement"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >account_balance_wallet</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.marketplaceSettlement') }}</span>
+            </router-link>
           </div>
         </div>
 

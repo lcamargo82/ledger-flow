@@ -100,6 +100,14 @@ async function main() {
       key: 'reconciliation:sync',
       description: 'Solicitar sincronização de conciliação financeira',
     },
+    {
+      key: 'marketplace-settlement:read',
+      description: 'Visualizar contas e ledger de settlement marketplace',
+    },
+    {
+      key: 'marketplace-settlement:manage',
+      description: 'Gerenciar contas financeiras e ajustes de settlement marketplace',
+    },
     { key: 'platform:access', description: 'Acesso à administração da plataforma' },
     { key: 'platform:tenants:create', description: 'Criar tenants da plataforma' },
     { key: 'platform:tenants:read', description: 'Visualizar tenants da plataforma' },

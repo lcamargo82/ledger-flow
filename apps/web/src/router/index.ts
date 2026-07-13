@@ -26,6 +26,7 @@ import ReconciliationView from '../views/ReconciliationView.vue'
 import NotificationsView from '../views/NotificationsView.vue'
 import InventoryTransfersView from '../views/InventoryTransfersView.vue'
 import InventoryCycleCountsView from '../views/InventoryCycleCountsView.vue'
+import MarketplaceSettlementView from '../views/MarketplaceSettlementView.vue'
 import { advancedInventoryFeatures } from '../config/features'
 
 export const advancedInventoryRouteDefinitions: RouteRecordRaw[] = [
@@ -300,6 +301,17 @@ const router = createRouter({
         requiresAuth: true,
         permissions: ['reconciliation:read'],
         capabilities: ['reconciliation.read'],
+      },
+    },
+    {
+      path: '/marketplace-settlement',
+      name: 'marketplace-settlement',
+      component: MarketplaceSettlementView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['marketplace-settlement:read'],
+        capabilities: ['marketplace_settlement.read'],
       },
     },
     {
