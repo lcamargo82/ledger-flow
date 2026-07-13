@@ -1,10 +1,11 @@
 /* eslint-disable */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { Customer, Payment, PaymentStatus } from '@prisma/client';
+import { Customer, Payment, PaymentProvider, PaymentStatus } from '@prisma/client';
 import { PaymentGatewayResolverService } from './payment-gateway-resolver.service';
 import { GatewayCustomerSyncService } from './gateway-customer-sync.service';
 import { GatewayCredentialsEncryptionService } from './gateway-credentials-encryption.service';
+import { MercadoPagoCredentialManager } from '../../infra/providers/mercado-pago/mercado-pago-credential.manager';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class GatewayPaymentOrchestrationService {
     private readonly gatewayResolver: PaymentGatewayResolverService,
     private readonly customerSyncService: GatewayCustomerSyncService,
     private readonly credentialsEncryptionService: GatewayCredentialsEncryptionService,
+    private readonly mercadoPagoCredentialManager: MercadoPagoCredentialManager,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -43,17 +45,13 @@ export class GatewayPaymentOrchestrationService {
 
     const adapter = (this.gatewayResolver as any).factory.getAdapter(configuration.provider);
 
-    this.logger.log(`[GatewayOrchestration] Syncing customer...`);
-    const providerCustomerId = await this.customerSyncService.syncCustomer(customer, configuration);
-
-    // Decrypt credentials
-    if (!configuration.encryptedCredentials) {
-      throw new Error('Gateway credentials are not configured');
+    let providerCustomerId: string | undefined;
+    if (configuration.provider === PaymentProvider.ASAAS) {
+      this.logger.log(`[GatewayOrchestration] Syncing customer...`);
+      providerCustomerId = await this.customerSyncService.syncCustomer(customer, configuration);
     }
 
-    const credentials = this.credentialsEncryptionService.decrypt(
-      configuration.encryptedCredentials,
-    );
+    const credentials = await this.resolveCredentials(tenantId, configuration);
 
     this.logger.log(`[GatewayOrchestration] Calling adapter to create payment...`);
     const result = await adapter.createPayment({
@@ -125,9 +123,7 @@ export class GatewayPaymentOrchestrationService {
 
     const adapter = (this.gatewayResolver as any).factory.getAdapter(configuration.provider);
 
-    const credentials = this.credentialsEncryptionService.decrypt(
-      configuration.encryptedCredentials,
-    );
+    const credentials = await this.resolveCredentials(tenantId, configuration);
 
     const instructions = await adapter.getPaymentInstructions({
       tenantId,
@@ -156,9 +152,7 @@ export class GatewayPaymentOrchestrationService {
 
     const adapter = (this.gatewayResolver as any).factory.getAdapter(configuration.provider);
 
-    const credentials = this.credentialsEncryptionService.decrypt(
-      configuration.encryptedCredentials,
-    );
+    const credentials = await this.resolveCredentials(tenantId, configuration);
 
     await adapter.cancelPayment({
       tenantId,
@@ -205,5 +199,28 @@ export class GatewayPaymentOrchestrationService {
     } catch (err) {
       this.logger.error(`[GatewayOrchestration] Failed to save audit logs: ${err}`);
     }
+  }
+
+  private async resolveCredentials(
+    tenantId: string,
+    configuration: {
+      id: string;
+      provider: PaymentProvider;
+      encryptedCredentials: string | null;
+    },
+  ) {
+    if (!configuration.encryptedCredentials) {
+      throw new Error('Gateway credentials are not configured');
+    }
+
+    if (configuration.provider === PaymentProvider.MERCADO_PAGO) {
+      return this.mercadoPagoCredentialManager.getValidCredentials({
+        tenantId,
+        gatewayConfigurationId: configuration.id,
+        purpose: 'PAYMENT',
+      });
+    }
+
+    return this.credentialsEncryptionService.decrypt(configuration.encryptedCredentials);
   }
 }

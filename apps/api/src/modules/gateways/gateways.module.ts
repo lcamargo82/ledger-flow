@@ -25,6 +25,7 @@ import { AsaasApiClient } from './infra/clients/asaas-api.client';
 import { GatewayCustomerSyncService } from './application/services/gateway-customer-sync.service';
 import { GatewayPaymentOrchestrationService } from './application/services/gateway-payment-orchestration.service';
 import { MercadoPagoApiClient } from './infra/providers/mercado-pago/mercado-pago-api.client';
+import { MercadoPagoCredentialManager } from './infra/providers/mercado-pago/mercado-pago-credential.manager';
 import { MercadoPagoOAuthStateService } from './infra/providers/mercado-pago/mercado-pago-oauth-state.service';
 import { MercadoPagoOAuthService } from './infra/providers/mercado-pago/mercado-pago-oauth.service';
 import { MercadoPagoOAuthController } from './presentation/controllers/mercado-pago-oauth.controller';
@@ -49,6 +50,7 @@ import { MercadoPagoOAuthController } from './presentation/controllers/mercado-p
     },
     AsaasApiClient,
     MercadoPagoApiClient,
+    MercadoPagoCredentialManager,
     GatewayCustomerSyncService,
     GatewayPaymentOrchestrationService,
     PaymentGatewayFactoryService,

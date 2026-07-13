@@ -33,6 +33,17 @@ describe('notification event registry', () => {
     );
   });
 
+  it('defines the authorized contract for Mercado Pago reauthorization', () => {
+    expect(getNotificationEventContract('mercado_pago.connection_reauth_required')).toEqual({
+      category: NotificationCategory.PAYMENTS,
+      severity: NotificationSeverity.ERROR,
+      titleKey: 'notifications.events.mercadoPagoConnectionReauthRequired.title',
+      messageKey: 'notifications.events.mercadoPagoConnectionReauthRequired.message',
+      requiredPermissions: ['gateways:read', 'gateways:manage'],
+      requiredCapabilities: ['notifications.read'],
+    });
+  });
+
   it('requires current permission and every capability to expose an event type', () => {
     expect(getVisibleNotificationEventTypes(['channels:read'], ['notifications.read'])).toEqual([]);
   });
@@ -42,5 +53,12 @@ describe('notification event registry', () => {
     expect(
       getVisibleNotificationEventTypes(['orders:read'], ['notifications.read', 'orders.manage']),
     ).toContain('channel.order.shipping_summary.updated');
+  });
+
+  it('exposes Mercado Pago reauthorization notifications to gateway-capable readers', () => {
+    expect(getVisibleNotificationEventTypes(['gateways:read'], [])).toEqual([]);
+    expect(getVisibleNotificationEventTypes(['gateways:read'], ['notifications.read'])).toContain(
+      'mercado_pago.connection_reauth_required',
+    );
   });
 });

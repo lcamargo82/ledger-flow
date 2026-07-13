@@ -214,6 +214,10 @@
       "reconciliationDivergence": {
         "title": "Reconciliation divergence identified",
         "message": "Case {caseId} requires review."
+      },
+      "mercadoPagoConnectionReauthRequired": {
+        "title": "Mercado Pago reconnection required",
+        "message": "The {provider} connection must be reconnected before operations can continue."
       }
     }
   },

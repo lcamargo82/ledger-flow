@@ -213,6 +213,10 @@
       "reconciliationDivergence": {
         "title": "Divergência de conciliação identificada",
         "message": "O caso {caseId} requer análise."
+      },
+      "mercadoPagoConnectionReauthRequired": {
+        "title": "Reconexão Mercado Pago necessária",
+        "message": "A conexão {provider} precisa ser reconectada para continuar processando operações."
       }
     }
   },

@@ -19,6 +19,8 @@ export const AuditActions = {
   MERCADO_PAGO_OAUTH_CONNECTION_SUCCEEDED: 'mercado_pago.oauth.connection_succeeded',
   MERCADO_PAGO_OAUTH_CONNECTION_FAILED: 'mercado_pago.oauth.connection_failed',
   MERCADO_PAGO_OAUTH_DISCONNECTED: 'mercado_pago.oauth.disconnected',
+  MERCADO_PAGO_TOKEN_REFRESHED: 'mercado_pago.oauth.token_refreshed',
+  MERCADO_PAGO_CONNECTION_REAUTH_REQUIRED: 'mercado_pago.connection_reauth_required',
 
   // Payment
   PAYMENT_CREATED: 'payment.created',
