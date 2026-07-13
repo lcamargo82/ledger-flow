@@ -3,27 +3,52 @@
     <div class="lf-card-header">
       <div class="connection-title">
         <h4>{{ connection.displayName || connection.provider }}</h4>
-        <span class="lf-badge" :class="statusBadgeClass">{{ t(`gateways.status.${connection.status}`) }}</span>
+        <span class="lf-badge" :class="statusBadgeClass">{{
+          t(`gateways.status.${connection.status}`)
+        }}</span>
       </div>
       <div class="connection-actions">
-        <button class="action-btn" @click="$emit('edit', connection)" :title="t('gateways.actions.edit')">
+        <button
+          class="action-btn"
+          @click="$emit('edit', connection)"
+          :title="t('gateways.actions.edit')"
+        >
           <span class="material-symbols-outlined">edit</span>
         </button>
-        <button v-if="connection.provider !== 'MERCADO_PAGO'" class="action-btn" @click="$emit('updateCredentials', connection)" :title="t('gateways.actions.updateCredentials')">
+        <button
+          v-if="connection.provider !== 'MERCADO_PAGO'"
+          class="action-btn"
+          @click="$emit('updateCredentials', connection)"
+          :title="t('gateways.actions.updateCredentials')"
+        >
           <span class="material-symbols-outlined">key</span>
         </button>
-        <button v-if="isActive" class="action-btn action-warning" @click="$emit('deactivate', connection)" :title="t('gateways.actions.deactivate')">
+        <button
+          v-if="isActive"
+          class="action-btn action-warning"
+          @click="$emit('deactivate', connection)"
+          :title="t('gateways.actions.deactivate')"
+        >
           <span class="material-symbols-outlined">pause</span>
         </button>
-        <button v-else-if="connection.status === 'INACTIVE'" class="action-btn action-success" @click="$emit('activate', connection)" :title="t('gateways.actions.activate')">
+        <button
+          v-else-if="connection.status === 'INACTIVE'"
+          class="action-btn action-success"
+          @click="$emit('activate', connection)"
+          :title="t('gateways.actions.activate')"
+        >
           <span class="material-symbols-outlined">play_arrow</span>
         </button>
-        <button class="action-btn action-danger" @click="$emit('disconnect', connection)" :title="t('gateways.actions.disconnect')">
+        <button
+          class="action-btn action-danger"
+          @click="$emit('disconnect', connection)"
+          :title="t('gateways.actions.disconnect')"
+        >
           <span class="material-symbols-outlined">delete</span>
         </button>
       </div>
     </div>
-    
+
     <div class="lf-card-body">
       <div class="info-grid">
         <div class="info-item">
@@ -37,7 +62,11 @@
         <div class="info-item">
           <label>{{ t('gateways.form.supportedMethods') }}</label>
           <div class="methods-tags">
-            <span v-for="method in connection.supportedMethods" :key="method" class="lf-badge lf-badge-neutral">
+            <span
+              v-for="method in connection.supportedMethods"
+              :key="method"
+              class="lf-badge lf-badge-neutral"
+            >
               {{ method }}
             </span>
           </div>
@@ -45,8 +74,25 @@
         <div class="info-item">
           <label>{{ t('gateways.form.credentialsConfigured') }}</label>
           <span :class="connection.credentialsConfigured ? 'text-success' : 'text-danger'">
-            {{ connection.credentialsConfigured ? t('gateways.messages.credentialsUpdated') : t('gateways.messages.notConfigured') }}
+            {{
+              connection.credentialsConfigured
+                ? t('gateways.messages.credentialsUpdated')
+                : t('gateways.messages.notConfigured')
+            }}
           </span>
+        </div>
+        <div v-if="connection.financialReadiness" class="info-item financial-readiness">
+          <label>{{ t('gateways.financialReadiness.label') }}</label>
+          <span class="lf-badge" :class="financialReadinessBadgeClass">
+            {{ t(`gateways.financialReadiness.state.${connection.financialReadiness.state}`) }}
+          </span>
+          <small class="readiness-help">
+            {{ financialReadinessDescription }}
+          </small>
+          <small v-if="connection.financialReadiness.missingScopes.length" class="readiness-scopes">
+            {{ t('gateways.financialReadiness.missingScopes') }}:
+            {{ connection.financialReadiness.missingScopes.join(', ') }}
+          </small>
         </div>
       </div>
     </div>
@@ -54,28 +100,57 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useI18n } from '@/composables/useI18n';
-import type { GatewayConnection } from '@/services/gateway-connections.service';
+import { computed } from 'vue'
+import { useI18n } from '@/composables/useI18n'
+import type { GatewayConnection } from '@/services/gateway-connections.service'
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 const props = defineProps<{
   connection: GatewayConnection
-}>();
+}>()
 
-defineEmits(['edit', 'updateCredentials', 'activate', 'deactivate', 'disconnect']);
+defineEmits(['edit', 'updateCredentials', 'activate', 'deactivate', 'disconnect'])
 
-const isActive = computed(() => props.connection.status === 'ACTIVE');
+const isActive = computed(() => props.connection.status === 'ACTIVE')
 
 const statusBadgeClass = computed(() => {
   switch (props.connection.status) {
-    case 'ACTIVE': return 'lf-badge-success';
-    case 'INACTIVE': return 'lf-badge-warning';
-    case 'DISABLED': return 'lf-badge-danger';
-    default: return 'lf-badge-neutral';
+    case 'ACTIVE':
+      return 'lf-badge-success'
+    case 'INACTIVE':
+      return 'lf-badge-warning'
+    case 'REAUTH_REQUIRED':
+      return 'lf-badge-danger'
+    case 'DISABLED':
+      return 'lf-badge-danger'
+    default:
+      return 'lf-badge-neutral'
   }
-});
+})
+
+const financialReadinessBadgeClass = computed(() => {
+  switch (props.connection.financialReadiness?.state) {
+    case 'SETTLEMENT_READY':
+      return 'lf-badge-success'
+    case 'PAYMENT_ONLY':
+      return 'lf-badge-warning'
+    case 'REAUTH_REQUIRED':
+    case 'UNHEALTHY':
+      return 'lf-badge-danger'
+    default:
+      return 'lf-badge-neutral'
+  }
+})
+
+const financialReadinessDescription = computed(() => {
+  const readiness = props.connection.financialReadiness
+  if (!readiness) return ''
+  if (readiness.reason) {
+    return t(`gateways.financialReadiness.reason.${readiness.reason}`)
+  }
+  return t(`gateways.financialReadiness.description.${readiness.state}`)
+})
 </script>
 
 <style scoped>
@@ -180,5 +255,19 @@ const statusBadgeClass = computed(() => {
 
 .text-danger {
   color: var(--lf-color-danger);
+}
+
+.financial-readiness {
+  grid-column: span 2;
+}
+
+.readiness-help,
+.readiness-scopes {
+  color: var(--lf-text-secondary);
+  line-height: 1.4;
+}
+
+.readiness-scopes {
+  color: var(--lf-warning);
 }
 </style>

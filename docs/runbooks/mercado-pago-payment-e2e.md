@@ -40,6 +40,7 @@ Nunca registre `access_token`, `refresh_token`, `Authorization`, `client_secret`
 | n8n outbound    | delivery assinado entregue uma vez ou deduplicado no consumidor                        | `NotificationWebhookDelivery`, headers HMAC, log do n8n                                  |
 | Refresh         | token perto do vencimento renova sem expor segredo                                     | `lastHealthCheckMessage=MERCADO_PAGO_TOKEN_REFRESHED`, audit log                         |
 | Reauth          | refresh inválido marca reconexão necessária                                            | status `REAUTH_REQUIRED`, notificação `mercado_pago.connection_reauth_required`          |
+| Financial ready | conexão mostra se é payment-only ou settlement-ready                                   | `financialReadiness` em `GET /gateways/connections`, UI de conexões                      |
 | Boleto          | boleto criado/status sincronizado ou limitação de provider documentada                 | pagamento boleto, instruções, nota de bloqueio                                           |
 
 ## 1. Conectar Mercado Pago
@@ -62,6 +63,7 @@ Evidência segura:
 - screenshot do status conectado sem tokens;
 - audit log de conexão bem-sucedida;
 - `GatewayConfiguration.credentialsFingerprint` presente;
+- `financialReadiness.state` mostra `PAYMENT_ONLY` quando faltam escopos financeiros, ou `SETTLEMENT_READY` quando `offline_access` e `read` estão presentes e a conexão está saudável;
 - ausência de token em response, UI, audit e logs.
 
 ## 2. Criar pagamento PIX

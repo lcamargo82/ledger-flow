@@ -19,4 +19,17 @@ describe('gateway provider normalization', () => {
     expect(ptBR.gateways.mercadoPago.oauthOnly).toContain('OAuth')
     expect(enUS.gateways.mercadoPago.oauthOnly).toContain('OAuth')
   })
+
+  it('defines Mercado Pago financial readiness copy in supported locales', () => {
+    expect(ptBR.gateways.status.REAUTH_REQUIRED).toBe('Reconexão necessária')
+    expect(enUS.gateways.status.REAUTH_REQUIRED).toBe('Reconnection required')
+    expect(ptBR.gateways.financialReadiness.state.PAYMENT_ONLY).toBe('Somente pagamentos')
+    expect(enUS.gateways.financialReadiness.state.SETTLEMENT_READY).toBe('Financial-ready')
+    expect(ptBR.gateways.financialReadiness.reason.MERCADO_PAGO_FINANCIAL_SCOPE_MISSING).toContain(
+      'escopos',
+    )
+    expect(enUS.gateways.financialReadiness.reason.MERCADO_PAGO_REAUTH_REQUIRED).toContain(
+      'Reconnect',
+    )
+  })
 })
