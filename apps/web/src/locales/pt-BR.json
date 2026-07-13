@@ -1967,11 +1967,39 @@
     "account": {
       "openingBalance": "Saldo inicial"
     },
+    "sections": {
+      "ledger": "Ledger de caixa",
+      "importedEvents": "Eventos importados"
+    },
+    "totals": {
+      "events": "Eventos",
+      "gross": "Bruto",
+      "fees": "Taxas",
+      "net": "Líquido"
+    },
     "actions": {
       "newAccount": "Nova conta",
       "create": "Criar conta",
       "newAdjustment": "Novo ajuste",
-      "recordAdjustment": "Registrar ajuste"
+      "recordAdjustment": "Registrar ajuste",
+      "sync": "Sincronizar Mercado Pago"
+    },
+    "sync": {
+      "title": "Sincronizar eventos Mercado Pago",
+      "description": "Informe o período para buscar pagamentos, taxas, líquido, refunds e datas de liberação. O payload é sanitizado antes de ser armazenado.",
+      "from": "Início",
+      "to": "Fim",
+      "maxPages": "Máximo de páginas",
+      "result": "Sincronização concluída: {received} recebidos, {created} novos e {duplicates} duplicados."
+    },
+    "events": {
+      "providerPaymentId": "Pagamento",
+      "status": "Status",
+      "gross": "Bruto",
+      "fees": "Taxas",
+      "net": "Líquido",
+      "occurredAt": "Ocorrido em",
+      "empty": "Nenhum evento financeiro importado ainda."
     },
     "form": {
       "createTitle": "Nova conta financeira",

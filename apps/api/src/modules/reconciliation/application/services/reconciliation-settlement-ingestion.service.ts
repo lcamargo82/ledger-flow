@@ -110,6 +110,7 @@ export class ReconciliationSettlementIngestionService {
   ): Prisma.ProviderSettlementEventUncheckedCreateInput {
     return {
       tenantId,
+      operationalFinancialAccountId: normalized.operationalFinancialAccountId,
       provider: normalized.provider,
       providerEventId: normalized.providerEventId,
       providerSettlementId: normalized.providerSettlementId,
