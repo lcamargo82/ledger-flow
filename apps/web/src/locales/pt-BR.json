@@ -1775,7 +1775,8 @@
       "connect": "Conectar Mercado Pago",
       "connecting": "Conectando...",
       "connected": "Conectado",
-      "connectionFailed": "Falha na conexão"
+      "connectionFailed": "Falha na conexão",
+      "oauthOnly": "A conexão Mercado Pago é feita via OAuth seguro. Credenciais da loja não são digitadas nem exibidas no painel."
     },
     "form": {
       "provider": "Provedor",

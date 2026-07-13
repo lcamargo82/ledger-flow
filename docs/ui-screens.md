@@ -204,6 +204,15 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Estados:** loading, vazio, erro, forbidden, unread/read/dismissed.
 - **Polling:** contador a cada 30 segundos por padrão, configurável por `VITE_NOTIFICATIONS_POLLING_INTERVAL_MS` com piso de 10 segundos.
 
+### Payment Gateway Connections
+
+- **Rota:** `/settings/gateway-connections`.
+- **Status Mercado Pago:** MP-0 hardening implementado; OAuth feedback normaliza `mercado-pago`, `mercado_pago` e `MERCADO_PAGO`.
+- **Componentes:** `GatewayConnectionForm`, `GatewayConnectionCard`, `GatewayConnectionEmptyState`, modais de status/credencial/desconexão e `AppButton`.
+- **Objetivo:** Gerenciar conexões de gateway por tenant sem expor segredos. Mercado Pago usa OAuth; credenciais da loja não são digitadas nem exibidas no painel.
+- **Capability matrix atual:** Mercado Pago anuncia somente PIX, boleto e sandbox. Webhooks, cancelamento, estorno, cartão e checkout avançado entram nas sprints MP-1 a MP-5.
+- **i18n:** Namespace `gateways.*` em pt-BR e en-US; não usar texto hardcoded em estados OAuth.
+
 ### Inventory Transfers
 
 - **Rota:** `/inventory/transfers`.

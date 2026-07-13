@@ -28,15 +28,15 @@ export class MercadoPagoPaymentGatewayAdapter implements IPaymentGateway {
     return {
       supportsPix: true,
       supportsBoleto: true,
-      supportsCard: true,
-      supportsBankTransfer: true,
-      supportsRefund: true,
-      supportsCancel: true,
-      supportsPartialRefund: true,
+      supportsCard: false,
+      supportsBankTransfer: false,
+      supportsRefund: false,
+      supportsCancel: false,
+      supportsPartialRefund: false,
       supportsSandbox: true,
-      supportsWebhooks: true,
-      supportsCheckoutRedirect: true,
-      supportsEmbeddedCheckout: true,
+      supportsWebhooks: false,
+      supportsCheckoutRedirect: false,
+      supportsEmbeddedCheckout: false,
     };
   }
 
