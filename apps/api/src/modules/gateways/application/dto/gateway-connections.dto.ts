@@ -107,55 +107,6 @@ export class UpdateGatewayConnectionStatusDto {
   status: GatewayConfigurationStatus;
 }
 
-export class GatewayConnectionResponseDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty({ enum: PaymentProvider })
-  provider: PaymentProvider;
-
-  @ApiProperty({ enum: GatewayEnvironment })
-  environment: GatewayEnvironment;
-
-  @ApiProperty({ enum: GatewayConfigurationStatus })
-  status: GatewayConfigurationStatus;
-
-  @ApiProperty()
-  priority: number;
-
-  @ApiProperty({ required: false })
-  displayName?: string;
-
-  @ApiProperty({ enum: PaymentMethod, isArray: true })
-  supportedMethods: PaymentMethod[];
-
-  @ApiProperty()
-  healthStatus: string;
-
-  @ApiProperty({
-    required: false,
-    type: () => GatewayFinancialReadinessDto,
-    description:
-      'Derived financial-read readiness for providers that can later feed settlement flows.',
-  })
-  financialReadiness?: GatewayFinancialReadinessDto;
-
-  @ApiProperty()
-  credentialsConfigured: boolean;
-
-  @ApiProperty({ required: false })
-  lastFailureAt?: Date | null;
-
-  @ApiProperty({ required: false })
-  lastSuccessfulOperationAt?: Date | null;
-
-  @ApiProperty()
-  createdAt: Date;
-
-  @ApiProperty()
-  updatedAt: Date;
-}
-
 export class GatewayFinancialReadinessDto {
   @ApiProperty({
     enum: [
@@ -207,4 +158,53 @@ export class GatewayFinancialReadinessDto {
 
   @ApiProperty({ required: false })
   lastFinancialSyncAt?: Date | null;
+}
+
+export class GatewayConnectionResponseDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty({ enum: PaymentProvider })
+  provider: PaymentProvider;
+
+  @ApiProperty({ enum: GatewayEnvironment })
+  environment: GatewayEnvironment;
+
+  @ApiProperty({ enum: GatewayConfigurationStatus })
+  status: GatewayConfigurationStatus;
+
+  @ApiProperty()
+  priority: number;
+
+  @ApiProperty({ required: false })
+  displayName?: string;
+
+  @ApiProperty({ enum: PaymentMethod, isArray: true })
+  supportedMethods: PaymentMethod[];
+
+  @ApiProperty()
+  healthStatus: string;
+
+  @ApiProperty({
+    required: false,
+    type: () => GatewayFinancialReadinessDto,
+    description:
+      'Derived financial-read readiness for providers that can later feed settlement flows.',
+  })
+  financialReadiness?: GatewayFinancialReadinessDto;
+
+  @ApiProperty()
+  credentialsConfigured: boolean;
+
+  @ApiProperty({ required: false })
+  lastFailureAt?: Date | null;
+
+  @ApiProperty({ required: false })
+  lastSuccessfulOperationAt?: Date | null;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
 }
