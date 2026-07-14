@@ -53,6 +53,16 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 - **Objetivo:** Exibir visão geral (cards atuais de perfil/sessão são temporários). Dashboard final será substituído por conteúdo real de negócio (TPV, pagamentos aprovados/falhos, clientes ativos, webhooks com falha, exportações recentes, status dos gateways).
 - **Layout:** `AppLayout`
 
+### Sales Intelligence
+
+- **Rota:** `/sales-intelligence`
+- **Status:** Implementada e validada (11.0.4)
+- **Objetivo:** Consolidar uma linha por pedido Mercado Livre com pagamento, taxa, líquido identificado pela origem e estoque.
+- **Permissões:** `sales-intelligence:read` + `sales_intelligence.read` (`ENTERPRISE`/`CUSTOM` ativo).
+- **Componentes:** `AppMetricGrid`/`AppMetricCard`, filtros, `AppTable`, paginação e `AppDrawer` com SKUs agrupados.
+- **Estados:** loading, empty, error com retry, fila paginada e drawer por pedido.
+- **Segurança:** tenant derivado da sessão; sem payload bruto, comprador, credenciais, custo, lucro ou margem.
+
 ## 5. Users
 
 - **Rota:** `/users`

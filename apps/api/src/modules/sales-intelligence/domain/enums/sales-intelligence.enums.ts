@@ -1,0 +1,15 @@
+export enum SalesIntelligenceNetAmountSource {
+  REALIZED = 'REALIZED',
+  RECONCILED = 'RECONCILED',
+  ESTIMATED = 'ESTIMATED',
+  UNAVAILABLE = 'UNAVAILABLE',
+}
+
+export enum SalesIntelligenceStockStatus {
+  PENDING = 'PENDING',
+  RESERVED = 'RESERVED',
+  CONSUMED = 'CONSUMED',
+  RELEASED = 'RELEASED',
+  DIVERGENT = 'DIVERGENT',
+  UNAVAILABLE = 'UNAVAILABLE',
+}

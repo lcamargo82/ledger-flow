@@ -126,6 +126,9 @@
     "apiConnected": "API Connected"
   },
   "nav": {
+    "sidebar": "Main navigation",
+    "openSidebar": "Open navigation",
+    "closeSidebar": "Close navigation",
     "groups": {
       "operations": "Operations",
       "financial": "Financial",
@@ -144,6 +147,7 @@
     "orders": "Orders",
     "channels": "Channels",
     "analytics": "Analytics",
+    "salesIntelligence": "Sales intelligence",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
     "marketplaceSettlement": "Receivables",
@@ -673,6 +677,7 @@
     "internalChannel": "Internal",
     "reconciliationNote": "Operational margin is not settlement, cash receipt, or financial reconciliation.",
     "cards": {
+      "title": "Financial indicators",
       "orders": "Orders with facts",
       "revenue": "Operational revenue",
       "cogs": "COGS",
@@ -698,6 +703,94 @@
       "title": "Could not load analytics",
       "default": "Could not process financial indicators.",
       "forbidden": "You do not have financial analytics access.",
+      "invalid": "Review the filters."
+    }
+  },
+  "salesIntelligence": {
+    "title": "Sales intelligence",
+    "description": "Track each marketplace sale without mixing order operations and financial analysis.",
+    "eyebrow": "Sales Intelligence Core",
+    "foundation": {
+      "eyebrow": "Sales Intelligence Core",
+      "scope": "Order, payment, fee, net amount, and inventory",
+      "provenance": "Realized, reconciled, and estimated values will always identify their source.",
+      "status": "11.0.1 foundation"
+    },
+    "summary": {
+      "title": "Filtered sales summary",
+      "orders": "Orders",
+      "orderCount": "{count} orders",
+      "paid": "Approved payments",
+      "fees": "Fees",
+      "net": "Net amount",
+      "stockIssues": "Inventory issues"
+    },
+    "filters": {
+      "orderReference": "Order",
+      "orderPlaceholder": "Number or external reference…",
+      "payment": "Payment",
+      "allPayments": "All payments",
+      "stock": "Inventory",
+      "allStock": "All states",
+      "dateFrom": "Sold from",
+      "dateTo": "Sold until"
+    },
+    "table": {
+      "soldAt": "Sale",
+      "order": "Order",
+      "payment": "Payment",
+      "paid": "Paid amount",
+      "fee": "Fee",
+      "net": "Net amount",
+      "stock": "Inventory",
+      "actions": "Actions"
+    },
+    "payment": {
+      "approved": "Approved",
+      "pending": "Pending",
+      "refunded": "Refunded",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected",
+      "unavailable": "Unavailable"
+    },
+    "stock": {
+      "PENDING": "Deduction pending",
+      "RESERVED": "Inventory reserved",
+      "CONSUMED": "Inventory deducted",
+      "RELEASED": "Inventory released",
+      "DIVERGENT": "Inventory mismatch",
+      "UNAVAILABLE": "Inventory unavailable"
+    },
+    "netSource": {
+      "REALIZED": "Realized net amount",
+      "RECONCILED": "Reconciled net amount",
+      "ESTIMATED": "Estimated net amount",
+      "UNAVAILABLE": "Net amount unavailable"
+    },
+    "orderStatus": {
+      "DRAFT": "Draft",
+      "CONFIRMED": "Confirmed",
+      "FULFILLED": "Fulfilled",
+      "CANCELLED": "Cancelled"
+    },
+    "actions": {
+      "details": "View items"
+    },
+    "drawer": {
+      "title": "Items for order {order}",
+      "items": "Order SKUs",
+      "quantity": "Quantity: {quantity}",
+      "productUnavailable": "Product not identified"
+    },
+    "unavailable": "Unavailable",
+    "empty": {
+      "title": "No marketplace sales yet",
+      "description": "Mercado Libre sales will appear here after order ingestion and consolidation."
+    },
+    "errors": {
+      "title": "Could not load sales",
+      "default": "Could not query sales intelligence right now.",
+      "forbidden": "You do not have sales intelligence access.",
       "invalid": "Review the filters."
     }
   },
@@ -976,7 +1069,9 @@
     "disabled": "Disabled",
     "pagination": {
       "total": "Total: {total}",
-      "pageOf": "Page {page} of {totalPages}"
+      "pageOf": "Page {page} of {totalPages}",
+      "previous": "Previous page",
+      "next": "Next page"
     }
   },
   "errors": {

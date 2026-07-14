@@ -3,9 +3,12 @@ import { computed, onMounted } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { useFinancialIntelligenceStore } from '../stores/financial-intelligence.store'
 import { formatDateTime } from '../utils/date-format'
+import { formatMoney } from '../utils/money-format'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppCard from '../components/common/AppCard.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
+import AppMetricCard from '../components/common/AppMetricCard.vue'
+import AppMetricGrid from '../components/common/AppMetricGrid.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
 import AppTable from '../components/common/AppTable.vue'
@@ -28,6 +31,9 @@ const channelOptions = computed(() => [
   { value: 'MERCADO_LIVRE', label: t('channels.provider.MERCADO_LIVRE') },
 ])
 
+const formatDashboardMoney = (amount?: string) =>
+  formatMoney(amount ?? '0', 'BRL', currentLocale.value)
+
 onMounted(() => {
   financialStore.fetchAnalytics()
 })
@@ -48,40 +54,24 @@ onMounted(() => {
     />
 
     <template v-else>
-      <div class="grid gap-4 md:grid-cols-4">
-        <AppCard>
-          <p class="text-sm text-[var(--lf-text-secondary)]">
-            {{ t('financialIntelligence.cards.orders') }}
-          </p>
-          <p class="mt-2 text-2xl font-semibold">
-            {{ financialStore.dashboard?.orderCount ?? 0 }}
-          </p>
-        </AppCard>
-        <AppCard>
-          <p class="text-sm text-[var(--lf-text-secondary)]">
-            {{ t('financialIntelligence.cards.revenue') }}
-          </p>
-          <p class="mt-2 text-2xl font-semibold">
-            {{ financialStore.dashboard?.revenueAmount ?? '0' }}
-          </p>
-        </AppCard>
-        <AppCard>
-          <p class="text-sm text-[var(--lf-text-secondary)]">
-            {{ t('financialIntelligence.cards.cogs') }}
-          </p>
-          <p class="mt-2 text-2xl font-semibold">
-            {{ financialStore.dashboard?.cogsAmount ?? '0' }}
-          </p>
-        </AppCard>
-        <AppCard>
-          <p class="text-sm text-[var(--lf-text-secondary)]">
-            {{ t('financialIntelligence.cards.margin') }}
-          </p>
-          <p class="mt-2 text-2xl font-semibold">
-            {{ financialStore.dashboard?.grossMarginAmount ?? '0' }}
-          </p>
-        </AppCard>
-      </div>
+      <AppMetricGrid :accessible-label="t('financialIntelligence.cards.title')">
+        <AppMetricCard
+          :label="t('financialIntelligence.cards.orders')"
+          :value="financialStore.dashboard?.orderCount ?? 0"
+        />
+        <AppMetricCard
+          :label="t('financialIntelligence.cards.revenue')"
+          :value="formatDashboardMoney(financialStore.dashboard?.revenueAmount)"
+        />
+        <AppMetricCard
+          :label="t('financialIntelligence.cards.cogs')"
+          :value="formatDashboardMoney(financialStore.dashboard?.cogsAmount)"
+        />
+        <AppMetricCard
+          :label="t('financialIntelligence.cards.margin')"
+          :value="formatDashboardMoney(financialStore.dashboard?.grossMarginAmount)"
+        />
+      </AppMetricGrid>
 
       <AppCard>
         <div class="grid gap-4 md:grid-cols-[minmax(220px,320px)_1fr] md:items-end">

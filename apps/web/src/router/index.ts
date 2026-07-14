@@ -27,6 +27,7 @@ import NotificationsView from '../views/NotificationsView.vue'
 import InventoryTransfersView from '../views/InventoryTransfersView.vue'
 import InventoryCycleCountsView from '../views/InventoryCycleCountsView.vue'
 import MarketplaceSettlementView from '../views/MarketplaceSettlementView.vue'
+import SalesIntelligenceView from '../views/SalesIntelligenceView.vue'
 import { advancedInventoryFeatures } from '../config/features'
 
 export const advancedInventoryRouteDefinitions: RouteRecordRaw[] = [
@@ -280,6 +281,17 @@ const router = createRouter({
         requiresAuth: true,
         permissions: ['financial-intelligence:read'],
         capabilities: ['financial.analytics.read'],
+      },
+    },
+    {
+      path: '/sales-intelligence',
+      name: 'sales-intelligence',
+      component: SalesIntelligenceView,
+      meta: {
+        layout: AppLayout,
+        requiresAuth: true,
+        permissions: ['sales-intelligence:read'],
+        capabilities: ['sales_intelligence.read'],
       },
     },
     {

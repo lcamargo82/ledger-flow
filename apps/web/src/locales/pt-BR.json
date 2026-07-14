@@ -125,6 +125,9 @@
     "apiConnected": "API Conectada"
   },
   "nav": {
+    "sidebar": "Navegação principal",
+    "openSidebar": "Abrir navegação",
+    "closeSidebar": "Fechar navegação",
     "groups": {
       "operations": "Operações",
       "financial": "Financeiro",
@@ -143,6 +146,7 @@
     "orders": "Pedidos",
     "channels": "Canais",
     "analytics": "Analytics",
+    "salesIntelligence": "Inteligência de vendas",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
     "marketplaceSettlement": "Recebíveis",
@@ -672,6 +676,7 @@
     "internalChannel": "Interno",
     "reconciliationNote": "Margem operacional não representa liquidação, recebimento ou conciliação financeira.",
     "cards": {
+      "title": "Indicadores financeiros",
       "orders": "Pedidos com fato",
       "revenue": "Receita operacional",
       "cogs": "CMV",
@@ -697,6 +702,94 @@
       "title": "Não foi possível carregar analytics",
       "default": "Não foi possível processar os indicadores financeiros.",
       "forbidden": "Você não possui acesso aos indicadores financeiros.",
+      "invalid": "Revise os filtros informados."
+    }
+  },
+  "salesIntelligence": {
+    "title": "Inteligência de vendas",
+    "description": "Acompanhe cada venda marketplace sem misturar operação de pedidos com análise financeira.",
+    "eyebrow": "Sales Intelligence Core",
+    "foundation": {
+      "eyebrow": "Sales Intelligence Core",
+      "scope": "Pedido, pagamento, taxa, líquido e estoque",
+      "provenance": "Valores realizados, conciliados e estimados serão identificados pela origem.",
+      "status": "Fundação 11.0.1"
+    },
+    "summary": {
+      "title": "Resumo das vendas filtradas",
+      "orders": "Pedidos",
+      "orderCount": "{count} pedidos",
+      "paid": "Pagamento aprovado",
+      "fees": "Taxas",
+      "net": "Líquido",
+      "stockIssues": "Divergências de estoque"
+    },
+    "filters": {
+      "orderReference": "Pedido",
+      "orderPlaceholder": "Número ou referência externa…",
+      "payment": "Pagamento",
+      "allPayments": "Todos os pagamentos",
+      "stock": "Estoque",
+      "allStock": "Todos os estados",
+      "dateFrom": "Venda a partir de",
+      "dateTo": "Venda até"
+    },
+    "table": {
+      "soldAt": "Venda",
+      "order": "Pedido",
+      "payment": "Pagamento",
+      "paid": "Valor pago",
+      "fee": "Taxa",
+      "net": "Líquido",
+      "stock": "Estoque",
+      "actions": "Ações"
+    },
+    "payment": {
+      "approved": "Aprovado",
+      "pending": "Pendente",
+      "refunded": "Estornado",
+      "cancelled": "Cancelado",
+      "rejected": "Recusado",
+      "unavailable": "Indisponível"
+    },
+    "stock": {
+      "PENDING": "Baixa pendente",
+      "RESERVED": "Estoque reservado",
+      "CONSUMED": "Estoque baixado",
+      "RELEASED": "Estoque liberado",
+      "DIVERGENT": "Estoque divergente",
+      "UNAVAILABLE": "Estoque indisponível"
+    },
+    "netSource": {
+      "REALIZED": "Líquido realizado",
+      "RECONCILED": "Líquido conciliado",
+      "ESTIMATED": "Líquido estimado",
+      "UNAVAILABLE": "Líquido indisponível"
+    },
+    "orderStatus": {
+      "DRAFT": "Rascunho",
+      "CONFIRMED": "Confirmado",
+      "FULFILLED": "Atendido",
+      "CANCELLED": "Cancelado"
+    },
+    "actions": {
+      "details": "Ver itens"
+    },
+    "drawer": {
+      "title": "Itens do pedido {order}",
+      "items": "SKUs do pedido",
+      "quantity": "Quantidade: {quantity}",
+      "productUnavailable": "Produto não identificado"
+    },
+    "unavailable": "Indisponível",
+    "empty": {
+      "title": "Nenhuma venda marketplace encontrada",
+      "description": "As vendas do Mercado Livre aparecerão aqui após a ingestão e consolidação do pedido."
+    },
+    "errors": {
+      "title": "Não foi possível carregar as vendas",
+      "default": "Não foi possível consultar a inteligência de vendas agora.",
+      "forbidden": "Você não possui acesso à inteligência de vendas.",
       "invalid": "Revise os filtros informados."
     }
   },
@@ -975,7 +1068,9 @@
     "disabled": "Inativo",
     "pagination": {
       "total": "Total: {total}",
-      "pageOf": "Página {page} de {totalPages}"
+      "pageOf": "Página {page} de {totalPages}",
+      "previous": "Página anterior",
+      "next": "Próxima página"
     }
   },
   "errors": {

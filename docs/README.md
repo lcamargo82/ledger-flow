@@ -148,6 +148,19 @@ O pacote Mercado Pago/9B fecha a base operacional de pagamentos Mercado Pago e a
 - `roadmap/9B-marketplace-settlement-vision.md`
 - `roadmap/10.3-fulfillment-shipping-vision.md`
 
+## Programa 11.0 — Sales Intelligence Core
+
+O recorte aprovado consolida pedido Mercado Livre, pagamento, taxa, líquido com proveniência e estoque em `/sales-intelligence`. A entrega vai da 11.0.1 à 11.0.4; lucro, DRE, shipping, timeline, alertas e exportações permanecem fora do Core.
+
+- `prd/11.0-sales-intelligence-prd.md`
+- `sdd/11.0-sales-intelligence-sdd.md`
+- `specs/11.0-sprint-plan.md`
+- `backlog/11.0-sales-intelligence-backlog.md`
+- `adr/0039-sales-intelligence-read-layer.md`
+- `runbooks/11.0-sales-intelligence-operational-readiness.md`
+- `reference/11.0.4-security-assessment.md`
+- `superpowers/plans/2026-07-14-11-0-sales-intelligence-core.md`
+
 ## Onde colocar os arquivos no repositório
 
 Copie os arquivos deste pacote para:

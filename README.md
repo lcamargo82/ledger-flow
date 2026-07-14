@@ -1495,6 +1495,41 @@ O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Du
 - **Usuário Operacional (Tenant)**: Dentro do tenant interno `LedgerFlow Platform`, o Platform Admin gerencia usuários, clientes e pagamentos da mesma forma que qualquer tenant padrão, utilizando a role `OWNER` com escopo `TENANT`.
 - **Administrador Global (Platform)**: Utilizando a role especial `PLATFORM_OWNER` com escopo `PLATFORM`, o Admin Master tem a capacidade de gerenciar todos os tenants do ecossistema a partir de uma interface separada na plataforma.
 
+## Fase 11.0.1 — Sales Intelligence Foundation
+
+A nova rota protegida `/sales-intelligence` inicia a camada de leitura consolidada de vendas marketplace.
+
+- API foundation: `GET /sales-intelligence` e `GET /sales-intelligence/summary`.
+- Acesso: `sales-intelligence:read` + capability `sales_intelligence.read`.
+- UI shell tenant-safe com componentes LedgerFlow e i18n pt-BR/en-US.
+- Nenhum valor de lucro, margem ou payload bruto é simulado/exposto nesta foundation.
+- O Core aprovado segue até 11.0.4 com pedido, pagamento, taxa, líquido identificado pela origem e estoque.
+
+## Fase 11.0.2 — Sales Intelligence Read Model
+
+- O intake Mercado Livre persiste status/data do pagamento, valor pago, taxa e líquido esperado em revisões financeiras imutáveis e idempotentes.
+- `GET /sales-intelligence` consolida a revisão atual, itens/reservas e settlement Mercado Pago com paginação e filtros tenant-scoped.
+- `GET /sales-intelligence/summary` usa os mesmos filtros e agrega dinheiro em minor units por proveniência `REALIZED`, `RECONCILED` ou `ESTIMATED`.
+- Estoque é derivado do ledger existente como `PENDING`, `RESERVED`, `CONSUMED`, `RELEASED`, `DIVERGENT` ou `UNAVAILABLE`.
+- Payload bruto, credenciais, dados de comprador, custo e margem continuam fora do contrato.
+
+## Fase 11.0.3 — Sales Intelligence Queue
+
+- `/sales-intelligence` exibe uma linha por pedido Mercado Livre, resumo, filtros tenant-scoped e paginação backend.
+- O drawer agrupa os SKUs e mostra produto, quantidade e estado do estoque por item.
+- Badges diferenciam líquido `REALIZED`, `RECONCILED`, `ESTIMATED` e `UNAVAILABLE` sem tratar estimativa como realização.
+- A migration `20260714184500_add_sales_intelligence_permission` cadastra `sales-intelligence:read` e a associa de forma idempotente às roles `OWNER`; não é necessário rodar a seed geral após `prisma migrate deploy`.
+- Roles personalizadas recebem a permissão apenas por atribuição administrativa explícita. O acesso também exige tenant `ENTERPRISE` ou `CUSTOM` ativo para obter `sales_intelligence.read`, seguido de renovação da sessão.
+- O shell usa navegação off-canvas no mobile e mantém a tabela com rolagem horizontal controlada.
+
+## Fase 11.0.4 — Sales Intelligence Hardening
+
+- O resumo percorre grandes intervalos em lotes de 500 pedidos com cursor estável, sem offsets crescentes ou consultas por item.
+- Os índices de pedido, fato financeiro atual, data de venda e status de pagamento sustentam os filtros tenant-scoped do Core.
+- `@nestjs/platform-express` 11.1.28 e `@nestjs/swagger` 11.4.5 atualizam o runtime para Multer 2.2.0 e js-yaml 4.3.0; `npm audit --omit=dev` fecha sem vulnerabilidades.
+- Analytics e Inteligência de vendas compartilham `AppMetricGrid` e `AppMetricCard`, preservando tokens, i18n e comportamento responsivo.
+- O checklist de deploy, permissões, contratos e smoke está em `docs/runbooks/11.0-sales-intelligence-operational-readiness.md`.
+
 ## Roadmap pós-10.1
 
 O pacote planejado seguinte está documentado sem declarar endpoints futuros como implementados:

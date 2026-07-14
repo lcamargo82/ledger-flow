@@ -4,7 +4,9 @@
     <aside
       class="lf-sidebar"
       :class="{ 'lf-sidebar--collapsed': isCollapsed }"
-      aria-label="Sidebar"
+      :aria-label="t('nav.sidebar')"
+      :aria-hidden="isMobile && isCollapsed ? 'true' : undefined"
+      :inert="isMobile && isCollapsed"
     >
       <button
         class="lf-sidebar-toggle"
@@ -270,7 +272,9 @@
         <div
           v-if="
             (authStore.checkAllPermissions(['financial-intelligence:read']) &&
-              authStore.checkAllCapabilities(['financial.analytics.read']))
+              authStore.checkAllCapabilities(['financial.analytics.read'])) ||
+            (authStore.checkAllPermissions(['sales-intelligence:read']) &&
+              authStore.checkAllCapabilities(['sales_intelligence.read']))
           "
           class="lf-sidebar-group"
         >
@@ -285,6 +289,20 @@
             }}</span>
           </button>
           <div v-show="expandedGroups.analytics || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['sales-intelligence:read']) &&
+                authStore.checkAllCapabilities(['sales_intelligence.read'])
+              "
+              to="/sales-intelligence"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >query_stats</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.salesIntelligence') }}</span>
+            </router-link>
             <router-link
               v-if="
                 authStore.checkAllPermissions(['financial-intelligence:read']) &&
@@ -425,8 +443,16 @@
         <LanguageSwitcher v-show="!isCollapsed" />
 
         <!-- User Info & Notifications (Expanded) -->
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--lf-space-2);" v-show="!isCollapsed">
-          <div class="lf-sidebar__user" style="flex: 1; overflow: hidden; min-width: 0;">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--lf-space-2);
+          "
+          v-show="!isCollapsed"
+        >
+          <div class="lf-sidebar__user" style="flex: 1; overflow: hidden; min-width: 0">
             <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
             <div class="lf-sidebar__user-info">
               <span class="lf-sidebar__user-name">{{ authStore.userName }}</span>
@@ -434,7 +460,7 @@
             </div>
           </div>
           <NotificationBell
-            style="flex-shrink: 0;"
+            style="flex-shrink: 0"
             v-if="
               authStore.checkAllPermissions(['notifications:read']) &&
               authStore.checkAllCapabilities(['notifications.read'])
@@ -443,7 +469,10 @@
         </div>
 
         <!-- User Info & Notifications (Collapsed) -->
-        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--lf-space-3);" v-show="isCollapsed">
+        <div
+          style="display: flex; flex-direction: column; align-items: center; gap: var(--lf-space-3)"
+          v-show="isCollapsed"
+        >
           <div class="lf-sidebar__user lf-sidebar__user--collapsed">
             <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
           </div>
@@ -455,7 +484,7 @@
           />
         </div>
 
-        <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; flex-direction: column">
           <button
             class="lf-sidebar__logout"
             @click="handleLogout"
@@ -467,16 +496,33 @@
             >
             <span class="text" v-show="!isCollapsed">{{ t('common.logout') }}</span>
           </button>
-          
-          <div v-show="!isCollapsed" style="margin-left: 32px; text-align: left; opacity: 0.6;">
+
+          <div v-show="!isCollapsed" style="margin-left: 32px; text-align: left; opacity: 0.6">
             <SystemVersionLabel />
           </div>
         </div>
       </div>
     </aside>
 
+    <button
+      v-if="isMobile && !isCollapsed"
+      type="button"
+      class="lf-sidebar-backdrop"
+      :aria-label="t('nav.closeSidebar')"
+      @click="isCollapsed = true"
+    />
+
     <!-- Main Content -->
     <main class="lf-layout-app__main">
+      <button
+        v-if="isMobile && isCollapsed"
+        type="button"
+        class="lf-mobile-sidebar-toggle"
+        :aria-label="t('nav.openSidebar')"
+        @click="isCollapsed = false"
+      >
+        <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+      </button>
       <!-- Page Content -->
       <div class="lf-layout-app__content">
         <router-view />
@@ -486,7 +532,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth.store'
 import { useConfirmDialogStore } from '../stores/confirm-dialog.store'
@@ -498,6 +544,7 @@ import SystemVersionLabel from '../components/notifications/SystemVersionLabel.v
 import { advancedInventoryFeatures } from '../config/features'
 
 const isCollapsed = ref(false)
+const isMobile = ref(false)
 
 const expandedGroups = reactive({
   operations: true,
@@ -523,6 +570,29 @@ const confirmDialogStore = useConfirmDialogStore()
 const router = useRouter()
 const { t } = useI18n()
 
+let mobileMediaQuery: MediaQueryList | null = null
+
+const handleViewportChange = (event: MediaQueryListEvent | MediaQueryList) => {
+  isMobile.value = event.matches
+  if (event.matches) isCollapsed.value = true
+}
+
+onMounted(() => {
+  if (typeof window.matchMedia !== 'function') return
+  mobileMediaQuery = window.matchMedia('(max-width: 767px)')
+  handleViewportChange(mobileMediaQuery)
+  mobileMediaQuery.addEventListener('change', handleViewportChange)
+})
+
+onUnmounted(() => mobileMediaQuery?.removeEventListener('change', handleViewportChange))
+
+watch(
+  () => router.currentRoute.value.fullPath,
+  () => {
+    if (isMobile.value) isCollapsed.value = true
+  },
+)
+
 const handleLogout = () => {
   confirmDialogStore.open({
     title: t('modal.confirmLogoutTitle'),
@@ -544,5 +614,71 @@ const handleLogout = () => {
 .lf-sidebar-logo {
   max-width: 180px;
   height: auto;
+}
+
+.lf-sidebar-backdrop {
+  display: none;
+}
+
+.lf-mobile-sidebar-toggle {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .lf-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 30;
+    width: min(85vw, 20rem);
+    transform: translateX(0);
+    transition: transform 180ms ease;
+  }
+
+  .lf-sidebar--collapsed {
+    width: min(85vw, 20rem);
+    transform: translateX(-105%);
+  }
+
+  .lf-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: block;
+    border: 0;
+    background: rgb(0 0 0 / 58%);
+  }
+
+  .lf-mobile-sidebar-toggle {
+    position: fixed;
+    top: var(--lf-space-4);
+    left: var(--lf-space-4);
+    z-index: 15;
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--lf-border-primary);
+    border-radius: var(--lf-radius);
+    background: var(--lf-surface-primary);
+    color: var(--lf-text-primary);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
+  }
+
+  .lf-mobile-sidebar-toggle:focus-visible,
+  .lf-sidebar-backdrop:focus-visible {
+    outline: 2px solid var(--lf-primary);
+    outline-offset: 2px;
+  }
+
+  .lf-layout-app__content {
+    padding: 4.75rem var(--lf-space-4) var(--lf-space-6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lf-sidebar {
+    transition: none;
+  }
 }
 </style>

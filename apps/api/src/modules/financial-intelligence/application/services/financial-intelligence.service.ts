@@ -16,20 +16,30 @@ export class FinancialIntelligenceService {
       provider: ChannelProvider;
       externalOrderId: string;
       currency?: string;
+      paymentStatus?: string;
+      soldAt?: string;
       revenueAmount?: string;
+      paidAmount?: string;
       channelFeeAmount?: string;
+      estimatedNetAmount?: string;
       freightAmount?: string;
       discountAmount?: string;
     },
   ) {
+    const normalizedFinancial = this.normalizeChannelFinancialInput(input);
+    const financialSignature = createHash('sha256')
+      .update(JSON.stringify(normalizedFinancial))
+      .digest('hex');
     const existingFact = await this.prisma.orderFinancialFact.findFirst({
-      where: { tenantId, orderId, version: 1 },
+      where: { tenantId, orderId, financialSignature, isCurrent: true },
     });
     if (existingFact) return existingFact;
 
     const order = await this.findOrderWithSku(orderId, tenantId);
     const revenueAmount = this.decimal(input.revenueAmount);
+    const paidAmount = this.optionalDecimal(input.paidAmount);
     const channelFeeAmount = this.decimal(input.channelFeeAmount);
+    const estimatedNetAmount = this.optionalDecimal(input.estimatedNetAmount);
     const freightAmount = this.decimal(input.freightAmount);
     const discountAmount = this.decimal(input.discountAmount);
     const { cogsAmount, items, currency } = this.calculateCogs(order.items, input.currency);
@@ -49,6 +59,12 @@ export class FinancialIntelligenceService {
       channelFees: {
         source: 'Provider order detail when available',
         amount: channelFeeAmount.toString(),
+        provided: input.channelFeeAmount !== undefined,
+      },
+      payment: {
+        status: input.paymentStatus ?? null,
+        paidAmount: paidAmount?.toString() ?? null,
+        estimatedNetAmount: estimatedNetAmount?.toString() ?? null,
       },
       freight: {
         source: 'Provider order detail when available',
@@ -62,31 +78,53 @@ export class FinancialIntelligenceService {
       items,
     };
 
-    const fact = await this.prisma.orderFinancialFact.create({
-      data: {
-        tenantId,
-        orderId: order.id,
-        externalOrderId: input.externalOrderId,
-        version: 1,
-        orderNumber: order.orderNumber,
-        orderStatus: order.status,
-        channelProvider: input.provider,
-        revenueAmount,
-        cogsAmount,
-        channelFeeAmount,
-        grossMarginAmount,
-        currency,
-        itemCount: items.length,
-        fulfilledAt: order.fulfilledAt,
-        components: components,
+    const fact = await this.prisma.$transaction(
+      async (transaction) => {
+        const latestVersion = await transaction.orderFinancialFact.aggregate({
+          where: { tenantId, orderId },
+          _max: { version: true },
+        });
+        await transaction.orderFinancialFact.updateMany({
+          where: { tenantId, orderId, isCurrent: true },
+          data: { isCurrent: false },
+        });
+        return transaction.orderFinancialFact.create({
+          data: {
+            tenantId,
+            orderId: order.id,
+            externalOrderId: input.externalOrderId,
+            version: (latestVersion._max.version ?? 0) + 1,
+            orderNumber: order.orderNumber,
+            orderStatus: order.status,
+            channelProvider: input.provider,
+            paymentStatus: input.paymentStatus,
+            soldAt: input.soldAt ? new Date(input.soldAt) : undefined,
+            paidAmount,
+            estimatedNetAmount,
+            financialSignature,
+            isCurrent: true,
+            revenueAmount,
+            cogsAmount,
+            channelFeeAmount,
+            grossMarginAmount,
+            currency,
+            itemCount: items.length,
+            fulfilledAt: order.fulfilledAt,
+            components,
+          },
+        });
       },
-    });
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
 
     await this.audit(tenantId, actorUserId, fact.id, {
       orderId: order.id,
       orderNumber: order.orderNumber,
       provider: input.provider,
       externalOrderId: input.externalOrderId,
+      paymentStatus: input.paymentStatus,
+      paidAmount: paidAmount?.toString(),
+      estimatedNetAmount: estimatedNetAmount?.toString(),
       revenueAmount: revenueAmount.toString(),
       channelFeeAmount: channelFeeAmount.toString(),
       cogsAmount: cogsAmount.toString(),
@@ -96,6 +134,10 @@ export class FinancialIntelligenceService {
       factId: fact.id,
       orderId: order.id,
       provider: input.provider,
+      version: fact.version,
+      paymentStatus: input.paymentStatus,
+      paidAmount: paidAmount?.toString(),
+      estimatedNetAmount: estimatedNetAmount?.toString(),
       revenueAmount: revenueAmount.toString(),
       channelFeeAmount: channelFeeAmount.toString(),
       cogsAmount: cogsAmount.toString(),
@@ -103,6 +145,34 @@ export class FinancialIntelligenceService {
     });
 
     return { ...fact, components };
+  }
+
+  private normalizeChannelFinancialInput(input: {
+    provider: ChannelProvider;
+    externalOrderId: string;
+    currency?: string;
+    paymentStatus?: string;
+    soldAt?: string;
+    revenueAmount?: string;
+    paidAmount?: string;
+    channelFeeAmount?: string;
+    estimatedNetAmount?: string;
+    freightAmount?: string;
+    discountAmount?: string;
+  }) {
+    return {
+      provider: input.provider,
+      externalOrderId: input.externalOrderId,
+      currency: input.currency ?? 'BRL',
+      paymentStatus: input.paymentStatus ?? null,
+      soldAt: input.soldAt ?? null,
+      revenueAmount: this.normalizedDecimal(input.revenueAmount),
+      paidAmount: this.normalizedDecimal(input.paidAmount),
+      channelFeeAmount: this.normalizedDecimal(input.channelFeeAmount),
+      estimatedNetAmount: this.normalizedDecimal(input.estimatedNetAmount),
+      freightAmount: this.normalizedDecimal(input.freightAmount),
+      discountAmount: this.normalizedDecimal(input.discountAmount),
+    };
   }
 
   async createFulfilledOrderFact(orderId: string, tenantId: string, actorUserId?: string) {
@@ -293,6 +363,14 @@ export class FinancialIntelligenceService {
 
   private decimal(value: string | undefined) {
     return new Prisma.Decimal(value ?? 0);
+  }
+
+  private optionalDecimal(value: string | undefined) {
+    return value === undefined ? undefined : new Prisma.Decimal(value);
+  }
+
+  private normalizedDecimal(value: string | undefined) {
+    return value === undefined ? null : new Prisma.Decimal(value).toString();
   }
 
   private async audit(

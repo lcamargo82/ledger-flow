@@ -45,6 +45,15 @@ describe('commerce navigation foundation', () => {
     expect(analyticsRoute?.meta.capabilities).toEqual(['financial.analytics.read'])
   })
 
+  it('registers sales intelligence route behind dedicated access metadata', () => {
+    const salesIntelligenceRoute = router
+      .getRoutes()
+      .find((item) => item.path === '/sales-intelligence')
+
+    expect(salesIntelligenceRoute?.meta.permissions).toEqual(['sales-intelligence:read'])
+    expect(salesIntelligenceRoute?.meta.capabilities).toEqual(['sales_intelligence.read'])
+  })
+
   it('registers exports route behind report export permission', () => {
     const exportsRoute = router.getRoutes().find((item) => item.path === '/exports')
 
@@ -96,6 +105,12 @@ describe('commerce navigation foundation', () => {
     expect(ptBR.financialIntelligence.cards.cogs).toBe('CMV')
     expect(enUS.financialIntelligence.table.margin).toBe('Margin')
     expect(ptBR.nav.analytics).toBe('Analytics')
+    expect(ptBR.nav.salesIntelligence).toBe('Inteligência de vendas')
+    expect(enUS.nav.salesIntelligence).toBe('Sales intelligence')
+    expect(ptBR.salesIntelligence.foundation.scope).toBe(
+      'Pedido, pagamento, taxa, líquido e estoque',
+    )
+    expect(enUS.salesIntelligence.empty.title).toBe('No marketplace sales yet')
     expect(ptBR.exports.actions.create).toBe('Gerar CSV')
     expect(enUS.exports.status.COMPLETED).toBe('Completed')
     expect(ptBR.nav.reconciliation).toBe('Conciliação')

@@ -1,4 +1,3 @@
-import { AsyncModule } from './modules/async/async.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
@@ -29,6 +28,7 @@ import { ExportsModule } from './modules/exports/exports.module';
 import { ReconciliationModule } from './modules/reconciliation/reconciliation.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { MarketplaceSettlementModule } from './modules/marketplace-settlement/marketplace-settlement.module';
+import { SalesIntelligenceModule } from './modules/sales-intelligence/sales-intelligence.module';
 
 @Module({
   imports: [
@@ -54,6 +54,7 @@ import { MarketplaceSettlementModule } from './modules/marketplace-settlement/ma
     ReconciliationModule,
     NotificationsModule,
     MarketplaceSettlementModule,
+    SalesIntelligenceModule,
   ],
   controllers: [AppController],
   providers: [
