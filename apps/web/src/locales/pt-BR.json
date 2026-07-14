@@ -235,6 +235,34 @@
       "mercadoPagoPaymentStatusUpdated": {
         "title": "Pagamento Mercado Pago atualizado",
         "message": "O pagamento {paymentReference} mudou de {previousStatus} para {currentStatus}."
+      },
+      "saleLossDetected": {
+        "title": "Prejuízo detectado na venda",
+        "message": "O pedido {orderNumber} apresentou margem negativa de {margin}%."
+      },
+      "saleLowMarginDetected": {
+        "title": "Margem baixa detectada",
+        "message": "O pedido {orderNumber} está com margem de {margin}%, abaixo do limite de {threshold}%."
+      },
+      "saleMissingCostDetected": {
+        "title": "Custo ausente na venda",
+        "message": "O pedido {orderNumber} não pode ter sua margem calculada porque há custo de SKU ausente."
+      },
+      "saleStockNotConsumed": {
+        "title": "Baixa de estoque pendente",
+        "message": "O pedido atendido {orderNumber} ainda não teve todo o estoque consumido."
+      },
+      "saleShippingDelayed": {
+        "title": "Envio atrasado",
+        "message": "O envio do pedido {orderNumber} está atrasado."
+      },
+      "saleSettlementDivergent": {
+        "title": "Settlement divergente",
+        "message": "O pedido {orderNumber} possui divergência de settlement."
+      },
+      "saleCashReleaseBlocked": {
+        "title": "Liberação de caixa bloqueada",
+        "message": "O valor do pedido {orderNumber} está com liberação bloqueada."
       }
     }
   },
@@ -773,7 +801,21 @@
       "CANCELLED": "Cancelado"
     },
     "actions": {
-      "details": "Ver itens"
+      "details": "Ver itens",
+      "export": "Exportar CSV",
+      "exporting": "Preparando CSV…",
+      "settings": "Configurar alertas"
+    },
+    "policy": {
+      "title": "Alertas de margem",
+      "enabled": "Alertar margem baixa",
+      "threshold": "Limite de margem (%)",
+      "save": "Salvar política",
+      "saved": "Política atualizada"
+    },
+    "export": {
+      "ready": "CSV pronto para baixar",
+      "failed": "Não foi possível gerar o CSV."
     },
     "drawer": {
       "title": "Itens do pedido {order}",

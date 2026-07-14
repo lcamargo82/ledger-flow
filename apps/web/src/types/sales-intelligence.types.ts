@@ -144,3 +144,8 @@ export interface SalesIntelligenceFilters {
   paymentStatus?: string
   stockStatus?: SalesIntelligenceStockStatus
 }
+
+export interface SalesIntelligencePolicy {
+  lowMarginEnabled: boolean
+  lowMarginThreshold: string
+}

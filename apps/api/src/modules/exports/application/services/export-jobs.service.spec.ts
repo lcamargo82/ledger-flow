@@ -34,6 +34,7 @@ describe('ExportJobsService', () => {
       orderFinancialFact: { findMany: jest.fn() },
       reconciliationCase: { findMany: jest.fn() },
       providerSettlementEvent: { findMany: jest.fn() },
+      internalOrder: { findMany: jest.fn() },
       auditLog: { create: jest.fn() },
       outboxEvent: { create: jest.fn() },
     };
@@ -53,6 +54,40 @@ describe('ExportJobsService', () => {
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(prisma.exportJob.create).not.toHaveBeenCalled();
+  });
+
+  it('derives protected Sales Intelligence columns from server permissions', async () => {
+    prisma.exportJob.create.mockImplementation(({ data }: any) =>
+      Promise.resolve({ id: 'sales-job', ...data }),
+    );
+
+    await service.createSalesIntelligenceJob(
+      'tenant-1',
+      'user-1',
+      ['sales-intelligence:export', 'sales-intelligence:view-profitability'],
+      { orderReference: '=unsafe-filter' },
+    );
+
+    expect(prisma.exportJob.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tenantId: 'tenant-1',
+        type: ExportJobType.SALES_INTELLIGENCE,
+        parameters: expect.objectContaining({
+          includeProfitability: true,
+          includeSettlement: false,
+        }),
+      }),
+    });
+  });
+
+  it('blocks Sales Intelligence export through the generic report endpoint', async () => {
+    await expect(
+      service.createJob('tenant-1', 'user-1', {
+        type: ExportJobType.SALES_INTELLIGENCE,
+        format: ExportJobFormat.CSV,
+        parameters: { includeSettlement: true },
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('streams catalog products into CSV and preserves SKU as spreadsheet text', async () => {

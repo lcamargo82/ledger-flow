@@ -43,6 +43,7 @@ export const salesIntelligenceDetailSelect = {
       channelFeeAmount: true,
       estimatedNetAmount: true,
       cogsAmount: true,
+      grossMarginAmount: true,
       soldAt: true,
       calculatedAt: true,
       currency: true,
