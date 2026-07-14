@@ -439,7 +439,7 @@ Itens:
 
 ## Fase 11.0 — Sales Intelligence Core
 
-**Status:** 11.0.1 e 11.0.2 concluídas nas branches das sprints
+**Status:** Core 11.0.1–11.0.4 concluído
 
 **Escopo aprovado:** uma linha por pedido Mercado Livre, SKUs agrupados no drawer, pagamento, taxa, líquido com origem `REALIZED/RECONCILED/ESTIMATED/UNAVAILABLE` e estado de estoque. `/orders` permanece operacional e `/sales-intelligence` é leitura analítica.
 

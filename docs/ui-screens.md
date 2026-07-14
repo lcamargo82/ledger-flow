@@ -56,10 +56,10 @@ Especificação detalhada, tela a tela, baseada no UI Blueprint e nos requisitos
 ### Sales Intelligence
 
 - **Rota:** `/sales-intelligence`
-- **Status:** Implementada (11.0.3)
+- **Status:** Implementada e validada (11.0.4)
 - **Objetivo:** Consolidar uma linha por pedido Mercado Livre com pagamento, taxa, líquido identificado pela origem e estoque.
 - **Permissões:** `sales-intelligence:read` + `sales_intelligence.read` (`ENTERPRISE`/`CUSTOM` ativo).
-- **Componentes:** resumo, filtros, `AppTable`, paginação e `AppDrawer` com SKUs agrupados.
+- **Componentes:** `AppMetricGrid`/`AppMetricCard`, filtros, `AppTable`, paginação e `AppDrawer` com SKUs agrupados.
 - **Estados:** loading, empty, error com retry, fila paginada e drawer por pedido.
 - **Segurança:** tenant derivado da sessão; sem payload bruto, comprador, credenciais, custo, lucro ou margem.
 

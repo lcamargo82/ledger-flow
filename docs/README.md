@@ -157,6 +157,8 @@ O recorte aprovado consolida pedido Mercado Livre, pagamento, taxa, líquido com
 - `specs/11.0-sprint-plan.md`
 - `backlog/11.0-sales-intelligence-backlog.md`
 - `adr/0039-sales-intelligence-read-layer.md`
+- `runbooks/11.0-sales-intelligence-operational-readiness.md`
+- `reference/11.0.4-security-assessment.md`
 - `superpowers/plans/2026-07-14-11-0-sales-intelligence-core.md`
 
 ## Onde colocar os arquivos no repositório

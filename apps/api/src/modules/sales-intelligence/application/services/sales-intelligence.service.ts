@@ -49,19 +49,17 @@ export class SalesIntelligenceService {
     };
   }
 
-  async getSummary(
-    tenantId: string,
-    query: ListSalesIntelligenceQueryDto = {},
-  ) {
+  async getSummary(tenantId: string, query: ListSalesIntelligenceQueryDto = {}) {
     const summary = this.emptySummary();
     const batchSize = 500;
     const where = buildSalesIntelligenceWhere(tenantId, query);
+    let cursorId: string | undefined;
 
-    for (let skip = 0; ; skip += batchSize) {
+    for (;;) {
       const orders = await this.prisma.internalOrder.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
-        skip,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        ...(cursorId && { cursor: { id: cursorId }, skip: 1 }),
         take: batchSize,
         select: salesIntelligenceOrderSelect,
       });
@@ -69,15 +67,13 @@ export class SalesIntelligenceService {
         .map((order) => mapSalesIntelligenceOrder(order))
         .forEach((row) => this.addToSummary(summary, row));
       if (orders.length < batchSize) break;
+      cursorId = orders.at(-1)?.id;
     }
 
     return this.serializeSummary(summary);
   }
 
-  private addToSummary(
-    summary: SummaryAccumulator,
-    row: SalesIntelligenceRowDto,
-  ) {
+  private addToSummary(summary: SummaryAccumulator, row: SalesIntelligenceRowDto) {
     summary.orderCount += 1;
     summary.paid += this.minor(row.paidAmountMinor);
     summary.fee += this.minor(row.feeAmountMinor);
@@ -91,8 +87,7 @@ export class SalesIntelligenceService {
     if (row.netAmountSource === SalesIntelligenceNetAmountSource.ESTIMATED) {
       summary.estimated += this.minor(row.netAmountMinor);
     }
-    if (row.stockStatus === SalesIntelligenceStockStatus.DIVERGENT)
-      summary.stockIssues += 1;
+    if (row.stockStatus === SalesIntelligenceStockStatus.DIVERGENT) summary.stockIssues += 1;
     summary.currency = row.currency;
   }
 

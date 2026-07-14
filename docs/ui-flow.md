@@ -37,7 +37,7 @@ Telas acessíveis após autenticação bem-sucedida, com verificação de roles/
 - **Notifications** (`/notifications`) - Planejada 10.2.0A
 - **Inventory Transfers** (`/inventory/transfers`) - Implementada 10.2.2
 - **Cycle Counts** (`/inventory/cycle-counts`) - Implementada 10.2.3
-- **Sales Intelligence** (`/sales-intelligence`) - Implementada 11.0.3
+- **Sales Intelligence** (`/sales-intelligence`) - Implementada 11.0.4
 - **Reports** (`/reports`) - _Futura tela_
 - **Webhooks** (`/webhooks`) - _Futura tela_
 - **Audit Logs** (`/audit-logs`) - _Futura tela_
@@ -71,7 +71,7 @@ Abaixo a lista plana de rotas e seus respectivos status de implementação:
 | `/exports`              | Implementada (10.0.10) | `AppLayout`              | `reports:export`                     | Exportações CSV rastreáveis com fila operacional        |
 | `/channels`             | Implementada (10.0.6–10.1), expansão 10.1.10 planejada | `AppLayout` | `channels:read` + capabilities específicas | Integrações reais, inbox, malha fina e sync |
 | `/analytics`            | Implementada (10.0.9) | `AppLayout`                | `financial-intelligence:read` + `financial.analytics.read` | Dashboard operacional de facts financeiros              |
-| `/sales-intelligence`   | Implementada (11.0.3) | `AppLayout`                | `sales-intelligence:read` + `sales_intelligence.read` | Fila por pedido, pagamento, taxa, líquido e estoque |
+| `/sales-intelligence`   | Implementada (11.0.4) | `AppLayout`                | `sales-intelligence:read` + `sales_intelligence.read` | Fila por pedido, pagamento, taxa, líquido e estoque |
 | `/webhooks`             | Futura                | `AppLayout`                | a definir                             | Configuração e logs de webhooks                         |
 | `/audit-logs`           | Futura                | `AppLayout`                | a definir                             | Logs de auditoria geral                                 |
 | `/forbidden`            | Implementada          | `AppLayout` / `AuthLayout` | N/A                                   | Informar acesso negado por falta de permissão           |

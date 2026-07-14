@@ -677,6 +677,7 @@
     "internalChannel": "Internal",
     "reconciliationNote": "Operational margin is not settlement, cash receipt, or financial reconciliation.",
     "cards": {
+      "title": "Financial indicators",
       "orders": "Orders with facts",
       "revenue": "Operational revenue",
       "cogs": "COGS",

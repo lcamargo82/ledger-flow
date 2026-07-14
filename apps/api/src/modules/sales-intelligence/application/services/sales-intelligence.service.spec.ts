@@ -107,9 +107,7 @@ describe('SalesIntelligenceService', () => {
 
     const result = await service.list('tenant-1', {});
 
-    expect(result.data[0].netAmountSource).toBe(
-      SalesIntelligenceNetAmountSource.RECONCILED,
-    );
+    expect(result.data[0].netAmountSource).toBe(SalesIntelligenceNetAmountSource.RECONCILED);
   });
 
   it('falls back to explicitly estimated net and marks mixed stock as divergent', async () => {
@@ -218,27 +216,16 @@ describe('SalesIntelligenceService', () => {
   it.each([
     [null, SalesIntelligenceStockStatus.PENDING],
     [InventoryReservationStatus.ACTIVE, SalesIntelligenceStockStatus.RESERVED],
-    [
-      InventoryReservationStatus.CONSUMED,
-      SalesIntelligenceStockStatus.CONSUMED,
-    ],
-    [
-      InventoryReservationStatus.RELEASED,
-      SalesIntelligenceStockStatus.RELEASED,
-    ],
-  ])(
-    'maps reservation status %s to aggregate stock status %s',
-    async (status, expected) => {
-      prisma.internalOrder.findMany.mockResolvedValue([
-        makeOrder({ reservationStatus: status }),
-      ]);
-      const service = new SalesIntelligenceService(prisma as never);
+    [InventoryReservationStatus.CONSUMED, SalesIntelligenceStockStatus.CONSUMED],
+    [InventoryReservationStatus.RELEASED, SalesIntelligenceStockStatus.RELEASED],
+  ])('maps reservation status %s to aggregate stock status %s', async (status, expected) => {
+    prisma.internalOrder.findMany.mockResolvedValue([makeOrder({ reservationStatus: status })]);
+    const service = new SalesIntelligenceService(prisma as never);
 
-      const result = await service.list('tenant-1', {});
+    const result = await service.list('tenant-1', {});
 
-      expect(result.data[0].stockStatus).toBe(expected);
-    },
-  );
+    expect(result.data[0].stockStatus).toBe(expected);
+  });
 
   it('summarizes minor-unit amounts by their explicit net provenance', async () => {
     prisma.internalOrder.findMany.mockResolvedValue([
@@ -278,6 +265,32 @@ describe('SalesIntelligenceService', () => {
       currency: 'BRL',
     });
   });
+
+  it('uses bounded cursor batches when summarizing a large filtered range', async () => {
+    const firstBatch = Array.from({ length: 500 }, (_, index) =>
+      makeOrder({ id: `order-${index}` }),
+    );
+    prisma.internalOrder.findMany
+      .mockResolvedValueOnce(firstBatch)
+      .mockResolvedValueOnce([makeOrder({ id: 'order-500' })]);
+    const service = new SalesIntelligenceService(prisma as never);
+
+    const result = await service.getSummary('tenant-1', {
+      dateFrom: '2026-01-01T00:00:00.000Z',
+      dateTo: '2026-07-14T23:59:59.999Z',
+    });
+
+    expect(result.orderCount).toBe(501);
+    expect(prisma.internalOrder.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        cursor: { id: 'order-499' },
+        skip: 1,
+        take: 500,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      }),
+    );
+  });
 });
 
 function makeOrder(
@@ -308,9 +321,7 @@ function makeOrder(
           options.reservationStatus === null
             ? null
             : {
-                status:
-                  options.reservationStatus ??
-                  InventoryReservationStatus.ACTIVE,
+                status: options.reservationStatus ?? InventoryReservationStatus.ACTIVE,
               },
       },
     ],
