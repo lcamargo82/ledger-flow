@@ -79,8 +79,8 @@ currency
 
 ## Implementation Tasks
 
-- [ ] 1. Importar e recortar a documentação 11.0 para o MVP Core → Verify: PRD/SDD/spec/backlog/ADR deixam explícitos os itens `in/out`, as três fontes de verdade e a precedência do líquido.
-- [ ] 2. Criar a foundation do módulo, permission/capability, DTOs e endpoints protegidos → Verify: testes de controller/guard retornam `401/403/200`, tenant vem apenas do JWT e OpenAPI expõe os contratos paginados.
+- [x] 1. Importar e recortar a documentação 11.0 para o MVP Core → Verify: PRD/SDD/spec/backlog/ADR deixam explícitos os itens `in/out`, as três fontes de verdade e a precedência do líquido.
+- [x] 2. Criar a foundation do módulo, permission/capability, DTOs e endpoints protegidos → Verify: testes de controller/guard cobrem acesso dedicado, tenant vem apenas do usuário autenticado e OpenAPI expõe os contratos paginados.
 - [ ] 3. Corrigir a persistência financeira do intake Mercado Livre → Verify: testes do adapter/intake persistem status, pago, taxa e líquido esperado; webhook repetido não duplica versão e mudança real cria uma nova revisão idempotente.
 - [ ] 4. Implementar a query consolidada e o mapper de proveniência financeira → Verify: testes cobrem líquido realizado, fallback estimado, indisponível, refund/cancelamento e match divergente sem N+1.
 - [ ] 5. Implementar a derivação agregada do estoque → Verify: testes cobrem pedido sem reserva, todos reservados, todos consumidos, todos liberados e itens em estados incompatíveis retornando `DIVERGENT`.

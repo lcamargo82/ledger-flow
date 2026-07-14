@@ -434,3 +434,20 @@ Itens:
 - Listagem de clientes com tabela e filtros.
 - Cadastro, edição e detalhes.
 - Integração de RBAC (customers:read, create, update).
+
+---
+
+## Fase 11.0 — Sales Intelligence Core
+
+**Status:** 11.0.1 concluída na branch da sprint
+
+**Escopo aprovado:** uma linha por pedido Mercado Livre, SKUs agrupados no drawer, pagamento, taxa, líquido com origem `REALIZED/RECONCILED/ESTIMATED/UNAVAILABLE` e estado de estoque. `/orders` permanece operacional e `/sales-intelligence` é leitura analítica.
+
+```text
+11.0.1 — Foundation
+11.0.2 — Read model consolidado
+11.0.3 — Fila, resumo, filtros e drawer
+11.0.4 — Hardening e fechamento
+```
+
+Fora do Core: custo/lucro/margem, DRE, shipping completo, timeline, alertas, n8n e exports.

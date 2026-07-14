@@ -93,6 +93,10 @@ async function main() {
       key: 'financial-intelligence:read',
       description: 'Visualizar inteligência financeira operacional',
     },
+    {
+      key: 'sales-intelligence:read',
+      description: 'Visualizar inteligência de vendas consolidada',
+    },
     { key: 'reconciliation:read', description: 'Visualizar conciliação financeira' },
     { key: 'reconciliation:manage', description: 'Gerenciar casos de conciliação financeira' },
     { key: 'reconciliation:export', description: 'Exportar relatórios de conciliação financeira' },

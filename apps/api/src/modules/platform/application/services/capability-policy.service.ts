@@ -43,6 +43,7 @@ const reconciliationCapabilities: PlatformCapability[] = [
 const masterCapabilities: PlatformCapability[] = [
   ...commerceCapabilities,
   CommerceCapabilities.FinancialAnalyticsRead,
+  CommerceCapabilities.SalesIntelligenceRead,
   ...reconciliationCapabilities,
   NotificationCapabilities.Manage,
   InventoryAdvancedCapabilities.Approval,

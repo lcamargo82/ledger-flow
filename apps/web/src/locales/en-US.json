@@ -144,6 +144,7 @@
     "orders": "Orders",
     "channels": "Channels",
     "analytics": "Analytics",
+    "salesIntelligence": "Sales intelligence",
     "customers": "Customers",
     "reconciliation": "Reconciliation",
     "marketplaceSettlement": "Receivables",
@@ -699,6 +700,20 @@
       "default": "Could not process financial indicators.",
       "forbidden": "You do not have financial analytics access.",
       "invalid": "Review the filters."
+    }
+  },
+  "salesIntelligence": {
+    "title": "Sales intelligence",
+    "description": "Track each marketplace sale without mixing order operations and financial analysis.",
+    "foundation": {
+      "eyebrow": "Sales Intelligence Core",
+      "scope": "Order, payment, fee, net amount, and inventory",
+      "provenance": "Realized, reconciled, and estimated values will always identify their source.",
+      "status": "11.0.1 foundation"
+    },
+    "empty": {
+      "title": "No marketplace sales yet",
+      "description": "Sales will appear here when the consolidated read model is enabled in 11.0.2."
     }
   },
   "exports": {

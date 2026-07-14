@@ -10,6 +10,7 @@ export const CommerceCapabilities = {
   ChannelsSyncInventory: 'channels.sync_inventory',
   OrdersChannelIntake: 'orders.channel_intake',
   FinancialAnalyticsRead: 'financial.analytics.read',
+  SalesIntelligenceRead: 'sales_intelligence.read',
 } as const;
 
 export type CommerceCapability = (typeof CommerceCapabilities)[keyof typeof CommerceCapabilities];
