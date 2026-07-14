@@ -9,6 +9,13 @@ import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { CreateExportJobDto } from '../dto/create-export-job.dto';
 import { ListExportJobsQueryDto } from '../dto/list-export-jobs-query.dto';
+import { ListSalesIntelligenceQueryDto } from '../../../sales-intelligence/application/dto/list-sales-intelligence-query.dto';
+import {
+  buildSalesIntelligenceWhere,
+  salesIntelligenceOrderSelect,
+} from '../../../sales-intelligence/application/services/sales-intelligence.query';
+import { mapSalesIntelligenceOrder } from '../../../sales-intelligence/application/services/sales-intelligence.mapper';
+import { SalesIntelligenceNetAmountSource } from '../../../sales-intelligence/domain/enums/sales-intelligence.enums';
 
 const BATCH_SIZE = 100;
 const EXPORT_TTL_HOURS = 24;
@@ -25,6 +32,9 @@ export class ExportJobsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createJob(tenantId: string, actorUserId: string, dto: CreateExportJobDto) {
+    if (dto.type === ExportJobType.SALES_INTELLIGENCE) {
+      throw new BadRequestException('Use the Sales Intelligence export endpoint.');
+    }
     if (dto.format === ExportJobFormat.XLSX) {
       throw new BadRequestException('XLSX export is reserved until a spreadsheet writer is added.');
     }
@@ -46,6 +56,52 @@ export class ExportJobsService {
     });
 
     return job;
+  }
+
+  async createSalesIntelligenceJob(
+    tenantId: string,
+    actorUserId: string,
+    permissions: string[],
+    filters: ListSalesIntelligenceQueryDto,
+  ) {
+    const job = await this.prisma.exportJob.create({
+      data: {
+        tenantId,
+        requestedByUserId: actorUserId,
+        type: ExportJobType.SALES_INTELLIGENCE,
+        format: ExportJobFormat.CSV,
+        status: ExportJobStatus.PENDING,
+        parameters: this.normalizeParameters({
+          ...filters,
+          includeProfitability: permissions.includes('sales-intelligence:view-profitability'),
+          includeSettlement: permissions.includes('sales-intelligence:view-settlement'),
+        }),
+      },
+    });
+    await this.audit(tenantId, actorUserId, 'export.job.created', job.id, {
+      type: job.type,
+      format: job.format,
+    });
+    return job;
+  }
+
+  async processSalesIntelligencePending(tenantId: string, actorUserId: string, limit = 5) {
+    const jobs = await this.prisma.exportJob.findMany({
+      where: { tenantId, type: ExportJobType.SALES_INTELLIGENCE, status: ExportJobStatus.PENDING },
+      orderBy: { createdAt: 'asc' },
+      take: Math.min(Math.max(limit, 1), 20),
+    });
+    const processed: ExportJob[] = [];
+    for (const job of jobs) processed.push(await this.processJob(tenantId, actorUserId, job));
+    return { processed };
+  }
+
+  async downloadSalesIntelligenceJob(tenantId: string, actorUserId: string, id: string) {
+    const job = await this.getTenantJob(tenantId, id);
+    if (job.type !== ExportJobType.SALES_INTELLIGENCE) {
+      throw new NotFoundException('Export job not found.');
+    }
+    return this.downloadJob(tenantId, actorUserId, id);
   }
 
   async listJobs(tenantId: string, query: ListExportJobsQueryDto) {
@@ -274,6 +330,29 @@ export class ExportJobsService {
       ]);
       rowCount = await this.streamMarketplaceSettlementEvents(job, stream);
     }
+    if (job.type === ExportJobType.SALES_INTELLIGENCE) {
+      const parameters = (job.parameters ?? {}) as Record<string, unknown>;
+      const includeProfitability = parameters.includeProfitability === true;
+      const includeSettlement = parameters.includeSettlement === true;
+      await this.writeLine(stream, [
+        'order_number',
+        'external_order_id',
+        'sold_at',
+        'order_status',
+        'products',
+        'skus',
+        'warehouses',
+        'payment_status',
+        'paid_amount_minor',
+        'fee_amount_minor',
+        'net_amount_minor',
+        'net_amount_source',
+        'stock_status',
+        ...(includeProfitability ? ['cogs_amount', 'gross_margin_amount'] : []),
+        ...(includeSettlement ? ['settlement_included'] : []),
+      ]);
+      rowCount = await this.streamSalesIntelligence(job, stream);
+    }
 
     stream.end();
     await once(stream, 'finish');
@@ -440,10 +519,7 @@ export class ExportJobsService {
     return where;
   }
 
-  private async streamMarketplaceSettlementEvents(
-    job: ExportJob,
-    stream: NodeJS.WritableStream,
-  ) {
+  private async streamMarketplaceSettlementEvents(job: ExportJob, stream: NodeJS.WritableStream) {
     let cursor: string | undefined;
     let rowCount = 0;
     const where = this.buildMarketplaceSettlementEventsWhere(job);
@@ -510,6 +586,77 @@ export class ExportJobsService {
     return where;
   }
 
+  private async streamSalesIntelligence(job: ExportJob, stream: NodeJS.WritableStream) {
+    const parameters = (job.parameters ?? {}) as Record<string, unknown>;
+    const where = buildSalesIntelligenceWhere(
+      job.tenantId,
+      this.salesIntelligenceFilters(parameters),
+    );
+    const includeProfitability = parameters.includeProfitability === true;
+    const includeSettlement = parameters.includeSettlement === true;
+    let cursor: string | undefined;
+    let rowCount = 0;
+
+    while (true) {
+      const orders = await this.prisma.internalOrder.findMany({
+        where,
+        orderBy: { id: 'asc' },
+        take: BATCH_SIZE,
+        ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+        select: salesIntelligenceOrderSelect,
+      });
+      if (orders.length === 0) break;
+
+      for (const order of orders) {
+        const row = mapSalesIntelligenceOrder(order);
+        const fact = order.financialFacts[0];
+        await this.writeLine(stream, [
+          this.neutralizeSpreadsheetFormula(row.orderNumber),
+          this.neutralizeSpreadsheetFormula(row.externalOrderId ?? ''),
+          row.soldAt.toISOString(),
+          row.orderStatus,
+          this.neutralizeSpreadsheetFormula(row.items.map((item) => item.productName).join(' | ')),
+          this.neutralizeSpreadsheetFormula(row.items.map((item) => item.sku).join(' | ')),
+          this.neutralizeSpreadsheetFormula(
+            order.items
+              .map((item) => `${item.warehouse.name} · ${item.warehouse.code}`)
+              .join(' | '),
+          ),
+          row.paymentStatus ?? '',
+          row.paidAmountMinor ?? '',
+          row.feeAmountMinor ?? '',
+          row.netAmountMinor ?? '',
+          row.netAmountSource,
+          row.stockStatus,
+          ...(includeProfitability
+            ? [fact?.cogsAmount.toString() ?? '', fact?.grossMarginAmount.toString() ?? '']
+            : []),
+          ...(includeSettlement
+            ? [row.netAmountSource !== SalesIntelligenceNetAmountSource.ESTIMATED]
+            : []),
+        ]);
+        rowCount += 1;
+      }
+      cursor = orders.at(-1)?.id;
+    }
+    return rowCount;
+  }
+
+  private salesIntelligenceFilters(
+    parameters: Record<string, unknown>,
+  ): ListSalesIntelligenceQueryDto {
+    return {
+      dateFrom: typeof parameters.dateFrom === 'string' ? parameters.dateFrom : undefined,
+      dateTo: typeof parameters.dateTo === 'string' ? parameters.dateTo : undefined,
+      orderReference:
+        typeof parameters.orderReference === 'string' ? parameters.orderReference : undefined,
+      paymentStatus:
+        typeof parameters.paymentStatus === 'string' ? parameters.paymentStatus : undefined,
+      stockStatus:
+        typeof parameters.stockStatus === 'string' ? (parameters.stockStatus as never) : undefined,
+    };
+  }
+
   private async getTenantJob(tenantId: string, id: string) {
     const job = await this.prisma.exportJob.findFirst({ where: { id, tenantId } });
     if (!job) throw new NotFoundException('Export job not found.');
@@ -543,12 +690,26 @@ export class ExportJobsService {
   }
 
   private toCsvValue(value: unknown) {
-    const text = value === null || value === undefined ? '' : String(value);
+    const text = this.csvScalar(value);
     return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  private csvScalar(value: unknown): string {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+      return value.toString();
+    }
+    if (value instanceof Date) return value.toISOString();
+    throw new TypeError('CSV values must be scalar.');
   }
 
   private preserveAsSpreadsheetText(value: string) {
     return `="${value.replace(/"/g, '""')}"`;
+  }
+
+  private neutralizeSpreadsheetFormula(value: string) {
+    return /^[=+\-@]/.test(value.trimStart()) ? `'${value}` : value;
   }
 
   private async audit(

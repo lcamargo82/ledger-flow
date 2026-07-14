@@ -83,6 +83,83 @@ const NOTIFICATION_EVENT_REGISTRY = {
     requiredPermissions: ['payments:read', 'payments:manage'],
     requiredCapabilities: [NotificationCapabilities.Read],
   },
+  'sale.loss_detected': {
+    category: NotificationCategory.ORDERS,
+    severity: NotificationSeverity.ERROR,
+    titleKey: 'notifications.events.saleLossDetected.title',
+    messageKey: 'notifications.events.saleLossDetected.message',
+    requiredPermissions: ['sales-intelligence:view-profitability'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      CommerceCapabilities.SalesIntelligenceRead,
+    ],
+  },
+  'sale.low_margin_detected': {
+    category: NotificationCategory.ORDERS,
+    severity: NotificationSeverity.WARNING,
+    titleKey: 'notifications.events.saleLowMarginDetected.title',
+    messageKey: 'notifications.events.saleLowMarginDetected.message',
+    requiredPermissions: ['sales-intelligence:view-profitability'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      CommerceCapabilities.SalesIntelligenceRead,
+    ],
+  },
+  'sale.missing_cost_detected': {
+    category: NotificationCategory.ORDERS,
+    severity: NotificationSeverity.WARNING,
+    titleKey: 'notifications.events.saleMissingCostDetected.title',
+    messageKey: 'notifications.events.saleMissingCostDetected.message',
+    requiredPermissions: ['sales-intelligence:view-profitability'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      CommerceCapabilities.SalesIntelligenceRead,
+    ],
+  },
+  'sale.stock_not_consumed': {
+    category: NotificationCategory.INVENTORY,
+    severity: NotificationSeverity.WARNING,
+    titleKey: 'notifications.events.saleStockNotConsumed.title',
+    messageKey: 'notifications.events.saleStockNotConsumed.message',
+    requiredPermissions: ['sales-intelligence:read', 'inventory:read'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      CommerceCapabilities.SalesIntelligenceRead,
+    ],
+  },
+  'sale.shipping_delayed': {
+    category: NotificationCategory.ORDERS,
+    severity: NotificationSeverity.WARNING,
+    titleKey: 'notifications.events.saleShippingDelayed.title',
+    messageKey: 'notifications.events.saleShippingDelayed.message',
+    requiredPermissions: ['sales-intelligence:read', 'orders:read'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      CommerceCapabilities.SalesIntelligenceRead,
+    ],
+  },
+  'sale.settlement_divergent': {
+    category: NotificationCategory.RECONCILIATION,
+    severity: NotificationSeverity.WARNING,
+    titleKey: 'notifications.events.saleSettlementDivergent.title',
+    messageKey: 'notifications.events.saleSettlementDivergent.message',
+    requiredPermissions: ['sales-intelligence:view-settlement'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      CommerceCapabilities.SalesIntelligenceRead,
+    ],
+  },
+  'sale.cash_release_blocked': {
+    category: NotificationCategory.RECONCILIATION,
+    severity: NotificationSeverity.ERROR,
+    titleKey: 'notifications.events.saleCashReleaseBlocked.title',
+    messageKey: 'notifications.events.saleCashReleaseBlocked.message',
+    requiredPermissions: ['sales-intelligence:view-settlement'],
+    requiredCapabilities: [
+      NotificationCapabilities.Read,
+      CommerceCapabilities.SalesIntelligenceRead,
+    ],
+  },
 } satisfies Record<string, NotificationEventContract>;
 
 export type RegisteredNotificationEventType = keyof typeof NOTIFICATION_EVENT_REGISTRY;

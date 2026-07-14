@@ -2,6 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { useSalesIntelligenceStore } from '../stores/sales-intelligence.store'
+import { useAuthStore } from '../stores/auth.store'
+import { useToastStore } from '../stores/toast.store'
+import { salesIntelligenceService } from '../services/sales-intelligence.service'
 import { formatDateTime } from '../utils/date-format'
 import { formatMoneyFromCents } from '../utils/money-format'
 import type {
@@ -16,6 +19,7 @@ import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
 import AppMetricCard from '../components/common/AppMetricCard.vue'
 import AppMetricGrid from '../components/common/AppMetricGrid.vue'
+import AppModal from '../components/common/AppModal.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
 import AppTable from '../components/common/AppTable.vue'
@@ -23,7 +27,47 @@ import SalesIntelligenceDetailDrawer from '../components/sales-intelligence/Sale
 
 const { t, currentLocale } = useI18n()
 const store = useSalesIntelligenceStore()
+const authStore = useAuthStore()
+const toastStore = useToastStore()
 const selectedOrder = ref<SalesIntelligenceOrder | null>(null)
+const isExporting = ref(false)
+const isPolicyOpen = ref(false)
+const isPolicySaving = ref(false)
+const policyEnabled = ref(true)
+const policyThreshold = ref('10.00')
+
+const exportCsv = async () => {
+  isExporting.value = true
+  try {
+    await salesIntelligenceService.exportCsv(store.filters)
+    toastStore.success(t('salesIntelligence.export.ready'))
+  } catch {
+    toastStore.error(t('salesIntelligence.export.failed'))
+  } finally {
+    isExporting.value = false
+  }
+}
+
+const openPolicy = async () => {
+  const policy = await salesIntelligenceService.getPolicy()
+  policyEnabled.value = policy.lowMarginEnabled
+  policyThreshold.value = policy.lowMarginThreshold
+  isPolicyOpen.value = true
+}
+
+const savePolicy = async () => {
+  isPolicySaving.value = true
+  try {
+    await salesIntelligenceService.updatePolicy({
+      lowMarginEnabled: policyEnabled.value,
+      lowMarginThreshold: Number(policyThreshold.value),
+    })
+    toastStore.success(t('salesIntelligence.policy.saved'))
+    isPolicyOpen.value = false
+  } finally {
+    isPolicySaving.value = false
+  }
+}
 
 const openOrder = async (order: SalesIntelligenceOrder) => {
   selectedOrder.value = order
@@ -108,7 +152,28 @@ onMounted(() => store.fetchOverview())
       :eyebrow="t('salesIntelligence.eyebrow')"
       :title="t('salesIntelligence.title')"
       :description="t('salesIntelligence.description')"
-    />
+    >
+      <template #actions>
+        <AppButton
+          v-if="authStore.checkAllPermissions(['sales-intelligence:manage-policy'])"
+          variant="secondary"
+          @click="openPolicy"
+        >
+          {{ t('salesIntelligence.actions.settings') }}
+        </AppButton>
+        <AppButton
+          v-if="authStore.checkAllPermissions(['sales-intelligence:export'])"
+          :disabled="isExporting"
+          @click="exportCsv"
+        >
+          {{
+            isExporting
+              ? t('salesIntelligence.actions.exporting')
+              : t('salesIntelligence.actions.export')
+          }}
+        </AppButton>
+      </template>
+    </AppPageHeader>
 
     <p class="text-sm font-medium text-[var(--lf-text-secondary)]">
       {{ t('salesIntelligence.foundation.scope') }}
@@ -265,6 +330,35 @@ onMounted(() => store.fetchOverview())
       :is-loading="store.isDetailLoading"
       @update:model-value="$event ? undefined : closeOrder()"
     />
+
+    <AppModal
+      v-model="isPolicyOpen"
+      :title="t('salesIntelligence.policy.title')"
+      size="sm"
+    >
+      <div class="space-y-5">
+        <label class="flex items-center gap-3 text-sm text-[var(--lf-text-primary)]">
+          <input v-model="policyEnabled" type="checkbox" />
+          {{ t('salesIntelligence.policy.enabled') }}
+        </label>
+        <AppInput
+          :model-value="policyThreshold"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          :disabled="!policyEnabled"
+          :label="t('salesIntelligence.policy.threshold')"
+          name="sales-low-margin-threshold"
+          @input="policyThreshold = ($event.target as HTMLInputElement).value"
+        />
+      </div>
+      <template #footer>
+        <AppButton :disabled="isPolicySaving" @click="savePolicy">
+          {{ t('salesIntelligence.policy.save') }}
+        </AppButton>
+      </template>
+    </AppModal>
   </div>
 </template>
 

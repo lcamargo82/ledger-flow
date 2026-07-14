@@ -236,6 +236,34 @@
       "mercadoPagoPaymentStatusUpdated": {
         "title": "Mercado Pago payment updated",
         "message": "Payment {paymentReference} changed from {previousStatus} to {currentStatus}."
+      },
+      "saleLossDetected": {
+        "title": "Sale loss detected",
+        "message": "Order {orderNumber} has a negative margin of {margin}%."
+      },
+      "saleLowMarginDetected": {
+        "title": "Low margin detected",
+        "message": "Order {orderNumber} has a {margin}% margin, below the {threshold}% threshold."
+      },
+      "saleMissingCostDetected": {
+        "title": "Sale cost missing",
+        "message": "Order {orderNumber} cannot have its margin calculated because an SKU cost is missing."
+      },
+      "saleStockNotConsumed": {
+        "title": "Inventory deduction pending",
+        "message": "Fulfilled order {orderNumber} has not consumed all inventory yet."
+      },
+      "saleShippingDelayed": {
+        "title": "Shipping delayed",
+        "message": "Shipping for order {orderNumber} is delayed."
+      },
+      "saleSettlementDivergent": {
+        "title": "Settlement divergence",
+        "message": "Order {orderNumber} has a settlement divergence."
+      },
+      "saleCashReleaseBlocked": {
+        "title": "Cash release blocked",
+        "message": "Funds for order {orderNumber} are blocked from release."
       }
     }
   },
@@ -774,7 +802,21 @@
       "CANCELLED": "Cancelled"
     },
     "actions": {
-      "details": "View items"
+      "details": "View items",
+      "export": "Export CSV",
+      "exporting": "Preparing CSV…",
+      "settings": "Configure alerts"
+    },
+    "policy": {
+      "title": "Margin alerts",
+      "enabled": "Alert on low margin",
+      "threshold": "Margin threshold (%)",
+      "save": "Save policy",
+      "saved": "Policy updated"
+    },
+    "export": {
+      "ready": "CSV ready to download",
+      "failed": "Could not generate the CSV."
     },
     "drawer": {
       "title": "Items for order {order}",

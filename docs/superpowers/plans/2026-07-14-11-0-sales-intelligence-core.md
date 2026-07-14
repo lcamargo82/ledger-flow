@@ -96,7 +96,7 @@ currency
 11.0.4 — Performance, segurança, OpenAPI/Redoc e smoke E2E
 ```
 
-A spec anexa completa segue até a 11.0.7. Para este recorte, a entrega termina na 11.0.4. Drawer financeiro completo/timeline, alertas/exportação e o hardening ampliado das antigas 11.0.5–11.0.7 permanecem como evolução posterior, sujeita a uma nova decisão de escopo.
+A spec anexa completa segue até a 11.0.7. O recorte inicial terminou na 11.0.4; a decisão posterior 11.0-D4 autorizou a conclusão integral de 11.0.5–11.0.7, mantendo a tabela principal enxuta e concentrando a visão completa no drawer/timeline.
 
 Branches sugeridas, sempre a partir de `develop`:
 

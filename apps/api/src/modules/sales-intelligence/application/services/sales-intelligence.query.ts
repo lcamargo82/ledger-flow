@@ -18,6 +18,7 @@ export const salesIntelligenceOrderSelect = {
       id: true,
       skuId: true,
       quantity: true,
+      warehouse: { select: { name: true, code: true } },
       reservation: { select: { status: true } },
       sku: {
         select: {
@@ -41,6 +42,8 @@ export const salesIntelligenceOrderSelect = {
       soldAt: true,
       currency: true,
       components: true,
+      cogsAmount: true,
+      grossMarginAmount: true,
     },
   },
   reconciliationCases: {
