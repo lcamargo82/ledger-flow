@@ -18,7 +18,7 @@ Fechar o Core 11.0 com consultas e dependências validadas, documentação opera
 
 - [x] Analytics exibe seus quatro indicadores na mesma grade compacta da Inteligência de vendas em desktop e responsiva em telas menores.
 - [x] O Core 11.0 atende performance, segurança, dependências, documentação e smoke runtime.
-- [ ] A branch da sprint volta à branch base e a fase validada chega à `develop` conforme o fluxo aprovado.
+- [x] A branch da sprint volta à branch base e a fase validada chega à `develop` conforme o fluxo aprovado.
 
 ## Notas
 
