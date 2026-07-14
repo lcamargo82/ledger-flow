@@ -77,14 +77,31 @@ const openEditModal = (product: ProductListItem) => {
   isEditModalOpen.value = true
 }
 
+const catalogErrorMessage = (err: any) => {
+  const msg = err.response?.data?.message || err.message
+  const errorMessage = Array.isArray(msg) ? msg.join(', ') : String(msg || '')
+
+  if (errorMessage.includes('Invalid SKU')) return t('catalog.errors.invalidSku')
+  if (errorMessage.includes('SKU already exists')) return t('catalog.errors.skuAlreadyExists')
+  if (errorMessage.includes('Cost change reason is required')) {
+    return t('catalog.errors.costChangeReasonRequired')
+  }
+
+  return errorMessage || t('catalog.errors.default')
+}
+
 const handleCreateProduct = async (payload: any) => {
+  formErrors.value = {}
   try {
     await catalogStore.createProduct(payload)
     isCreateModalOpen.value = false
     toast.success(t('catalog.toast.created') || 'Produto criado com sucesso!')
   } catch (err: any) {
-    const msg = err.response?.data?.message || err.message
-    toast.error(Array.isArray(msg) ? msg.join(', ') : msg)
+    const errorMessage = catalogErrorMessage(err)
+    if (errorMessage === t('catalog.errors.invalidSku')) {
+      formErrors.value = { sku: errorMessage }
+    }
+    toast.error(errorMessage)
   }
 }
 
@@ -96,11 +113,12 @@ const handleUpdateProduct = async (payload: any) => {
     isEditModalOpen.value = false
     toast.success(t('catalog.toast.updated') || 'Produto atualizado com sucesso!')
   } catch (err: any) {
-    const msg = err.response?.data?.message || err.message
-    const errorMessage = Array.isArray(msg) ? msg.join(', ') : msg
+    const errorMessage = catalogErrorMessage(err)
     
-    if (errorMessage.includes('Cost change reason is required')) {
+    if (errorMessage === t('catalog.errors.costChangeReasonRequired')) {
       formErrors.value = { costChangeReason: t('catalog.errors.costChangeReasonRequired') || 'O motivo da alteração de custo é obrigatório.' }
+    } else if (errorMessage === t('catalog.errors.invalidSku')) {
+      formErrors.value = { sku: errorMessage }
     } else {
       toast.error(errorMessage)
     }

@@ -48,6 +48,7 @@ const selectedReservation = ref<InventoryReservation | null>(null)
 const warehouseForm = reactive({ id: '', code: '', name: '' })
 const warehouseFormErrors = ref<WarehouseFormErrors>({})
 const warehouseSubmitError = ref('')
+const adjustmentSubmitError = ref('')
 const adjustmentForm = reactive({
   skuId: '',
   warehouseId: '',
@@ -204,20 +205,27 @@ const toggleWarehouse = async (id: string, isActive: boolean) => {
 }
 
 const recordAdjustment = async () => {
-  await inventoryStore.recordAdjustment({
-    skuId: adjustmentForm.skuId,
-    warehouseId: adjustmentForm.warehouseId,
-    type: adjustmentForm.type,
-    quantity: Number(adjustmentForm.quantity),
-    reasonCode: adjustmentForm.reasonCode,
-    notes: adjustmentForm.notes || undefined,
-  })
-  adjustmentForm.skuId = ''
-  adjustmentForm.warehouseId = ''
-  adjustmentForm.quantity = null
-  adjustmentForm.reasonCode = ''
-  adjustmentForm.notes = ''
-  isAdjustmentModalOpen.value = false
+  adjustmentSubmitError.value = ''
+
+  try {
+    await inventoryStore.recordAdjustment({
+      skuId: adjustmentForm.skuId.trim(),
+      warehouseId: adjustmentForm.warehouseId,
+      type: adjustmentForm.type,
+      quantity: Number(adjustmentForm.quantity),
+      reasonCode: adjustmentForm.reasonCode,
+      notes: adjustmentForm.notes || undefined,
+    })
+    adjustmentForm.skuId = ''
+    adjustmentForm.warehouseId = ''
+    adjustmentForm.quantity = null
+    adjustmentForm.reasonCode = ''
+    adjustmentForm.notes = ''
+    isAdjustmentModalOpen.value = false
+  } catch {
+    adjustmentSubmitError.value = inventoryStore.error || 'inventory.errors.default'
+    inventoryStore.clearError()
+  }
 }
 
 const createStableOperationId = (prefix: string, id?: string) =>
@@ -571,17 +579,24 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
       size="md"
     >
       <form class="space-y-4" @submit.prevent="recordAdjustment">
+        <div v-if="adjustmentSubmitError" class="lf-error-message" role="alert">
+          {{ t(adjustmentSubmitError) }}
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <AppInput
             id="adjustment-sku"
             v-model="adjustmentForm.skuId"
             :label="t('inventory.form.skuIdLabel')"
+            :placeholder="t('inventory.form.skuIdPlaceholder')"
+            required
+            @input="adjustmentSubmitError = ''"
           />
           <AppSelect
             id="adjustment-warehouse"
             v-model="adjustmentForm.warehouseId"
             :label="t('inventory.form.warehouseLabel')"
             :options="warehouseOptions"
+            required
           />
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -590,12 +605,14 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
             v-model="adjustmentForm.quantity"
             :allow-decimals="true"
             :label="t('inventory.form.quantityLabel')"
+            required
           />
           <AppInput
             id="adjustment-reason"
             v-model="adjustmentForm.reasonCode"
             :label="t('inventory.form.reasonCodeLabel')"
             class="md:col-span-2"
+            required
           />
         </div>
         <AppInput

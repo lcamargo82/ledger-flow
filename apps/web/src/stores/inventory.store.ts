@@ -49,11 +49,26 @@ export const useInventoryStore = defineStore('inventory', () => {
   const extractErrorMessage = (err: unknown): string => {
     if (axios.isAxiosError(err)) {
       if (err.response?.status === 409) return 'inventory.errors.warehouseCodeExists'
+      const message = err.response?.data?.message
+      const normalizedMessage = Array.isArray(message) ? message.join(' ') : String(message || '')
+      if (err.response?.status === 404 && normalizedMessage.includes('SKU not found')) {
+        return 'inventory.errors.skuNotFound'
+      }
       if (err.response?.status === 404) return 'inventory.errors.notFound'
       if (err.response?.status === 403) return 'inventory.errors.forbidden'
+      if (
+        err.response?.status === 400 &&
+        normalizedMessage.includes('Insufficient on-hand quantity')
+      ) {
+        return 'inventory.errors.insufficientOnHand'
+      }
       if (err.response?.status === 400) return 'inventory.errors.invalid'
     }
     return 'inventory.errors.default'
+  }
+
+  const clearError = () => {
+    error.value = null
   }
 
   const fetchWarehouses = async () => {
@@ -356,6 +371,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     isLoading,
     isMutating,
     error,
+    clearError,
     fetchInventory,
     fetchWarehouses,
     fetchBalances,

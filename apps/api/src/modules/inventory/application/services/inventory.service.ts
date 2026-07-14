@@ -111,10 +111,10 @@ export class InventoryService {
       throw new BadRequestException('Only adjustment movement types are allowed.');
     }
 
-    const [warehouse, sku] = await Promise.all([
-      this.inventoryRepository.findWarehouseById(dto.warehouseId, tenantId),
-      this.inventoryRepository.findSkuById(dto.skuId, tenantId),
-    ]);
+    const warehouse = await this.inventoryRepository.findWarehouseById(dto.warehouseId, tenantId);
+    const sku =
+      (await this.inventoryRepository.findSkuById(dto.skuId, tenantId)) ??
+      (await this.inventoryRepository.findSkuByCode(dto.skuId, tenantId));
 
     if (!warehouse || !warehouse.isActive) {
       throw new NotFoundException('Warehouse not found.');
@@ -126,7 +126,7 @@ export class InventoryService {
 
     const result = await this.inventoryRepository.recordAdjustment({
       tenantId,
-      skuId: dto.skuId,
+      skuId: sku.id,
       warehouseId: dto.warehouseId,
       type: dto.type,
       quantityDelta: dto.quantity,
@@ -148,6 +148,7 @@ export class InventoryService {
       result.movement.id,
       {
         skuId: dto.skuId,
+        resolvedSkuId: sku.id,
         warehouseId: dto.warehouseId,
         type: dto.type,
         quantity: dto.quantity,

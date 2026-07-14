@@ -47,6 +47,7 @@ const syncForm = reactive({
   to: '',
   maxPages: 3,
 })
+const syncFormErrors = ref<Record<string, string>>({})
 
 const eligibleMercadoPagoConnections = computed(() =>
   connections.value.filter(
@@ -101,6 +102,7 @@ const ensureDefaultSyncPeriod = () => {
 
 const openSyncModal = () => {
   ensureDefaultSyncPeriod()
+  syncFormErrors.value = {}
   isSyncModalOpen.value = true
 }
 
@@ -140,10 +142,18 @@ const submitAdjustment = async () => {
 
 const submitSync = async () => {
   if (!settlementStore.selectedAccountId) return
+  syncFormErrors.value = {}
+  const maxPages = Number(syncForm.maxPages) || 0
+
+  if (maxPages < 1 || maxPages > 10) {
+    syncFormErrors.value = { maxPages: t('marketplaceSettlement.sync.maxPagesValidation') }
+    return
+  }
+
   await settlementStore.syncFinancialEvents(settlementStore.selectedAccountId, {
     from: toIsoDateTime(syncForm.from),
     to: toIsoDateTime(syncForm.to),
-    maxPages: Number(syncForm.maxPages) || 3,
+    maxPages,
   })
   isSyncModalOpen.value = false
 }
@@ -561,9 +571,10 @@ const submitSync = async () => {
           v-model="syncForm.maxPages"
           type="number"
           min="1"
-          max="10"
           :label="t('marketplaceSettlement.sync.maxPages')"
+          :error="syncFormErrors.maxPages"
           required
+          @input="syncFormErrors.maxPages = ''"
         />
         <div class="lf-modal-footer-actions">
           <AppButton variant="secondary" @click="isSyncModalOpen = false">
