@@ -93,6 +93,19 @@ export class PrismaInventoryRepository implements InventoryRepository {
     return this.prisma.productSku.findFirst({ where: { id, tenantId } });
   }
 
+  findSkuByCode(code: string, tenantId: string) {
+    const normalizedCode = code.trim().toUpperCase();
+    return this.prisma.productSku.findFirst({
+      where: {
+        tenantId,
+        OR: [
+          { skuCanonical: normalizedCode },
+          { skuDisplay: { equals: code.trim(), mode: 'insensitive' } },
+        ],
+      },
+    });
+  }
+
   async recordAdjustment(data: AdjustmentData) {
     return this.prisma.$transaction(async (tx) => {
       const signedDelta =

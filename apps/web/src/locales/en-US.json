@@ -415,6 +415,7 @@
       "codeLabel": "Code",
       "nameLabel": "Name",
       "skuIdLabel": "SKU",
+      "skuIdPlaceholder": "Enter the catalog SKU, e.g. CONTROL-AZUL-CAMUF",
       "warehouseLabel": "Warehouse",
       "warehousePlaceholder": "Select a warehouse",
       "typeLabel": "Type",
@@ -459,6 +460,8 @@
       "default": "Could not process the inventory operation.",
       "warehouseCodeExists": "This warehouse code already exists for the current tenant.",
       "notFound": "Inventory record not found.",
+      "skuNotFound": "SKU not found in the catalog. Check that you typed the code exactly as shown on the product.",
+      "insufficientOnHand": "This adjustment would make on-hand stock lower than reserved stock. Reduce the quantity or release reservations first.",
       "forbidden": "You do not have inventory access.",
       "invalid": "Review the inventory information."
     }
@@ -806,7 +809,13 @@
       "barcodeLabel": "Barcode",
       "costChangeReasonLabel": "Cost change reason",
       "costChangeReasonPlaceholder": "Explain the reason when changing cost",
-      "parentSkuNotice": "Parent products group variants and do not have their own SKU."
+      "parentSkuNotice": "Parent products group variants and do not have their own SKU.",
+      "validation": {
+        "skuRequired": "Enter the product SKU.",
+        "skuLength": "SKU must be between 8 and 20 characters.",
+        "skuPattern": "Use only letters, numbers, hyphens, or underscores in the SKU.",
+        "skuLeadingZero": "Numeric SKUs cannot start with zero."
+      }
     },
     "empty": {
       "title": "No products found",
@@ -816,6 +825,7 @@
       "title": "Could not load catalog",
       "default": "Could not process the catalog operation.",
       "invalid": "Review the product and SKU information.",
+      "invalidSku": "SKU must be between 8 and 20 characters and use only letters, numbers, hyphens, or underscores.",
       "skuAlreadyExists": "This SKU already exists for the current tenant.",
       "notFound": "Product not found.",
       "costChangeReasonRequired": "The reason for the cost change is required.",
@@ -2032,6 +2042,7 @@
       "from": "Start",
       "to": "End",
       "maxPages": "Max pages",
+      "maxPagesValidation": "Enter a page count between 1 and 10.",
       "result": "Sync completed: {received} received, {created} new and {duplicates} duplicates."
     },
     "dashboard": {

@@ -39,9 +39,11 @@ const form = reactive({
 })
 
 const skuManuallyEdited = ref(false)
+const skuTouched = ref(false)
 
 const onSkuInput = () => {
   skuManuallyEdited.value = true
+  skuTouched.value = true
 }
 
 watch(() => form.name, (newName) => {
@@ -68,7 +70,23 @@ const parentOptions = computed(() => [
     .map(product => ({ value: product.id, label: product.name })),
 ])
 
+const skuPattern = /^[A-Z0-9_-]+$/
+const skuValidationError = computed(() => {
+  if (!requiresSku.value) return ''
+  const sku = form.sku.trim().toUpperCase()
+  if (!sku) return t('catalog.form.validation.skuRequired')
+  if (sku.length < 8 || sku.length > 20) return t('catalog.form.validation.skuLength')
+  if (!skuPattern.test(sku)) return t('catalog.form.validation.skuPattern')
+  if (/^0[0-9]+$/.test(sku)) return t('catalog.form.validation.skuLeadingZero')
+  return ''
+})
+
 const submit = () => {
+  if (skuValidationError.value) {
+    skuTouched.value = true
+    return
+  }
+
   const basePayload = {
     name: form.name,
     description: form.description || undefined,
@@ -155,6 +173,7 @@ const submit = () => {
         :label="t('catalog.form.skuLabel')"
         :placeholder="t('catalog.form.skuPlaceholder')"
         :disabled="!canEditSku"
+        :error="props.errors?.sku || (skuTouched ? skuValidationError : '')"
         @input="onSkuInput"
       />
       <AppCurrencyInput

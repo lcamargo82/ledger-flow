@@ -414,6 +414,7 @@
       "codeLabel": "Código",
       "nameLabel": "Nome",
       "skuIdLabel": "SKU",
+      "skuIdPlaceholder": "Digite o SKU do catálogo, ex: CONTROL-AZUL-CAMUF",
       "warehouseLabel": "Warehouse",
       "warehousePlaceholder": "Selecione um warehouse",
       "typeLabel": "Tipo",
@@ -458,6 +459,8 @@
       "default": "Não foi possível processar a operação de estoque.",
       "warehouseCodeExists": "Este código de warehouse já existe para o tenant atual.",
       "notFound": "Registro de estoque não encontrado.",
+      "skuNotFound": "SKU não encontrado no catálogo. Confira se digitou o código exatamente como aparece no produto.",
+      "insufficientOnHand": "O ajuste deixaria o estoque físico menor que o reservado. Reduza a quantidade ou libere reservas antes.",
       "forbidden": "Você não possui acesso ao estoque.",
       "invalid": "Revise as informações do estoque."
     }
@@ -805,7 +808,13 @@
       "barcodeLabel": "Código de barras",
       "costChangeReasonLabel": "Motivo da alteração de custo",
       "costChangeReasonPlaceholder": "Informe o motivo ao alterar o custo",
-      "parentSkuNotice": "Produto pai agrupa variantes e não possui SKU próprio."
+      "parentSkuNotice": "Produto pai agrupa variantes e não possui SKU próprio.",
+      "validation": {
+        "skuRequired": "Informe o SKU do produto.",
+        "skuLength": "O SKU deve ter entre 8 e 20 caracteres.",
+        "skuPattern": "Use apenas letras, números, hífen ou sublinhado no SKU.",
+        "skuLeadingZero": "SKUs numéricos não podem começar com zero."
+      }
     },
     "empty": {
       "title": "Nenhum produto encontrado",
@@ -815,6 +824,7 @@
       "title": "Não foi possível carregar o catálogo",
       "default": "Não foi possível processar a operação de catálogo.",
       "invalid": "Revise as informações do produto e do SKU.",
+      "invalidSku": "O SKU deve ter entre 8 e 20 caracteres e usar apenas letras, números, hífen ou sublinhado.",
       "skuAlreadyExists": "Este SKU já está cadastrado para o tenant atual.",
       "notFound": "Produto não encontrado.",
       "costChangeReasonRequired": "O motivo da alteração de custo é obrigatório.",
@@ -2033,6 +2043,7 @@
       "from": "Início",
       "to": "Fim",
       "maxPages": "Máximo de páginas",
+      "maxPagesValidation": "Informe um número de páginas entre 1 e 10.",
       "result": "Sincronização concluída: {received} recebidos, {created} novos e {duplicates} duplicados."
     },
     "dashboard": {

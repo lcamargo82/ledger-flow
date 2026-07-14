@@ -221,6 +221,7 @@ export interface InventoryRepository {
   updateWarehouse(id: string, tenantId: string, data: UpdateWarehouseData): Promise<Warehouse>;
   listWarehouses(params: ListWarehousesParams): Promise<PaginatedResult<Warehouse>>;
   findSkuById(id: string, tenantId: string): Promise<ProductSku | null>;
+  findSkuByCode(code: string, tenantId: string): Promise<ProductSku | null>;
   recordAdjustment(
     data: AdjustmentData,
   ): Promise<{ movement: InventoryMovement; balance: InventoryBalance }>;

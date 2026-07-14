@@ -10,6 +10,7 @@ describe('InventoryService', () => {
     updateWarehouse: jest.fn(),
     listWarehouses: jest.fn(),
     findSkuById: jest.fn(),
+    findSkuByCode: jest.fn(),
     recordAdjustment: jest.fn(),
     reserveStock: jest.fn(),
     releaseReservation: jest.fn(),
@@ -97,6 +98,7 @@ describe('InventoryService', () => {
       isActive: true,
     });
     repository.findSkuById.mockResolvedValue({ id: 'sku-1' });
+    repository.findSkuByCode.mockResolvedValue(null);
     repository.recordAdjustment.mockResolvedValue({
       movement: { id: 'movement-1', type: InventoryMovementType.ADJUSTMENT_IN },
       balance: {
@@ -134,6 +136,8 @@ describe('InventoryService', () => {
 
   it('rejects adjustments for missing warehouses', async () => {
     repository.findWarehouseById.mockResolvedValue(null);
+    repository.findSkuById.mockResolvedValue(null);
+    repository.findSkuByCode.mockResolvedValue(null);
 
     await expect(
       service.recordAdjustment('tenant-1', 'user-1', {
@@ -144,6 +148,43 @@ describe('InventoryService', () => {
         reasonCode: 'COUNT',
       }),
     ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('records adjustment using the visible catalog SKU code', async () => {
+    repository.findWarehouseById.mockResolvedValue({
+      id: 'warehouse-1',
+      isActive: true,
+    });
+    repository.findSkuById.mockResolvedValue(null);
+    repository.findSkuByCode.mockResolvedValue({ id: 'sku-1', averageCost: 40 });
+    repository.recordAdjustment.mockResolvedValue({
+      movement: { id: 'movement-1', type: InventoryMovementType.ADJUSTMENT_IN },
+      balance: {
+        id: 'balance-1',
+        skuId: 'sku-1',
+        warehouseId: 'warehouse-1',
+        onHandQuantity: '6',
+        reservedQuantity: '0',
+        availableQuantity: '6',
+        version: 1,
+      },
+    });
+
+    await service.recordAdjustment('tenant-1', 'user-1', {
+      skuId: 'CONTROL-AZUL-CAMUF',
+      warehouseId: 'warehouse-1',
+      type: InventoryMovementType.ADJUSTMENT_IN,
+      quantity: 6,
+      reasonCode: 'INITIAL_COUNT',
+    });
+
+    expect(repository.findSkuByCode).toHaveBeenCalledWith('CONTROL-AZUL-CAMUF', 'tenant-1');
+    expect(repository.recordAdjustment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skuId: 'sku-1',
+        unitCost: 40,
+      }),
+    );
   });
 
   it('reserves available stock with source idempotency and audit log', async () => {

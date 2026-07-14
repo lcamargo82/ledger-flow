@@ -30,9 +30,14 @@ export const useCatalogProductsStore = defineStore('catalogProducts', () => {
 
   const extractErrorMessage = (err: unknown): string => {
     if (axios.isAxiosError(err)) {
+      const message = err.response?.data?.message
+      const normalizedMessage = Array.isArray(message) ? message.join(' ') : String(message || '')
       if (err.response?.status === 409) return 'catalog.errors.skuAlreadyExists'
       if (err.response?.status === 404) return 'catalog.errors.notFound'
       if (err.response?.status === 403) return 'catalog.errors.forbidden'
+      if (err.response?.status === 400 && normalizedMessage.includes('Invalid SKU')) {
+        return 'catalog.errors.invalidSku'
+      }
       if (err.response?.status === 400) return 'catalog.errors.invalid'
     }
     return 'catalog.errors.default'

@@ -3,7 +3,10 @@ import { InventoryMovementType } from '@prisma/client';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class RecordAdjustmentDto {
-  @ApiProperty({ example: 'sku-id' })
+  @ApiProperty({
+    example: 'CONTROL-AZUL-CAMUF',
+    description: 'ID interno do SKU ou código comercial exibido no catálogo.',
+  })
   @IsString()
   skuId: string;
 
