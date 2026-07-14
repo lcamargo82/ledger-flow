@@ -273,6 +273,7 @@ model NotificationEvent {
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, category, createdAt(sort: Desc)])
   @@index([tenantId, sourceType, sourceId])
+  @@index([eventType, occurredAt], map: "notification_events_type_occurred_at_idx")
   @@map("notification_events")
 }
 

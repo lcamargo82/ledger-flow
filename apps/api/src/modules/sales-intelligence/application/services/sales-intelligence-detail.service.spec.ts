@@ -97,6 +97,7 @@ describe('SalesIntelligenceService detail and timeline', () => {
     expect(result.settlement).toEqual(
       expect.objectContaining({ status: 'RECONCILED', cashStatus: 'REALIZED' }),
     );
+    expect(result).not.toHaveProperty('customerName');
   });
 
   it('redacts profitability, settlement, payment and inventory fields in the backend', async () => {
@@ -158,7 +159,6 @@ function makeDetailedOrder() {
     id: 'order-1',
     orderNumber: 'ML-123456',
     status: InternalOrderStatus.FULFILLED,
-    customerName: 'Cliente seguro',
     createdAt: new Date('2026-07-14T10:00:00.000Z'),
     confirmedAt: new Date('2026-07-14T10:30:00.000Z'),
     fulfilledAt: new Date('2026-07-14T12:00:00.000Z'),

@@ -4,7 +4,6 @@ export const salesIntelligenceDetailSelect = {
   id: true,
   orderNumber: true,
   status: true,
-  customerName: true,
   createdAt: true,
   confirmedAt: true,
   fulfilledAt: true,

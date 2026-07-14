@@ -80,8 +80,9 @@ const warehouseColumns = computed(() => [
 ])
 
 const balanceColumns = computed(() => [
-  { key: 'skuId', label: t('inventory.table.skuId') },
-  { key: 'warehouseId', label: t('inventory.table.warehouseId') },
+  { key: 'product', label: t('inventory.table.product') },
+  { key: 'sku', label: t('inventory.table.sku') },
+  { key: 'warehouse', label: t('inventory.table.warehouse') },
   { key: 'onHandQuantity', label: t('inventory.table.onHand') },
   { key: 'reservedQuantity', label: t('inventory.table.reserved') },
   { key: 'availableQuantity', label: t('inventory.table.available') },
@@ -91,8 +92,9 @@ const balanceColumns = computed(() => [
 const movementColumns = computed(() => [
   { key: 'occurredAt', label: t('inventory.table.occurredAt') },
   { key: 'type', label: t('inventory.table.type') },
-  { key: 'skuId', label: t('inventory.table.skuId') },
-  { key: 'warehouseId', label: t('inventory.table.warehouseId') },
+  { key: 'product', label: t('inventory.table.product') },
+  { key: 'sku', label: t('inventory.table.sku') },
+  { key: 'warehouse', label: t('inventory.table.warehouse') },
   { key: 'quantityDelta', label: t('inventory.table.quantity') },
   { key: 'reasonCode', label: t('inventory.table.reason') },
 ])
@@ -100,8 +102,9 @@ const movementColumns = computed(() => [
 const reservationColumns = computed(() => [
   { key: 'createdAt', label: t('inventory.table.createdAt') },
   { key: 'status', label: t('inventory.table.status') },
-  { key: 'skuId', label: t('inventory.table.skuId') },
-  { key: 'warehouseId', label: t('inventory.table.warehouseId') },
+  { key: 'product', label: t('inventory.table.product') },
+  { key: 'sku', label: t('inventory.table.sku') },
+  { key: 'warehouse', label: t('inventory.table.warehouse') },
   { key: 'quantity', label: t('inventory.table.quantity') },
   { key: 'source', label: t('inventory.table.source') },
   { key: 'reasonCode', label: t('inventory.table.reason') },
@@ -413,6 +416,11 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
         :empty-title="t('inventory.empty.balancesTitle')"
         :empty-description="t('inventory.empty.balancesDescription')"
       >
+        <template #product="{ item }">{{ item.sku.product.name }}</template>
+        <template #sku="{ item }"><span translate="no">{{ item.sku.skuDisplay }}</span></template>
+        <template #warehouse="{ item }">
+          {{ item.warehouse.name }} · <span translate="no">{{ item.warehouse.code }}</span>
+        </template>
         <template #updatedAt="{ item }">
           {{ formatDateTime(item.updatedAt, currentLocale) }}
         </template>
@@ -426,6 +434,11 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
         :empty-title="t('inventory.empty.movementsTitle')"
         :empty-description="t('inventory.empty.movementsDescription')"
       >
+        <template #product="{ item }">{{ item.sku.product.name }}</template>
+        <template #sku="{ item }"><span translate="no">{{ item.sku.skuDisplay }}</span></template>
+        <template #warehouse="{ item }">
+          {{ item.warehouse.name }} · <span translate="no">{{ item.warehouse.code }}</span>
+        </template>
         <template #occurredAt="{ item }">
           {{ formatDateTime(item.occurredAt, currentLocale) }}
         </template>
@@ -442,6 +455,11 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
         :empty-title="t('inventory.empty.reservationsTitle')"
         :empty-description="t('inventory.empty.reservationsDescription')"
       >
+        <template #product="{ item }">{{ item.sku.product.name }}</template>
+        <template #sku="{ item }"><span translate="no">{{ item.sku.skuDisplay }}</span></template>
+        <template #warehouse="{ item }">
+          {{ item.warehouse.name }} · <span translate="no">{{ item.warehouse.code }}</span>
+        </template>
         <template #createdAt="{ item }">
           {{ formatDateTime(item.createdAt, currentLocale) }}
         </template>
@@ -450,7 +468,7 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
             {{ t(`inventory.reservationStatus.${item.status}`) }}
           </AppBadge>
         </template>
-        <template #source="{ item }"> {{ item.sourceType }} / {{ item.sourceId }} </template>
+        <template #source="{ item }">{{ item.sourceType }}</template>
         <template #actions="{ item }">
           <div
             v-if="item.status === 'ACTIVE' && authStore.checkAllPermissions(['inventory:manage'])"

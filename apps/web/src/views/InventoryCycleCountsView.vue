@@ -43,7 +43,7 @@ const countForm = reactive({
 const columns = computed(() => [
   { key: 'countNumber', label: t('inventory.cycleCounts.table.number') },
   { key: 'status', label: t('inventory.cycleCounts.table.status') },
-  { key: 'warehouseId', label: t('inventory.cycleCounts.table.warehouse') },
+  { key: 'warehouse', label: t('inventory.cycleCounts.table.warehouse') },
   { key: 'items', label: t('inventory.cycleCounts.table.items') },
   { key: 'variance', label: t('inventory.cycleCounts.table.variance') },
   { key: 'reasonCode', label: t('inventory.cycleCounts.table.reason') },
@@ -71,11 +71,6 @@ const reasonOptions = computed(() =>
 onMounted(async () => {
   await Promise.all([inventoryStore.fetchWarehouses(), inventoryStore.fetchCycleCounts()])
 })
-
-const warehouseLabel = (id: string) => {
-  const warehouse = inventoryStore.warehouses.find((item) => item.id === id)
-  return warehouse ? `${warehouse.code} - ${warehouse.name}` : id
-}
 
 const statusVariant = (status: CycleCountStatus) => {
   if (status === 'APPROVED') return 'success'
@@ -243,11 +238,16 @@ const errorKey = (error: unknown) => {
             {{ t(`inventory.cycleCountStatus.${item.status}`) }}
           </AppBadge>
         </template>
-        <template #warehouseId="{ item }">
-          {{ warehouseLabel(item.warehouseId) }}
+        <template #warehouse="{ item }">
+          {{ item.warehouse.name }} · <span translate="no">{{ item.warehouse.code }}</span>
         </template>
         <template #items="{ item }">
-          {{ t('inventory.cycleCounts.table.itemCount', { count: item.items.length }) }}
+          <div v-for="countItem in item.items" :key="countItem.id" class="space-y-0.5">
+            <span>{{ countItem.sku.product.name }}</span>
+            <span class="block text-xs text-[var(--lf-text-secondary)]" translate="no">
+              {{ countItem.sku.skuDisplay }}
+            </span>
+          </div>
         </template>
         <template #variance="{ item }">
           {{ totalVariance(item) }}
@@ -297,7 +297,8 @@ const errorKey = (error: unknown) => {
         <div class="space-y-3">
           <div>
             <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-              {{ count.countNumber }} · {{ warehouseLabel(count.warehouseId) }}
+              {{ count.countNumber }} · {{ count.warehouse.name }} ·
+              <span translate="no">{{ count.warehouse.code }}</span>
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">
               {{ t('inventory.cycleCounts.detail.snapshotHint') }}
@@ -307,7 +308,8 @@ const errorKey = (error: unknown) => {
             <table class="lf-table">
               <thead class="lf-table-head">
                 <tr>
-                  <th class="lf-table-th text-left">{{ t('inventory.table.skuId') }}</th>
+                  <th class="lf-table-th text-left">{{ t('inventory.table.product') }}</th>
+                  <th class="lf-table-th text-left">{{ t('inventory.table.sku') }}</th>
                   <th class="lf-table-th text-left">
                     {{ t('inventory.cycleCounts.detail.system') }}
                   </th>
@@ -322,7 +324,8 @@ const errorKey = (error: unknown) => {
               </thead>
               <tbody>
                 <tr v-for="item in count.items" :key="item.id" class="lf-table-row">
-                  <td class="lf-table-td">{{ item.skuId }}</td>
+                  <td class="lf-table-td">{{ item.sku.product.name }}</td>
+                  <td class="lf-table-td" translate="no">{{ item.sku.skuDisplay }}</td>
                   <td class="lf-table-td">{{ item.systemOnHandAtOpen ?? '-' }}</td>
                   <td class="lf-table-td">{{ item.countedQuantity ?? '-' }}</td>
                   <td class="lf-table-td">{{ item.varianceQuantity ?? '-' }}</td>
@@ -404,7 +407,8 @@ const errorKey = (error: unknown) => {
     >
       <form class="space-y-4" @submit.prevent="countItem">
         <p v-if="countModal" class="text-sm text-gray-500 dark:text-gray-400">
-          {{ countModal.item.skuId }}
+          {{ countModal.item.sku.product.name }} ·
+          <span translate="no">{{ countModal.item.sku.skuDisplay }}</span>
         </p>
         <AppNumberInput
           v-model="countedQuantity"
