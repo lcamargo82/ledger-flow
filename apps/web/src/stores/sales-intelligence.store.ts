@@ -3,10 +3,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { salesIntelligenceService } from '../services/sales-intelligence.service'
 import type {
+  SalesIntelligenceDetail,
   SalesIntelligenceFilters,
   SalesIntelligenceMeta,
   SalesIntelligenceOrder,
   SalesIntelligenceSummary,
+  SalesTimelineEvent,
 } from '../types/sales-intelligence.types'
 
 export const useSalesIntelligenceStore = defineStore('sales-intelligence', () => {
@@ -16,6 +18,9 @@ export const useSalesIntelligenceStore = defineStore('sales-intelligence', () =>
   const filters = ref<SalesIntelligenceFilters>({ page: 1, perPage: 20 })
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const detail = ref<SalesIntelligenceDetail | null>(null)
+  const timeline = ref<SalesTimelineEvent[]>([])
+  const isDetailLoading = ref(false)
 
   const extractErrorMessage = (err: unknown): string => {
     if (axios.isAxiosError(err)) {
@@ -53,6 +58,29 @@ export const useSalesIntelligenceStore = defineStore('sales-intelligence', () =>
     await fetchOverview()
   }
 
+  const fetchDetail = async (orderId: string) => {
+    isDetailLoading.value = true
+    detail.value = null
+    timeline.value = []
+    try {
+      const [detailResponse, timelineResponse] = await Promise.all([
+        salesIntelligenceService.getDetail(orderId),
+        salesIntelligenceService.getTimeline(orderId),
+      ])
+      detail.value = detailResponse
+      timeline.value = timelineResponse
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+    } finally {
+      isDetailLoading.value = false
+    }
+  }
+
+  const clearDetail = () => {
+    detail.value = null
+    timeline.value = []
+  }
+
   return {
     orders,
     summary,
@@ -60,8 +88,13 @@ export const useSalesIntelligenceStore = defineStore('sales-intelligence', () =>
     filters,
     isLoading,
     error,
+    detail,
+    timeline,
+    isDetailLoading,
     fetchOverview,
     setFilters,
     setPage,
+    fetchDetail,
+    clearDetail,
   }
 })

@@ -780,7 +780,77 @@
       "title": "Items for order {order}",
       "items": "Order SKUs",
       "quantity": "Quantity: {quantity}",
-      "productUnavailable": "Product not identified"
+      "productUnavailable": "Product not identified",
+      "financial": "Sale financial result",
+      "cogs": "COGS",
+      "itemCogs": "Item COGS",
+      "profit": "Profit",
+      "margin": "Margin",
+      "shipping": "Shipping",
+      "settlement": "Settlement and cash",
+      "timeline": "Complete history"
+    },
+    "profitability": {
+      "PROFIT": "Profitable sale",
+      "LOSS": "Loss-making sale",
+      "BREAK_EVEN": "Break even",
+      "MISSING_COST": "Missing cost",
+      "UNAVAILABLE": "Result unavailable"
+    },
+    "profitSource": {
+      "REALIZED": "Realized profit",
+      "ESTIMATED": "Estimated profit",
+      "UNAVAILABLE": "Profit unavailable"
+    },
+    "shipping": {
+      "PENDING": "Pending",
+      "READY_TO_SHIP": "Ready to ship",
+      "POSTED": "Posted",
+      "IN_TRANSIT": "In transit",
+      "DELIVERED": "Delivered",
+      "DELAYED": "Delayed",
+      "CANCELED": "Canceled",
+      "UNAVAILABLE": "Shipping unavailable"
+    },
+    "settlement": {
+      "PENDING": "Pending",
+      "RECONCILED": "Reconciled",
+      "DIVERGENT": "Divergent",
+      "MANUAL_REVIEW": "Manual review",
+      "IGNORED": "Ignored"
+    },
+    "cash": {
+      "REALIZED": "Realized cash impact",
+      "RELEASED": "Funds released",
+      "PENDING_RELEASE": "Pending release",
+      "BLOCKED": "Release blocked",
+      "REFUNDED": "Refunded",
+      "CHARGEBACK": "Chargeback",
+      "UNAVAILABLE": "Cash unavailable"
+    },
+    "timeline": {
+      "orderCreated": { "title": "Order received", "message": "The order entered LedgerFlow." },
+      "payment": { "title": "Payment updated", "message": "The safe payment state was updated." },
+      "inventory": {
+        "title": "Inventory moved",
+        "message": "A movement linked to the sale was recorded."
+      },
+      "shipping": {
+        "title": "Shipping updated",
+        "message": "The sale shipping summary was updated."
+      },
+      "settlement": {
+        "title": "Settlement updated",
+        "message": "The sale settlement was updated."
+      },
+      "cash": {
+        "title": "Cash impact",
+        "message": "A financial entry linked to the sale was realized."
+      },
+      "outbound": {
+        "title": "Outbound event",
+        "message": "A sanitized event was prepared for delivery."
+      }
     },
     "unavailable": "Unavailable",
     "empty": {
