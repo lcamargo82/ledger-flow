@@ -6,8 +6,8 @@ import SalesIntelligenceView from '../views/SalesIntelligenceView.vue'
 
 vi.mock('../services/sales-intelligence.service', () => ({
   salesIntelligenceService: {
-    list: vi.fn(),
-    getSummary: vi.fn(),
+    list: vi.fn<typeof salesIntelligenceService.list>(),
+    getSummary: vi.fn<typeof salesIntelligenceService.getSummary>(),
   },
 }))
 

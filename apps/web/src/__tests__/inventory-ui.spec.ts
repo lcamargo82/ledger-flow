@@ -8,7 +8,7 @@ import { validateWarehouseForm } from '../utils/inventory-validation'
 
 vi.mock('../services/inventory.service', () => ({
   inventoryService: {
-    createWarehouse: vi.fn(),
+    createWarehouse: vi.fn<typeof inventoryService.createWarehouse>(),
   },
 }))
 

@@ -12,7 +12,6 @@ import {
   ChannelListingMatchStatus,
   ChannelProvider,
   ChannelWebhookStatus,
-  Prisma,
 } from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
@@ -220,7 +219,7 @@ export class ChannelOrderIntakeService {
         aggregateId: summary.id,
         eventType: 'channel.order.shipping_summary.updated',
         eventVersion: 1,
-        payload: payload as Prisma.InputJsonValue,
+        payload,
         payloadHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
       },
     });

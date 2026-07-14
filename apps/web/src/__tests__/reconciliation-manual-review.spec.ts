@@ -6,12 +6,12 @@ import { reconciliationService } from '../services/reconciliation.service'
 
 vi.mock('../services/reconciliation.service', () => ({
   reconciliationService: {
-    listCases: vi.fn(),
-    getDashboard: vi.fn(),
-    getCase: vi.fn(),
-    getTimeline: vi.fn(),
-    listReasonCodes: vi.fn(),
-    createDecision: vi.fn(),
+    listCases: vi.fn<typeof reconciliationService.listCases>(),
+    getDashboard: vi.fn<typeof reconciliationService.getDashboard>(),
+    getCase: vi.fn<typeof reconciliationService.getCase>(),
+    getTimeline: vi.fn<typeof reconciliationService.getTimeline>(),
+    listReasonCodes: vi.fn<typeof reconciliationService.listReasonCodes>(),
+    createDecision: vi.fn<typeof reconciliationService.createDecision>(),
   },
 }))
 

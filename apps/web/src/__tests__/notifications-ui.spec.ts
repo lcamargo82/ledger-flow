@@ -7,11 +7,11 @@ import { useNotificationsStore } from '../stores/notifications.store'
 
 vi.mock('../services/notifications.service', () => ({
   notificationsService: {
-    list: vi.fn(),
-    unreadCount: vi.fn(),
-    markRead: vi.fn(),
-    markAllRead: vi.fn(),
-    dismiss: vi.fn(),
+    list: vi.fn<typeof notificationsService.list>(),
+    unreadCount: vi.fn<typeof notificationsService.unreadCount>(),
+    markRead: vi.fn<typeof notificationsService.markRead>(),
+    markAllRead: vi.fn<typeof notificationsService.markAllRead>(),
+    dismiss: vi.fn<typeof notificationsService.dismiss>(),
   },
 }))
 
