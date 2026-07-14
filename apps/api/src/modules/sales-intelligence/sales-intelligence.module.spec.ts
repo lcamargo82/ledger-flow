@@ -12,8 +12,6 @@ describe('SalesIntelligenceModule', () => {
       .useValue({})
       .compile();
 
-    expect(module.get(SalesIntelligenceService)).toBeInstanceOf(
-      SalesIntelligenceService,
-    );
+    expect(module.get(SalesIntelligenceService)).toBeInstanceOf(SalesIntelligenceService);
   });
 });

@@ -15,6 +15,8 @@ import AppCard from '../components/common/AppCard.vue'
 import AppDrawer from '../components/common/AppDrawer.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
+import AppMetricCard from '../components/common/AppMetricCard.vue'
+import AppMetricGrid from '../components/common/AppMetricGrid.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
 import AppTable from '../components/common/AppTable.vue'
@@ -112,38 +114,28 @@ onMounted(() => store.fetchOverview())
     />
 
     <template v-else>
-      <section class="sales-summary-grid" :aria-label="t('salesIntelligence.summary.title')">
-        <AppCard>
-          <p class="sales-summary-label">{{ t('salesIntelligence.summary.orders') }}</p>
-          <p class="sales-summary-value">
-            {{
-              t('salesIntelligence.summary.orderCount', { count: store.summary?.orderCount ?? 0 })
-            }}
-          </p>
-        </AppCard>
-        <AppCard>
-          <p class="sales-summary-label">{{ t('salesIntelligence.summary.paid') }}</p>
-          <p class="sales-summary-value">
-            {{ formatMinor(store.summary?.paidAmountMinor ?? '0', summaryCurrency) }}
-          </p>
-        </AppCard>
-        <AppCard>
-          <p class="sales-summary-label">{{ t('salesIntelligence.summary.fees') }}</p>
-          <p class="sales-summary-value">
-            {{ formatMinor(store.summary?.feeAmountMinor ?? '0', summaryCurrency) }}
-          </p>
-        </AppCard>
-        <AppCard>
-          <p class="sales-summary-label">{{ t('salesIntelligence.summary.net') }}</p>
-          <p class="sales-summary-value">
-            {{ formatMinor(store.summary?.netAmountMinor ?? '0', summaryCurrency) }}
-          </p>
-        </AppCard>
-        <AppCard>
-          <p class="sales-summary-label">{{ t('salesIntelligence.summary.stockIssues') }}</p>
-          <p class="sales-summary-value">{{ store.summary?.stockIssueCount ?? 0 }}</p>
-        </AppCard>
-      </section>
+      <AppMetricGrid :accessible-label="t('salesIntelligence.summary.title')">
+        <AppMetricCard
+          :label="t('salesIntelligence.summary.orders')"
+          :value="t('salesIntelligence.summary.orderCount', { count: store.summary?.orderCount ?? 0 })"
+        />
+        <AppMetricCard
+          :label="t('salesIntelligence.summary.paid')"
+          :value="formatMinor(store.summary?.paidAmountMinor ?? '0', summaryCurrency)"
+        />
+        <AppMetricCard
+          :label="t('salesIntelligence.summary.fees')"
+          :value="formatMinor(store.summary?.feeAmountMinor ?? '0', summaryCurrency)"
+        />
+        <AppMetricCard
+          :label="t('salesIntelligence.summary.net')"
+          :value="formatMinor(store.summary?.netAmountMinor ?? '0', summaryCurrency)"
+        />
+        <AppMetricCard
+          :label="t('salesIntelligence.summary.stockIssues')"
+          :value="store.summary?.stockIssueCount ?? 0"
+        />
+      </AppMetricGrid>
 
       <AppCard>
         <div class="sales-filters">
@@ -301,25 +293,6 @@ onMounted(() => store.fetchOverview())
 </template>
 
 <style scoped>
-.sales-summary-label {
-  font-size: 0.8125rem;
-  color: var(--lf-text-secondary);
-}
-
-.sales-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
-  gap: var(--lf-space-4);
-}
-
-.sales-summary-value {
-  margin-top: var(--lf-space-2);
-  font-size: 1.35rem;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-  color: var(--lf-text-primary);
-}
-
 .sales-filters {
   display: grid;
   gap: var(--lf-space-4);
@@ -362,10 +335,6 @@ onMounted(() => store.fetchOverview())
 }
 
 @media (max-width: 640px) {
-  .sales-summary-grid > :last-child:nth-child(odd) {
-    grid-column: 1 / -1;
-  }
-
   .sales-drawer-summary {
     grid-template-columns: 1fr;
   }

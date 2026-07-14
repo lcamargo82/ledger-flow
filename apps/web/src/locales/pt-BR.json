@@ -676,6 +676,7 @@
     "internalChannel": "Interno",
     "reconciliationNote": "Margem operacional não representa liquidação, recebimento ou conciliação financeira.",
     "cards": {
+      "title": "Indicadores financeiros",
       "orders": "Pedidos com fato",
       "revenue": "Receita operacional",
       "cogs": "CMV",

@@ -17,6 +17,7 @@ Create `SalesIntelligenceModule` as a tenant-scoped read layer and `/sales-intel
 - Query optimization and field-level provenance are mandatory.
 - The Core can launch without profit, shipping, alerts or exports.
 - A rebuildable snapshot may be introduced only after measured query pressure.
+- The 11.0.4 volume regression keeps summaries in cursor batches of 500; no materialized snapshot is introduced without production evidence.
 
 ## Rejected
 

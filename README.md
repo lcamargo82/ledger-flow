@@ -1522,6 +1522,14 @@ A nova rota protegida `/sales-intelligence` inicia a camada de leitura consolida
 - Roles personalizadas recebem a permissão apenas por atribuição administrativa explícita. O acesso também exige tenant `ENTERPRISE` ou `CUSTOM` ativo para obter `sales_intelligence.read`, seguido de renovação da sessão.
 - O shell usa navegação off-canvas no mobile e mantém a tabela com rolagem horizontal controlada.
 
+## Fase 11.0.4 — Sales Intelligence Hardening
+
+- O resumo percorre grandes intervalos em lotes de 500 pedidos com cursor estável, sem offsets crescentes ou consultas por item.
+- Os índices de pedido, fato financeiro atual, data de venda e status de pagamento sustentam os filtros tenant-scoped do Core.
+- `@nestjs/platform-express` 11.1.28 e `@nestjs/swagger` 11.4.5 atualizam o runtime para Multer 2.2.0 e js-yaml 4.3.0; `npm audit --omit=dev` fecha sem vulnerabilidades.
+- Analytics e Inteligência de vendas compartilham `AppMetricGrid` e `AppMetricCard`, preservando tokens, i18n e comportamento responsivo.
+- O checklist de deploy, permissões, contratos e smoke está em `docs/runbooks/11.0-sales-intelligence-operational-readiness.md`.
+
 ## Roadmap pós-10.1
 
 O pacote planejado seguinte está documentado sem declarar endpoints futuros como implementados:

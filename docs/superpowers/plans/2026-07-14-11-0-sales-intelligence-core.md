@@ -85,7 +85,7 @@ currency
 - [x] 4. Implementar a query consolidada e o mapper de proveniência financeira → Verify: testes cobrem líquido realizado, fallback estimado, indisponível, refund/cancelamento e match divergente sem N+1.
 - [x] 5. Implementar a derivação agregada do estoque → Verify: testes cobrem pedido sem reserva, todos reservados, todos consumidos, todos liberados e itens em estados incompatíveis retornando `DIVERGENT`.
 - [x] 6. Construir a página `/sales-intelligence` com resumo, filtros, fila responsiva e drawer de itens → Verify: teste de componente cobre loading/empty/error, filtros, paginação, badges, abertura do drawer, SKUs/quantidades/estoque e distinção visual entre líquido realizado, conciliado e estimado usando componentes compartilhados.
-- [ ] 7. Fechar índices, segurança, docs e validação operacional → Verify: Prisma validate/generate, testes focados API/web, builds, type-check, i18n check e smoke em `/api/docs`, `/api/openapi.json`, `/api/reference` e `/sales-intelligence` passam.
+- [x] 7. Fechar índices, segurança, docs e validação operacional → Verify: Prisma validate/generate, testes focados API/web, builds, type-check, i18n check e smoke em `/api/docs`, `/api/openapi.json`, `/api/reference` e `/sales-intelligence` passam.
 
 ## Suggested Delivery Sequence
 
@@ -122,11 +122,11 @@ Cada sprint nasce da branch base e volta para ela com merge `--no-ff`. A branch 
 
 ## Done When
 
-- [ ] Uma venda Mercado Livre aparece uma única vez e mostra pedido, pagamento, taxa, líquido e estoque com fontes rastreáveis.
-- [ ] O usuário distingue líquido realizado de estimado; ausência de dado nunca vira zero silenciosamente.
-- [ ] Reprocessamento de webhook e sync Mercado Pago não duplica pedido/fato nem baixa estoque duas vezes.
-- [ ] Todas as consultas são tenant-scoped, paginadas e sem raw provider payload ou segredo.
-- [ ] Componentes reutilizáveis, pt-BR/en-US, Swagger, OpenAPI, Redoc e documentação do sistema estão atualizados.
+- [x] Uma venda Mercado Livre aparece uma única vez e mostra pedido, pagamento, taxa, líquido e estoque com fontes rastreáveis.
+- [x] O usuário distingue líquido realizado de estimado; ausência de dado nunca vira zero silenciosamente.
+- [x] Reprocessamento de webhook e sync Mercado Pago não duplica pedido/fato nem baixa estoque duas vezes.
+- [x] Todas as consultas são tenant-scoped, paginadas e sem raw provider payload ou segredo.
+- [x] Componentes reutilizáveis, pt-BR/en-US, Swagger, OpenAPI, Redoc e documentação do sistema estão atualizados.
 
 ## Accepted Decisions
 
