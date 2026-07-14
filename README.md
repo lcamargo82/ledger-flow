@@ -1495,6 +1495,16 @@ O Admin Master (Platform Owner) agora possui acesso total em um papel duplo (_Du
 - **Usuário Operacional (Tenant)**: Dentro do tenant interno `LedgerFlow Platform`, o Platform Admin gerencia usuários, clientes e pagamentos da mesma forma que qualquer tenant padrão, utilizando a role `OWNER` com escopo `TENANT`.
 - **Administrador Global (Platform)**: Utilizando a role especial `PLATFORM_OWNER` com escopo `PLATFORM`, o Admin Master tem a capacidade de gerenciar todos os tenants do ecossistema a partir de uma interface separada na plataforma.
 
+## Fase 11.0.1 — Sales Intelligence Foundation
+
+A nova rota protegida `/sales-intelligence` inicia a camada de leitura consolidada de vendas marketplace.
+
+- API foundation: `GET /sales-intelligence` e `GET /sales-intelligence/summary`.
+- Acesso: `sales-intelligence:read` + capability `sales_intelligence.read`.
+- UI shell tenant-safe com componentes LedgerFlow e i18n pt-BR/en-US.
+- Nenhum valor de lucro, margem ou payload bruto é simulado/exposto nesta foundation.
+- O Core aprovado segue até 11.0.4 com pedido, pagamento, taxa, líquido identificado pela origem e estoque.
+
 ## Roadmap pós-10.1
 
 O pacote planejado seguinte está documentado sem declarar endpoints futuros como implementados:

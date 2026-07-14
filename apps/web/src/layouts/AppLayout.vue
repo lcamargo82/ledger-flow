@@ -270,7 +270,9 @@
         <div
           v-if="
             (authStore.checkAllPermissions(['financial-intelligence:read']) &&
-              authStore.checkAllCapabilities(['financial.analytics.read']))
+              authStore.checkAllCapabilities(['financial.analytics.read'])) ||
+            (authStore.checkAllPermissions(['sales-intelligence:read']) &&
+              authStore.checkAllCapabilities(['sales_intelligence.read']))
           "
           class="lf-sidebar-group"
         >
@@ -285,6 +287,20 @@
             }}</span>
           </button>
           <div v-show="expandedGroups.analytics || isCollapsed" class="lf-sidebar-group-content">
+            <router-link
+              v-if="
+                authStore.checkAllPermissions(['sales-intelligence:read']) &&
+                authStore.checkAllCapabilities(['sales_intelligence.read'])
+              "
+              to="/sales-intelligence"
+              class="lf-nav-item"
+              active-class="lf-nav-item--active"
+            >
+              <span class="material-symbols-outlined icon" style="font-variation-settings: 'FILL' 0"
+                >query_stats</span
+              >
+              <span class="text" v-show="!isCollapsed">{{ t('nav.salesIntelligence') }}</span>
+            </router-link>
             <router-link
               v-if="
                 authStore.checkAllPermissions(['financial-intelligence:read']) &&
@@ -425,8 +441,16 @@
         <LanguageSwitcher v-show="!isCollapsed" />
 
         <!-- User Info & Notifications (Expanded) -->
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--lf-space-2);" v-show="!isCollapsed">
-          <div class="lf-sidebar__user" style="flex: 1; overflow: hidden; min-width: 0;">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--lf-space-2);
+          "
+          v-show="!isCollapsed"
+        >
+          <div class="lf-sidebar__user" style="flex: 1; overflow: hidden; min-width: 0">
             <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
             <div class="lf-sidebar__user-info">
               <span class="lf-sidebar__user-name">{{ authStore.userName }}</span>
@@ -434,7 +458,7 @@
             </div>
           </div>
           <NotificationBell
-            style="flex-shrink: 0;"
+            style="flex-shrink: 0"
             v-if="
               authStore.checkAllPermissions(['notifications:read']) &&
               authStore.checkAllCapabilities(['notifications.read'])
@@ -443,7 +467,10 @@
         </div>
 
         <!-- User Info & Notifications (Collapsed) -->
-        <div style="display: flex; flex-direction: column; align-items: center; gap: var(--lf-space-3);" v-show="isCollapsed">
+        <div
+          style="display: flex; flex-direction: column; align-items: center; gap: var(--lf-space-3)"
+          v-show="isCollapsed"
+        >
           <div class="lf-sidebar__user lf-sidebar__user--collapsed">
             <div class="lf-sidebar__avatar">{{ authStore.userName.charAt(0).toUpperCase() }}</div>
           </div>
@@ -455,7 +482,7 @@
           />
         </div>
 
-        <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; flex-direction: column">
           <button
             class="lf-sidebar__logout"
             @click="handleLogout"
@@ -467,8 +494,8 @@
             >
             <span class="text" v-show="!isCollapsed">{{ t('common.logout') }}</span>
           </button>
-          
-          <div v-show="!isCollapsed" style="margin-left: 32px; text-align: left; opacity: 0.6;">
+
+          <div v-show="!isCollapsed" style="margin-left: 32px; text-align: left; opacity: 0.6">
             <SystemVersionLabel />
           </div>
         </div>

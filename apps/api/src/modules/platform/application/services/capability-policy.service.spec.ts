@@ -120,6 +120,7 @@ describe('CapabilityPolicyService', () => {
         CommerceCapabilities.InventoryManage,
         CommerceCapabilities.ChannelsConnect,
         CommerceCapabilities.FinancialAnalyticsRead,
+        CommerceCapabilities.SalesIntelligenceRead,
         ReconciliationCapabilities.Read,
       ]),
     );

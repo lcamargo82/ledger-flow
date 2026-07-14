@@ -143,6 +143,7 @@
     "orders": "Pedidos",
     "channels": "Canais",
     "analytics": "Analytics",
+    "salesIntelligence": "Inteligência de vendas",
     "customers": "Clientes",
     "reconciliation": "Conciliação",
     "marketplaceSettlement": "Recebíveis",
@@ -698,6 +699,20 @@
       "default": "Não foi possível processar os indicadores financeiros.",
       "forbidden": "Você não possui acesso aos indicadores financeiros.",
       "invalid": "Revise os filtros informados."
+    }
+  },
+  "salesIntelligence": {
+    "title": "Inteligência de vendas",
+    "description": "Acompanhe cada venda marketplace sem misturar operação de pedidos com análise financeira.",
+    "foundation": {
+      "eyebrow": "Sales Intelligence Core",
+      "scope": "Pedido, pagamento, taxa, líquido e estoque",
+      "provenance": "Valores realizados, conciliados e estimados serão identificados pela origem.",
+      "status": "Fundação 11.0.1"
+    },
+    "empty": {
+      "title": "Nenhuma venda marketplace encontrada",
+      "description": "As vendas aparecerão aqui quando o read model consolidado for ativado na 11.0.2."
     }
   },
   "exports": {
