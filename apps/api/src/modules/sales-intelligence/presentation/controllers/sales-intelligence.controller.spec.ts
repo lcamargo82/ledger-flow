@@ -24,10 +24,17 @@ describe('SalesIntelligenceController', () => {
     ]);
   });
 
-  it('derives tenant scope from the authenticated user', () => {
+  it('derives tenant scope from the authenticated user', async () => {
     const query = { page: 1, perPage: 20 };
-    controller.list({ tenantId: 'tenant-1' } as never, query);
+    await controller.list({ tenantId: 'tenant-1' } as never, query);
 
     expect(list).toHaveBeenCalledWith('tenant-1', query);
+  });
+
+  it('applies the authenticated tenant and filters to the summary', async () => {
+    const query = { paymentStatus: 'paid' };
+    await controller.getSummary({ tenantId: 'tenant-1' } as never, query);
+
+    expect(getSummary).toHaveBeenCalledWith('tenant-1', query);
   });
 });

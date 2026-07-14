@@ -9,7 +9,6 @@ import {
   ChannelInventoryUpdateResult,
   ChannelOrderAdapter,
   ChannelOrderDetails,
-  ChannelProviderAdapter,
   ChannelProviderCapabilities,
 } from '../../domain/interfaces/channel-provider-adapter.interface';
 import {
@@ -165,12 +164,19 @@ export class MercadoLivreChannelAdapter
       this.firstMoney((order.payments ?? []).map((payment) => payment.transaction_amount)) ??
       paidAmount;
     const discountAmount = this.money(order.coupon?.amount);
+    const paymentStatus =
+      (order.payments ?? []).map((payment) => payment.status?.trim()).find(Boolean) ?? order.status;
+    const soldAt = this.isoDate(order.date_created);
+    const estimatedNetAmount = this.subtractMoney(paidAmount ?? revenueAmount, channelFeeAmount);
 
     const financial = {
       ...(order.currency_id && { currency: order.currency_id }),
+      ...(paymentStatus && { paymentStatus }),
+      ...(soldAt && { soldAt }),
       ...(revenueAmount && { revenueAmount }),
       ...(paidAmount && { paidAmount }),
       ...(channelFeeAmount && { channelFeeAmount }),
+      ...(estimatedNetAmount && { estimatedNetAmount }),
       ...(freightAmount && { freightAmount }),
       ...(discountAmount && { discountAmount }),
     };
@@ -220,6 +226,13 @@ export class MercadoLivreChannelAdapter
 
   private firstMoney(values: Array<number | string | undefined>) {
     return values.map((value) => this.money(value)).find(Boolean);
+  }
+
+  private subtractMoney(amount: string | undefined, fee: string | undefined) {
+    if (!amount || fee === undefined) return undefined;
+    const amountMinor = Math.round(Number(amount) * 100);
+    const feeMinor = Math.round(Number(fee ?? 0) * 100);
+    return this.money((amountMinor - feeMinor) / 100);
   }
 
   private money(value: number | string | undefined) {

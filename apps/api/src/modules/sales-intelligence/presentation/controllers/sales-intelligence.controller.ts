@@ -39,7 +39,10 @@ export class SalesIntelligenceController {
   @Get('summary')
   @ApiOperation({ summary: 'Consultar resumo consolidado de vendas' })
   @ApiOkResponse({ type: SalesIntelligenceSummaryDto })
-  getSummary(@CurrentUser() user: AuthenticatedUser) {
-    return this.service.getSummary(user.tenantId);
+  getSummary(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListSalesIntelligenceQueryDto,
+  ) {
+    return this.service.getSummary(user.tenantId, query);
   }
 }

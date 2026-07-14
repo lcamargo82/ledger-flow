@@ -17,7 +17,7 @@ export class SalesIntelligenceItemDto {
 export class SalesIntelligenceRowDto {
   @ApiProperty() orderId: string;
   @ApiProperty() orderNumber: string;
-  @ApiProperty() externalOrderId: string;
+  @ApiPropertyOptional() externalOrderId?: string | null;
   @ApiProperty() soldAt: Date;
   @ApiProperty() orderStatus: string;
   @ApiProperty({ type: [SalesIntelligenceItemDto] }) items: SalesIntelligenceItemDto[];

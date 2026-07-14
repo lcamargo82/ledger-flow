@@ -1505,6 +1505,14 @@ A nova rota protegida `/sales-intelligence` inicia a camada de leitura consolida
 - Nenhum valor de lucro, margem ou payload bruto é simulado/exposto nesta foundation.
 - O Core aprovado segue até 11.0.4 com pedido, pagamento, taxa, líquido identificado pela origem e estoque.
 
+## Fase 11.0.2 — Sales Intelligence Read Model
+
+- O intake Mercado Livre persiste status/data do pagamento, valor pago, taxa e líquido esperado em revisões financeiras imutáveis e idempotentes.
+- `GET /sales-intelligence` consolida a revisão atual, itens/reservas e settlement Mercado Pago com paginação e filtros tenant-scoped.
+- `GET /sales-intelligence/summary` usa os mesmos filtros e agrega dinheiro em minor units por proveniência `REALIZED`, `RECONCILED` ou `ESTIMATED`.
+- Estoque é derivado do ledger existente como `PENDING`, `RESERVED`, `CONSUMED`, `RELEASED`, `DIVERGENT` ou `UNAVAILABLE`.
+- Payload bruto, credenciais, dados de comprador, custo e margem continuam fora do contrato.
+
 ## Roadmap pós-10.1
 
 O pacote planejado seguinte está documentado sem declarar endpoints futuros como implementados:

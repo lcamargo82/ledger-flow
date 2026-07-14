@@ -81,9 +81,9 @@ currency
 
 - [x] 1. Importar e recortar a documentação 11.0 para o MVP Core → Verify: PRD/SDD/spec/backlog/ADR deixam explícitos os itens `in/out`, as três fontes de verdade e a precedência do líquido.
 - [x] 2. Criar a foundation do módulo, permission/capability, DTOs e endpoints protegidos → Verify: testes de controller/guard cobrem acesso dedicado, tenant vem apenas do usuário autenticado e OpenAPI expõe os contratos paginados.
-- [ ] 3. Corrigir a persistência financeira do intake Mercado Livre → Verify: testes do adapter/intake persistem status, pago, taxa e líquido esperado; webhook repetido não duplica versão e mudança real cria uma nova revisão idempotente.
-- [ ] 4. Implementar a query consolidada e o mapper de proveniência financeira → Verify: testes cobrem líquido realizado, fallback estimado, indisponível, refund/cancelamento e match divergente sem N+1.
-- [ ] 5. Implementar a derivação agregada do estoque → Verify: testes cobrem pedido sem reserva, todos reservados, todos consumidos, todos liberados e itens em estados incompatíveis retornando `DIVERGENT`.
+- [x] 3. Corrigir a persistência financeira do intake Mercado Livre → Verify: testes do adapter/intake persistem status, pago, taxa e líquido esperado; webhook repetido não duplica versão e mudança real cria uma nova revisão idempotente.
+- [x] 4. Implementar a query consolidada e o mapper de proveniência financeira → Verify: testes cobrem líquido realizado, fallback estimado, indisponível, refund/cancelamento e match divergente sem N+1.
+- [x] 5. Implementar a derivação agregada do estoque → Verify: testes cobrem pedido sem reserva, todos reservados, todos consumidos, todos liberados e itens em estados incompatíveis retornando `DIVERGENT`.
 - [ ] 6. Construir a página `/sales-intelligence` com resumo, filtros, fila responsiva e drawer de itens → Verify: teste de componente cobre loading/empty/error, filtros, paginação, badges, abertura do drawer, SKUs/quantidades/estoque e distinção visual entre líquido realizado, conciliado e estimado usando componentes compartilhados.
 - [ ] 7. Fechar índices, segurança, docs e validação operacional → Verify: Prisma validate/generate, testes focados API/web, builds, type-check, i18n check e smoke em `/api/docs`, `/api/openapi.json`, `/api/reference` e `/sales-intelligence` passam.
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { BadRequestException } from '@nestjs/common';
 import {
   ChannelIntegrationStatus,
@@ -196,9 +197,12 @@ describe('ChannelOrderIntakeService', () => {
       buyerName: 'Comprador Teste',
       financial: {
         currency: 'BRL',
+        paymentStatus: 'paid',
+        soldAt: '2026-07-14T13:30:00.000Z',
         revenueAmount: '120.5',
         paidAmount: '115',
         channelFeeAmount: '12.05',
+        estimatedNetAmount: '102.95',
         freightAmount: '8',
         discountAmount: '5.5',
       },
@@ -221,9 +225,12 @@ describe('ChannelOrderIntakeService', () => {
         provider: ChannelProvider.MERCADO_LIVRE,
         externalOrderId: '2000000001',
         currency: 'BRL',
+        paymentStatus: 'paid',
+        soldAt: '2026-07-14T13:30:00.000Z',
         revenueAmount: '120.5',
         paidAmount: '115',
         channelFeeAmount: '12.05',
+        estimatedNetAmount: '102.95',
         freightAmount: '8',
         discountAmount: '5.5',
       },
