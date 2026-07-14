@@ -20,8 +20,11 @@ describe('SalesIntelligenceService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-14T10:00:00.000Z'));
     prisma.internalOrder.count.mockResolvedValue(1);
   });
+
+  afterEach(() => jest.useRealTimers());
 
   it('consolidates the latest order fact, realized net and consumed stock without N+1', async () => {
     prisma.internalOrder.findMany.mockResolvedValue([
@@ -45,10 +48,7 @@ describe('SalesIntelligenceService', () => {
         reservationStatus: InventoryReservationStatus.CONSUMED,
       }),
     ]);
-    const service = new SalesIntelligenceService(
-      prisma as never,
-      () => new Date('2026-07-14T10:00:00.000Z'),
-    );
+    const service = new SalesIntelligenceService(prisma as never);
 
     const result = await service.list('tenant-1', { page: 1, perPage: 20 });
 
@@ -60,7 +60,10 @@ describe('SalesIntelligenceService', () => {
           AND: [
             {
               financialFacts: {
-                some: { channelProvider: ChannelProvider.MERCADO_LIVRE, isCurrent: true },
+                some: {
+                  channelProvider: ChannelProvider.MERCADO_LIVRE,
+                  isCurrent: true,
+                },
               },
             },
           ],
@@ -100,14 +103,13 @@ describe('SalesIntelligenceService', () => {
         ],
       }),
     ]);
-    const service = new SalesIntelligenceService(
-      prisma as never,
-      () => new Date('2026-07-14T10:00:00.000Z'),
-    );
+    const service = new SalesIntelligenceService(prisma as never);
 
     const result = await service.list('tenant-1', {});
 
-    expect(result.data[0].netAmountSource).toBe(SalesIntelligenceNetAmountSource.RECONCILED);
+    expect(result.data[0].netAmountSource).toBe(
+      SalesIntelligenceNetAmountSource.RECONCILED,
+    );
   });
 
   it('falls back to explicitly estimated net and marks mixed stock as divergent', async () => {
@@ -133,7 +135,10 @@ describe('SalesIntelligenceService', () => {
 
   it('does not present an estimate for cancelled or refunded payments', async () => {
     prisma.internalOrder.findMany.mockResolvedValue([
-      makeOrder({ paymentStatus: 'refunded', orderStatus: InternalOrderStatus.CANCELLED }),
+      makeOrder({
+        paymentStatus: 'refunded',
+        orderStatus: InternalOrderStatus.CANCELLED,
+      }),
     ]);
     const service = new SalesIntelligenceService(prisma as never);
 
@@ -168,10 +173,7 @@ describe('SalesIntelligenceService', () => {
         ],
       }),
     ]);
-    const service = new SalesIntelligenceService(
-      prisma as never,
-      () => new Date('2026-07-14T10:00:00.000Z'),
-    );
+    const service = new SalesIntelligenceService(prisma as never);
 
     const result = await service.list('tenant-1', {});
 
@@ -194,13 +196,21 @@ describe('SalesIntelligenceService', () => {
       stockStatus: SalesIntelligenceStockStatus.RESERVED,
     });
 
-    expect(result.meta).toEqual({ page: 1, perPage: 1, total: 1, totalPages: 1 });
+    expect(result.meta).toEqual({
+      page: 1,
+      perPage: 1,
+      total: 1,
+      totalPages: 1,
+    });
     expect(result.data).toHaveLength(1);
     expect(prisma.internalOrder.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         skip: 0,
         take: 1,
-        where: expect.objectContaining({ tenantId: 'tenant-1', AND: expect.any(Array) }),
+        where: expect.objectContaining({
+          tenantId: 'tenant-1',
+          AND: expect.any(Array),
+        }),
       }),
     );
   });
@@ -208,16 +218,27 @@ describe('SalesIntelligenceService', () => {
   it.each([
     [null, SalesIntelligenceStockStatus.PENDING],
     [InventoryReservationStatus.ACTIVE, SalesIntelligenceStockStatus.RESERVED],
-    [InventoryReservationStatus.CONSUMED, SalesIntelligenceStockStatus.CONSUMED],
-    [InventoryReservationStatus.RELEASED, SalesIntelligenceStockStatus.RELEASED],
-  ])('maps reservation status %s to aggregate stock status %s', async (status, expected) => {
-    prisma.internalOrder.findMany.mockResolvedValue([makeOrder({ reservationStatus: status })]);
-    const service = new SalesIntelligenceService(prisma as never);
+    [
+      InventoryReservationStatus.CONSUMED,
+      SalesIntelligenceStockStatus.CONSUMED,
+    ],
+    [
+      InventoryReservationStatus.RELEASED,
+      SalesIntelligenceStockStatus.RELEASED,
+    ],
+  ])(
+    'maps reservation status %s to aggregate stock status %s',
+    async (status, expected) => {
+      prisma.internalOrder.findMany.mockResolvedValue([
+        makeOrder({ reservationStatus: status }),
+      ]);
+      const service = new SalesIntelligenceService(prisma as never);
 
-    const result = await service.list('tenant-1', {});
+      const result = await service.list('tenant-1', {});
 
-    expect(result.data[0].stockStatus).toBe(expected);
-  });
+      expect(result.data[0].stockStatus).toBe(expected);
+    },
+  );
 
   it('summarizes minor-unit amounts by their explicit net provenance', async () => {
     prisma.internalOrder.findMany.mockResolvedValue([
@@ -241,10 +262,7 @@ describe('SalesIntelligenceService', () => {
       }),
       makeOrder({ id: 'order-2' }),
     ]);
-    const service = new SalesIntelligenceService(
-      prisma as never,
-      () => new Date('2026-07-14T10:00:00.000Z'),
-    );
+    const service = new SalesIntelligenceService(prisma as never);
 
     const result = await service.getSummary('tenant-1');
 
@@ -289,7 +307,11 @@ function makeOrder(
         reservation:
           options.reservationStatus === null
             ? null
-            : { status: options.reservationStatus ?? InventoryReservationStatus.ACTIVE },
+            : {
+                status:
+                  options.reservationStatus ??
+                  InventoryReservationStatus.ACTIVE,
+              },
       },
     ],
     financialFacts: [

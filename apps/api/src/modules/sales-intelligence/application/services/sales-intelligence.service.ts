@@ -26,10 +26,7 @@ interface SummaryAccumulator {
 
 @Injectable()
 export class SalesIntelligenceService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly now: () => Date = () => new Date(),
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async list(tenantId: string, query: ListSalesIntelligenceQueryDto) {
     const page = query.page ?? 1;
@@ -47,12 +44,15 @@ export class SalesIntelligenceService {
     ]);
 
     return {
-      data: orders.map((order) => mapSalesIntelligenceOrder(order, this.now)),
+      data: orders.map((order) => mapSalesIntelligenceOrder(order)),
       meta: { page, perPage, total, totalPages: Math.ceil(total / perPage) },
     };
   }
 
-  async getSummary(tenantId: string, query: ListSalesIntelligenceQueryDto = {}) {
+  async getSummary(
+    tenantId: string,
+    query: ListSalesIntelligenceQueryDto = {},
+  ) {
     const summary = this.emptySummary();
     const batchSize = 500;
     const where = buildSalesIntelligenceWhere(tenantId, query);
@@ -66,7 +66,7 @@ export class SalesIntelligenceService {
         select: salesIntelligenceOrderSelect,
       });
       orders
-        .map((order) => mapSalesIntelligenceOrder(order, this.now))
+        .map((order) => mapSalesIntelligenceOrder(order))
         .forEach((row) => this.addToSummary(summary, row));
       if (orders.length < batchSize) break;
     }
@@ -74,7 +74,10 @@ export class SalesIntelligenceService {
     return this.serializeSummary(summary);
   }
 
-  private addToSummary(summary: SummaryAccumulator, row: SalesIntelligenceRowDto) {
+  private addToSummary(
+    summary: SummaryAccumulator,
+    row: SalesIntelligenceRowDto,
+  ) {
     summary.orderCount += 1;
     summary.paid += this.minor(row.paidAmountMinor);
     summary.fee += this.minor(row.feeAmountMinor);
@@ -88,7 +91,8 @@ export class SalesIntelligenceService {
     if (row.netAmountSource === SalesIntelligenceNetAmountSource.ESTIMATED) {
       summary.estimated += this.minor(row.netAmountMinor);
     }
-    if (row.stockStatus === SalesIntelligenceStockStatus.DIVERGENT) summary.stockIssues += 1;
+    if (row.stockStatus === SalesIntelligenceStockStatus.DIVERGENT)
+      summary.stockIssues += 1;
     summary.currency = row.currency;
   }
 
