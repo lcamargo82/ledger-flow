@@ -1,40 +1,373 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
+import { useSalesIntelligenceStore } from '../stores/sales-intelligence.store'
+import { formatDateTime } from '../utils/date-format'
+import { formatMoneyFromCents } from '../utils/money-format'
+import type {
+  SalesIntelligenceNetAmountSource,
+  SalesIntelligenceOrder,
+  SalesIntelligenceStockStatus,
+} from '../types/sales-intelligence.types'
 import AppBadge from '../components/common/AppBadge.vue'
+import AppButton from '../components/common/AppButton.vue'
 import AppCard from '../components/common/AppCard.vue'
-import AppEmptyState from '../components/common/AppEmptyState.vue'
+import AppDrawer from '../components/common/AppDrawer.vue'
+import AppErrorState from '../components/common/AppErrorState.vue'
+import AppInput from '../components/common/AppInput.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
+import AppSelect from '../components/common/AppSelect.vue'
+import AppTable from '../components/common/AppTable.vue'
 
-const { t } = useI18n()
+const { t, currentLocale } = useI18n()
+const store = useSalesIntelligenceStore()
+const selectedOrder = ref<SalesIntelligenceOrder | null>(null)
+
+const columns = computed(() => [
+  { key: 'soldAt', label: t('salesIntelligence.table.soldAt') },
+  { key: 'order', label: t('salesIntelligence.table.order') },
+  { key: 'paymentStatus', label: t('salesIntelligence.table.payment') },
+  { key: 'paidAmountMinor', label: t('salesIntelligence.table.paid'), align: 'right' as const },
+  { key: 'feeAmountMinor', label: t('salesIntelligence.table.fee'), align: 'right' as const },
+  { key: 'netAmountMinor', label: t('salesIntelligence.table.net'), align: 'right' as const },
+  { key: 'stockStatus', label: t('salesIntelligence.table.stock') },
+  { key: 'actions', label: t('salesIntelligence.table.actions'), align: 'right' as const },
+])
+
+const paymentOptions = computed(() => [
+  { value: '', label: t('salesIntelligence.filters.allPayments') },
+  { value: 'approved', label: t('salesIntelligence.payment.approved') },
+  { value: 'pending', label: t('salesIntelligence.payment.pending') },
+  { value: 'refunded', label: t('salesIntelligence.payment.refunded') },
+  { value: 'cancelled', label: t('salesIntelligence.payment.cancelled') },
+])
+
+const stockOptions = computed(() => [
+  { value: '', label: t('salesIntelligence.filters.allStock') },
+  ...(['PENDING', 'RESERVED', 'CONSUMED', 'RELEASED', 'DIVERGENT', 'UNAVAILABLE'] as const).map(
+    (value) => ({ value, label: t(`salesIntelligence.stock.${value}`) }),
+  ),
+])
+
+const summaryCurrency = computed(() => store.summary?.currency ?? 'BRL')
+
+const formatMinor = (amount?: string | null, currency: string = 'BRL') => {
+  if (amount === null || amount === undefined) return t('salesIntelligence.unavailable')
+  return formatMoneyFromCents(Number(amount), currency, currentLocale.value)
+}
+
+const paymentVariant = (status?: string | null) => {
+  if (status === 'approved') return 'success'
+  if (status === 'refunded' || status === 'cancelled') return 'danger'
+  return 'warning'
+}
+
+const stockVariant = (status: SalesIntelligenceStockStatus) => {
+  if (status === 'CONSUMED') return 'success'
+  if (status === 'RESERVED') return 'info'
+  if (status === 'DIVERGENT') return 'danger'
+  if (status === 'PENDING') return 'warning'
+  return 'default'
+}
+
+const netVariant = (source: SalesIntelligenceNetAmountSource) => {
+  if (source === 'REALIZED') return 'success'
+  if (source === 'RECONCILED') return 'info'
+  if (source === 'ESTIMATED') return 'warning'
+  return 'default'
+}
+
+const setPaymentStatus = (value: string) => store.setFilters({ paymentStatus: value || undefined })
+const setStockStatus = (value: string) =>
+  store.setFilters({
+    stockStatus: (value || undefined) as SalesIntelligenceStockStatus | undefined,
+  })
+const setOrderReference = (value: string) =>
+  store.setFilters({ orderReference: value.trim() || undefined })
+const setDate = (key: 'dateFrom' | 'dateTo', value: string) =>
+  store.setFilters({ [key]: value || undefined })
+
+onMounted(() => store.fetchOverview())
 </script>
 
 <template>
   <div class="space-y-6">
     <AppPageHeader
-      :eyebrow="t('salesIntelligence.foundation.eyebrow')"
+      :eyebrow="t('salesIntelligence.eyebrow')"
       :title="t('salesIntelligence.title')"
       :description="t('salesIntelligence.description')"
     />
 
-    <AppCard>
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm font-medium text-[var(--lf-text-primary)]">
-            {{ t('salesIntelligence.foundation.scope') }}
-          </p>
-          <p class="mt-1 text-sm text-[var(--lf-text-secondary)]">
-            {{ t('salesIntelligence.foundation.provenance') }}
-          </p>
-        </div>
-        <AppBadge variant="info">
-          {{ t('salesIntelligence.foundation.status') }}
-        </AppBadge>
-      </div>
-    </AppCard>
+    <p class="text-sm font-medium text-[var(--lf-text-secondary)]">
+      {{ t('salesIntelligence.foundation.scope') }}
+    </p>
 
-    <AppEmptyState
-      :title="t('salesIntelligence.empty.title')"
-      :description="t('salesIntelligence.empty.description')"
+    <AppErrorState
+      v-if="store.error && !store.orders.length"
+      :title="t('salesIntelligence.errors.title')"
+      :description="t(store.error)"
+      :action-label="t('common.retry')"
+      show-retry
+      @retry="store.fetchOverview()"
     />
+
+    <template v-else>
+      <section class="sales-summary-grid" :aria-label="t('salesIntelligence.summary.title')">
+        <AppCard>
+          <p class="sales-summary-label">{{ t('salesIntelligence.summary.orders') }}</p>
+          <p class="sales-summary-value">
+            {{
+              t('salesIntelligence.summary.orderCount', { count: store.summary?.orderCount ?? 0 })
+            }}
+          </p>
+        </AppCard>
+        <AppCard>
+          <p class="sales-summary-label">{{ t('salesIntelligence.summary.paid') }}</p>
+          <p class="sales-summary-value">
+            {{ formatMinor(store.summary?.paidAmountMinor ?? '0', summaryCurrency) }}
+          </p>
+        </AppCard>
+        <AppCard>
+          <p class="sales-summary-label">{{ t('salesIntelligence.summary.fees') }}</p>
+          <p class="sales-summary-value">
+            {{ formatMinor(store.summary?.feeAmountMinor ?? '0', summaryCurrency) }}
+          </p>
+        </AppCard>
+        <AppCard>
+          <p class="sales-summary-label">{{ t('salesIntelligence.summary.net') }}</p>
+          <p class="sales-summary-value">
+            {{ formatMinor(store.summary?.netAmountMinor ?? '0', summaryCurrency) }}
+          </p>
+        </AppCard>
+        <AppCard>
+          <p class="sales-summary-label">{{ t('salesIntelligence.summary.stockIssues') }}</p>
+          <p class="sales-summary-value">{{ store.summary?.stockIssueCount ?? 0 }}</p>
+        </AppCard>
+      </section>
+
+      <AppCard>
+        <div class="sales-filters">
+          <AppInput
+            :model-value="store.filters.orderReference"
+            :label="t('salesIntelligence.filters.orderReference')"
+            :placeholder="t('salesIntelligence.filters.orderPlaceholder')"
+            name="sales-order-reference"
+            autocomplete="off"
+            @change="setOrderReference(($event.target as HTMLInputElement).value)"
+          />
+          <AppSelect
+            :model-value="store.filters.paymentStatus || ''"
+            :label="t('salesIntelligence.filters.payment')"
+            :options="paymentOptions"
+            name="sales-payment-status"
+            autocomplete="off"
+            data-testid="sales-payment-filter"
+            @update:model-value="setPaymentStatus"
+          />
+          <AppSelect
+            :model-value="store.filters.stockStatus || ''"
+            :label="t('salesIntelligence.filters.stock')"
+            :options="stockOptions"
+            name="sales-stock-status"
+            autocomplete="off"
+            @update:model-value="setStockStatus"
+          />
+          <AppInput
+            :model-value="store.filters.dateFrom"
+            type="date"
+            :label="t('salesIntelligence.filters.dateFrom')"
+            name="sales-date-from"
+            autocomplete="off"
+            @change="setDate('dateFrom', ($event.target as HTMLInputElement).value)"
+          />
+          <AppInput
+            :model-value="store.filters.dateTo"
+            type="date"
+            :label="t('salesIntelligence.filters.dateTo')"
+            name="sales-date-to"
+            autocomplete="off"
+            @change="setDate('dateTo', ($event.target as HTMLInputElement).value)"
+          />
+        </div>
+      </AppCard>
+
+      <AppTable
+        :columns="columns"
+        :items="store.orders"
+        :is-loading="store.isLoading"
+        :empty-title="t('salesIntelligence.empty.title')"
+        :empty-description="t('salesIntelligence.empty.description')"
+        :pagination="store.meta"
+        @update:page="store.setPage"
+      >
+        <template #soldAt="{ item }">
+          <span class="whitespace-nowrap">{{ formatDateTime(item.soldAt, currentLocale) }}</span>
+        </template>
+        <template #order="{ item }">
+          <div class="space-y-1">
+            <p class="break-words font-semibold text-[var(--lf-text-primary)]" translate="no">
+              {{ item.orderNumber }}
+            </p>
+            <p class="text-xs text-[var(--lf-text-secondary)]">
+              {{ item.externalOrderId || t('salesIntelligence.unavailable') }} ·
+              {{ t(`salesIntelligence.orderStatus.${item.orderStatus}`) }}
+            </p>
+          </div>
+        </template>
+        <template #paymentStatus="{ item }">
+          <AppBadge :variant="paymentVariant(item.paymentStatus)">
+            {{ t(`salesIntelligence.payment.${item.paymentStatus || 'unavailable'}`) }}
+          </AppBadge>
+        </template>
+        <template #paidAmountMinor="{ item }">
+          <span class="sales-money">{{ formatMinor(item.paidAmountMinor, item.currency) }}</span>
+        </template>
+        <template #feeAmountMinor="{ item }">
+          <span class="sales-money">{{ formatMinor(item.feeAmountMinor, item.currency) }}</span>
+        </template>
+        <template #netAmountMinor="{ item }">
+          <div class="flex flex-col items-end gap-1">
+            <span class="sales-money font-semibold">{{
+              formatMinor(item.netAmountMinor, item.currency)
+            }}</span>
+            <AppBadge :variant="netVariant(item.netAmountSource)">
+              {{ t(`salesIntelligence.netSource.${item.netAmountSource}`) }}
+            </AppBadge>
+          </div>
+        </template>
+        <template #stockStatus="{ item }">
+          <AppBadge :variant="stockVariant(item.stockStatus)">
+            {{ t(`salesIntelligence.stock.${item.stockStatus}`) }}
+          </AppBadge>
+        </template>
+        <template #actions="{ item }">
+          <AppButton
+            variant="secondary"
+            size="small"
+            :data-testid="`sales-order-details-${item.orderId}`"
+            @click="selectedOrder = item"
+          >
+            {{ t('salesIntelligence.actions.details') }}
+          </AppButton>
+        </template>
+      </AppTable>
+    </template>
+
+    <AppDrawer
+      :model-value="Boolean(selectedOrder)"
+      :title="t('salesIntelligence.drawer.title', { order: selectedOrder?.orderNumber ?? '' })"
+      data-testid="sales-order-drawer"
+      @update:model-value="selectedOrder = $event ? selectedOrder : null"
+    >
+      <div v-if="selectedOrder" class="space-y-5">
+        <div class="sales-drawer-summary">
+          <div>
+            <span>{{ t('salesIntelligence.table.payment') }}</span>
+            <strong>{{
+              t(`salesIntelligence.payment.${selectedOrder.paymentStatus || 'unavailable'}`)
+            }}</strong>
+          </div>
+          <div>
+            <span>{{ t('salesIntelligence.table.net') }}</span>
+            <strong>{{ formatMinor(selectedOrder.netAmountMinor, selectedOrder.currency) }}</strong>
+          </div>
+        </div>
+        <ul class="space-y-3" :aria-label="t('salesIntelligence.drawer.items')">
+          <li v-for="item in selectedOrder.items" :key="item.orderItemId" class="sales-item-card">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="break-words font-semibold text-[var(--lf-text-primary)]">
+                  {{ item.productName || t('salesIntelligence.drawer.productUnavailable') }}
+                </p>
+                <p
+                  class="mt-1 break-all font-mono text-sm text-[var(--lf-text-secondary)]"
+                  translate="no"
+                >
+                  {{ item.sku || item.skuId }}
+                </p>
+              </div>
+              <AppBadge :variant="stockVariant(item.stockStatus)">
+                {{ t(`salesIntelligence.stock.${item.stockStatus}`) }}
+              </AppBadge>
+            </div>
+            <p class="mt-3 text-sm text-[var(--lf-text-secondary)]">
+              {{ t('salesIntelligence.drawer.quantity', { quantity: item.quantity }) }}
+            </p>
+          </li>
+        </ul>
+      </div>
+    </AppDrawer>
   </div>
 </template>
+
+<style scoped>
+.sales-summary-label {
+  font-size: 0.8125rem;
+  color: var(--lf-text-secondary);
+}
+
+.sales-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: var(--lf-space-4);
+}
+
+.sales-summary-value {
+  margin-top: var(--lf-space-2);
+  font-size: 1.35rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--lf-text-primary);
+}
+
+.sales-filters {
+  display: grid;
+  gap: var(--lf-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  align-items: end;
+}
+
+.sales-money {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.sales-drawer-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--lf-space-3);
+}
+
+.sales-drawer-summary > div,
+.sales-item-card {
+  border: 1px solid var(--lf-border-primary);
+  border-radius: var(--lf-radius);
+  background: var(--lf-surface-secondary);
+  padding: var(--lf-space-4);
+}
+
+.sales-drawer-summary span,
+.sales-drawer-summary strong {
+  display: block;
+}
+
+.sales-drawer-summary span {
+  font-size: 0.75rem;
+  color: var(--lf-text-secondary);
+}
+
+.sales-drawer-summary strong {
+  margin-top: var(--lf-space-1);
+  color: var(--lf-text-primary);
+}
+
+@media (max-width: 640px) {
+  .sales-summary-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .sales-drawer-summary {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

@@ -1513,6 +1513,15 @@ A nova rota protegida `/sales-intelligence` inicia a camada de leitura consolida
 - Estoque é derivado do ledger existente como `PENDING`, `RESERVED`, `CONSUMED`, `RELEASED`, `DIVERGENT` ou `UNAVAILABLE`.
 - Payload bruto, credenciais, dados de comprador, custo e margem continuam fora do contrato.
 
+## Fase 11.0.3 — Sales Intelligence Queue
+
+- `/sales-intelligence` exibe uma linha por pedido Mercado Livre, resumo, filtros tenant-scoped e paginação backend.
+- O drawer agrupa os SKUs e mostra produto, quantidade e estado do estoque por item.
+- Badges diferenciam líquido `REALIZED`, `RECONCILED`, `ESTIMATED` e `UNAVAILABLE` sem tratar estimativa como realização.
+- A migration `20260714184500_add_sales_intelligence_permission` cadastra `sales-intelligence:read` e a associa de forma idempotente às roles `OWNER`; não é necessário rodar a seed geral após `prisma migrate deploy`.
+- Roles personalizadas recebem a permissão apenas por atribuição administrativa explícita. O acesso também exige tenant `ENTERPRISE` ou `CUSTOM` ativo para obter `sales_intelligence.read`, seguido de renovação da sessão.
+- O shell usa navegação off-canvas no mobile e mantém a tabela com rolagem horizontal controlada.
+
 ## Roadmap pós-10.1
 
 O pacote planejado seguinte está documentado sem declarar endpoints futuros como implementados:

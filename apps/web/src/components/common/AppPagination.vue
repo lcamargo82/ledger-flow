@@ -35,17 +35,19 @@ const nextPage = () => {
         {{ t('common.pagination.total', { total }) }}
       </span>
     </div>
-    
+
     <div class="lf-pagination__controls" v-if="totalPages > 1">
       <AppButton
         variant="secondary"
         size="small"
         icon-only
         :disabled="!canGoPrev"
+        :aria-label="t('common.pagination.previous')"
+        data-testid="pagination-previous"
         @click="prevPage"
       >
         <template #icon>
-          <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_left</span>
         </template>
       </AppButton>
       <span class="lf-pagination__page-text text-sm text-[var(--lf-text-secondary)]">
@@ -56,10 +58,14 @@ const nextPage = () => {
         size="small"
         icon-only
         :disabled="!canGoNext"
+        :aria-label="t('common.pagination.next')"
+        data-testid="pagination-next"
         @click="nextPage"
       >
         <template #icon>
-          <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true"
+            >chevron_right</span
+          >
         </template>
       </AppButton>
     </div>
