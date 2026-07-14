@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDateString, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { SalesIntelligenceStockStatus } from '../../domain/enums/sales-intelligence.enums';
 
 export class ListSalesIntelligenceQueryDto {
   @ApiPropertyOptional({ example: 1, minimum: 1, default: 1 })
@@ -38,8 +39,8 @@ export class ListSalesIntelligenceQueryDto {
   @IsString()
   paymentStatus?: string;
 
-  @ApiPropertyOptional({ example: 'RESERVED' })
+  @ApiPropertyOptional({ enum: SalesIntelligenceStockStatus, example: 'RESERVED' })
   @IsOptional()
-  @IsString()
-  stockStatus?: string;
+  @IsEnum(SalesIntelligenceStockStatus)
+  stockStatus?: SalesIntelligenceStockStatus;
 }

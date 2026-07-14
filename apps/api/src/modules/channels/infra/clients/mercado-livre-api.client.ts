@@ -63,6 +63,7 @@ export interface MercadoLivreItemResponse {
 export interface MercadoLivreOrderResponse {
   id: number | string;
   status?: string;
+  date_created?: string;
   currency_id?: string;
   total_amount?: number | string;
   paid_amount?: number | string;
@@ -71,6 +72,7 @@ export interface MercadoLivreOrderResponse {
     amount?: number | string;
   };
   payments?: Array<{
+    status?: string;
     total_paid_amount?: number | string;
     transaction_amount?: number | string;
     shipping_cost?: number | string;

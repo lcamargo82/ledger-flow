@@ -144,6 +144,7 @@ describe('MercadoLivreChannelAdapter', () => {
     apiClient.getOrder.mockResolvedValue({
       id: 2000000001,
       status: 'paid',
+      date_created: '2026-07-14T10:30:00.000-03:00',
       currency_id: 'BRL',
       total_amount: 120.5,
       paid_amount: 115,
@@ -166,13 +167,37 @@ describe('MercadoLivreChannelAdapter', () => {
 
     expect(order.financial).toEqual({
       currency: 'BRL',
+      paymentStatus: 'paid',
+      soldAt: '2026-07-14T13:30:00.000Z',
       revenueAmount: '120.5',
       paidAmount: '115',
       channelFeeAmount: '12.05',
+      estimatedNetAmount: '102.95',
       freightAmount: '8',
       discountAmount: '5.5',
     });
     expect(JSON.stringify(order)).not.toContain('ml-access-token');
+  });
+
+  it('does not assume an estimated net amount when the marketplace fee is unavailable', async () => {
+    apiClient.getOrder.mockResolvedValue({
+      id: 2000000002,
+      status: 'paid',
+      currency_id: 'BRL',
+      paid_amount: 115,
+      order_items: [{ quantity: 1, item: { id: 'MLB124', title: 'Produto sem taxa' } }],
+    });
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const order = await adapter.fetchOrder({
+      accessToken: 'ml-access-token',
+      resource: '/orders/2000000002',
+    });
+
+    expect(order.financial).toEqual(
+      expect.objectContaining({ paidAmount: '115', paymentStatus: 'paid' }),
+    );
+    expect(order.financial).not.toHaveProperty('estimatedNetAmount');
   });
 
   it('normalizes Mercado Livre shipping summary with string IDs and masked tracking', async () => {

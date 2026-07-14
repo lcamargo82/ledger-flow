@@ -49,9 +49,12 @@ export interface ChannelOrderDetails {
   items: ChannelOrderItem[];
   financial?: {
     currency?: string;
+    paymentStatus?: string;
+    soldAt?: string;
     revenueAmount?: string;
     paidAmount?: string;
     channelFeeAmount?: string;
+    estimatedNetAmount?: string;
     freightAmount?: string;
     discountAmount?: string;
   };
