@@ -97,6 +97,22 @@ async function main() {
       key: 'sales-intelligence:read',
       description: 'Visualizar inteligência de vendas consolidada',
     },
+    {
+      key: 'sales-intelligence:view-profitability',
+      description: 'Visualizar CMV, lucro e margem por venda',
+    },
+    {
+      key: 'sales-intelligence:view-settlement',
+      description: 'Visualizar settlement e impacto de caixa por venda',
+    },
+    {
+      key: 'sales-intelligence:export',
+      description: 'Exportar inteligência de vendas',
+    },
+    {
+      key: 'sales-intelligence:manage-policy',
+      description: 'Gerenciar políticas e alertas de inteligência de vendas',
+    },
     { key: 'reconciliation:read', description: 'Visualizar conciliação financeira' },
     { key: 'reconciliation:manage', description: 'Gerenciar casos de conciliação financeira' },
     { key: 'reconciliation:export', description: 'Exportar relatórios de conciliação financeira' },

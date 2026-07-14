@@ -8,6 +8,8 @@ vi.mock('../services/sales-intelligence.service', () => ({
   salesIntelligenceService: {
     list: vi.fn<typeof salesIntelligenceService.list>(),
     getSummary: vi.fn<typeof salesIntelligenceService.getSummary>(),
+    getDetail: vi.fn<typeof salesIntelligenceService.getDetail>(),
+    getTimeline: vi.fn<typeof salesIntelligenceService.getTimeline>(),
   },
 }))
 
@@ -55,6 +57,57 @@ describe('sales intelligence queue', () => {
       stockIssueCount: 0,
       currency: 'BRL',
     })
+    vi.mocked(salesIntelligenceService.getDetail).mockResolvedValue({
+      ...row,
+      permissions: {
+        canViewProfitability: true,
+        canViewSettlement: true,
+        canViewPayment: true,
+        canViewInventory: true,
+      },
+      items: [
+        {
+          orderItemId: 'item-1',
+          skuId: 'sku-1',
+          sku: 'CAM-001-P',
+          productName: 'Camiseta LedgerFlow',
+          quantity: '2',
+          stockStatus: 'CONSUMED',
+          warehouseName: 'Estoque principal',
+          warehouseCode: 'MAIN',
+          unitCostMinor: '4000',
+          cogsAmountMinor: '8000',
+        },
+      ],
+      payment: { status: 'approved', paidAmountMinor: '15000' },
+      financial: {
+        grossAmountMinor: '15000',
+        feeAmountMinor: '2140',
+        shippingCostMinor: '500',
+        netAmountMinor: '12860',
+        netAmountSource: 'REALIZED',
+        cogsAmountMinor: '8000',
+        estimatedProfitMinor: '4360',
+        realizedProfitMinor: '4360',
+        marginPercent: '29.07',
+        profitabilityStatus: 'PROFIT',
+        profitSource: 'REALIZED',
+      },
+      shipping: { status: 'DELIVERED', trackingCodeMasked: '***1234' },
+      settlement: { status: 'RECONCILED', cashStatus: 'REALIZED' },
+    })
+    vi.mocked(salesIntelligenceService.getTimeline).mockResolvedValue([
+      {
+        id: 'event-1',
+        occurredAt: '2026-07-14T13:00:00.000Z',
+        source: 'SETTLEMENT',
+        type: 'settlement.reconciled',
+        titleKey: 'salesIntelligence.timeline.settlement.title',
+        messageKey: 'salesIntelligence.timeline.settlement.message',
+        severity: 'SUCCESS',
+        metadata: {},
+      },
+    ])
   })
 
   it('renders order summary, explicit net provenance and stock state', async () => {
@@ -82,11 +135,21 @@ describe('sales intelligence queue', () => {
     await flushPromises()
 
     await wrapper.get('[data-testid="sales-order-details-order-1"]').trigger('click')
+    await flushPromises()
 
     expect(wrapper.get('[data-testid="sales-order-drawer"]').attributes('role')).toBe('dialog')
-    expect(wrapper.text()).toContain('CAM-001-P')
-    expect(wrapper.text()).toContain('Camiseta LedgerFlow')
-    expect(wrapper.text()).toContain('Quantidade: 2')
+    const drawerText = wrapper.text().replace(/\s+/g, ' ')
+    expect(drawerText).toContain('CAM-001-P')
+    expect(drawerText).toContain('Camiseta LedgerFlow')
+    expect(drawerText).toContain('Quantidade: 2')
+    expect(drawerText).toContain('Estoque principal · MAIN')
+    expect(drawerText).toContain('R$ 80,00')
+    expect(drawerText).toContain('R$ 43,60')
+    expect(drawerText).toContain('29,07%')
+    expect(drawerText).toContain('Entregue')
+    expect(drawerText).toContain('Conciliado')
+    expect(salesIntelligenceService.getDetail).toHaveBeenCalledWith('order-1')
+    expect(salesIntelligenceService.getTimeline).toHaveBeenCalledWith('order-1')
   })
 
   it('applies approved filters and changes backend pages', async () => {

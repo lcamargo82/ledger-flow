@@ -21,6 +21,23 @@ export interface SalesIntelligenceItem {
   stockStatus: SalesIntelligenceStockStatus
 }
 
+export type SalesIntelligenceProfitabilityStatus =
+  | 'PROFIT'
+  | 'LOSS'
+  | 'BREAK_EVEN'
+  | 'MISSING_COST'
+  | 'UNAVAILABLE'
+
+export type SalesIntelligenceProfitSource = 'REALIZED' | 'ESTIMATED' | 'UNAVAILABLE'
+
+export interface SalesIntelligenceDetailItem extends Omit<SalesIntelligenceItem, 'stockStatus'> {
+  stockStatus: SalesIntelligenceStockStatus | null
+  warehouseName?: string | null
+  warehouseCode?: string | null
+  unitCostMinor?: string | null
+  cogsAmountMinor?: string | null
+}
+
 export interface SalesIntelligenceOrder {
   orderId: string
   orderNumber: string
@@ -35,6 +52,63 @@ export interface SalesIntelligenceOrder {
   netAmountSource: SalesIntelligenceNetAmountSource
   stockStatus: SalesIntelligenceStockStatus
   currency: string
+}
+
+export interface SalesIntelligenceDetail extends Omit<SalesIntelligenceOrder, 'items'> {
+  customerName?: string | null
+  permissions: {
+    canViewProfitability: boolean
+    canViewSettlement: boolean
+    canViewPayment: boolean
+    canViewInventory: boolean
+  }
+  items: SalesIntelligenceDetailItem[]
+  payment: {
+    status?: string | null
+    paidAmountMinor?: string | null
+    reference?: string | null
+  } | null
+  financial: {
+    grossAmountMinor?: string | null
+    feeAmountMinor?: string | null
+    shippingCostMinor?: string | null
+    netAmountMinor?: string | null
+    netAmountSource: SalesIntelligenceNetAmountSource
+    cogsAmountMinor?: string | null
+    estimatedProfitMinor?: string | null
+    realizedProfitMinor?: string | null
+    marginPercent?: string | null
+    profitabilityStatus: SalesIntelligenceProfitabilityStatus
+    profitSource: SalesIntelligenceProfitSource
+  }
+  shipping: {
+    status: string
+    providerStatus?: string | null
+    trackingCodeMasked?: string | null
+    deliveryEstimateAt?: string | null
+  }
+  settlement: {
+    caseId?: string
+    status: string
+    cashStatus: string
+    providerStatus?: string | null
+    availableAt?: string | null
+    amountMinor?: string | null
+    feeAmountMinor?: string | null
+    netAmountMinor?: string | null
+    currency?: string
+  } | null
+}
+
+export interface SalesTimelineEvent {
+  id: string
+  occurredAt: string
+  source: string
+  type: string
+  titleKey: string
+  messageKey: string
+  severity: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR'
+  metadata: Record<string, unknown>
 }
 
 export interface SalesIntelligenceMeta {

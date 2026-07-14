@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -15,7 +15,9 @@ import { CommerceCapabilities } from '../../../platform/domain/constants/platfor
 import { ListSalesIntelligenceQueryDto } from '../../application/dto/list-sales-intelligence-query.dto';
 import {
   PaginatedSalesIntelligenceResponseDto,
+  SalesIntelligenceDetailDto,
   SalesIntelligenceSummaryDto,
+  SalesTimelineEventDto,
 } from '../../application/dto/sales-intelligence-response.dto';
 import { SalesIntelligenceService } from '../../application/services/sales-intelligence.service';
 
@@ -44,5 +46,19 @@ export class SalesIntelligenceController {
     @Query() query: ListSalesIntelligenceQueryDto,
   ) {
     return this.service.getSummary(user.tenantId, query);
+  }
+
+  @Get(':orderId/timeline')
+  @ApiOperation({ summary: 'Consultar timeline sanitizada da venda' })
+  @ApiOkResponse({ type: [SalesTimelineEventDto] })
+  getTimeline(@CurrentUser() user: AuthenticatedUser, @Param('orderId') orderId: string) {
+    return this.service.getTimeline(user.tenantId, orderId, user.permissions);
+  }
+
+  @Get(':orderId')
+  @ApiOperation({ summary: 'Consultar detalhe operacional e financeiro da venda' })
+  @ApiOkResponse({ type: SalesIntelligenceDetailDto })
+  getDetail(@CurrentUser() user: AuthenticatedUser, @Param('orderId') orderId: string) {
+    return this.service.getDetail(user.tenantId, orderId, user.permissions);
   }
 }
