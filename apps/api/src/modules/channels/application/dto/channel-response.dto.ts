@@ -91,6 +91,18 @@ export class ChannelInventorySyncStateResponseDto {
   @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
   @ApiProperty() externalListingId: string;
   @ApiProperty() skuId: string;
+  @ApiPropertyOptional({
+    example: {
+      skuCanonical: 'CONTROLLER-GAMEPAD',
+      skuDisplay: 'CONTROLLER-GAMEPAD',
+      product: { name: 'Controle Gamepad Wireless' },
+    },
+  })
+  sku?: {
+    skuCanonical: string;
+    skuDisplay: string;
+    product: { name: string };
+  };
   @ApiProperty({ enum: ChannelInventorySyncStatus }) status: ChannelInventorySyncStatus;
   @ApiProperty({ enum: ChannelCircuitState }) circuitState: ChannelCircuitState;
   @ApiProperty() targetAvailableQuantity: string;

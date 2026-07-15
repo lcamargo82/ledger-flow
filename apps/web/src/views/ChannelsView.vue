@@ -103,7 +103,7 @@ const syncColumns = computed(() => [
   { key: 'updatedAt', label: t('channels.table.updatedAt') },
   { key: 'provider', label: t('channels.table.provider') },
   { key: 'externalListingId', label: t('channels.table.providerEventId') },
-  { key: 'skuId', label: t('channels.table.skuId') },
+  { key: 'sku', label: t('channels.table.skuId') },
   { key: 'quantity', label: t('channels.table.targetAvailable') },
   { key: 'status', label: t('channels.table.status') },
   { key: 'circuit', label: t('channels.table.circuit') },
@@ -654,8 +654,14 @@ const mapListing = async () => {
           <template #provider="{ item }">
             {{ t(`channels.provider.${item.provider}`) }}
           </template>
-          <template #skuId="{ item }">
-            <span class="font-mono text-xs">{{ item.skuId }}</span>
+          <template #sku="{ item }">
+            <div v-if="item.sku" class="space-y-1">
+              <div class="text-sm text-[var(--lf-text-primary)]">{{ item.sku.product.name }}</div>
+              <div class="font-mono text-xs text-[var(--lf-text-secondary)]">
+                {{ item.sku.skuDisplay }}
+              </div>
+            </div>
+            <span v-else class="text-[var(--lf-text-secondary)]">-</span>
           </template>
           <template #quantity="{ item }">
             {{ item.targetAvailableQuantity }}

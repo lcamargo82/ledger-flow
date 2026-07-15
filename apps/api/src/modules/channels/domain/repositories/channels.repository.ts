@@ -127,7 +127,15 @@ export interface ListInventorySyncStatesParams {
 }
 
 export interface PaginatedInventorySyncStatesResult {
-  data: ChannelInventorySyncState[];
+  data: Array<
+    ChannelInventorySyncState & {
+      sku: {
+        skuCanonical: string;
+        skuDisplay: string;
+        product: { name: string };
+      } | null;
+    }
+  >;
   meta: {
     page: number;
     perPage: number;

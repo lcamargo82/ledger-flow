@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import ChannelsView from '../views/ChannelsView.vue'
+import channelsViewSource from '../views/ChannelsView.vue?raw'
 
 const fetchChannels = vi.fn()
 const fetchListings = vi.fn()
@@ -103,5 +104,12 @@ describe('ChannelsView Mercado Livre connection', () => {
 
     expect(connectMercadoLivre).toHaveBeenCalledOnce()
     expect(createIntegration).not.toHaveBeenCalled()
+  })
+
+  it('renders readable product and SKU fields instead of the internal SKU UUID', () => {
+    expect(channelsViewSource).toContain("{ key: 'sku', label")
+    expect(channelsViewSource).toContain('item.sku.product.name')
+    expect(channelsViewSource).toContain('item.sku.skuDisplay')
+    expect(channelsViewSource).not.toContain('#skuId')
   })
 })
