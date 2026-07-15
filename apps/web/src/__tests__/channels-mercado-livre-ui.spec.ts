@@ -1,5 +1,5 @@
 /* oxlint-disable vitest/require-mock-type-parameters */
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import ChannelsView from '../views/ChannelsView.vue'
@@ -10,6 +10,7 @@ const fetchListings = vi.fn()
 const fetchInventorySyncStatus = vi.fn()
 const createIntegration = vi.fn()
 const connectMercadoLivre = vi.fn()
+const setListingSearch = vi.fn()
 
 vi.mock('../stores/auth.store', () => ({
   useAuthStore: () => ({
@@ -65,12 +66,14 @@ vi.mock('../stores/channels.store', () => ({
     processInventorySync: vi.fn(),
     setInboxStatus: vi.fn(),
     setListingStatus: vi.fn(),
+    setListingSearch,
     setInventorySyncStatus: vi.fn(),
   }),
 }))
 
 describe('ChannelsView Mercado Livre connection', () => {
   afterEach(() => {
+    vi.useRealTimers()
     vi.clearAllMocks()
     document.body.innerHTML = ''
   })
@@ -128,5 +131,26 @@ describe('ChannelsView Mercado Livre connection', () => {
     expect(channelsViewSource).toContain("mappingForm.skuId = exactMatch?.id || ''")
     expect(channelsViewSource).toContain("t('channels.errors.skuNotFound'")
     expect(channelsViewSource).toContain('requestId !== mappingSearchRequestId')
+  })
+
+  it('filters the mapping review with a debounced readable search', async () => {
+    vi.useFakeTimers()
+    fetchChannels.mockResolvedValue(undefined)
+    fetchListings.mockResolvedValue(undefined)
+    fetchInventorySyncStatus.mockResolvedValue(undefined)
+    const wrapper = mount(ChannelsView)
+    await flushPromises()
+
+    const mappingReviewTab = wrapper
+      .findAll('button')
+      .find((button) => button.text().includes('Malha fina'))
+    expect(mappingReviewTab).toBeDefined()
+    await mappingReviewTab!.trigger('click')
+
+    const search = wrapper.get('#channel-listing-search')
+    await search.setValue('  MLB4835955601  ')
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(setListingSearch).toHaveBeenCalledWith('MLB4835955601')
   })
 })

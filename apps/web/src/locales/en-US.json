@@ -592,7 +592,9 @@
     },
     "filters": {
       "statusLabel": "Status",
-      "statusAll": "All"
+      "statusAll": "All",
+      "listingSearchLabel": "Search listings",
+      "listingSearchPlaceholder": "Listing ID, title, product, or SKU..."
     },
     "table": {
       "provider": "Provider",

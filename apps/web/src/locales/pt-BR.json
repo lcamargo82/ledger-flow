@@ -591,7 +591,9 @@
     },
     "filters": {
       "statusLabel": "Status",
-      "statusAll": "Todos"
+      "statusAll": "Todos",
+      "listingSearchLabel": "Buscar anúncio",
+      "listingSearchPlaceholder": "ID do anúncio, título, produto ou SKU..."
     },
     "table": {
       "provider": "Provider",

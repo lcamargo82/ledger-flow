@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ChannelListingMatchStatus, ChannelProvider } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 export class ListChannelListingsQueryDto {
   @ApiPropertyOptional({ example: 1, minimum: 1 })
@@ -27,4 +27,13 @@ export class ListChannelListingsQueryDto {
   @IsOptional()
   @IsEnum(ChannelListingMatchStatus)
   status?: ChannelListingMatchStatus;
+
+  @ApiPropertyOptional({
+    example: 'MLB4835955601',
+    description: 'Busca por ID externo, título, SKU externo, produto ou SKU vinculado',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  search?: string;
 }

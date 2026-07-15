@@ -45,6 +45,7 @@ export const useChannelsStore = defineStore('channels', () => {
     perPage: number
     provider?: ChannelProvider
     status?: ChannelListingMatchStatus
+    search?: string
   }>({ page: 1, perPage: 10, status: 'UNMATCHED' })
   const inventorySyncFilters = ref<{
     page: number
@@ -213,6 +214,12 @@ export const useChannelsStore = defineStore('channels', () => {
     fetchListings()
   }
 
+  const setListingSearch = (search?: string) => {
+    listingFilters.value.search = search
+    listingFilters.value.page = 1
+    fetchListings()
+  }
+
   const setListingPage = (page: number) => {
     listingFilters.value.page = page
     fetchListings()
@@ -326,6 +333,7 @@ export const useChannelsStore = defineStore('channels', () => {
     setInboxStatus,
     setInboxPage,
     setListingStatus,
+    setListingSearch,
     setListingPage,
     setInventorySyncStatus,
     setInventorySyncPage,

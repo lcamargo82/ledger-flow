@@ -119,6 +119,7 @@ export class ChannelsService {
     perPage?: number
     provider?: ChannelProvider
     status?: ChannelListingMatchStatus
+    search?: string
   }): Promise<PaginatedChannelListingsResponse> {
     const { data } = await httpClient.get<PaginatedChannelListingsResponse>(
       '/channels/listings/unmatched',

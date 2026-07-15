@@ -200,12 +200,23 @@ export class PrismaChannelsRepository implements ChannelsRepository {
 
   async listListings(params: ListChannelListingsParams) {
     const { tenantId, page = 1, perPage = 10, provider, status } = params;
+    const search = params.search?.trim();
     const take = Math.min(perPage, 100);
     const skip = (page - 1) * take;
     const where: Prisma.ChannelListingWhereInput = {
       tenantId,
       provider,
       matchStatus: status,
+      ...(search && {
+        OR: [
+          { externalListingId: { contains: search, mode: 'insensitive' } },
+          { title: { contains: search, mode: 'insensitive' } },
+          { externalSku: { contains: search, mode: 'insensitive' } },
+          { matchedSku: { skuCanonical: { contains: search, mode: 'insensitive' } } },
+          { matchedSku: { skuDisplay: { contains: search, mode: 'insensitive' } } },
+          { matchedSku: { product: { name: { contains: search, mode: 'insensitive' } } } },
+        ],
+      }),
     };
 
     const [listings, total] = await Promise.all([

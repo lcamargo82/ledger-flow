@@ -90,6 +90,37 @@ describe('PrismaChannelsRepository inventory sync identities', () => {
     });
   });
 
+  it('searches tenant listings by external identity and readable product or SKU fields', async () => {
+    prisma.channelListing.findMany.mockResolvedValue([]);
+    prisma.channelListing.count.mockResolvedValue(0);
+    const repository = new PrismaChannelsRepository(prisma as never);
+
+    await repository.listListings({ tenantId: 'tenant-1', search: 'game-r365' });
+
+    const expectedWhere = {
+      tenantId: 'tenant-1',
+      provider: undefined,
+      matchStatus: undefined,
+      OR: [
+        { externalListingId: { contains: 'game-r365', mode: 'insensitive' } },
+        { title: { contains: 'game-r365', mode: 'insensitive' } },
+        { externalSku: { contains: 'game-r365', mode: 'insensitive' } },
+        { matchedSku: { skuCanonical: { contains: 'game-r365', mode: 'insensitive' } } },
+        { matchedSku: { skuDisplay: { contains: 'game-r365', mode: 'insensitive' } } },
+        {
+          matchedSku: { product: { name: { contains: 'game-r365', mode: 'insensitive' } } },
+        },
+      ],
+    };
+    expect(prisma.channelListing.findMany).toHaveBeenCalledWith({
+      where: expectedWhere,
+      skip: 0,
+      take: 10,
+      orderBy: { importedAt: 'desc' },
+    });
+    expect(prisma.channelListing.count).toHaveBeenCalledWith({ where: expectedWhere });
+  });
+
   it('lists active tenant SKU options by readable product or SKU search', async () => {
     prisma.productSku.findMany.mockResolvedValue([]);
     const repository = new PrismaChannelsRepository(prisma as never);

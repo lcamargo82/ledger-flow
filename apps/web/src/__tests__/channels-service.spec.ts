@@ -51,6 +51,28 @@ describe('ChannelsService', () => {
     })
   })
 
+  it('sends the mapping review search together with pagination and status', async () => {
+    vi.mocked(httpClient.get).mockResolvedValue({
+      data: { data: [], meta: { page: 1, perPage: 10, total: 0, totalPages: 0 } },
+    })
+
+    await channelsService.listListings({
+      page: 1,
+      perPage: 10,
+      status: 'UNMATCHED',
+      search: 'MLB4835955601',
+    })
+
+    expect(httpClient.get).toHaveBeenCalledWith('/channels/listings/unmatched', {
+      params: {
+        page: 1,
+        perPage: 10,
+        status: 'UNMATCHED',
+        search: 'MLB4835955601',
+      },
+    })
+  })
+
   it('updates operational integration settings through the tenant-scoped endpoint', async () => {
     vi.mocked(httpClient.patch).mockResolvedValue({
       data: { integration: { id: 'integration-1' } },

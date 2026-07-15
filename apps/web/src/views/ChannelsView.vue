@@ -44,6 +44,7 @@ const isSettingsModalOpen = ref(false)
 const selectedIntegration = ref<ChannelIntegration | null>(null)
 const warehouses = ref<Warehouse[]>([])
 const selectedListing = ref<ChannelListing | null>(null)
+const listingSearch = ref(channelsStore.listingFilters.search || '')
 const mappingSearch = ref('')
 const mappingSkuOptions = ref<ChannelSkuOption[]>([])
 const mappingError = ref('')
@@ -51,6 +52,7 @@ const mappingSearchFeedback = ref('')
 const mappingSearchFailed = ref(false)
 const isLoadingSkuOptions = ref(false)
 let mappingSearchTimer: ReturnType<typeof setTimeout> | null = null
+let listingSearchTimer: ReturnType<typeof setTimeout> | null = null
 let mappingSearchRequestId = 0
 
 const integrationForm = reactive({
@@ -178,7 +180,15 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('storage', refreshFromOtherTab)
   if (mappingSearchTimer) clearTimeout(mappingSearchTimer)
+  if (listingSearchTimer) clearTimeout(listingSearchTimer)
 })
+
+const scheduleListingSearch = () => {
+  if (listingSearchTimer) clearTimeout(listingSearchTimer)
+  listingSearchTimer = setTimeout(() => {
+    channelsStore.setListingSearch(listingSearch.value.trim() || undefined)
+  }, 400)
+}
 
 const createIntegration = async () => {
   if (integrationForm.provider === 'MERCADO_LIVRE') {
@@ -603,21 +613,32 @@ const mapListing = async () => {
 
       <div v-if="activeTab === 'listings'" class="space-y-4">
         <AppCard>
-          <div class="grid gap-4 md:grid-cols-[minmax(220px,320px)_1fr] md:items-end">
-            <AppSelect
-              id="channel-listing-status"
-              :model-value="channelsStore.listingFilters.status || ''"
-              :label="t('channels.filters.statusLabel')"
-              :options="listingStatusOptions"
-              @update:model-value="
-                channelsStore.setListingStatus(
-                  ($event || undefined) as ChannelListingMatchStatus | undefined,
-                )
-              "
-            />
+          <div class="lf-filter-container">
+            <div class="lf-filter-item lf-filter-item--large">
+              <AppInput
+                id="channel-listing-search"
+                v-model="listingSearch"
+                :label="t('channels.filters.listingSearchLabel')"
+                :placeholder="t('channels.filters.listingSearchPlaceholder')"
+                @input="scheduleListingSearch"
+              />
+            </div>
+            <div class="lf-filter-item">
+              <AppSelect
+                id="channel-listing-status"
+                :model-value="channelsStore.listingFilters.status || ''"
+                :label="t('channels.filters.statusLabel')"
+                :options="listingStatusOptions"
+                @update:model-value="
+                  channelsStore.setListingStatus(
+                    ($event || undefined) as ChannelListingMatchStatus | undefined,
+                  )
+                "
+              />
+            </div>
             <div
               v-if="channelsStore.lastImportSummary"
-              class="text-sm text-[var(--lf-text-secondary)]"
+              class="self-end pb-3 text-sm text-[var(--lf-text-secondary)]"
             >
               {{
                 t('channels.importSummary', {

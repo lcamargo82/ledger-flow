@@ -83,6 +83,7 @@ export interface ListChannelListingsParams {
   perPage?: number;
   provider?: ChannelProvider;
   status?: ChannelListingMatchStatus;
+  search?: string;
 }
 
 export interface PaginatedChannelListingsResult {
