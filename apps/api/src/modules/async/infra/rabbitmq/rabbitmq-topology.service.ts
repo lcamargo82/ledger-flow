@@ -67,49 +67,28 @@ export class RabbitMqTopologyService {
         dlx,
         'channel.webhook.dlq',
       );
+      await this.assertAndBindQueue(
+        channel,
+        'ledgerflow.sales-intelligence.events.q',
+        exchange,
+        'financial.order_fact.created',
+        dlx,
+        'sales-intelligence.dlq',
+      );
+      await channel.bindQueue(
+        'ledgerflow.sales-intelligence.events.q',
+        exchange,
+        'channel.order.shipping_summary.updated',
+      );
+      await channel.bindQueue(
+        'ledgerflow.sales-intelligence.events.q',
+        exchange,
+        'inventory.reservation.consumed',
+      );
 
-      // Domain event queues without an internal consumer yet. They keep mandatory
-      // publishes routable and make the events available for future integrations.
-      await this.assertAndBindQueue(
-        channel,
-        'ledgerflow.export.events.q',
-        exchange,
-        'export.job.*',
-        dlx,
-        'export.dlq',
-      );
-      await this.assertAndBindQueue(
-        channel,
-        'ledgerflow.inventory.events.q',
-        exchange,
-        'inventory.#',
-        dlx,
-        'inventory.dlq',
-      );
-      await this.assertAndBindQueue(
-        channel,
-        'ledgerflow.orders.events.q',
-        exchange,
-        'orders.order.*',
-        dlx,
-        'orders.dlq',
-      );
-      await this.assertAndBindQueue(
-        channel,
-        'ledgerflow.channel.events.q',
-        exchange,
-        'channel.#',
-        dlx,
-        'channel.dlq',
-      );
-      await this.assertAndBindQueue(
-        channel,
-        'ledgerflow.financial.events.q',
-        exchange,
-        'financial.#',
-        dlx,
-        'financial.dlq',
-      );
+      // These queues existed as broad, unconsumed catch-alls. Keep the queues so
+      // production messages are not deleted, but stop routing new messages to them.
+      await this.unbindLegacyCatchAllQueues(channel, exchange, dlx);
 
       // Retry Queues
       const retryIntervals = [30000, 120000, 600000, 1800000]; // 30s, 2m, 10m, 30m
@@ -178,6 +157,9 @@ export class RabbitMqTopologyService {
       await channel.assertQueue('ledgerflow.financial.dlq', { durable: true });
       await channel.bindQueue('ledgerflow.financial.dlq', dlx, 'financial.dlq');
 
+      await channel.assertQueue('ledgerflow.sales-intelligence.dlq', { durable: true });
+      await channel.bindQueue('ledgerflow.sales-intelligence.dlq', dlx, 'sales-intelligence.dlq');
+
       await channel.close();
       await connection.close();
       this.logger.log('rabbitmq.topology.initialized');
@@ -201,5 +183,24 @@ export class RabbitMqTopologyService {
       deadLetterRoutingKey: dlqRoutingKey,
     });
     await channel.bindQueue(queue, exchange, routingKey);
+  }
+
+  private async unbindLegacyCatchAllQueues(channel: any, exchange: string, dlx: string) {
+    const queues = [
+      ['ledgerflow.export.events.q', 'export.job.*', 'export.dlq'],
+      ['ledgerflow.inventory.events.q', 'inventory.#', 'inventory.dlq'],
+      ['ledgerflow.orders.events.q', 'orders.order.*', 'orders.dlq'],
+      ['ledgerflow.channel.events.q', 'channel.#', 'channel.dlq'],
+      ['ledgerflow.financial.events.q', 'financial.#', 'financial.dlq'],
+    ];
+
+    for (const [queue, routingKey, deadLetterRoutingKey] of queues) {
+      await channel.assertQueue(queue, {
+        durable: true,
+        deadLetterExchange: dlx,
+        deadLetterRoutingKey,
+      });
+      await channel.unbindQueue(queue, exchange, routingKey);
+    }
   }
 }

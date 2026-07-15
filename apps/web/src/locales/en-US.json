@@ -586,7 +586,9 @@
       "reactivate": "Reactivate",
       "reconnect": "Reconnect",
       "save": "Save",
-      "disconnect": "Disconnect"
+      "disconnect": "Disconnect",
+      "replay": "Replay event",
+      "replayFailed": "Replay failures"
     },
     "filters": {
       "statusLabel": "Status",
@@ -601,6 +603,7 @@
       "eventType": "Event",
       "providerEventId": "External ID",
       "summary": "Summary",
+      "failureReason": "Failure",
       "importedAt": "Imported at",
       "title": "Listing",
       "externalSku": "External SKU",
@@ -655,6 +658,14 @@
       "title": "Disconnect Mercado Livre",
       "message": "Credentials will be removed and channel operations will stop."
     },
+    "replay": {
+      "singleTitle": "Replay webhook",
+      "singleMessage": "The event will be queued again with an audit trail. Confirm only after fixing the channel configuration.",
+      "singleSuccess": "Webhook queued successfully.",
+      "bulkTitle": "Replay failed webhooks",
+      "bulkMessage": "Up to 50 failed events will be queued again for this tenant.",
+      "bulkSuccess": "{count} webhooks were queued again."
+    },
     "oauth": {
       "connectedSuccess": "Mercado Livre connected successfully.",
       "connectedFailed": "Could not complete the Mercado Livre connection."
@@ -698,6 +709,8 @@
     "errors": {
       "title": "Could not load channels",
       "default": "Could not process the channel operation.",
+      "timeout": "The import exceeded the expected time. Try again; processing may continue on the server.",
+      "importFailed": "Could not complete the listing import. The current screen was kept available so you can try again.",
       "forbidden": "You do not have channel access.",
       "invalid": "Review the channel information."
     }

@@ -58,6 +58,8 @@ vi.mock('../stores/channels.store', () => ({
     reactivateIntegration: vi.fn(),
     disconnectMercadoLivre: vi.fn(),
     importListings: vi.fn(),
+    replayWebhookInbox: vi.fn(),
+    replayFailedWebhooks: vi.fn(),
     mapListing: vi.fn(),
     processInventorySync: vi.fn(),
     setInboxStatus: vi.fn(),

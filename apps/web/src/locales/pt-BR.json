@@ -585,7 +585,9 @@
       "reactivate": "Reativar",
       "reconnect": "Reconectar",
       "save": "Salvar",
-      "disconnect": "Desconectar"
+      "disconnect": "Desconectar",
+      "replay": "Reprocessar evento",
+      "replayFailed": "Reprocessar falhas"
     },
     "filters": {
       "statusLabel": "Status",
@@ -600,6 +602,7 @@
       "eventType": "Evento",
       "providerEventId": "ID externo",
       "summary": "Resumo",
+      "failureReason": "Falha",
       "importedAt": "Importado em",
       "title": "Anúncio",
       "externalSku": "SKU externo",
@@ -654,6 +657,14 @@
       "title": "Desconectar Mercado Livre",
       "message": "As credenciais serão removidas e as operações do canal serão interrompidas."
     },
+    "replay": {
+      "singleTitle": "Reprocessar webhook",
+      "singleMessage": "O evento será reenfileirado com auditoria. Confirme somente após corrigir a configuração do canal.",
+      "singleSuccess": "Webhook reenfileirado com sucesso.",
+      "bulkTitle": "Reprocessar webhooks com falha",
+      "bulkMessage": "Até 50 eventos com falha serão reenfileirados para este tenant.",
+      "bulkSuccess": "{count} webhooks foram reenfileirados."
+    },
     "oauth": {
       "connectedSuccess": "Mercado Livre conectado com sucesso.",
       "connectedFailed": "Não foi possível concluir a conexão com o Mercado Livre."
@@ -697,6 +708,8 @@
     "errors": {
       "title": "Não foi possível carregar canais",
       "default": "Não foi possível processar a operação de canais.",
+      "timeout": "A importação excedeu o tempo esperado. Tente novamente; o processamento pode continuar no servidor.",
+      "importFailed": "Não foi possível concluir a importação dos anúncios. A tela foi mantida para permitir uma nova tentativa.",
       "forbidden": "Você não possui acesso a canais.",
       "invalid": "Revise as informações de canais."
     }

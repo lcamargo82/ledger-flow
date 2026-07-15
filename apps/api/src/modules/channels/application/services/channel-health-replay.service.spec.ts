@@ -18,6 +18,7 @@ describe('ChannelHealthReplayService', () => {
   const prisma = {
     outboxEvent: { create: jest.fn() },
     auditLog: { create: jest.fn() },
+    channelWebhookInboxEvent: { findMany: jest.fn() },
   };
 
   beforeEach(() => {
@@ -186,6 +187,35 @@ describe('ChannelHealthReplayService', () => {
       }),
     });
     expect(result).toEqual({ replayed: true, syncStateId: 'sync-1' });
+  });
+
+  it('replays a bounded tenant-scoped batch and returns a sanitized summary', async () => {
+    prisma.channelWebhookInboxEvent.findMany.mockResolvedValue([{ id: 'inbox-1' }]);
+    channelsRepository.findInboxById.mockResolvedValue({
+      id: 'inbox-1',
+      tenantId: 'tenant-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      providerEventId: 'evt-1',
+      eventType: 'orders_v2',
+      status: ChannelWebhookStatus.RECEIVED,
+      processedAt: null,
+      failureReason: 'Default warehouse required',
+    });
+
+    const result = await makeService().replayFailedWebhooks('tenant-1', 'user-1', { limit: 500 });
+
+    expect(prisma.channelWebhookInboxEvent.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ tenantId: 'tenant-1' }),
+        take: 100,
+      }),
+    );
+    expect(result).toEqual({
+      requested: 1,
+      replayed: 1,
+      skipped: 0,
+      results: [{ inboxEventId: 'inbox-1', replayed: true }],
+    });
   });
 
   it('rejects replay outside the tenant or non-failed states', async () => {

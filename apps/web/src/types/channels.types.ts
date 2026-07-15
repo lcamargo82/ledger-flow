@@ -147,6 +147,18 @@ export interface ChannelListingsImportResponse {
   data: ChannelListing[]
 }
 
+export interface ChannelReplayResponse {
+  replayed: boolean
+  inboxEventId: string
+}
+
+export interface ChannelBulkReplayResponse {
+  requested: number
+  replayed: number
+  skipped: number
+  results: Array<{ inboxEventId: string; replayed: boolean; reason?: string }>
+}
+
 export interface MercadoLivreConnectResponse {
   authorizationUrl: string
 }

@@ -16,6 +16,7 @@ describe('ChannelsController health and replay', () => {
   const healthReplayService = {
     getHealth: jest.fn(),
     replayWebhookInbox: jest.fn(),
+    replayFailedWebhooks: jest.fn(),
     replayInventorySync: jest.fn(),
   };
   const user = { tenantId: 'tenant-1', id: 'user-1' };
@@ -82,5 +83,23 @@ describe('ChannelsController health and replay', () => {
       'sync-1',
     );
     expect(result).toEqual({ replayed: true, syncStateId: 'sync-1' });
+  });
+
+  it('replays a bounded failed webhook batch using the current tenant and actor', async () => {
+    healthReplayService.replayFailedWebhooks.mockResolvedValue({
+      requested: 2,
+      replayed: 2,
+      skipped: 0,
+      results: [],
+    });
+
+    const result = await makeController().replayFailedWebhooks(user as never, { limit: 25 });
+
+    expect(healthReplayService.replayFailedWebhooks).toHaveBeenCalledWith(
+      'tenant-1',
+      'user-1',
+      { limit: 25 },
+    );
+    expect(result.replayed).toBe(2);
   });
 });
