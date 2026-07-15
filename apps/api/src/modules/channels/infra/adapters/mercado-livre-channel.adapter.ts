@@ -35,7 +35,7 @@ export class MercadoLivreChannelAdapter
 
   async fetchListings(input: ChannelListingImportInput): Promise<ChannelListingImportItem[]> {
     const pageSize = input.pageSize ?? 100;
-    const maxPages = input.maxPages;
+    const maxPages = input.externalUserProductId ? 1 : input.maxPages;
     const listings: ChannelListingImportItem[] = [];
     const seenItemIds = new Set<string>();
     let scrollId: string | undefined;
@@ -46,7 +46,8 @@ export class MercadoLivreChannelAdapter
         accessToken: input.accessToken,
         sellerId: input.externalAccountId,
         limit: pageSize,
-        searchType: 'scan',
+        ...(!input.externalUserProductId && { searchType: 'scan' as const }),
+        ...(input.externalUserProductId && { userProductId: input.externalUserProductId }),
         ...(scrollId && { scrollId }),
       });
       const itemIds = search.results.filter((itemId) => {
@@ -83,6 +84,57 @@ export class MercadoLivreChannelAdapter
     input: ChannelInventoryUpdateInput,
   ): Promise<ChannelInventoryUpdateResult> {
     try {
+      if (input.externalUserProductId) {
+        const stock = await this.apiClient.getUserProductStock(
+          input.accessToken,
+          input.externalUserProductId,
+        );
+        const sellerWarehouseLocations = stock.data.locations.filter(
+          (location) => location.type === 'seller_warehouse',
+        );
+        if (sellerWarehouseLocations.length > 0) {
+          if (!input.sellerWarehouseLocation) {
+            return {
+              ok: false,
+              errorCode: 'WAREHOUSE_MAPPING_REQUIRED',
+              errorSummary: 'Mercado Livre seller warehouse mapping is required.',
+            };
+          }
+          if (!stock.version) {
+            return {
+              ok: false,
+              errorCode: 'PROVIDER_VERSION_REQUIRED',
+              errorSummary: 'Mercado Livre did not return the stock version.',
+            };
+          }
+          const configuredLocation = sellerWarehouseLocations.some(
+            (location) =>
+              String(location.store_id) === input.sellerWarehouseLocation?.storeId &&
+              location.network_node_id === input.sellerWarehouseLocation?.networkNodeId,
+          );
+          if (!configuredLocation) {
+            return {
+              ok: false,
+              errorCode: 'WAREHOUSE_MAPPING_INVALID',
+              errorSummary: 'Configured Mercado Livre seller warehouse was not found.',
+            };
+          }
+          await this.apiClient.updateUserProductSellerWarehouseStock({
+            accessToken: input.accessToken,
+            externalUserProductId: input.externalUserProductId,
+            version: stock.version,
+            storeId: input.sellerWarehouseLocation.storeId,
+            networkNodeId: input.sellerWarehouseLocation.networkNodeId,
+            availableQuantity: input.availableQuantity,
+          });
+          return {
+            ok: true,
+            providerStatus: 'updated',
+            externalListingId: input.externalListingId,
+            availableQuantity: input.availableQuantity,
+          };
+        }
+      }
       const result = await this.apiClient.updateItemStock(input);
       return {
         ok: true,
@@ -114,6 +166,9 @@ export class MercadoLivreChannelAdapter
 
     return {
       externalListingId: item.id,
+      ...(item.user_product_id?.trim() && {
+        externalUserProductId: item.user_product_id.trim(),
+      }),
       title: item.title ?? item.id,
       externalSku: this.resolveSku(item),
       metadata: {

@@ -195,6 +195,8 @@ const archiveProduct = async (product: ProductListItem) => {
         :is-loading="catalogStore.isLoading"
         :empty-title="t('catalog.empty.title')"
         :empty-description="t('catalog.empty.description')"
+        :pagination="catalogStore.meta"
+        @update:page="catalogStore.setPage"
       >
         <template #name="{ item }">
           <div>
@@ -257,29 +259,6 @@ const archiveProduct = async (product: ProductListItem) => {
         </template>
       </AppTable>
 
-      <div v-if="catalogStore.totalPages > 1" class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-gray-700 dark:text-gray-300">
-          {{ t('catalog.pagination.pageOf', { page: catalogStore.currentPage, totalPages: catalogStore.totalPages }) }}
-        </div>
-        <div class="flex gap-2">
-          <AppButton
-            variant="secondary"
-            size="small"
-            :disabled="catalogStore.currentPage <= 1 || catalogStore.isLoading"
-            @click="catalogStore.setPage(catalogStore.currentPage - 1)"
-          >
-            {{ t('catalog.pagination.previous') }}
-          </AppButton>
-          <AppButton
-            variant="secondary"
-            size="small"
-            :disabled="catalogStore.currentPage >= catalogStore.totalPages || catalogStore.isLoading"
-            @click="catalogStore.setPage(catalogStore.currentPage + 1)"
-          >
-            {{ t('catalog.pagination.next') }}
-          </AppButton>
-        </div>
-      </div>
     </template>
 
     <AppModal v-model="isCreateModalOpen" :title="t('catalog.form.createTitle')" size="lg">

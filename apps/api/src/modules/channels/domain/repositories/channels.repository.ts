@@ -64,6 +64,7 @@ export interface PaginatedChannelInboxResult {
 
 export interface MockChannelListingInput {
   externalListingId: string;
+  externalUserProductId?: string | null;
   title: string;
   externalSku?: string | null;
 }
@@ -111,6 +112,7 @@ export interface SyncableListingProjection {
   integrationId: string;
   provider: ChannelProvider;
   externalListingId: string;
+  externalUserProductId: string | null;
   matchedSkuId: string | null;
 }
 
@@ -218,9 +220,11 @@ export interface ChannelsRepository {
     externalListingId: string;
   }): Promise<ChannelListing | null>;
   findSkuById(id: string, tenantId: string): Promise<ProductSku | null>;
-  createManualMapping(params: {
+  createManualMappingGroup(params: {
     tenantId: string;
     listingId: string;
+    integrationId: string;
+    externalUserProductId?: string | null;
     skuId: string;
     actorUserId: string;
     reason?: string | null;

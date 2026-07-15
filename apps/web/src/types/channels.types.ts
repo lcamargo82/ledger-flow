@@ -28,6 +28,8 @@ export interface ChannelIntegration {
     syncEnabled: boolean
     stockSyncMode: 'AVAILABLE'
     importListingsOnConnect: boolean
+    mercadoLivreWarehouseStoreId?: string | null
+    mercadoLivreWarehouseNetworkNodeId?: string | null
   }
   healthStatus: 'HEALTHY' | 'DEGRADED' | 'REAUTH_REQUIRED' | 'SUSPENDED' | 'DISCONNECTED' | 'FAILED'
   requiresReauth: boolean
@@ -42,6 +44,8 @@ export interface UpdateChannelIntegrationSettingsRequest {
   syncEnabled?: boolean
   stockSyncMode?: 'AVAILABLE'
   importListingsOnConnect?: boolean
+  mercadoLivreWarehouseStoreId?: string | null
+  mercadoLivreWarehouseNetworkNodeId?: string | null
 }
 
 export interface ChannelWebhookInboxEvent {
@@ -74,6 +78,7 @@ export interface ChannelListing {
   integrationId: string
   provider: ChannelProvider
   externalListingId: string
+  externalUserProductId?: string | null
   title: string
   externalSku?: string | null
   matchStatus: ChannelListingMatchStatus

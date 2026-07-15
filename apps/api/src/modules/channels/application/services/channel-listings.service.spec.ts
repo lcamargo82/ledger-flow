@@ -17,11 +17,12 @@ describe('ChannelsService listings', () => {
     createInboxEvent: jest.fn(),
     listInbox: jest.fn(),
     findSkuMatchCandidates: jest.fn(),
+    findListingByExternalId: jest.fn(),
     upsertListing: jest.fn(),
     listListings: jest.fn(),
     findListingById: jest.fn(),
     findSkuById: jest.fn(),
-    createManualMapping: jest.fn(),
+    createManualMappingGroup: jest.fn(),
   };
 
   const prisma = {
@@ -50,6 +51,7 @@ describe('ChannelsService listings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     channelsRepository.findIntegrationById.mockResolvedValue(integration);
+    channelsRepository.findListingByExternalId.mockResolvedValue(null);
     channelsRepository.upsertListing.mockImplementation(async (data) => ({
       id: `listing-${data.externalListingId}`,
       createdAt: new Date(),
@@ -154,6 +156,7 @@ describe('ChannelsService listings', () => {
     mercadoLivreAdapter.fetchListings.mockResolvedValueOnce([
       {
         externalListingId: 'MLB-1',
+        externalUserProductId: 'MLBU4292355491',
         title: 'Produto casado',
         externalSku: 'SKU-1',
         metadata: { providerStatus: 'active' },
@@ -195,6 +198,7 @@ describe('ChannelsService listings', () => {
       expect.objectContaining({
         provider: ChannelProvider.MERCADO_LIVRE,
         externalListingId: 'MLB-1',
+        externalUserProductId: 'MLBU4292355491',
         matchStatus: ChannelListingMatchStatus.MATCHED,
         matchedSkuId: 'sku-1',
       }),
@@ -216,6 +220,32 @@ describe('ChannelsService listings', () => {
       ignored: 0,
     });
     expect(JSON.stringify(prisma.auditLog.create.mock.calls)).not.toContain('ml-access-token');
+  });
+
+  it('preserves a valid manual mapping when listings are imported again', async () => {
+    channelsRepository.findListingByExternalId.mockResolvedValueOnce({
+      id: 'listing-1',
+      tenantId: 'tenant-1',
+      integrationId: 'integration-1',
+      externalListingId: 'ext-1',
+      matchStatus: ChannelListingMatchStatus.MATCHED,
+      matchedSkuId: 'sku-manual',
+      candidateSkuIds: null,
+    });
+    const service = new ChannelsService(channelsRepository as never, prisma as never);
+
+    await service.importListings('integration-1', 'tenant-1', 'user-1', {
+      listings: [{ externalListingId: 'ext-1', title: 'Produto', externalSku: 'OUTRO-SKU' }],
+    });
+
+    expect(channelsRepository.findSkuMatchCandidates).not.toHaveBeenCalled();
+    expect(channelsRepository.upsertListing).toHaveBeenCalledWith(
+      expect.objectContaining({
+        externalListingId: 'ext-1',
+        matchStatus: ChannelListingMatchStatus.MATCHED,
+        matchedSkuId: 'sku-manual',
+      }),
+    );
   });
 
   it('rejects import for disabled or missing integrations', async () => {
@@ -242,9 +272,10 @@ describe('ChannelsService listings', () => {
       tenantId: 'tenant-1',
       integrationId: 'integration-1',
       provider: ChannelProvider.MOCK,
+      externalUserProductId: 'MLBU-1',
     });
     channelsRepository.findSkuById.mockResolvedValue({ id: 'sku-1', tenantId: 'tenant-1' });
-    channelsRepository.createManualMapping.mockResolvedValue({
+    channelsRepository.createManualMappingGroup.mockResolvedValue({
       id: 'listing-1',
       matchStatus: ChannelListingMatchStatus.MATCHED,
       matchedSkuId: 'sku-1',
@@ -257,9 +288,11 @@ describe('ChannelsService listings', () => {
     });
 
     expect(listing.matchedSkuId).toBe('sku-1');
-    expect(channelsRepository.createManualMapping).toHaveBeenCalledWith({
+    expect(channelsRepository.createManualMappingGroup).toHaveBeenCalledWith({
       tenantId: 'tenant-1',
       listingId: 'listing-1',
+      integrationId: 'integration-1',
+      externalUserProductId: 'MLBU-1',
       skuId: 'sku-1',
       actorUserId: 'user-1',
       reason: 'Conferido manualmente',

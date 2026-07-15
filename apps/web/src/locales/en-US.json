@@ -594,7 +594,7 @@
       "statusLabel": "Status",
       "statusAll": "All",
       "listingSearchLabel": "Search listings",
-      "listingSearchPlaceholder": "Listing ID, title, product, or SKU..."
+      "listingSearchPlaceholder": "MLB/MLBU ID, title, product, or SKU..."
     },
     "table": {
       "provider": "Provider",
@@ -608,6 +608,7 @@
       "failureReason": "Failure",
       "importedAt": "Imported at",
       "title": "Listing",
+      "externalIds": "Mercado Livre IDs",
       "externalSku": "External SKU",
       "candidates": "Candidates",
       "actions": "Actions",
@@ -662,7 +663,16 @@
       "syncEnabled": "Inventory sync enabled",
       "stockSyncModeAvailable": "Stock mode: available",
       "saved": "Integration settings saved.",
-      "importListingsOnConnect": "Import listings after connecting"
+      "importListingsOnConnect": "Import listings after connecting",
+      "mercadoLivreWarehouseStoreId": "Mercado Livre warehouse store ID",
+      "mercadoLivreWarehouseNetworkNodeId": "Mercado Livre logistics node ID",
+      "mercadoLivreWarehouseHelp": "Required to synchronize Mercado Livre accounts with multi-origin inventory. Both identifiers must match the selected default warehouse."
+    },
+    "import": {
+      "title": "Import listings",
+      "userProductId": "Mercado Livre User Product (optional)",
+      "userProductIdPlaceholder": "E.g. MLBU4292355491",
+      "userProductIdHelp": "Enter an MLBU to find that exact User Product and all linked listings. Leave empty to import the full catalog."
     },
     "disconnect": {
       "title": "Disconnect Mercado Livre",
@@ -1212,8 +1222,10 @@
     "pagination": {
       "total": "Total: {total}",
       "pageOf": "Page {page} of {totalPages}",
+      "first": "First page",
       "previous": "Previous page",
-      "next": "Next page"
+      "next": "Next page",
+      "last": "Last page"
     }
   },
   "errors": {

@@ -60,9 +60,15 @@ export class ChannelInventorySyncService {
       input.skuId,
     );
     const states: ChannelInventorySyncState[] = [];
+    const scheduledUserProducts = new Set<string>();
 
     for (const listing of listings) {
       if (!listing.matchedSkuId) continue;
+      const userProductKey = listing.externalUserProductId
+        ? `${listing.integrationId}:${listing.externalUserProductId}`
+        : null;
+      if (userProductKey && scheduledUserProducts.has(userProductKey)) continue;
+      if (userProductKey) scheduledUserProducts.add(userProductKey);
 
       const state = await this.channelsRepository.upsertInventorySyncState({
         tenantId: input.tenantId,
@@ -120,6 +126,8 @@ export class ChannelInventorySyncService {
 
       if (
         result.errorCode === 'INTEGRATION_NOT_SYNCABLE' ||
+        result.errorCode === 'WAREHOUSE_MAPPING_REQUIRED' ||
+        result.errorCode === 'WAREHOUSE_MAPPING_INVALID' ||
         state.attemptCount + 1 >= this.maxAttemptsBeforeCircuit
       ) {
         await this.notificationProducer?.channelInventorySyncFailed({
@@ -232,9 +240,23 @@ export class ChannelInventorySyncService {
       };
     }
 
+    const listing = await this.channelsRepository.findListingById(state.listingId, tenantId);
+    if (!listing) {
+      return {
+        ok: false as const,
+        errorCode: 'LISTING_NOT_FOUND',
+        errorSummary: 'Mapped channel listing was not found.',
+      };
+    }
+    const settings = this.asRecord(integration.settingsJson);
+    const storeId = this.asOptionalString(settings.mercadoLivreWarehouseStoreId);
+    const networkNodeId = this.asOptionalString(settings.mercadoLivreWarehouseNetworkNodeId);
+
     return this.mercadoLivreAdapter.updateListingStock({
       accessToken,
       externalListingId: state.externalListingId,
+      externalUserProductId: listing.externalUserProductId,
+      sellerWarehouseLocation: storeId && networkNodeId ? { storeId, networkNodeId } : null,
       availableQuantity: quantity,
     });
   }
@@ -267,6 +289,16 @@ export class ChannelInventorySyncService {
 
   private addSeconds(date: Date, seconds: number) {
     return new Date(date.getTime() + seconds * 1000);
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  }
+
+  private asOptionalString(value: unknown) {
+    return typeof value === 'string' && value.trim() ? value.trim() : null;
   }
 
   private async createOutbox(

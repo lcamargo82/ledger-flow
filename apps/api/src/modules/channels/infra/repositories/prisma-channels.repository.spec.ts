@@ -103,6 +103,7 @@ describe('PrismaChannelsRepository inventory sync identities', () => {
       matchStatus: undefined,
       OR: [
         { externalListingId: { contains: 'game-r365', mode: 'insensitive' } },
+        { externalUserProductId: { contains: 'game-r365', mode: 'insensitive' } },
         { title: { contains: 'game-r365', mode: 'insensitive' } },
         { externalSku: { contains: 'game-r365', mode: 'insensitive' } },
         { matchedSku: { skuCanonical: { contains: 'game-r365', mode: 'insensitive' } } },

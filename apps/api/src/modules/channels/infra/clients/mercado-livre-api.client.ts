@@ -37,6 +37,7 @@ export interface MercadoLivreSearchItemsInput {
   offset?: number;
   searchType?: 'scan';
   scrollId?: string;
+  userProductId?: string;
 }
 
 export interface MercadoLivreSearchItemsResponse {
@@ -51,6 +52,7 @@ export interface MercadoLivreSearchItemsResponse {
 
 export interface MercadoLivreItemResponse {
   id: string;
+  user_product_id?: string | null;
   title?: string;
   seller_custom_field?: string | null;
   status?: string;
@@ -121,6 +123,27 @@ export interface MercadoLivreUpdateItemStockResponse {
   status?: string;
 }
 
+export interface MercadoLivreUserProductStockLocation {
+  type: string;
+  store_id?: string | number;
+  network_node_id?: string;
+  quantity?: number;
+}
+
+export interface MercadoLivreUserProductStockResponse {
+  id: string;
+  locations: MercadoLivreUserProductStockLocation[];
+}
+
+export interface MercadoLivreUpdateUserProductStockInput {
+  accessToken: string;
+  externalUserProductId: string;
+  version: string;
+  storeId: string;
+  networkNodeId: string;
+  availableQuantity: number;
+}
+
 @Injectable()
 export class MercadoLivreApiClient {
   async exchangeAuthorizationCode(
@@ -175,6 +198,7 @@ export class MercadoLivreApiClient {
     const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
     const url = new URL(`${baseUrl}/users/${input.sellerId}/items/search`);
     url.searchParams.set('limit', String(input.limit));
+    if (input.userProductId) url.searchParams.set('user_product_id', input.userProductId);
     if (input.searchType) url.searchParams.set('search_type', input.searchType);
     if (input.scrollId) url.searchParams.set('scroll_id', input.scrollId);
     else if (input.offset !== undefined) url.searchParams.set('offset', String(input.offset));
@@ -249,6 +273,60 @@ export class MercadoLivreApiClient {
     }
 
     return response.json() as Promise<MercadoLivreUpdateItemStockResponse>;
+  }
+
+  async getUserProductStock(accessToken: string, externalUserProductId: string) {
+    const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
+    const response = await fetch(`${baseUrl}/user-products/${externalUserProductId}/stock`, {
+      headers: { authorization: `Bearer ${accessToken}` },
+      signal: this.requestSignal(),
+    });
+
+    if (!response.ok)
+      throw this.providerRequestError('User Product stock lookup failed.', response);
+
+    return {
+      data: (await response.json()) as MercadoLivreUserProductStockResponse,
+      version: response.headers.get('x-version'),
+    };
+  }
+
+  async updateUserProductSellerWarehouseStock(
+    input: MercadoLivreUpdateUserProductStockInput,
+  ): Promise<void> {
+    const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
+    const response = await fetch(
+      `${baseUrl}/user-products/${input.externalUserProductId}/stock/type/seller_warehouse`,
+      {
+        method: 'PUT',
+        headers: {
+          authorization: `Bearer ${input.accessToken}`,
+          'content-type': 'application/json',
+          'x-version': input.version,
+        },
+        body: JSON.stringify({
+          locations: [
+            {
+              store_id: input.storeId,
+              network_node_id: input.networkNodeId,
+              quantity: input.availableQuantity,
+            },
+          ],
+        }),
+        signal: this.requestSignal(),
+      },
+    );
+
+    if (!response.ok)
+      throw this.providerRequestError('User Product stock update failed.', response);
+  }
+
+  private providerRequestError(message: string, response: Response) {
+    const error = new Error(message) as Error & { status?: number; retryAfterSeconds?: number };
+    error.status = response.status;
+    const retryAfter = Number(response.headers.get('retry-after'));
+    if (Number.isFinite(retryAfter) && retryAfter > 0) error.retryAfterSeconds = retryAfter;
+    return error;
   }
 
   private requestSignal() {

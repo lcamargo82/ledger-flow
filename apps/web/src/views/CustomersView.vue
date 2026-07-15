@@ -194,6 +194,8 @@ const typeOptions = computed(() => [
         :is-loading="customersStore.isLoading"
         :empty-title="t('customers.empty.title')"
         :empty-description="t('customers.empty.description')"
+        :pagination="customersStore.meta"
+        @update:page="customersStore.setPage"
       >
         <template #name="{ item }">
           <span class="font-medium text-gray-900 dark:text-white">{{ item.name }}</span>
@@ -266,30 +268,6 @@ const typeOptions = computed(() => [
         </template>
       </AppTable>
 
-      <!-- Pagination -->
-      <div v-if="customersStore.totalPages > 1" class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-gray-700 dark:text-gray-300">
-          {{ t('customers.pagination.pageOf', { page: customersStore.currentPage, totalPages: customersStore.totalPages }) }}
-        </div>
-        <div class="flex gap-2">
-          <AppButton 
-            variant="secondary" 
-            size="small" 
-            :disabled="customersStore.currentPage <= 1 || customersStore.isLoading"
-            @click="customersStore.setPage(customersStore.currentPage - 1)"
-          >
-            {{ t('customers.pagination.previous') }}
-          </AppButton>
-          <AppButton 
-            variant="secondary" 
-            size="small" 
-            :disabled="customersStore.currentPage >= customersStore.totalPages || customersStore.isLoading"
-            @click="customersStore.setPage(customersStore.currentPage + 1)"
-          >
-            {{ t('customers.pagination.next') }}
-          </AppButton>
-        </div>
-      </div>
     </template>
 
     <!-- Details Modal -->

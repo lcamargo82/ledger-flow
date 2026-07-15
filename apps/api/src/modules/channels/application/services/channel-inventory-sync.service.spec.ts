@@ -12,6 +12,7 @@ describe('ChannelInventorySyncService', () => {
     listInventorySyncStates: jest.fn(),
     findPendingInventorySyncStates: jest.fn(),
     findIntegrationById: jest.fn(),
+    findListingById: jest.fn(),
     markInventorySyncSuccess: jest.fn(),
     markInventorySyncRetry: jest.fn(),
     markInventorySyncCircuitOpen: jest.fn(),
@@ -45,6 +46,11 @@ describe('ChannelInventorySyncService', () => {
     });
     credentialsEncryptionService.decrypt.mockReturnValue({
       accessToken: 'ml-access-token',
+    });
+    channelsRepository.findListingById.mockResolvedValue({
+      id: 'listing-1',
+      externalListingId: 'MLB-1',
+      externalUserProductId: null,
     });
   });
 
@@ -95,6 +101,41 @@ describe('ChannelInventorySyncService', () => {
         }),
       }),
     );
+  });
+
+  it('schedules only one stock write for listings from the same User Product', async () => {
+    channelsRepository.findSyncableListingsBySku.mockResolvedValue([
+      {
+        id: 'listing-1',
+        tenantId: 'tenant-1',
+        integrationId: 'integration-1',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalListingId: 'MLB-1',
+        externalUserProductId: 'MLBU4292355491',
+        matchedSkuId: 'sku-1',
+      },
+      {
+        id: 'listing-2',
+        tenantId: 'tenant-1',
+        integrationId: 'integration-1',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalListingId: 'MLB-2',
+        externalUserProductId: 'MLBU4292355491',
+        matchedSkuId: 'sku-1',
+      },
+    ]);
+    channelsRepository.upsertInventorySyncState.mockResolvedValue({ id: 'sync-1' });
+    const service = new ChannelInventorySyncService(channelsRepository as never, prisma as never);
+
+    const result = await service.enqueueBalanceChanged({
+      tenantId: 'tenant-1',
+      skuId: 'sku-1',
+      availableQuantity: 5,
+      balanceId: 'balance-1',
+    });
+
+    expect(result.requested).toBe(1);
+    expect(channelsRepository.upsertInventorySyncState).toHaveBeenCalledTimes(1);
   });
 
   it('processes pending mock syncs successfully and is replay-safe when quantity is unchanged', async () => {
@@ -220,6 +261,8 @@ describe('ChannelInventorySyncService', () => {
     expect(mercadoLivreAdapter.updateListingStock).toHaveBeenCalledWith({
       accessToken: 'ml-access-token',
       externalListingId: 'MLB-1',
+      externalUserProductId: null,
+      sellerWarehouseLocation: null,
       availableQuantity: 8,
     });
     expect(channelsRepository.markInventorySyncSuccess).toHaveBeenCalledWith(

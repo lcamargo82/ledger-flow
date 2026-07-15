@@ -7,6 +7,8 @@ describe('MercadoLivreChannelAdapter', () => {
     getItem: jest.fn(),
     getOrder: jest.fn(),
     updateItemStock: jest.fn(),
+    getUserProductStock: jest.fn(),
+    updateUserProductSellerWarehouseStock: jest.fn(),
   };
 
   beforeEach(() => {
@@ -43,6 +45,7 @@ describe('MercadoLivreChannelAdapter', () => {
     apiClient.getItem
       .mockResolvedValueOnce({
         id: 'MLB-1',
+        user_product_id: 'MLBU4292355491',
         title: 'Camiseta LedgerFlow Azul',
         seller_custom_field: 'CAMISETA-AZUL-M',
         status: 'active',
@@ -86,6 +89,7 @@ describe('MercadoLivreChannelAdapter', () => {
     expect(result).toEqual([
       {
         externalListingId: 'MLB-1',
+        externalUserProductId: 'MLBU4292355491',
         title: 'Camiseta LedgerFlow Azul',
         externalSku: 'CAMISETA-AZUL-M',
         metadata: {
@@ -194,6 +198,74 @@ describe('MercadoLivreChannelAdapter', () => {
     });
     expect(JSON.stringify(result)).not.toContain('ml-access-token');
     expect(JSON.stringify(result)).not.toContain('must-not-leak');
+  });
+
+  it('updates multi-origin stock by User Product and configured seller warehouse', async () => {
+    apiClient.getUserProductStock.mockResolvedValue({
+      version: '7',
+      data: {
+        id: 'MLBU4292355491',
+        locations: [
+          {
+            type: 'seller_warehouse',
+            store_id: 'store-1',
+            network_node_id: 'node-1',
+            quantity: 3,
+          },
+        ],
+      },
+    });
+    apiClient.updateUserProductSellerWarehouseStock.mockResolvedValue(undefined);
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const result = await adapter.updateListingStock({
+      accessToken: 'ml-access-token',
+      externalListingId: 'MLB-1',
+      externalUserProductId: 'MLBU4292355491',
+      sellerWarehouseLocation: { storeId: 'store-1', networkNodeId: 'node-1' },
+      availableQuantity: 7,
+    });
+
+    expect(apiClient.updateUserProductSellerWarehouseStock).toHaveBeenCalledWith({
+      accessToken: 'ml-access-token',
+      externalUserProductId: 'MLBU4292355491',
+      version: '7',
+      storeId: 'store-1',
+      networkNodeId: 'node-1',
+      availableQuantity: 7,
+    });
+    expect(apiClient.updateItemStock).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      ok: true,
+      providerStatus: 'updated',
+      externalListingId: 'MLB-1',
+      availableQuantity: 7,
+    });
+  });
+
+  it('blocks multi-origin stock writes without an explicit warehouse mapping', async () => {
+    apiClient.getUserProductStock.mockResolvedValue({
+      version: '7',
+      data: {
+        id: 'MLBU4292355491',
+        locations: [{ type: 'seller_warehouse', store_id: 'store-1' }],
+      },
+    });
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const result = await adapter.updateListingStock({
+      accessToken: 'ml-access-token',
+      externalListingId: 'MLB-1',
+      externalUserProductId: 'MLBU4292355491',
+      availableQuantity: 7,
+    });
+
+    expect(result).toEqual({
+      ok: false,
+      errorCode: 'WAREHOUSE_MAPPING_REQUIRED',
+      errorSummary: 'Mercado Livre seller warehouse mapping is required.',
+    });
+    expect(apiClient.updateItemStock).not.toHaveBeenCalled();
   });
 
   it('normalizes optional Mercado Livre order financial components', async () => {

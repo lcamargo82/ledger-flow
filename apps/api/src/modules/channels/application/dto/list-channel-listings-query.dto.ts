@@ -30,7 +30,7 @@ export class ListChannelListingsQueryDto {
 
   @ApiPropertyOptional({
     example: 'MLB4835955601',
-    description: 'Busca por ID externo, título, SKU externo, produto ou SKU vinculado',
+    description: 'Busca por item MLB, User Product MLBU, título, SKU externo, produto ou SKU',
   })
   @IsOptional()
   @IsString()

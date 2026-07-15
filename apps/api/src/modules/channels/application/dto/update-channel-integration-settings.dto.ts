@@ -21,4 +21,14 @@ export class UpdateChannelIntegrationSettingsDto {
   @IsOptional()
   @IsBoolean()
   importListingsOnConnect?: boolean;
+
+  @ApiPropertyOptional({ description: 'Mercado Livre seller warehouse store_id.' })
+  @IsOptional()
+  @IsString()
+  mercadoLivreWarehouseStoreId?: string | null;
+
+  @ApiPropertyOptional({ description: 'Mercado Livre seller warehouse network_node_id.' })
+  @IsOptional()
+  @IsString()
+  mercadoLivreWarehouseNetworkNodeId?: string | null;
 }

@@ -18,10 +18,12 @@ export interface ChannelListingImportInput {
   externalAccountId: string;
   maxPages?: number;
   pageSize?: number;
+  externalUserProductId?: string;
 }
 
 export interface ChannelListingImportItem {
   externalListingId: string;
+  externalUserProductId?: string;
   title: string;
   externalSku?: string;
   metadata?: Record<string, unknown>;
@@ -80,6 +82,11 @@ export interface ChannelOrderAdapter extends ChannelProviderAdapter {
 export interface ChannelInventoryUpdateInput {
   accessToken: string;
   externalListingId: string;
+  externalUserProductId?: string | null;
+  sellerWarehouseLocation?: {
+    storeId: string;
+    networkNodeId: string;
+  } | null;
   availableQuantity: number;
 }
 

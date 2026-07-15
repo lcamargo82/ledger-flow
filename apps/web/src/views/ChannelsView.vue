@@ -41,7 +41,9 @@ const activeTab = ref<'integrations' | 'inbox' | 'listings' | 'sync'>('integrati
 const isCreateModalOpen = ref(false)
 const isMapModalOpen = ref(false)
 const isSettingsModalOpen = ref(false)
+const isImportModalOpen = ref(false)
 const selectedIntegration = ref<ChannelIntegration | null>(null)
+const selectedImportIntegration = ref<ChannelIntegration | null>(null)
 const warehouses = ref<Warehouse[]>([])
 const selectedListing = ref<ChannelListing | null>(null)
 const listingSearch = ref(channelsStore.listingFilters.search || '')
@@ -60,6 +62,8 @@ const integrationForm = reactive({
   name: '',
   webhookSecret: '',
 })
+
+const importForm = reactive({ externalUserProductId: '' })
 
 const channelProviderOptions = computed(() => [
   { value: 'MOCK', label: t('channels.provider.MOCK') },
@@ -82,6 +86,8 @@ const settingsForm = reactive({
   defaultWarehouseId: '',
   syncEnabled: true,
   importListingsOnConnect: false,
+  mercadoLivreWarehouseStoreId: '',
+  mercadoLivreWarehouseNetworkNodeId: '',
 })
 const warehouseOptions = computed(() => [
   { value: '', label: t('channels.settings.noWarehouse') },
@@ -111,6 +117,7 @@ const listingColumns = computed(() => [
   { key: 'importedAt', label: t('channels.table.importedAt') },
   { key: 'provider', label: t('channels.table.provider') },
   { key: 'title', label: t('channels.table.title') },
+  { key: 'externalIds', label: t('channels.table.externalIds') },
   { key: 'externalSku', label: t('channels.table.externalSku') },
   { key: 'matchStatus', label: t('channels.table.status') },
   { key: 'candidates', label: t('channels.table.candidates') },
@@ -276,10 +283,22 @@ const canSyncInventory = computed(
     authStore.checkCapability('channels.sync_inventory'),
 )
 
-const importListings = async (integrationId: string) => {
+const openImportListings = (integration: ChannelIntegration) => {
+  selectedImportIntegration.value = integration
+  importForm.externalUserProductId = ''
+  isImportModalOpen.value = true
+}
+
+const importListings = async () => {
+  if (!selectedImportIntegration.value) return
   try {
-    await channelsStore.importListings(integrationId)
+    await channelsStore.importListings(selectedImportIntegration.value.id, {
+      ...(importForm.externalUserProductId.trim() && {
+        externalUserProductId: importForm.externalUserProductId.trim().toUpperCase(),
+      }),
+    })
     activeTab.value = 'listings'
+    isImportModalOpen.value = false
   } catch {
     toast.error(t('channels.errors.importFailed'))
   }
@@ -290,6 +309,10 @@ const openSettings = (integration: ChannelIntegration) => {
   settingsForm.defaultWarehouseId = integration.defaultWarehouseId || ''
   settingsForm.syncEnabled = integration.settings.syncEnabled
   settingsForm.importListingsOnConnect = integration.settings.importListingsOnConnect
+  settingsForm.mercadoLivreWarehouseStoreId =
+    integration.settings.mercadoLivreWarehouseStoreId || ''
+  settingsForm.mercadoLivreWarehouseNetworkNodeId =
+    integration.settings.mercadoLivreWarehouseNetworkNodeId || ''
   isSettingsModalOpen.value = true
 }
 
@@ -300,6 +323,8 @@ const saveSettings = async () => {
     syncEnabled: settingsForm.syncEnabled,
     stockSyncMode: 'AVAILABLE',
     importListingsOnConnect: settingsForm.importListingsOnConnect,
+    mercadoLivreWarehouseStoreId: settingsForm.mercadoLivreWarehouseStoreId || null,
+    mercadoLivreWarehouseNetworkNodeId: settingsForm.mercadoLivreWarehouseNetworkNodeId || null,
   })
   toast.success(t('channels.settings.saved'))
   isSettingsModalOpen.value = false
@@ -485,7 +510,7 @@ const mapListing = async () => {
               icon-only
               :title="t('channels.actions.importListings')"
               :loading="channelsStore.isMutating"
-              @click="importListings(item.id)"
+              @click="openImportListings(item)"
             >
               <template #icon>
                 <span class="material-symbols-outlined text-[18px]">cloud_download</span>
@@ -667,6 +692,14 @@ const mapListing = async () => {
           <template #provider="{ item }">
             {{ t(`channels.provider.${item.provider}`) }}
           </template>
+          <template #externalIds="{ item }">
+            <div class="space-y-1 font-mono text-xs">
+              <div>{{ item.externalListingId }}</div>
+              <div v-if="item.externalUserProductId" class="text-[var(--lf-text-secondary)]">
+                {{ item.externalUserProductId }}
+              </div>
+            </div>
+          </template>
           <template #externalSku="{ item }">
             <span class="font-mono text-xs">{{ item.externalSku || '-' }}</span>
           </template>
@@ -821,6 +854,28 @@ const mapListing = async () => {
       </form>
     </AppModal>
 
+    <AppModal v-model="isImportModalOpen" :title="t('channels.import.title')" size="md">
+      <form class="space-y-4" @submit.prevent="importListings">
+        <AppInput
+          id="channel-import-user-product-id"
+          v-model="importForm.externalUserProductId"
+          :label="t('channels.import.userProductId')"
+          :placeholder="t('channels.import.userProductIdPlaceholder')"
+        />
+        <p class="text-sm text-[var(--lf-text-secondary)]">
+          {{ t('channels.import.userProductIdHelp') }}
+        </p>
+        <div class="flex justify-end gap-2">
+          <AppButton type="button" variant="secondary" @click="isImportModalOpen = false">
+            {{ t('common.cancel') }}
+          </AppButton>
+          <AppButton type="submit" variant="primary" :loading="channelsStore.isMutating">
+            {{ t('channels.actions.importListings') }}
+          </AppButton>
+        </div>
+      </form>
+    </AppModal>
+
     <AppModal v-model="isSettingsModalOpen" :title="t('channels.settings.title')" size="md">
       <form class="space-y-4" @submit.prevent="saveSettings">
         <AppSelect
@@ -829,6 +884,21 @@ const mapListing = async () => {
           :label="t('channels.settings.defaultWarehouse')"
           :options="warehouseOptions"
         />
+        <template v-if="selectedIntegration?.provider === 'MERCADO_LIVRE'">
+          <AppInput
+            id="channel-mercado-livre-store-id"
+            v-model="settingsForm.mercadoLivreWarehouseStoreId"
+            :label="t('channels.settings.mercadoLivreWarehouseStoreId')"
+          />
+          <AppInput
+            id="channel-mercado-livre-network-node-id"
+            v-model="settingsForm.mercadoLivreWarehouseNetworkNodeId"
+            :label="t('channels.settings.mercadoLivreWarehouseNetworkNodeId')"
+          />
+          <p class="text-sm text-[var(--lf-text-secondary)]">
+            {{ t('channels.settings.mercadoLivreWarehouseHelp') }}
+          </p>
+        </template>
         <label class="flex items-center gap-2 text-sm text-[var(--lf-text-secondary)]">
           <input v-model="settingsForm.syncEnabled" type="checkbox" />
           {{ t('channels.settings.syncEnabled') }}
@@ -855,6 +925,12 @@ const mapListing = async () => {
       <form class="space-y-4" novalidate @submit.prevent="mapListing">
         <p class="text-sm text-[var(--lf-text-secondary)]">
           {{ selectedListing?.title }}
+        </p>
+        <p class="font-mono text-xs text-[var(--lf-text-secondary)]">
+          {{ selectedListing?.externalListingId }}
+          <template v-if="selectedListing?.externalUserProductId">
+            · {{ selectedListing.externalUserProductId }}
+          </template>
         </p>
         <AppInput
           id="channel-mapping-sku-search"

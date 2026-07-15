@@ -89,10 +89,13 @@ export class ChannelsService {
     return data
   }
 
-  async importListings(integrationId: string): Promise<ChannelListingsImportResponse> {
+  async importListings(
+    integrationId: string,
+    payload: { externalUserProductId?: string } = {},
+  ): Promise<ChannelListingsImportResponse> {
     const { data } = await httpClient.post<ChannelListingsImportResponse>(
       `/channels/integrations/${integrationId}/import-listings`,
-      {},
+      payload,
       { timeout: 120_000 },
     )
     return data

@@ -138,6 +138,8 @@ describe('ChannelsService', () => {
           syncEnabled: true,
           stockSyncMode: 'AVAILABLE',
           importListingsOnConnect: false,
+          mercadoLivreWarehouseStoreId: null,
+          mercadoLivreWarehouseNetworkNodeId: null,
         },
       }),
     ]);

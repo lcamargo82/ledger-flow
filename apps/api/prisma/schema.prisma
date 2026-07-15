@@ -972,20 +972,21 @@ model ChannelWebhookInboxEvent {
 }
 
 model ChannelListing {
-  id                String                    @id @default(uuid())
-  tenantId          String                    @map("tenant_id")
-  integrationId     String                    @map("integration_id")
-  provider          ChannelProvider
-  externalListingId String                    @map("external_listing_id")
-  title             String
-  externalSku       String?                   @map("external_sku")
-  matchStatus       ChannelListingMatchStatus @default(UNMATCHED) @map("match_status")
-  matchedSkuId      String?                   @map("matched_sku_id")
-  candidateSkuIds   Json?                     @map("candidate_sku_ids")
-  importedAt        DateTime                  @default(now()) @map("imported_at")
-  ignoredAt         DateTime?                 @map("ignored_at")
-  createdAt         DateTime                  @default(now()) @map("created_at")
-  updatedAt         DateTime                  @updatedAt @map("updated_at")
+  id                    String                    @id @default(uuid())
+  tenantId              String                    @map("tenant_id")
+  integrationId         String                    @map("integration_id")
+  provider              ChannelProvider
+  externalListingId     String                    @map("external_listing_id")
+  externalUserProductId String?                   @map("external_user_product_id")
+  title                 String
+  externalSku           String?                   @map("external_sku")
+  matchStatus           ChannelListingMatchStatus @default(UNMATCHED) @map("match_status")
+  matchedSkuId          String?                   @map("matched_sku_id")
+  candidateSkuIds       Json?                     @map("candidate_sku_ids")
+  importedAt            DateTime                  @default(now()) @map("imported_at")
+  ignoredAt             DateTime?                 @map("ignored_at")
+  createdAt             DateTime                  @default(now()) @map("created_at")
+  updatedAt             DateTime                  @updatedAt @map("updated_at")
 
   tenant      Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   integration ChannelIntegration         @relation(fields: [integrationId], references: [id], onDelete: Cascade)
@@ -997,6 +998,7 @@ model ChannelListing {
   @@index([tenantId, matchStatus])
   @@index([tenantId, integrationId])
   @@index([tenantId, externalSku])
+  @@index([tenantId, integrationId, externalUserProductId])
   @@map("channel_listings")
 }
 
@@ -1453,11 +1455,11 @@ enum ExportJobType {
 }
 
 model SalesIntelligencePolicy {
-  tenantId              String   @id @map("tenant_id")
-  lowMarginEnabled      Boolean  @default(true) @map("low_margin_enabled")
-  lowMarginThreshold    Decimal  @default(10) @map("low_margin_threshold") @db.Decimal(5, 2)
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  tenantId           String   @id @map("tenant_id")
+  lowMarginEnabled   Boolean  @default(true) @map("low_margin_enabled")
+  lowMarginThreshold Decimal  @default(10) @map("low_margin_threshold") @db.Decimal(5, 2)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
