@@ -6,6 +6,7 @@ import type {
   ChannelIntegrationsResponse,
   ChannelReplayResponse,
   ChannelBulkReplayResponse,
+  ChannelSkuOption,
   ChannelListing,
   ChannelListingsImportResponse,
   ChannelListingMatchStatus,
@@ -124,6 +125,13 @@ export class ChannelsService {
       { params },
     )
     return data
+  }
+
+  async listSkuOptions(params?: { search?: string; limit?: number }): Promise<ChannelSkuOption[]> {
+    const { data } = await httpClient.get<{ data: ChannelSkuOption[] }>('/channels/skus/options', {
+      params,
+    })
+    return data.data
   }
 
   async mapListing(

@@ -7,6 +7,7 @@ describe('ChannelsController health and replay', () => {
     listInbox: jest.fn(),
     importListings: jest.fn(),
     listListings: jest.fn(),
+    listSkuOptions: jest.fn(),
     mapListing: jest.fn(),
   };
   const inventorySyncService = {
@@ -53,6 +54,28 @@ describe('ChannelsController health and replay', () => {
     expect(result.status).toBe('HEALTHY');
   });
 
+  it('lists readable SKU options only for the current tenant', async () => {
+    channelsService.listSkuOptions.mockResolvedValue([
+      {
+        id: 'sku-uuid-1',
+        skuCanonical: 'CONTROLLER-GAMEPAD',
+        skuDisplay: 'CONTROLLER-GAMEPAD',
+        product: { name: 'Controle Gamepad Wireless' },
+      },
+    ]);
+
+    const result = await makeController().listSkuOptions(user as never, {
+      search: 'gamepad',
+      limit: 25,
+    });
+
+    expect(channelsService.listSkuOptions).toHaveBeenCalledWith('tenant-1', {
+      search: 'gamepad',
+      limit: 25,
+    });
+    expect(result.data[0].skuDisplay).toBe('CONTROLLER-GAMEPAD');
+  });
+
   it('replays webhook inbox using the current tenant and actor', async () => {
     healthReplayService.replayWebhookInbox.mockResolvedValue({
       replayed: true,
@@ -95,11 +118,9 @@ describe('ChannelsController health and replay', () => {
 
     const result = await makeController().replayFailedWebhooks(user as never, { limit: 25 });
 
-    expect(healthReplayService.replayFailedWebhooks).toHaveBeenCalledWith(
-      'tenant-1',
-      'user-1',
-      { limit: 25 },
-    );
+    expect(healthReplayService.replayFailedWebhooks).toHaveBeenCalledWith('tenant-1', 'user-1', {
+      limit: 25,
+    });
     expect(result.replayed).toBe(2);
   });
 });

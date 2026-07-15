@@ -169,6 +169,14 @@ export class ChannelsService {
     return this.channelsRepository.listListings({ tenantId, ...query });
   }
 
+  listSkuOptions(tenantId: string, query: { search?: string; limit?: number }) {
+    return this.channelsRepository.listSkuOptions({
+      tenantId,
+      search: query.search,
+      limit: query.limit ?? 50,
+    });
+  }
+
   async importListings(
     integrationId: string,
     tenantId: string,

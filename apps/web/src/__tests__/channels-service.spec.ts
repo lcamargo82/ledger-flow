@@ -5,6 +5,7 @@ import { httpClient } from '../services/http-client'
 
 vi.mock('../services/http-client', () => ({
   httpClient: {
+    get: vi.fn(),
     post: vi.fn(),
     patch: vi.fn(),
   },
@@ -25,6 +26,29 @@ describe('ChannelsService', () => {
     })
 
     expect(httpClient.post).toHaveBeenCalledWith('/channels/mercado-livre/connect', {})
+  })
+
+  it('loads tenant-scoped readable SKU options for listing mapping', async () => {
+    vi.mocked(httpClient.get).mockResolvedValue({
+      data: {
+        data: [
+          {
+            id: 'sku-uuid-1',
+            skuCanonical: 'CONTROLLER-GAMEPAD',
+            skuDisplay: 'CONTROLLER-GAMEPAD',
+            product: { name: 'Controle Gamepad Wireless' },
+          },
+        ],
+      },
+    })
+
+    await expect(
+      channelsService.listSkuOptions({ search: 'gamepad', limit: 50 }),
+    ).resolves.toHaveLength(1)
+
+    expect(httpClient.get).toHaveBeenCalledWith('/channels/skus/options', {
+      params: { search: 'gamepad', limit: 50 },
+    })
   })
 
   it('updates operational integration settings through the tenant-scoped endpoint', async () => {
@@ -65,11 +89,7 @@ describe('ChannelsService', () => {
     await channelsService.replayWebhookInbox('inbox-1')
     await channelsService.replayFailedWebhooks(50)
 
-    expect(httpClient.post).toHaveBeenNthCalledWith(
-      1,
-      '/channels/webhook-inbox/inbox-1/replay',
-      {},
-    )
+    expect(httpClient.post).toHaveBeenNthCalledWith(1, '/channels/webhook-inbox/inbox-1/replay', {})
     expect(httpClient.post).toHaveBeenNthCalledWith(2, '/channels/webhook-inbox/replay-failed', {
       limit: 50,
     })

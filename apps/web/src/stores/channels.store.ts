@@ -273,14 +273,10 @@ export const useChannelsStore = defineStore('channels', () => {
 
   const mapListing = async (listingId: string, payload: MapChannelListingRequest) => {
     isMutating.value = true
-    error.value = null
     try {
       const response = await channelsService.mapListing(listingId, payload)
       await fetchListings()
       return response.listing
-    } catch (err) {
-      error.value = extractErrorMessage(err)
-      throw err
     } finally {
       isMutating.value = false
     }

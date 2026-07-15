@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
@@ -7,8 +7,9 @@ import { useChannelsStore } from '../stores/channels.store'
 import { useToastStore } from '../stores/toast.store'
 import { useConfirmDialogStore } from '../stores/confirm-dialog.store'
 import { inventoryService } from '../services/inventory.service'
+import { channelsService } from '../services/channels.service'
 import type { Warehouse } from '../types/inventory.types'
-import type { ChannelIntegration } from '../types/channels.types'
+import type { ChannelIntegration, ChannelSkuOption } from '../types/channels.types'
 import { formatDateTime } from '../utils/date-format'
 import type {
   ChannelInventorySyncStatus,
@@ -43,6 +44,11 @@ const isSettingsModalOpen = ref(false)
 const selectedIntegration = ref<ChannelIntegration | null>(null)
 const warehouses = ref<Warehouse[]>([])
 const selectedListing = ref<ChannelListing | null>(null)
+const mappingSearch = ref('')
+const mappingSkuOptions = ref<ChannelSkuOption[]>([])
+const mappingError = ref('')
+const isLoadingSkuOptions = ref(false)
+let mappingSearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const integrationForm = reactive({
   provider: 'MOCK' as ChannelProvider,
@@ -59,6 +65,13 @@ const mappingForm = reactive({
   skuId: '',
   reason: '',
 })
+
+const readableSkuOptions = computed(() =>
+  mappingSkuOptions.value.map((sku) => ({
+    value: sku.id,
+    label: `${sku.product.name} · ${sku.skuDisplay}`,
+  })),
+)
 
 const settingsForm = reactive({
   defaultWarehouseId: '',
@@ -159,7 +172,10 @@ onMounted(async () => {
   window.addEventListener('storage', refreshFromOtherTab)
 })
 
-onBeforeUnmount(() => window.removeEventListener('storage', refreshFromOtherTab))
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', refreshFromOtherTab)
+  if (mappingSearchTimer) clearTimeout(mappingSearchTimer)
+})
 
 const createIntegration = async () => {
   if (integrationForm.provider === 'MERCADO_LIVRE') {
@@ -287,21 +303,54 @@ const disconnectIntegration = (integration: ChannelIntegration) =>
     onCancel: null,
   })
 
+const loadMappingSkuOptions = async (search = '') => {
+  isLoadingSkuOptions.value = true
+  mappingError.value = ''
+  try {
+    mappingSkuOptions.value = await channelsService.listSkuOptions({ search, limit: 50 })
+  } catch {
+    mappingSkuOptions.value = []
+    mappingError.value = t('channels.errors.skuOptionsUnavailable')
+  } finally {
+    isLoadingSkuOptions.value = false
+  }
+}
+
+watch(mappingSearch, (search) => {
+  if (!isMapModalOpen.value) return
+  if (mappingSearchTimer) clearTimeout(mappingSearchTimer)
+  mappingSearchTimer = setTimeout(() => loadMappingSkuOptions(search.trim()), 250)
+})
+
 const openMapModal = (listing: ChannelListing) => {
   selectedListing.value = listing
   mappingForm.skuId = listing.matchedSkuId || ''
   mappingForm.reason = ''
+  mappingSearch.value = ''
+  mappingError.value = ''
+  mappingSkuOptions.value = listing.candidateSkus || []
   isMapModalOpen.value = true
+  void loadMappingSkuOptions()
 }
 
 const mapListing = async () => {
   if (!selectedListing.value) return
-  await channelsStore.mapListing(selectedListing.value.id, {
-    skuId: mappingForm.skuId,
-    reason: mappingForm.reason || undefined,
-  })
-  isMapModalOpen.value = false
-  selectedListing.value = null
+  if (!mappingForm.skuId) {
+    mappingError.value = t('channels.errors.skuRequired')
+    return
+  }
+  mappingError.value = ''
+  try {
+    await channelsStore.mapListing(selectedListing.value.id, {
+      skuId: mappingForm.skuId,
+      reason: mappingForm.reason || undefined,
+    })
+    toast.success(t('channels.mapping.success'))
+    isMapModalOpen.value = false
+    selectedListing.value = null
+  } catch {
+    mappingError.value = t('channels.errors.mappingFailed')
+  }
 }
 </script>
 
@@ -580,9 +629,13 @@ const mapListing = async () => {
             </AppBadge>
           </template>
           <template #candidates="{ item }">
-            <span class="font-mono text-xs">
-              {{ (item.candidateSkuIds || []).join(', ') || '-' }}
-            </span>
+            <div v-if="item.candidateSkus?.length" class="space-y-1 text-xs">
+              <div v-for="candidate in item.candidateSkus" :key="candidate.id">
+                {{ candidate.product.name }} ·
+                <span class="font-mono">{{ candidate.skuDisplay }}</span>
+              </div>
+            </div>
+            <span v-else>-</span>
           </template>
           <template #actions="{ item }">
             <AppButton
@@ -757,9 +810,25 @@ const mapListing = async () => {
           {{ selectedListing?.title }}
         </p>
         <AppInput
+          id="channel-mapping-sku-search"
+          v-model="mappingSearch"
+          :label="t('channels.form.skuSearchLabel')"
+          :placeholder="t('channels.form.skuSearchPlaceholder')"
+          autocomplete="off"
+        />
+        <AppSelect
           id="channel-mapping-sku"
           v-model="mappingForm.skuId"
-          :label="t('channels.form.skuIdLabel')"
+          :label="t('channels.form.productSkuLabel')"
+          :placeholder="
+            isLoadingSkuOptions
+              ? t('channels.form.loadingSkuOptions')
+              : t('channels.form.selectSkuPlaceholder')
+          "
+          :options="readableSkuOptions"
+          :disabled="isLoadingSkuOptions"
+          :error="mappingError"
+          required
         />
         <AppInput
           id="channel-mapping-reason"
