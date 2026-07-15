@@ -235,6 +235,34 @@
       "mercadoPagoPaymentStatusUpdated": {
         "title": "Pagamento Mercado Pago atualizado",
         "message": "O pagamento {paymentReference} mudou de {previousStatus} para {currentStatus}."
+      },
+      "saleLossDetected": {
+        "title": "Prejuízo detectado na venda",
+        "message": "O pedido {orderNumber} apresentou margem negativa de {margin}%."
+      },
+      "saleLowMarginDetected": {
+        "title": "Margem baixa detectada",
+        "message": "O pedido {orderNumber} está com margem de {margin}%, abaixo do limite de {threshold}%."
+      },
+      "saleMissingCostDetected": {
+        "title": "Custo ausente na venda",
+        "message": "O pedido {orderNumber} não pode ter sua margem calculada porque há custo de SKU ausente."
+      },
+      "saleStockNotConsumed": {
+        "title": "Baixa de estoque pendente",
+        "message": "O pedido atendido {orderNumber} ainda não teve todo o estoque consumido."
+      },
+      "saleShippingDelayed": {
+        "title": "Envio atrasado",
+        "message": "O envio do pedido {orderNumber} está atrasado."
+      },
+      "saleSettlementDivergent": {
+        "title": "Settlement divergente",
+        "message": "O pedido {orderNumber} possui divergência de settlement."
+      },
+      "saleCashReleaseBlocked": {
+        "title": "Liberação de caixa bloqueada",
+        "message": "O valor do pedido {orderNumber} está com liberação bloqueada."
       }
     }
   },
@@ -397,6 +425,9 @@
       "actions": "Ações",
       "skuId": "SKU",
       "warehouseId": "Warehouse",
+      "product": "Produto",
+      "sku": "SKU",
+      "warehouse": "Armazém",
       "onHand": "Disponível físico",
       "reserved": "Reservado",
       "available": "Disponível venda",
@@ -773,13 +804,100 @@
       "CANCELLED": "Cancelado"
     },
     "actions": {
-      "details": "Ver itens"
+      "details": "Ver itens",
+      "export": "Exportar CSV",
+      "exporting": "Preparando CSV…",
+      "settings": "Configurar alertas"
+    },
+    "policy": {
+      "title": "Alertas de margem",
+      "enabled": "Alertar margem baixa",
+      "threshold": "Limite de margem (%)",
+      "save": "Salvar política",
+      "saved": "Política atualizada"
+    },
+    "export": {
+      "ready": "CSV pronto para baixar",
+      "failed": "Não foi possível gerar o CSV."
     },
     "drawer": {
       "title": "Itens do pedido {order}",
       "items": "SKUs do pedido",
       "quantity": "Quantidade: {quantity}",
-      "productUnavailable": "Produto não identificado"
+      "productUnavailable": "Produto não identificado",
+      "financial": "Resultado financeiro da venda",
+      "cogs": "CMV",
+      "itemCogs": "CMV do item",
+      "profit": "Lucro",
+      "margin": "Margem",
+      "shipping": "Envio",
+      "settlement": "Conciliação e caixa",
+      "timeline": "Histórico completo"
+    },
+    "profitability": {
+      "PROFIT": "Venda lucrativa",
+      "LOSS": "Venda com prejuízo",
+      "BREAK_EVEN": "Ponto de equilíbrio",
+      "MISSING_COST": "Custo ausente",
+      "UNAVAILABLE": "Resultado indisponível"
+    },
+    "profitSource": {
+      "REALIZED": "Lucro realizado",
+      "ESTIMATED": "Lucro estimado",
+      "UNAVAILABLE": "Lucro indisponível"
+    },
+    "shipping": {
+      "PENDING": "Pendente",
+      "READY_TO_SHIP": "Pronto para envio",
+      "POSTED": "Postado",
+      "IN_TRANSIT": "Em trânsito",
+      "DELIVERED": "Entregue",
+      "DELAYED": "Atrasado",
+      "CANCELED": "Cancelado",
+      "UNAVAILABLE": "Envio indisponível"
+    },
+    "settlement": {
+      "PENDING": "Pendente",
+      "RECONCILED": "Conciliado",
+      "DIVERGENT": "Divergente",
+      "MANUAL_REVIEW": "Revisão manual",
+      "IGNORED": "Ignorado"
+    },
+    "cash": {
+      "REALIZED": "Impacto realizado no caixa",
+      "RELEASED": "Valor liberado",
+      "PENDING_RELEASE": "Aguardando liberação",
+      "BLOCKED": "Liberação bloqueada",
+      "REFUNDED": "Estornado",
+      "CHARGEBACK": "Chargeback",
+      "UNAVAILABLE": "Caixa indisponível"
+    },
+    "timeline": {
+      "orderCreated": { "title": "Pedido recebido", "message": "O pedido entrou no LedgerFlow." },
+      "payment": {
+        "title": "Pagamento atualizado",
+        "message": "O estado seguro do pagamento foi atualizado."
+      },
+      "inventory": {
+        "title": "Estoque movimentado",
+        "message": "Uma movimentação vinculada à venda foi registrada."
+      },
+      "shipping": {
+        "title": "Envio atualizado",
+        "message": "O resumo logístico da venda foi atualizado."
+      },
+      "settlement": {
+        "title": "Conciliação atualizada",
+        "message": "O settlement da venda teve uma atualização."
+      },
+      "cash": {
+        "title": "Impacto no caixa",
+        "message": "Um lançamento financeiro vinculado à venda foi realizado."
+      },
+      "outbound": {
+        "title": "Evento outbound",
+        "message": "Um evento sanitizado foi preparado para entrega."
+      }
     },
     "unavailable": "Indisponível",
     "empty": {

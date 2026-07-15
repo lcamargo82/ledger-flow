@@ -96,4 +96,42 @@ export class HealthService {
       timestamp: new Date().toISOString(),
     };
   }
+
+  async getSalesIntelligenceHealth() {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const [
+      currentFactsCalculatedLast24h,
+      saleAlertsLast24h,
+      webhookDeliveriesInDlq,
+      failedExports,
+    ] = await Promise.all([
+      this.prisma.orderFinancialFact.count({
+        where: { isCurrent: true, calculatedAt: { gte: since } },
+      }),
+      this.prisma.notificationEvent.count({
+        where: { eventType: { startsWith: 'sale.' }, occurredAt: { gte: since } },
+      }),
+      this.prisma.notificationWebhookDelivery.count({
+        where: {
+          status: NotificationWebhookDeliveryStatus.DLQ,
+          notificationEvent: { eventType: { startsWith: 'sale.' } },
+        },
+      }),
+      this.prisma.exportJob.count({
+        where: { type: ExportJobType.SALES_INTELLIGENCE, status: ExportJobStatus.FAILED },
+      }),
+    ]);
+
+    return {
+      status: webhookDeliveriesInDlq > 0 || failedExports > 0 ? 'degraded' : 'ok',
+      check: 'sales-intelligence',
+      window: '24h',
+      currentFactsCalculatedLast24h,
+      saleAlertsLast24h,
+      webhookDeliveriesInDlq,
+      failedExports,
+      sanitized: true,
+      timestamp: new Date().toISOString(),
+    };
+  }
 }

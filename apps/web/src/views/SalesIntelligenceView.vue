@@ -2,6 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { useSalesIntelligenceStore } from '../stores/sales-intelligence.store'
+import { useAuthStore } from '../stores/auth.store'
+import { useToastStore } from '../stores/toast.store'
+import { salesIntelligenceService } from '../services/sales-intelligence.service'
 import { formatDateTime } from '../utils/date-format'
 import { formatMoneyFromCents } from '../utils/money-format'
 import type {
@@ -12,18 +15,69 @@ import type {
 import AppBadge from '../components/common/AppBadge.vue'
 import AppButton from '../components/common/AppButton.vue'
 import AppCard from '../components/common/AppCard.vue'
-import AppDrawer from '../components/common/AppDrawer.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
 import AppMetricCard from '../components/common/AppMetricCard.vue'
 import AppMetricGrid from '../components/common/AppMetricGrid.vue'
+import AppModal from '../components/common/AppModal.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
 import AppTable from '../components/common/AppTable.vue'
+import SalesIntelligenceDetailDrawer from '../components/sales-intelligence/SalesIntelligenceDetailDrawer.vue'
 
 const { t, currentLocale } = useI18n()
 const store = useSalesIntelligenceStore()
+const authStore = useAuthStore()
+const toastStore = useToastStore()
 const selectedOrder = ref<SalesIntelligenceOrder | null>(null)
+const isExporting = ref(false)
+const isPolicyOpen = ref(false)
+const isPolicySaving = ref(false)
+const policyEnabled = ref(true)
+const policyThreshold = ref('10.00')
+
+const exportCsv = async () => {
+  isExporting.value = true
+  try {
+    await salesIntelligenceService.exportCsv(store.filters)
+    toastStore.success(t('salesIntelligence.export.ready'))
+  } catch {
+    toastStore.error(t('salesIntelligence.export.failed'))
+  } finally {
+    isExporting.value = false
+  }
+}
+
+const openPolicy = async () => {
+  const policy = await salesIntelligenceService.getPolicy()
+  policyEnabled.value = policy.lowMarginEnabled
+  policyThreshold.value = policy.lowMarginThreshold
+  isPolicyOpen.value = true
+}
+
+const savePolicy = async () => {
+  isPolicySaving.value = true
+  try {
+    await salesIntelligenceService.updatePolicy({
+      lowMarginEnabled: policyEnabled.value,
+      lowMarginThreshold: Number(policyThreshold.value),
+    })
+    toastStore.success(t('salesIntelligence.policy.saved'))
+    isPolicyOpen.value = false
+  } finally {
+    isPolicySaving.value = false
+  }
+}
+
+const openOrder = async (order: SalesIntelligenceOrder) => {
+  selectedOrder.value = order
+  await store.fetchDetail(order.orderId)
+}
+
+const closeOrder = () => {
+  selectedOrder.value = null
+  store.clearDetail()
+}
 
 const columns = computed(() => [
   { key: 'soldAt', label: t('salesIntelligence.table.soldAt') },
@@ -98,7 +152,28 @@ onMounted(() => store.fetchOverview())
       :eyebrow="t('salesIntelligence.eyebrow')"
       :title="t('salesIntelligence.title')"
       :description="t('salesIntelligence.description')"
-    />
+    >
+      <template #actions>
+        <AppButton
+          v-if="authStore.checkAllPermissions(['sales-intelligence:manage-policy'])"
+          variant="secondary"
+          @click="openPolicy"
+        >
+          {{ t('salesIntelligence.actions.settings') }}
+        </AppButton>
+        <AppButton
+          v-if="authStore.checkAllPermissions(['sales-intelligence:export'])"
+          :disabled="isExporting"
+          @click="exportCsv"
+        >
+          {{
+            isExporting
+              ? t('salesIntelligence.actions.exporting')
+              : t('salesIntelligence.actions.export')
+          }}
+        </AppButton>
+      </template>
+    </AppPageHeader>
 
     <p class="text-sm font-medium text-[var(--lf-text-secondary)]">
       {{ t('salesIntelligence.foundation.scope') }}
@@ -117,7 +192,9 @@ onMounted(() => store.fetchOverview())
       <AppMetricGrid :accessible-label="t('salesIntelligence.summary.title')">
         <AppMetricCard
           :label="t('salesIntelligence.summary.orders')"
-          :value="t('salesIntelligence.summary.orderCount', { count: store.summary?.orderCount ?? 0 })"
+          :value="
+            t('salesIntelligence.summary.orderCount', { count: store.summary?.orderCount ?? 0 })
+          "
         />
         <AppMetricCard
           :label="t('salesIntelligence.summary.paid')"
@@ -237,7 +314,7 @@ onMounted(() => store.fetchOverview())
             variant="secondary"
             size="small"
             :data-testid="`sales-order-details-${item.orderId}`"
-            @click="selectedOrder = item"
+            @click="openOrder(item)"
           >
             {{ t('salesIntelligence.actions.details') }}
           </AppButton>
@@ -245,50 +322,43 @@ onMounted(() => store.fetchOverview())
       </AppTable>
     </template>
 
-    <AppDrawer
+    <SalesIntelligenceDetailDrawer
       :model-value="Boolean(selectedOrder)"
-      :title="t('salesIntelligence.drawer.title', { order: selectedOrder?.orderNumber ?? '' })"
-      data-testid="sales-order-drawer"
-      @update:model-value="selectedOrder = $event ? selectedOrder : null"
+      :order-number="selectedOrder?.orderNumber ?? ''"
+      :detail="store.detail"
+      :timeline="store.timeline"
+      :is-loading="store.isDetailLoading"
+      @update:model-value="$event ? undefined : closeOrder()"
+    />
+
+    <AppModal
+      v-model="isPolicyOpen"
+      :title="t('salesIntelligence.policy.title')"
+      size="sm"
     >
-      <div v-if="selectedOrder" class="space-y-5">
-        <div class="sales-drawer-summary">
-          <div>
-            <span>{{ t('salesIntelligence.table.payment') }}</span>
-            <strong>{{
-              t(`salesIntelligence.payment.${selectedOrder.paymentStatus || 'unavailable'}`)
-            }}</strong>
-          </div>
-          <div>
-            <span>{{ t('salesIntelligence.table.net') }}</span>
-            <strong>{{ formatMinor(selectedOrder.netAmountMinor, selectedOrder.currency) }}</strong>
-          </div>
-        </div>
-        <ul class="space-y-3" :aria-label="t('salesIntelligence.drawer.items')">
-          <li v-for="item in selectedOrder.items" :key="item.orderItemId" class="sales-item-card">
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <p class="break-words font-semibold text-[var(--lf-text-primary)]">
-                  {{ item.productName || t('salesIntelligence.drawer.productUnavailable') }}
-                </p>
-                <p
-                  class="mt-1 break-all font-mono text-sm text-[var(--lf-text-secondary)]"
-                  translate="no"
-                >
-                  {{ item.sku || item.skuId }}
-                </p>
-              </div>
-              <AppBadge :variant="stockVariant(item.stockStatus)">
-                {{ t(`salesIntelligence.stock.${item.stockStatus}`) }}
-              </AppBadge>
-            </div>
-            <p class="mt-3 text-sm text-[var(--lf-text-secondary)]">
-              {{ t('salesIntelligence.drawer.quantity', { quantity: item.quantity }) }}
-            </p>
-          </li>
-        </ul>
+      <div class="space-y-5">
+        <label class="flex items-center gap-3 text-sm text-[var(--lf-text-primary)]">
+          <input v-model="policyEnabled" type="checkbox" />
+          {{ t('salesIntelligence.policy.enabled') }}
+        </label>
+        <AppInput
+          :model-value="policyThreshold"
+          type="number"
+          min="0"
+          max="100"
+          step="0.01"
+          :disabled="!policyEnabled"
+          :label="t('salesIntelligence.policy.threshold')"
+          name="sales-low-margin-threshold"
+          @input="policyThreshold = ($event.target as HTMLInputElement).value"
+        />
       </div>
-    </AppDrawer>
+      <template #footer>
+        <AppButton :disabled="isPolicySaving" @click="savePolicy">
+          {{ t('salesIntelligence.policy.save') }}
+        </AppButton>
+      </template>
+    </AppModal>
   </div>
 </template>
 
@@ -303,40 +373,5 @@ onMounted(() => store.fetchOverview())
 .sales-money {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
-}
-
-.sales-drawer-summary {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--lf-space-3);
-}
-
-.sales-drawer-summary > div,
-.sales-item-card {
-  border: 1px solid var(--lf-border-primary);
-  border-radius: var(--lf-radius);
-  background: var(--lf-surface-secondary);
-  padding: var(--lf-space-4);
-}
-
-.sales-drawer-summary span,
-.sales-drawer-summary strong {
-  display: block;
-}
-
-.sales-drawer-summary span {
-  font-size: 0.75rem;
-  color: var(--lf-text-secondary);
-}
-
-.sales-drawer-summary strong {
-  margin-top: var(--lf-space-1);
-  color: var(--lf-text-primary);
-}
-
-@media (max-width: 640px) {
-  .sales-drawer-summary {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

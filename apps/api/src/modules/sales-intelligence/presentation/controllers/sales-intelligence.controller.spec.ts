@@ -7,9 +7,13 @@ import { SalesIntelligenceController } from './sales-intelligence.controller';
 describe('SalesIntelligenceController', () => {
   const list = jest.fn();
   const getSummary = jest.fn();
+  const getDetail = jest.fn();
+  const getTimeline = jest.fn();
   const service = {
     list,
     getSummary,
+    getDetail,
+    getTimeline,
   } as unknown as SalesIntelligenceService;
   const controller = new SalesIntelligenceController(service);
 
@@ -36,5 +40,24 @@ describe('SalesIntelligenceController', () => {
     await controller.getSummary({ tenantId: 'tenant-1' } as never, query);
 
     expect(getSummary).toHaveBeenCalledWith('tenant-1', query);
+  });
+
+  it('passes authenticated field permissions to detail and timeline redaction', async () => {
+    const user = {
+      tenantId: 'tenant-1',
+      permissions: ['sales-intelligence:view-profitability', 'inventory:read'],
+    } as never;
+
+    await controller.getDetail(user, 'order-1');
+    await controller.getTimeline(user, 'order-1');
+
+    expect(getDetail).toHaveBeenCalledWith('tenant-1', 'order-1', [
+      'sales-intelligence:view-profitability',
+      'inventory:read',
+    ]);
+    expect(getTimeline).toHaveBeenCalledWith('tenant-1', 'order-1', [
+      'sales-intelligence:view-profitability',
+      'inventory:read',
+    ]);
   });
 });

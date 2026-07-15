@@ -201,6 +201,7 @@ model Tenant {
   operationalFinancialAccounts     OperationalFinancialAccount[]
   cashLedgerEntries                CashLedgerEntry[]
   cashPositionAdjustments          CashPositionAdjustment[]
+  salesIntelligencePolicy          SalesIntelligencePolicy?
 
   @@map("tenants")
 }
@@ -272,6 +273,7 @@ model NotificationEvent {
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, category, createdAt(sort: Desc)])
   @@index([tenantId, sourceType, sourceId])
+  @@index([eventType, occurredAt], map: "notification_events_type_occurred_at_idx")
   @@map("notification_events")
 }
 
@@ -1447,6 +1449,19 @@ enum ExportJobType {
   CATALOG_PRODUCTS
   RECONCILIATION_CASES
   MARKETPLACE_SETTLEMENT_EVENTS
+  SALES_INTELLIGENCE
+}
+
+model SalesIntelligencePolicy {
+  tenantId              String   @id @map("tenant_id")
+  lowMarginEnabled      Boolean  @default(true) @map("low_margin_enabled")
+  lowMarginThreshold    Decimal  @default(10) @map("low_margin_threshold") @db.Decimal(5, 2)
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("sales_intelligence_policies")
 }
 
 enum ReconciliationCaseStatus {

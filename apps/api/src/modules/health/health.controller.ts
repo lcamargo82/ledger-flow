@@ -6,7 +6,10 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiServiceUnavailableResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { RequirePermissions } from '../auth/presentation/decorators/require-permissions.decorator';
+import { PlatformAdminOnly } from '../auth/presentation/decorators/platform-admin-only.decorator';
 
 @ApiTags('Health')
 @Controller('health')
@@ -97,5 +100,31 @@ export class HealthController {
   })
   async getSettlementHealth() {
     return this.healthService.getSettlementHealth();
+  }
+
+  @Get('sales-intelligence')
+  @ApiBearerAuth('access-token')
+  @PlatformAdminOnly()
+  @RequirePermissions('platform:tenants:health:read')
+  @ApiOperation({
+    summary: 'Retorna snapshot sanitizado de saúde operacional da inteligência de vendas',
+  })
+  @ApiOkResponse({
+    schema: {
+      example: {
+        status: 'ok',
+        check: 'sales-intelligence',
+        window: '24h',
+        currentFactsCalculatedLast24h: 25,
+        saleAlertsLast24h: 2,
+        webhookDeliveriesInDlq: 0,
+        failedExports: 0,
+        sanitized: true,
+        timestamp: '2026-07-14T00:00:00.000Z',
+      },
+    },
+  })
+  async getSalesIntelligenceHealth() {
+    return this.healthService.getSalesIntelligenceHealth();
   }
 }

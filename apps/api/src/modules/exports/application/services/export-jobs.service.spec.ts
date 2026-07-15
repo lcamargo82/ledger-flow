@@ -11,6 +11,7 @@ import {
   ReconciliationCaseStatus,
   ReconciliationMatchType,
   WebhookProvider,
+  InternalOrderStatus,
 } from '@prisma/client';
 import { ExportJobsService } from './export-jobs.service';
 
@@ -34,6 +35,7 @@ describe('ExportJobsService', () => {
       orderFinancialFact: { findMany: jest.fn() },
       reconciliationCase: { findMany: jest.fn() },
       providerSettlementEvent: { findMany: jest.fn() },
+      internalOrder: { findMany: jest.fn() },
       auditLog: { create: jest.fn() },
       outboxEvent: { create: jest.fn() },
     };
@@ -53,6 +55,97 @@ describe('ExportJobsService', () => {
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(prisma.exportJob.create).not.toHaveBeenCalled();
+  });
+
+  it('derives protected Sales Intelligence columns from server permissions', async () => {
+    prisma.exportJob.create.mockImplementation(({ data }: any) =>
+      Promise.resolve({ id: 'sales-job', ...data }),
+    );
+
+    await service.createSalesIntelligenceJob(
+      'tenant-1',
+      'user-1',
+      ['sales-intelligence:export', 'sales-intelligence:view-profitability'],
+      { orderReference: '=unsafe-filter' },
+    );
+
+    expect(prisma.exportJob.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        tenantId: 'tenant-1',
+        type: ExportJobType.SALES_INTELLIGENCE,
+        parameters: expect.objectContaining({
+          includeProfitability: true,
+          includeSettlement: false,
+        }),
+      }),
+    });
+  });
+
+  it('blocks Sales Intelligence export through the generic report endpoint', async () => {
+    await expect(
+      service.createJob('tenant-1', 'user-1', {
+        type: ExportJobType.SALES_INTELLIGENCE,
+        format: ExportJobFormat.CSV,
+        parameters: { includeSettlement: true },
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('streams Sales Intelligence in bounded batches and neutralizes formulas', async () => {
+    const pendingJob = {
+      id: 'sales-volume-job',
+      tenantId: 'tenant-1',
+      requestedByUserId: 'user-1',
+      type: ExportJobType.SALES_INTELLIGENCE,
+      format: ExportJobFormat.CSV,
+      status: ExportJobStatus.PENDING,
+      parameters: { includeProfitability: false, includeSettlement: false },
+      filePath: null,
+      fileName: null,
+      mimeType: null,
+      rowCount: 0,
+      errorCode: null,
+      errorSummary: null,
+      expiresAt: null,
+      startedAt: null,
+      completedAt: null,
+      cancelledAt: null,
+      createdAt: new Date('2026-07-14T12:00:00.000Z'),
+      updatedAt: new Date('2026-07-14T12:00:00.000Z'),
+    };
+    let completedJob: any;
+    prisma.exportJob.findMany.mockResolvedValueOnce([pendingJob]);
+    prisma.exportJob.update.mockImplementation(({ data }: any) => {
+      if (data.status === ExportJobStatus.PROCESSING) {
+        return Promise.resolve({ ...pendingJob, ...data });
+      }
+      completedJob = { ...pendingJob, ...data };
+      return Promise.resolve(completedJob);
+    });
+    const orders = Array.from({ length: 101 }, (_, index) => ({
+      id: `order-${String(index).padStart(3, '0')}`,
+      orderNumber: index === 0 ? '=FORMULA()' : `ML-${index}`,
+      status: InternalOrderStatus.FULFILLED,
+      createdAt: new Date('2026-07-14T12:00:00.000Z'),
+      items: [],
+      financialFacts: [],
+      reconciliationCases: [],
+    }));
+    prisma.internalOrder.findMany
+      .mockResolvedValueOnce(orders.slice(0, 100))
+      .mockResolvedValueOnce(orders.slice(100))
+      .mockResolvedValueOnce([]);
+
+    await service.processSalesIntelligencePending('tenant-1', 'user-1');
+    const file = await readFile(completedJob.filePath, 'utf8');
+
+    expect(completedJob.rowCount).toBe(101);
+    expect(prisma.internalOrder.findMany).toHaveBeenCalledTimes(3);
+    expect(prisma.internalOrder.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ take: 100, cursor: { id: 'order-099' }, skip: 1 }),
+    );
+    expect(file).toContain('"\'=FORMULA()"');
   });
 
   it('streams catalog products into CSV and preserves SKU as spreadsheet text', async () => {

@@ -42,8 +42,8 @@ const transferForm = reactive({
 const columns = computed(() => [
   { key: 'transferNumber', label: t('inventory.transfers.table.number') },
   { key: 'status', label: t('inventory.transfers.table.status') },
-  { key: 'sourceWarehouseId', label: t('inventory.transfers.table.source') },
-  { key: 'destinationWarehouseId', label: t('inventory.transfers.table.destination') },
+  { key: 'sourceWarehouse', label: t('inventory.transfers.table.source') },
+  { key: 'destinationWarehouse', label: t('inventory.transfers.table.destination') },
   { key: 'items', label: t('inventory.transfers.table.items') },
   { key: 'reasonCode', label: t('inventory.transfers.table.reason') },
   { key: 'createdAt', label: t('inventory.transfers.table.createdAt') },
@@ -70,11 +70,6 @@ const reasonOptions = computed(() =>
 onMounted(async () => {
   await Promise.all([inventoryStore.fetchWarehouses(), inventoryStore.fetchTransfers()])
 })
-
-const warehouseLabel = (id: string) => {
-  const warehouse = inventoryStore.warehouses.find((item) => item.id === id)
-  return warehouse ? `${warehouse.code} - ${warehouse.name}` : id
-}
 
 const statusVariant = (status: InventoryTransferStatus) => {
   if (status === 'COMPLETED') return 'success'
@@ -223,14 +218,20 @@ const errorKey = (error: unknown) => {
             {{ t(`inventory.transferStatus.${item.status}`) }}
           </AppBadge>
         </template>
-        <template #sourceWarehouseId="{ item }">
-          {{ warehouseLabel(item.sourceWarehouseId) }}
+        <template #sourceWarehouse="{ item }">
+          {{ item.sourceWarehouse.name }} · <span translate="no">{{ item.sourceWarehouse.code }}</span>
         </template>
-        <template #destinationWarehouseId="{ item }">
-          {{ warehouseLabel(item.destinationWarehouseId) }}
+        <template #destinationWarehouse="{ item }">
+          {{ item.destinationWarehouse.name }} ·
+          <span translate="no">{{ item.destinationWarehouse.code }}</span>
         </template>
         <template #items="{ item }">
-          {{ t('inventory.transfers.table.itemCount', { count: item.items.length }) }}
+          <div v-for="transferItem in item.items" :key="transferItem.id" class="space-y-0.5">
+            <span>{{ transferItem.sku.product.name }}</span>
+            <span class="block text-xs text-[var(--lf-text-secondary)]" translate="no">
+              {{ transferItem.sku.skuDisplay }} · {{ transferItem.quantity }}
+            </span>
+          </div>
         </template>
         <template #reasonCode="{ item }">
           {{ t(`inventory.reasonCodes.transfer.${item.reasonCode}`) }}

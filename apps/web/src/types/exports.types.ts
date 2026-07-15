@@ -5,6 +5,7 @@ export type ExportJobType =
   | 'CATALOG_PRODUCTS'
   | 'RECONCILIATION_CASES'
   | 'MARKETPLACE_SETTLEMENT_EVENTS'
+  | 'SALES_INTELLIGENCE'
 
 export interface ExportJob {
   id: string
