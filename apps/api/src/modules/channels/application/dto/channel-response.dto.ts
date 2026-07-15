@@ -148,6 +148,20 @@ export class ChannelReplayResponseDto {
   @ApiPropertyOptional() syncStateId?: string;
 }
 
+export class ChannelBulkReplayItemDto {
+  @ApiProperty() inboxEventId: string;
+  @ApiProperty() replayed: boolean;
+  @ApiPropertyOptional() reason?: string;
+}
+
+export class ChannelBulkReplayResponseDto {
+  @ApiProperty() requested: number;
+  @ApiProperty() replayed: number;
+  @ApiProperty() skipped: number;
+  @ApiProperty({ type: [ChannelBulkReplayItemDto] })
+  results: ChannelBulkReplayItemDto[];
+}
+
 export class ChannelIntegrationMutationResponseDto {
   @ApiProperty({ type: ChannelIntegrationResponseDto })
   integration: ChannelIntegrationResponseDto;

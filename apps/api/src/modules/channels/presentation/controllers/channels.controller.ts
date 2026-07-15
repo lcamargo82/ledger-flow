@@ -20,6 +20,7 @@ import { ListChannelListingsQueryDto } from '../../application/dto/list-channel-
 import { ListInventorySyncQueryDto } from '../../application/dto/list-inventory-sync-query.dto';
 import { MapChannelListingDto } from '../../application/dto/map-channel-listing.dto';
 import { UpdateChannelIntegrationSettingsDto } from '../../application/dto/update-channel-integration-settings.dto';
+import { ReplayChannelWebhooksDto } from '../../application/dto/replay-channel-webhooks.dto';
 import {
   ChannelInventorySyncProcessSummaryDto,
   ChannelHealthResponseDto,
@@ -28,6 +29,7 @@ import {
   ChannelIntegrationMutationResponseDto,
   ChannelIntegrationsResponseDto,
   ChannelReplayResponseDto,
+  ChannelBulkReplayResponseDto,
   PaginatedChannelInventorySyncResponseDto,
   PaginatedChannelListingsResponseDto,
   PaginatedChannelInboxResponseDto,
@@ -149,6 +151,19 @@ export class ChannelsController {
   @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
   replayWebhookInbox(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.healthReplayService.replayWebhookInbox(user.tenantId, user.id, id);
+  }
+
+  @Post('webhook-inbox/replay-failed')
+  @RequirePermissions('channels:manage')
+  @ApiOperation({ summary: 'Reenfileirar lote limitado de webhooks de canal com falha' })
+  @ApiCreatedResponse({ type: ChannelBulkReplayResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de canais' })
+  replayFailedWebhooks(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: ReplayChannelWebhooksDto,
+  ) {
+    return this.healthReplayService.replayFailedWebhooks(user.tenantId, user.id, dto);
   }
 
   @Post('integrations/:id/import-listings')

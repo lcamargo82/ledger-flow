@@ -3,7 +3,6 @@ import {
   ChannelIntegration,
   ChannelIntegrationStatus,
   ChannelInventorySyncStatus,
-  ChannelProvider,
   ChannelWebhookInboxEvent,
   ChannelWebhookStatus,
   Prisma,
@@ -84,6 +83,47 @@ export class ChannelHealthReplayService {
     );
 
     return { replayed: true, inboxEventId: inboxEvent.id };
+  }
+
+  async replayFailedWebhooks(
+    tenantId: string,
+    actorUserId: string,
+    options: { limit?: number; integrationId?: string },
+  ) {
+    const limit = Math.min(Math.max(options.limit || 50, 1), 100);
+    const events = await this.prisma.channelWebhookInboxEvent.findMany({
+      where: {
+        tenantId,
+        integrationId: options.integrationId,
+        status: ChannelWebhookStatus.RECEIVED,
+        processedAt: null,
+        failureReason: { not: null },
+      },
+      select: { id: true },
+      orderBy: { receivedAt: 'asc' },
+      take: limit,
+    });
+
+    const results: Array<{ inboxEventId: string; replayed: boolean; reason?: string }> = [];
+    for (const event of events) {
+      try {
+        await this.replayWebhookInbox(tenantId, actorUserId, event.id);
+        results.push({ inboxEventId: event.id, replayed: true });
+      } catch (error) {
+        results.push({
+          inboxEventId: event.id,
+          replayed: false,
+          reason: error instanceof BadRequestException ? 'NOT_REPLAYABLE' : 'REPLAY_FAILED',
+        });
+      }
+    }
+
+    return {
+      requested: events.length,
+      replayed: results.filter((result) => result.replayed).length,
+      skipped: results.filter((result) => !result.replayed).length,
+      results,
+    };
   }
 
   async replayInventorySync(tenantId: string, actorUserId: string, syncStateId: string) {

@@ -46,6 +46,7 @@ export class RabbitMQConsumer implements OnApplicationBootstrap {
         this.consume('ledgerflow.reconciliation.events.q'),
         this.consume('ledgerflow.notifications.webhooks.q'),
         this.consume('ledgerflow.channel.webhook.events.q'),
+        this.consume('ledgerflow.sales-intelligence.events.q'),
       ]);
     } catch (err: any) {
       this.logger.error(`Failed to connect to RabbitMQ consumer: ${err.message}`);

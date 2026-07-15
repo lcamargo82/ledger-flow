@@ -9,6 +9,7 @@ describe('RabbitMqTopologyService', () => {
   const assertExchange = jest.fn();
   const assertQueue = jest.fn();
   const bindQueue = jest.fn();
+  const unbindQueue = jest.fn();
   const closeChannel = jest.fn();
   const closeConnection = jest.fn();
 
@@ -19,34 +20,35 @@ describe('RabbitMqTopologyService', () => {
         assertExchange,
         assertQueue,
         bindQueue,
+        unbindQueue,
         close: closeChannel,
       }),
       close: closeConnection,
     });
   });
 
-  it('binds emitted domain events so mandatory outbox publishes are routable', async () => {
+  it('routes only domain events that have internal consumers', async () => {
     await new RabbitMqTopologyService().initializeTopology();
 
     expect(bindQueue).toHaveBeenCalledWith(
-      'ledgerflow.export.events.q',
+      'ledgerflow.sales-intelligence.events.q',
       'ledgerflow.events',
-      'export.job.*',
+      'financial.order_fact.created',
     );
     expect(bindQueue).toHaveBeenCalledWith(
-      'ledgerflow.inventory.events.q',
+      'ledgerflow.sales-intelligence.events.q',
       'ledgerflow.events',
-      'inventory.#',
+      'inventory.reservation.consumed',
     );
     expect(bindQueue).toHaveBeenCalledWith(
-      'ledgerflow.orders.events.q',
+      'ledgerflow.sales-intelligence.events.q',
       'ledgerflow.events',
-      'orders.order.*',
+      'channel.order.shipping_summary.updated',
     );
-    expect(bindQueue).toHaveBeenCalledWith(
-      'ledgerflow.financial.events.q',
+    expect(unbindQueue).toHaveBeenCalledWith(
+      'ledgerflow.channel.events.q',
       'ledgerflow.events',
-      'financial.#',
+      'channel.#',
     );
   });
 

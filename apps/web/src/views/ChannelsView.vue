@@ -15,6 +15,7 @@ import type {
   ChannelListing,
   ChannelListingMatchStatus,
   ChannelProvider,
+  ChannelWebhookInboxEvent,
   ChannelWebhookStatus,
 } from '../types/channels.types'
 import AppBadge from '../components/common/AppBadge.vue'
@@ -84,7 +85,8 @@ const inboxColumns = computed(() => [
   { key: 'eventType', label: t('channels.table.eventType') },
   { key: 'providerEventId', label: t('channels.table.providerEventId') },
   { key: 'status', label: t('channels.table.status') },
-  { key: 'summary', label: t('channels.table.summary') },
+  { key: 'failureReason', label: t('channels.table.failureReason') },
+  { key: 'actions', label: t('channels.table.actions') },
 ])
 
 const listingColumns = computed(() => [
@@ -200,6 +202,39 @@ const canImportListings = computed(
     authStore.checkCapability('channels.import_listings'),
 )
 
+const canReplayWebhooks = computed(() => authStore.checkAllPermissions(['channels:manage']))
+
+const canReplayWebhook = (event: ChannelWebhookInboxEvent) =>
+  event.status === 'RECEIVED' && !event.processedAt && Boolean(event.failureReason)
+
+const replayWebhook = (event: ChannelWebhookInboxEvent) =>
+  confirmDialog.open({
+    title: t('channels.replay.singleTitle'),
+    message: t('channels.replay.singleMessage'),
+    confirmText: t('channels.actions.replay'),
+    cancelText: t('common.cancel'),
+    confirmVariant: 'primary',
+    onConfirm: async () => {
+      await channelsStore.replayWebhookInbox(event.id)
+      toast.success(t('channels.replay.singleSuccess'))
+    },
+    onCancel: null,
+  })
+
+const replayFailedWebhooks = () =>
+  confirmDialog.open({
+    title: t('channels.replay.bulkTitle'),
+    message: t('channels.replay.bulkMessage'),
+    confirmText: t('channels.actions.replayFailed'),
+    cancelText: t('common.cancel'),
+    confirmVariant: 'primary',
+    onConfirm: async () => {
+      const result = await channelsStore.replayFailedWebhooks(50)
+      toast.success(t('channels.replay.bulkSuccess', { count: result.replayed }))
+    },
+    onCancel: null,
+  })
+
 const canMapListings = computed(
   () =>
     authStore.checkAllPermissions(['channels:manage']) &&
@@ -213,8 +248,12 @@ const canSyncInventory = computed(
 )
 
 const importListings = async (integrationId: string) => {
-  await channelsStore.importListings(integrationId)
-  activeTab.value = 'listings'
+  try {
+    await channelsStore.importListings(integrationId)
+    activeTab.value = 'listings'
+  } catch {
+    toast.error(t('channels.errors.importFailed'))
+  }
 }
 
 const openSettings = (integration: ChannelIntegration) => {
@@ -421,17 +460,27 @@ const mapListing = async () => {
 
       <div v-if="activeTab === 'inbox'" class="space-y-4">
         <AppCard>
-          <AppSelect
-            id="channel-inbox-status"
-            :model-value="channelsStore.filters.status || ''"
-            :label="t('channels.filters.statusLabel')"
-            :options="statusOptions"
-            @update:model-value="
-              channelsStore.setInboxStatus(
-                ($event || undefined) as ChannelWebhookStatus | undefined,
-              )
-            "
-          />
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <AppSelect
+              id="channel-inbox-status"
+              :model-value="channelsStore.filters.status || ''"
+              :label="t('channels.filters.statusLabel')"
+              :options="statusOptions"
+              @update:model-value="
+                channelsStore.setInboxStatus(
+                  ($event || undefined) as ChannelWebhookStatus | undefined,
+                )
+              "
+            />
+            <AppButton
+              v-if="canReplayWebhooks"
+              variant="secondary"
+              :loading="channelsStore.isMutating"
+              @click="replayFailedWebhooks"
+            >
+              {{ t('channels.actions.replayFailed') }}
+            </AppButton>
+          </div>
         </AppCard>
 
         <AppTable
@@ -454,8 +503,25 @@ const mapListing = async () => {
               {{ t(`channels.webhookStatus.${item.status}`) }}
             </AppBadge>
           </template>
-          <template #summary="{ item }">
-            <span class="font-mono text-xs">{{ JSON.stringify(item.payloadSummary || {}) }}</span>
+          <template #failureReason="{ item }">
+            <span class="text-xs text-[var(--lf-text-secondary)]">
+              {{ item.failureReason || '-' }}
+            </span>
+          </template>
+          <template #actions="{ item }">
+            <AppButton
+              v-if="canReplayWebhooks && canReplayWebhook(item)"
+              variant="secondary"
+              size="small"
+              icon-only
+              :title="t('channels.actions.replay')"
+              :loading="channelsStore.isMutating"
+              @click="replayWebhook(item)"
+            >
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">replay</span>
+              </template>
+            </AppButton>
           </template>
         </AppTable>
       </div>

@@ -4,6 +4,8 @@ import type {
   ChannelInventorySyncProcessSummary,
   ChannelInventorySyncStatus,
   ChannelIntegrationsResponse,
+  ChannelReplayResponse,
+  ChannelBulkReplayResponse,
   ChannelListing,
   ChannelListingsImportResponse,
   ChannelListingMatchStatus,
@@ -90,6 +92,23 @@ export class ChannelsService {
     const { data } = await httpClient.post<ChannelListingsImportResponse>(
       `/channels/integrations/${integrationId}/import-listings`,
       {},
+      { timeout: 120_000 },
+    )
+    return data
+  }
+
+  async replayWebhookInbox(inboxEventId: string): Promise<ChannelReplayResponse> {
+    const { data } = await httpClient.post<ChannelReplayResponse>(
+      `/channels/webhook-inbox/${inboxEventId}/replay`,
+      {},
+    )
+    return data
+  }
+
+  async replayFailedWebhooks(limit = 50): Promise<ChannelBulkReplayResponse> {
+    const { data } = await httpClient.post<ChannelBulkReplayResponse>(
+      '/channels/webhook-inbox/replay-failed',
+      { limit },
     )
     return data
   }

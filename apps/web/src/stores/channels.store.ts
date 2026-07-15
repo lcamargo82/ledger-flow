@@ -58,6 +58,7 @@ export const useChannelsStore = defineStore('channels', () => {
 
   const extractErrorMessage = (err: unknown): string => {
     if (axios.isAxiosError(err)) {
+      if (err.code === 'ECONNABORTED') return 'channels.errors.timeout'
       if (err.response?.status === 403) return 'channels.errors.forbidden'
       if (err.response?.status === 400) return 'channels.errors.invalid'
     }
@@ -230,11 +231,37 @@ export const useChannelsStore = defineStore('channels', () => {
 
   const importListings = async (integrationId: string) => {
     isMutating.value = true
-    error.value = null
     try {
       const response = await channelsService.importListings(integrationId)
       lastImportSummary.value = response.summary
       await fetchListings()
+      return response
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const replayWebhookInbox = async (inboxEventId: string) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await channelsService.replayWebhookInbox(inboxEventId)
+      await fetchChannels()
+      return response
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
+  const replayFailedWebhooks = async (limit = 50) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const response = await channelsService.replayFailedWebhooks(limit)
+      await fetchChannels()
       return response
     } catch (err) {
       error.value = extractErrorMessage(err)
@@ -307,6 +334,8 @@ export const useChannelsStore = defineStore('channels', () => {
     setInventorySyncStatus,
     setInventorySyncPage,
     importListings,
+    replayWebhookInbox,
+    replayFailedWebhooks,
     mapListing,
     processInventorySync,
   }

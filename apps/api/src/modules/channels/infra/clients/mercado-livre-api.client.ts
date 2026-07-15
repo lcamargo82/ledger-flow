@@ -134,6 +134,7 @@ export class MercadoLivreApiClient {
         code: input.code,
         redirect_uri: input.redirectUri,
       }),
+      signal: this.requestSignal(),
     });
 
     if (!response.ok) throw this.tokenRequestError(response.status);
@@ -154,6 +155,7 @@ export class MercadoLivreApiClient {
         client_secret: input.clientSecret,
         refresh_token: input.refreshToken,
       }),
+      signal: this.requestSignal(),
     });
 
     if (!response.ok) throw this.tokenRequestError(response.status);
@@ -174,6 +176,7 @@ export class MercadoLivreApiClient {
 
     const response = await fetch(url, {
       headers: { authorization: `Bearer ${input.accessToken}` },
+      signal: this.requestSignal(),
     });
 
     if (!response.ok) {
@@ -187,6 +190,7 @@ export class MercadoLivreApiClient {
     const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
     const response = await fetch(`${baseUrl}/items/${itemId}`, {
       headers: { authorization: `Bearer ${accessToken}` },
+      signal: this.requestSignal(),
     });
 
     if (!response.ok) {
@@ -201,6 +205,7 @@ export class MercadoLivreApiClient {
     const normalizedResource = resource.startsWith('/') ? resource : `/${resource}`;
     const response = await fetch(`${baseUrl}${normalizedResource}`, {
       headers: { authorization: `Bearer ${accessToken}` },
+      signal: this.requestSignal(),
     });
 
     if (!response.ok) {
@@ -221,6 +226,7 @@ export class MercadoLivreApiClient {
         'content-type': 'application/json',
       },
       body: JSON.stringify({ available_quantity: input.availableQuantity }),
+      signal: this.requestSignal(),
     });
 
     if (!response.ok) {
@@ -238,5 +244,12 @@ export class MercadoLivreApiClient {
     }
 
     return response.json() as Promise<MercadoLivreUpdateItemStockResponse>;
+  }
+
+  private requestSignal() {
+    const configuredTimeout = Number(process.env.MERCADO_LIVRE_HTTP_TIMEOUT_MS);
+    const timeoutMs =
+      Number.isFinite(configuredTimeout) && configuredTimeout > 0 ? configuredTimeout : 15_000;
+    return AbortSignal.timeout(timeoutMs);
   }
 }

@@ -47,9 +47,13 @@ export class MercadoLivreChannelAdapter
         limit: pageSize,
       });
 
-      for (const itemId of search.results) {
-        const item = await this.apiClient.getItem(input.accessToken, itemId);
-        listings.push(this.toListing(item));
+      const detailConcurrency = 10;
+      for (let index = 0; index < search.results.length; index += detailConcurrency) {
+        const itemIds = search.results.slice(index, index + detailConcurrency);
+        const items = await Promise.all(
+          itemIds.map((itemId) => this.apiClient.getItem(input.accessToken, itemId)),
+        );
+        listings.push(...items.map((item) => this.toListing(item)));
       }
 
       offset += search.paging.limit;

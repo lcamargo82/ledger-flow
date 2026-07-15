@@ -3,6 +3,7 @@ import { OutboxRepository } from '../../domain/interfaces/outbox.repository';
 import { AsyncMessagePublisher } from '../../domain/interfaces/async-message-publisher.interface';
 import { AsyncMessageEnvelope } from '../../domain/entities/async-message-envelope';
 import { randomUUID } from 'crypto';
+import { AsyncHandlerRegistryService } from './async-handler-registry.service';
 
 @Injectable()
 export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -19,6 +20,7 @@ export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplic
   constructor(
     private readonly outboxRepository: OutboxRepository,
     private readonly messagePublisher: AsyncMessagePublisher,
+    private readonly handlerRegistry: AsyncHandlerRegistryService,
   ) {}
 
   onApplicationBootstrap() {
@@ -63,6 +65,14 @@ export class OutboxDispatcherService implements OnApplicationBootstrap, OnApplic
 
       for (const event of events) {
         try {
+          if (!this.handlerRegistry.hasHandlers(event.eventType)) {
+            await this.outboxRepository.markAsPublished(event.id);
+            this.logger.debug(
+              `Outbox event ${event.id} retained for audit without broker delivery: no async handler for ${event.eventType}`,
+            );
+            continue;
+          }
+
           const envelope: AsyncMessageEnvelope = {
             messageId: event.id,
             eventType: event.eventType,

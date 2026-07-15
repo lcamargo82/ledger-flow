@@ -18,4 +18,8 @@ export class AsyncHandlerRegistryService {
   getHandlers(eventType: string): AsyncEventHandler[] {
     return this.handlers.get(eventType) || [];
   }
+
+  hasHandlers(eventType: string): boolean {
+    return (this.handlers.get(eventType)?.length || 0) > 0;
+  }
 }

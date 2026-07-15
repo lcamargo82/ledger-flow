@@ -42,4 +42,36 @@ describe('ChannelsService', () => {
       syncEnabled: true,
     })
   })
+
+  it('uses an operation-appropriate timeout for Mercado Livre listing imports', async () => {
+    vi.mocked(httpClient.post).mockResolvedValue({ data: { summary: {}, data: [] } })
+
+    await channelsService.importListings('integration-1')
+
+    expect(httpClient.post).toHaveBeenCalledWith(
+      '/channels/integrations/integration-1/import-listings',
+      {},
+      { timeout: 120_000 },
+    )
+  })
+
+  it('calls tenant-scoped individual and bounded bulk replay endpoints', async () => {
+    vi.mocked(httpClient.post)
+      .mockResolvedValueOnce({ data: { replayed: true, inboxEventId: 'inbox-1' } })
+      .mockResolvedValueOnce({
+        data: { requested: 1, replayed: 1, skipped: 0, results: [] },
+      })
+
+    await channelsService.replayWebhookInbox('inbox-1')
+    await channelsService.replayFailedWebhooks(50)
+
+    expect(httpClient.post).toHaveBeenNthCalledWith(
+      1,
+      '/channels/webhook-inbox/inbox-1/replay',
+      {},
+    )
+    expect(httpClient.post).toHaveBeenNthCalledWith(2, '/channels/webhook-inbox/replay-failed', {
+      limit: 50,
+    })
+  })
 })
