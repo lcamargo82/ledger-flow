@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { usePermissionsStore } from '../stores/permissions.store'
 import { useAuthStore } from '../stores/auth.store'
@@ -18,6 +18,8 @@ const authStore = useAuthStore()
 
 const searchInput = ref('')
 const selectedScope = ref('')
+const currentPage = ref(1)
+const perPage = 20
 
 const scopeOptions = computed(() => [
   { value: '', label: t('permissions.scope.all') },
@@ -46,18 +48,35 @@ onMounted(() => {
 const filteredPermissions = computed(() => {
   const query = searchInput.value.toLowerCase()
   let list = permissionsStore.permissions
-  
+
   if (selectedScope.value) {
-    list = list.filter(p => p.scope === selectedScope.value)
+    list = list.filter((p) => p.scope === selectedScope.value)
   }
 
   if (!query) return list
-  
-  return list.filter(p => 
-    p.key.toLowerCase().includes(query) || 
-    (p.description && p.description.toLowerCase().includes(query)) ||
-    getPermissionDescription(p).toLowerCase().includes(query)
+
+  return list.filter(
+    (p) =>
+      p.key.toLowerCase().includes(query) ||
+      (p.description && p.description.toLowerCase().includes(query)) ||
+      getPermissionDescription(p).toLowerCase().includes(query),
   )
+})
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredPermissions.value.length / perPage)),
+)
+const paginatedPermissions = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  return filteredPermissions.value.slice(start, start + perPage)
+})
+
+watch([searchInput, selectedScope], () => {
+  currentPage.value = 1
+})
+
+watch(totalPages, (value) => {
+  if (currentPage.value > value) currentPage.value = value
 })
 
 const getPermissionDescription = (item: any) => {
@@ -72,14 +91,11 @@ const getPermissionDescription = (item: any) => {
 
 <template>
   <div class="space-y-6">
-    <AppPageHeader 
-      :title="t('permissions.title')" 
-      :description="t('permissions.description')"
-    />
+    <AppPageHeader :title="t('permissions.title')" :description="t('permissions.description')" />
 
-    <AppErrorState 
-      v-if="permissionsStore.error && !permissionsStore.permissions.length" 
-      :title="t('permissions.errorTitle')" 
+    <AppErrorState
+      v-if="permissionsStore.error && !permissionsStore.permissions.length"
+      :title="t('permissions.errorTitle')"
       :description="t(permissionsStore.error) || t('permissions.errorDescription')"
       @retry="permissionsStore.fetchPermissions()"
     />
@@ -88,7 +104,7 @@ const getPermissionDescription = (item: any) => {
       <AppCard class="lf-mb-6">
         <div class="lf-filter-container">
           <div class="lf-filter-item lf-filter-item--large">
-            <AppInput 
+            <AppInput
               id="search"
               v-model="searchInput"
               :label="t('permissions.searchLabel')"
@@ -106,15 +122,24 @@ const getPermissionDescription = (item: any) => {
         </div>
       </AppCard>
 
-      <AppTable 
-        :columns="columns" 
-        :items="filteredPermissions" 
+      <AppTable
+        :columns="columns"
+        :items="paginatedPermissions"
         :is-loading="permissionsStore.isLoading"
         :empty-title="t('permissions.emptyTitle')"
         :empty-description="t('permissions.emptyDescription')"
+        :pagination="{
+          page: currentPage,
+          totalPages,
+          total: filteredPermissions.length,
+          perPage,
+        }"
+        @update:page="currentPage = $event"
       >
         <template #key="{ item }">
-          <span class="font-medium font-mono text-xs text-indigo-600 dark:text-indigo-400">{{ item.key }}</span>
+          <span class="font-medium font-mono text-xs text-indigo-600 dark:text-indigo-400">{{
+            item.key
+          }}</span>
         </template>
 
         <template #description="{ item }">
@@ -125,7 +150,11 @@ const getPermissionDescription = (item: any) => {
 
         <template #scope="{ item }">
           <AppBadge :variant="item.scope === 'PLATFORM' ? 'warning' : 'info'">
-            {{ item.scope === 'PLATFORM' ? t('permissions.scopeBadge.platform') : t('permissions.scopeBadge.tenant') }}
+            {{
+              item.scope === 'PLATFORM'
+                ? t('permissions.scopeBadge.platform')
+                : t('permissions.scopeBadge.tenant')
+            }}
           </AppBadge>
         </template>
 

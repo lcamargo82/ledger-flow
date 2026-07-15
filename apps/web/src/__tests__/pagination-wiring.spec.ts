@@ -7,6 +7,7 @@ import inventoryTransfersSource from '../views/InventoryTransfersView.vue?raw'
 import marketplaceSettlementSource from '../views/MarketplaceSettlementView.vue?raw'
 import platformAuditSource from '../views/PlatformAuditView.vue?raw'
 import platformTenantsSource from '../views/PlatformTenantsView.vue?raw'
+import permissionsSource from '../views/PermissionsView.vue?raw'
 import reconciliationSource from '../views/ReconciliationView.vue?raw'
 
 describe('paginated table wiring', () => {
@@ -40,9 +41,19 @@ describe('paginated table wiring', () => {
     expect(platformTenantsSource).toContain('@update:page="handlePageChange"')
     expect(platformAuditSource).toContain(':total-pages="auditStore.meta.totalPages"')
     expect(platformAuditSource).toContain('@update:page="handlePageChange"')
-    expect(marketplaceSettlementSource).toContain(':total-pages="settlementStore.ledgerMeta.totalPages"')
-    expect(marketplaceSettlementSource).toContain(':total-pages="settlementStore.eventsMeta.totalPages"')
+    expect(marketplaceSettlementSource).toContain(
+      ':total-pages="settlementStore.ledgerMeta.totalPages"',
+    )
+    expect(marketplaceSettlementSource).toContain(
+      ':total-pages="settlementStore.eventsMeta.totalPages"',
+    )
     expect(marketplaceSettlementSource).toContain('@update:page="settlementStore.setLedgerPage"')
     expect(marketplaceSettlementSource).toContain('@update:page="settlementStore.setEventsPage"')
+  })
+
+  it('paginates the bounded permissions registry in the UI', () => {
+    expect(permissionsSource).toContain(':items="paginatedPermissions"')
+    expect(permissionsSource).toContain('total: filteredPermissions.length')
+    expect(permissionsSource).toContain('@update:page="currentPage = $event"')
   })
 })
