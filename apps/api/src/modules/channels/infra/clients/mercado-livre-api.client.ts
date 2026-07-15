@@ -33,12 +33,15 @@ export class MercadoLivreTokenRequestError extends Error {
 export interface MercadoLivreSearchItemsInput {
   accessToken: string;
   sellerId: string;
-  offset: number;
   limit: number;
+  offset?: number;
+  searchType?: 'scan';
+  scrollId?: string;
 }
 
 export interface MercadoLivreSearchItemsResponse {
   results: string[];
+  scroll_id?: string | null;
   paging: {
     total: number;
     offset: number;
@@ -171,8 +174,10 @@ export class MercadoLivreApiClient {
   ): Promise<MercadoLivreSearchItemsResponse> {
     const baseUrl = process.env.MERCADO_LIVRE_API_BASE_URL ?? 'https://api.mercadolibre.com';
     const url = new URL(`${baseUrl}/users/${input.sellerId}/items/search`);
-    url.searchParams.set('offset', String(input.offset));
     url.searchParams.set('limit', String(input.limit));
+    if (input.searchType) url.searchParams.set('search_type', input.searchType);
+    if (input.scrollId) url.searchParams.set('scroll_id', input.scrollId);
+    else if (input.offset !== undefined) url.searchParams.set('offset', String(input.offset));
 
     const response = await fetch(url, {
       headers: { authorization: `Bearer ${input.accessToken}` },

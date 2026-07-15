@@ -48,4 +48,30 @@ describe('MercadoLivreApiClient token lifecycle', () => {
     );
     await expect(request).rejects.not.toThrow('secret-refresh-token');
   });
+
+  it('uses scan pagination with a scroll cursor and without offset', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        results: ['MLB-1'],
+        scroll_id: 'cursor-1',
+        paging: { total: 1, offset: 0, limit: 100 },
+      }),
+    });
+
+    await new MercadoLivreApiClient().searchSellerItems({
+      accessToken: 'access-token',
+      sellerId: 'seller-1',
+      limit: 100,
+      searchType: 'scan',
+      scrollId: 'cursor-1',
+    });
+
+    const requestUrl = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(requestUrl.pathname).toBe('/users/seller-1/items/search');
+    expect(requestUrl.searchParams.get('limit')).toBe('100');
+    expect(requestUrl.searchParams.get('search_type')).toBe('scan');
+    expect(requestUrl.searchParams.get('scroll_id')).toBe('cursor-1');
+    expect(requestUrl.searchParams.has('offset')).toBe(false);
+  });
 });

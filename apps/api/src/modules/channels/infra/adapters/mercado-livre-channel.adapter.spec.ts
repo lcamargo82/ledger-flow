@@ -32,10 +32,12 @@ describe('MercadoLivreChannelAdapter', () => {
     apiClient.searchSellerItems
       .mockResolvedValueOnce({
         results: ['MLB-1', 'MLB-2'],
+        scroll_id: 'cursor-1',
         paging: { total: 3, offset: 0, limit: 2 },
       })
       .mockResolvedValueOnce({
         results: ['MLB-3'],
+        scroll_id: null,
         paging: { total: 3, offset: 2, limit: 2 },
       });
     apiClient.getItem
@@ -71,14 +73,15 @@ describe('MercadoLivreChannelAdapter', () => {
     expect(apiClient.searchSellerItems).toHaveBeenNthCalledWith(1, {
       accessToken: 'ml-access-token',
       sellerId: 'seller-1',
-      offset: 0,
       limit: 2,
+      searchType: 'scan',
     });
     expect(apiClient.searchSellerItems).toHaveBeenNthCalledWith(2, {
       accessToken: 'ml-access-token',
       sellerId: 'seller-1',
-      offset: 2,
       limit: 2,
+      searchType: 'scan',
+      scrollId: 'cursor-1',
     });
     expect(result).toEqual([
       {
@@ -109,6 +112,59 @@ describe('MercadoLivreChannelAdapter', () => {
     ]);
     expect(JSON.stringify(result)).not.toContain('must-not-leak');
     expect(JSON.stringify(result)).not.toContain('ml-access-token');
+  });
+
+  it('imports beyond five pages by default and stops on an empty scan page', async () => {
+    for (let page = 1; page <= 6; page += 1) {
+      apiClient.searchSellerItems.mockResolvedValueOnce({
+        results: [`MLB-${page}`],
+        scroll_id: `cursor-${page}`,
+        paging: { total: 6, offset: page - 1, limit: 1 },
+      });
+    }
+    apiClient.searchSellerItems.mockResolvedValueOnce({
+      results: [],
+      scroll_id: null,
+      paging: { total: 6, offset: 6, limit: 1 },
+    });
+    apiClient.getItem.mockImplementation((_accessToken: string, itemId: string) =>
+      Promise.resolve({ id: itemId, title: itemId }),
+    );
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const result = await adapter.fetchListings({
+      accessToken: 'ml-access-token',
+      externalAccountId: 'seller-1',
+      pageSize: 1,
+    });
+
+    expect(result).toHaveLength(6);
+    expect(apiClient.searchSellerItems).toHaveBeenCalledTimes(7);
+  });
+
+  it('stops safely when a scan page repeats already imported item IDs', async () => {
+    apiClient.searchSellerItems
+      .mockResolvedValueOnce({
+        results: ['MLB-1'],
+        scroll_id: 'cursor-1',
+        paging: { total: 2, offset: 0, limit: 1 },
+      })
+      .mockResolvedValueOnce({
+        results: ['MLB-1'],
+        scroll_id: 'cursor-1',
+        paging: { total: 2, offset: 1, limit: 1 },
+      });
+    apiClient.getItem.mockResolvedValue({ id: 'MLB-1', title: 'Produto' });
+    const adapter = new MercadoLivreChannelAdapter(apiClient as never);
+
+    const result = await adapter.fetchListings({
+      accessToken: 'ml-access-token',
+      externalAccountId: 'seller-1',
+    });
+
+    expect(result).toHaveLength(1);
+    expect(apiClient.searchSellerItems).toHaveBeenCalledTimes(2);
+    expect(apiClient.getItem).toHaveBeenCalledTimes(1);
   });
 
   it('updates Mercado Livre listing stock using desired available quantity', async () => {

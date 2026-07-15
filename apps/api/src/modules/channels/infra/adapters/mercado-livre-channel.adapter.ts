@@ -34,30 +34,42 @@ export class MercadoLivreChannelAdapter
   constructor(private readonly apiClient: MercadoLivreApiClient) {}
 
   async fetchListings(input: ChannelListingImportInput): Promise<ChannelListingImportItem[]> {
-    const pageSize = input.pageSize ?? 50;
-    const maxPages = input.maxPages ?? 5;
+    const pageSize = input.pageSize ?? 100;
+    const maxPages = input.maxPages;
     const listings: ChannelListingImportItem[] = [];
-    let offset = 0;
+    const seenItemIds = new Set<string>();
+    let scrollId: string | undefined;
+    let page = 0;
 
-    for (let page = 0; page < maxPages; page += 1) {
+    while (maxPages === undefined || page < maxPages) {
       const search = await this.apiClient.searchSellerItems({
         accessToken: input.accessToken,
         sellerId: input.externalAccountId,
-        offset,
         limit: pageSize,
+        searchType: 'scan',
+        ...(scrollId && { scrollId }),
+      });
+      const itemIds = search.results.filter((itemId) => {
+        if (seenItemIds.has(itemId)) return false;
+        seenItemIds.add(itemId);
+        return true;
       });
 
+      if (itemIds.length === 0) break;
+
       const detailConcurrency = 10;
-      for (let index = 0; index < search.results.length; index += detailConcurrency) {
-        const itemIds = search.results.slice(index, index + detailConcurrency);
+      for (let index = 0; index < itemIds.length; index += detailConcurrency) {
+        const batch = itemIds.slice(index, index + detailConcurrency);
         const items = await Promise.all(
-          itemIds.map((itemId) => this.apiClient.getItem(input.accessToken, itemId)),
+          batch.map((itemId) => this.apiClient.getItem(input.accessToken, itemId)),
         );
         listings.push(...items.map((item) => this.toListing(item)));
       }
 
-      offset += search.paging.limit;
-      if (offset >= search.paging.total || search.results.length === 0) break;
+      page += 1;
+      const nextScrollId = search.scroll_id?.trim();
+      if (!nextScrollId) break;
+      scrollId = nextScrollId;
     }
 
     return listings;
