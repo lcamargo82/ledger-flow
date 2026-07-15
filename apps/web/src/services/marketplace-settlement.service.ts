@@ -30,9 +30,13 @@ export class MarketplaceSettlementService {
     return data
   }
 
-  async listLedger(accountId: string): Promise<CashLedgerEntriesResponse> {
+  async listLedger(
+    accountId: string,
+    params?: { page?: number; perPage?: number },
+  ): Promise<CashLedgerEntriesResponse> {
     const { data } = await httpClient.get<CashLedgerEntriesResponse>(
       `/marketplace-settlement/financial-accounts/${accountId}/ledger`,
+      { params },
     )
     return data
   }
@@ -58,9 +62,13 @@ export class MarketplaceSettlementService {
     return data
   }
 
-  async listEvents(accountId: string): Promise<MarketplaceSettlementEventsResponse> {
+  async listEvents(
+    accountId: string,
+    params?: { page?: number; perPage?: number },
+  ): Promise<MarketplaceSettlementEventsResponse> {
     const { data } = await httpClient.get<MarketplaceSettlementEventsResponse>(
       `/marketplace-settlement/financial-accounts/${accountId}/events`,
+      { params },
     )
     return data
   }

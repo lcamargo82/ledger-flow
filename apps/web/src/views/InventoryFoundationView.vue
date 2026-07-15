@@ -369,6 +369,8 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
         :is-loading="inventoryStore.isLoading"
         :empty-title="t('inventory.empty.warehousesTitle')"
         :empty-description="t('inventory.empty.warehousesDescription')"
+        :pagination="inventoryStore.warehouseMeta"
+        @update:page="inventoryStore.setWarehousePage"
       >
         <template #status="{ item }">
           <AppBadge :variant="item.isActive ? 'success' : 'default'">
@@ -415,6 +417,8 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
         :is-loading="inventoryStore.isLoading"
         :empty-title="t('inventory.empty.balancesTitle')"
         :empty-description="t('inventory.empty.balancesDescription')"
+        :pagination="inventoryStore.balanceMeta"
+        @update:page="inventoryStore.setBalancePage"
       >
         <template #product="{ item }">{{ item.sku.product.name }}</template>
         <template #sku="{ item }"><span translate="no">{{ item.sku.skuDisplay }}</span></template>
@@ -433,6 +437,8 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
         :is-loading="inventoryStore.isLoading"
         :empty-title="t('inventory.empty.movementsTitle')"
         :empty-description="t('inventory.empty.movementsDescription')"
+        :pagination="inventoryStore.movementMeta"
+        @update:page="inventoryStore.setMovementPage"
       >
         <template #product="{ item }">{{ item.sku.product.name }}</template>
         <template #sku="{ item }"><span translate="no">{{ item.sku.skuDisplay }}</span></template>
@@ -454,6 +460,8 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
         :is-loading="inventoryStore.isLoading"
         :empty-title="t('inventory.empty.reservationsTitle')"
         :empty-description="t('inventory.empty.reservationsDescription')"
+        :pagination="inventoryStore.reservationMeta"
+        @update:page="inventoryStore.setReservationPage"
       >
         <template #product="{ item }">{{ item.sku.product.name }}</template>
         <template #sku="{ item }"><span translate="no">{{ item.sku.skuDisplay }}</span></template>

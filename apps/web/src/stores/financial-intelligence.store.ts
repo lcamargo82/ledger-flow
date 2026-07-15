@@ -49,6 +49,11 @@ export const useFinancialIntelligenceStore = defineStore('financial-intelligence
     fetchAnalytics()
   }
 
+  const setPage = (page: number) => {
+    filters.value = { ...filters.value, page }
+    fetchAnalytics()
+  }
+
   return {
     dashboard,
     facts,
@@ -58,5 +63,6 @@ export const useFinancialIntelligenceStore = defineStore('financial-intelligence
     error,
     fetchAnalytics,
     setFilters,
+    setPage,
   }
 })

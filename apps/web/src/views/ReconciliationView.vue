@@ -5,6 +5,7 @@ import AppEmptyState from '../components/common/AppEmptyState.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppLoading from '../components/common/AppLoading.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
+import AppTable from '../components/common/AppTable.vue'
 import ReconciliationDecisionModal from '../components/reconciliation/ReconciliationDecisionModal.vue'
 import { useI18n } from '../composables/useI18n'
 import { useReconciliationStore } from '../stores/reconciliation.store'
@@ -21,6 +22,16 @@ const selectedCase = ref<ReconciliationCase | null>(null)
 const isDecisionModalOpen = ref(false)
 
 const hasCases = computed(() => reconciliationStore.cases.length > 0)
+const caseColumns = computed(() => [
+  { key: 'id', label: t('reconciliation.table.case') },
+  { key: 'status', label: t('reconciliation.table.status') },
+  { key: 'provider', label: t('reconciliation.table.provider') },
+  { key: 'received', label: t('reconciliation.table.received') },
+  { key: 'difference', label: t('reconciliation.table.difference') },
+  { key: 'reference', label: t('reconciliation.table.reference') },
+  { key: 'createdAt', label: t('reconciliation.table.createdAt') },
+  { key: 'actions', label: t('reconciliation.table.actions'), align: 'right' as const },
+])
 const maxAgingCount = computed(() => {
   const buckets = reconciliationStore.dashboard?.agingBuckets ?? []
   return Math.max(1, ...buckets.map((bucket) => bucket.count))
@@ -175,48 +186,42 @@ const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.valu
           <strong>{{ reconciliationStore.meta.total }}</strong>
         </div>
 
-        <div class="lf-reconciliation-table-wrap">
-          <table class="lf-reconciliation-table">
-            <thead>
-              <tr>
-                <th>{{ t('reconciliation.table.case') }}</th>
-                <th>{{ t('reconciliation.table.status') }}</th>
-                <th>{{ t('reconciliation.table.provider') }}</th>
-                <th>{{ t('reconciliation.table.received') }}</th>
-                <th>{{ t('reconciliation.table.difference') }}</th>
-                <th>{{ t('reconciliation.table.reference') }}</th>
-                <th>{{ t('reconciliation.table.createdAt') }}</th>
-                <th class="lf-table-actions">{{ t('reconciliation.table.actions') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in reconciliationStore.cases" :key="item.id">
-                <td class="lf-mono">{{ item.id }}</td>
-                <td>
-                  <span class="lf-status-pill">{{ item.status }}</span>
-                </td>
-                <td>{{ item.provider }}</td>
-                <td>{{ formatMinor(item.receivedAmountMinor, item.currency) }}</td>
-                <td>{{ formatMinor(item.differenceAmountMinor, item.currency) }}</td>
-                <td>
-                  <span>{{ referenceLabel(item) }}</span>
-                  <small v-if="item.order">{{ item.order.status }}</small>
-                </td>
-                <td>{{ formatDateTime(item.createdAt, getLocale()) }}</td>
-                <td class="lf-table-actions">
-                  <AppButton
-                    size="small"
-                    variant="secondary"
-                    data-testid="open-decision-modal"
-                    @click="openDecisionModal(item)"
-                  >
-                    {{ t('reconciliation.actions.review') }}
-                  </AppButton>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <AppTable
+          :columns="caseColumns"
+          :items="reconciliationStore.cases"
+          :pagination="reconciliationStore.meta"
+          @update:page="reconciliationStore.setPage"
+        >
+          <template #id="{ item }">
+            <span class="lf-mono">{{ item.id }}</span>
+          </template>
+          <template #status="{ item }">
+            <span class="lf-status-pill">{{ item.status }}</span>
+          </template>
+          <template #received="{ item }">
+            {{ formatMinor(item.receivedAmountMinor, item.currency) }}
+          </template>
+          <template #difference="{ item }">
+            {{ formatMinor(item.differenceAmountMinor, item.currency) }}
+          </template>
+          <template #reference="{ item }">
+            <span>{{ referenceLabel(item) }}</span>
+            <small v-if="item.order" class="block">{{ item.order.status }}</small>
+          </template>
+          <template #createdAt="{ item }">
+            {{ formatDateTime(item.createdAt, getLocale()) }}
+          </template>
+          <template #actions="{ item }">
+            <AppButton
+              size="small"
+              variant="secondary"
+              data-testid="open-decision-modal"
+              @click="openDecisionModal(item)"
+            >
+              {{ t('reconciliation.actions.review') }}
+            </AppButton>
+          </template>
+        </AppTable>
       </template>
     </div>
 

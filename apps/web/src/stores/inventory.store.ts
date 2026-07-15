@@ -75,7 +75,10 @@ export const useInventoryStore = defineStore('inventory', () => {
     isLoading.value = true
     error.value = null
     try {
-      const response = await inventoryService.listWarehouses()
+      const response = await inventoryService.listWarehouses({
+        page: warehouseMeta.value.page,
+        perPage: warehouseMeta.value.perPage,
+      })
       warehouses.value = response.data
       warehouseMeta.value = response.meta
     } catch (err) {
@@ -87,31 +90,46 @@ export const useInventoryStore = defineStore('inventory', () => {
   }
 
   const fetchBalances = async () => {
-    const response = await inventoryService.listBalances()
+    const response = await inventoryService.listBalances({
+      page: balanceMeta.value.page,
+      perPage: balanceMeta.value.perPage,
+    })
     balances.value = response.data
     balanceMeta.value = response.meta
   }
 
   const fetchMovements = async () => {
-    const response = await inventoryService.listMovements()
+    const response = await inventoryService.listMovements({
+      page: movementMeta.value.page,
+      perPage: movementMeta.value.perPage,
+    })
     movements.value = response.data
     movementMeta.value = response.meta
   }
 
   const fetchReservations = async () => {
-    const response = await inventoryService.listReservations()
+    const response = await inventoryService.listReservations({
+      page: reservationMeta.value.page,
+      perPage: reservationMeta.value.perPage,
+    })
     reservations.value = response.data
     reservationMeta.value = response.meta
   }
 
   const fetchTransfers = async () => {
-    const response = await inventoryService.listTransfers()
+    const response = await inventoryService.listTransfers({
+      page: transferMeta.value.page,
+      perPage: transferMeta.value.perPage,
+    })
     transfers.value = response.data
     transferMeta.value = response.meta
   }
 
   const fetchCycleCounts = async () => {
-    const response = await inventoryService.listCycleCounts()
+    const response = await inventoryService.listCycleCounts({
+      page: cycleCountMeta.value.page,
+      perPage: cycleCountMeta.value.perPage,
+    })
     cycleCounts.value = response.data
     cycleCountMeta.value = response.meta
   }
@@ -127,6 +145,36 @@ export const useInventoryStore = defineStore('inventory', () => {
     } finally {
       isLoading.value = false
     }
+  }
+
+  const setWarehousePage = (page: number) => {
+    warehouseMeta.value.page = page
+    fetchWarehouses()
+  }
+
+  const setBalancePage = (page: number) => {
+    balanceMeta.value.page = page
+    fetchBalances()
+  }
+
+  const setMovementPage = (page: number) => {
+    movementMeta.value.page = page
+    fetchMovements()
+  }
+
+  const setReservationPage = (page: number) => {
+    reservationMeta.value.page = page
+    fetchReservations()
+  }
+
+  const setTransferPage = (page: number) => {
+    transferMeta.value.page = page
+    fetchTransfers()
+  }
+
+  const setCycleCountPage = (page: number) => {
+    cycleCountMeta.value.page = page
+    fetchCycleCounts()
   }
 
   const createWarehouse = async (payload: CreateWarehouseRequest) => {
@@ -379,6 +427,12 @@ export const useInventoryStore = defineStore('inventory', () => {
     fetchReservations,
     fetchTransfers,
     fetchCycleCounts,
+    setWarehousePage,
+    setBalancePage,
+    setMovementPage,
+    setReservationPage,
+    setTransferPage,
+    setCycleCountPage,
     createWarehouse,
     updateWarehouse,
     recordAdjustment,

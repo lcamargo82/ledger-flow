@@ -23,8 +23,26 @@ describe('analytics metrics', () => {
       note: 'operational_margin_not_cash_reconciliation',
     })
     vi.mocked(financialIntelligenceService.listFacts).mockResolvedValue({
-      data: [],
-      meta: { page: 1, perPage: 10, total: 0, totalPages: 1 },
+      data: [
+        {
+          id: 'fact-1',
+          tenantId: 'tenant-1',
+          orderId: 'order-1',
+          version: 1,
+          orderNumber: 'ORDER-1',
+          orderStatus: 'FULFILLED',
+          channelProvider: 'MERCADO_LIVRE',
+          revenueAmount: '150.50',
+          cogsAmount: '42.10',
+          channelFeeAmount: '20.00',
+          grossMarginAmount: '88.40',
+          currency: 'BRL',
+          itemCount: 1,
+          calculatedAt: '2026-07-14T12:00:00.000Z',
+          components: {},
+        },
+      ],
+      meta: { page: 1, perPage: 10, total: 11, totalPages: 2 },
     })
   })
 
@@ -40,6 +58,18 @@ describe('analytics metrics', () => {
     expect(text).toContain('R$ 150,50')
     expect(text).toContain('R$ 42,10')
     expect(text).toContain('R$ 88,40')
+  })
+
+  it('requests the selected backend page', async () => {
+    const wrapper = mount(AnalyticsView)
+    await flushPromises()
+
+    await wrapper.get('[data-testid="pagination-next"]').trigger('click')
+    await flushPromises()
+
+    expect(financialIntelligenceService.listFacts).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2, perPage: 10 }),
+    )
   })
 })
 

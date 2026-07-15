@@ -126,11 +126,13 @@ const columns = computed(() => [
 ])
 
 onMounted(() => {
-  fetchTenants()
+  fetchTenants(1)
 })
 
-const fetchTenants = () => {
+const fetchTenants = (page = 1) => {
   platformTenantsStore.fetchTenants({
+    page,
+    perPage: platformTenantsStore.meta.perPage,
     search: searchQuery.value || undefined,
     active: selectedStatus.value === 'active' ? true : selectedStatus.value === 'inactive' ? false : undefined,
     plan: selectedPlan.value ? (selectedPlan.value as any) : undefined,
@@ -138,7 +140,11 @@ const fetchTenants = () => {
 }
 
 const handleSearch = () => {
-  fetchTenants()
+  fetchTenants(1)
+}
+
+const handlePageChange = (page: number) => {
+  fetchTenants(page)
 }
 
 </script>
@@ -204,6 +210,8 @@ const handleSearch = () => {
         :is-loading="platformTenantsStore.loading"
         :empty-title="t('platformTenants.emptyTitle')"
         :empty-description="t('platformTenants.emptyDescription')"
+        :pagination="platformTenantsStore.meta"
+        @update:page="handlePageChange"
       >
         <template #name="{ item }">
           <div class="font-medium text-gray-900 dark:text-white">{{ item.name }}</div>

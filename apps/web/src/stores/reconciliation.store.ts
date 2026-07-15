@@ -121,6 +121,11 @@ export const useReconciliationStore = defineStore('reconciliation', () => {
     selectedTimeline.value = null
   }
 
+  const setPage = (page: number) => {
+    filters.value = { ...filters.value, page }
+    fetchOverview()
+  }
+
   return {
     cases,
     dashboard,
@@ -139,5 +144,6 @@ export const useReconciliationStore = defineStore('reconciliation', () => {
     fetchReviewContext,
     clearReviewContext,
     createDecision,
+    setPage,
   }
 })

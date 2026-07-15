@@ -96,6 +96,8 @@ onMounted(() => {
         :is-loading="financialStore.isLoading"
         :empty-title="t('financialIntelligence.empty.title')"
         :empty-description="t('financialIntelligence.empty.description')"
+        :pagination="financialStore.meta"
+        @update:page="financialStore.setPage"
       >
         <template #calculatedAt="{ item }">
           {{ formatDateTime(item.calculatedAt, currentLocale) }}

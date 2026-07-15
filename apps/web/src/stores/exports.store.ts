@@ -45,6 +45,11 @@ export const useExportsStore = defineStore('exports', () => {
     fetchJobs()
   }
 
+  const setPage = (page: number) => {
+    filters.value = { ...filters.value, page }
+    fetchJobs()
+  }
+
   const createJob = async (payload: CreateExportJobPayload) => {
     isMutating.value = true
     try {
@@ -97,6 +102,7 @@ export const useExportsStore = defineStore('exports', () => {
     error,
     fetchJobs,
     setFilters,
+    setPage,
     createJob,
     processPending,
     cancelJob,

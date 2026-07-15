@@ -22,6 +22,8 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
   const dashboard = ref<MarketplaceSettlementDashboard | null>(null)
   const lastSyncResult = ref<MarketplaceSettlementSyncResult | null>(null)
   const selectedAccountId = ref<string | null>(null)
+  const ledgerMeta = ref({ page: 1, perPage: 20, total: 0, totalPages: 1 })
+  const eventsMeta = ref({ page: 1, perPage: 20, total: 0, totalPages: 1 })
   const isLoading = ref(false)
   const isMutating = ref(false)
   const isSyncing = ref(false)
@@ -65,16 +67,44 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
   const fetchLedger = async (accountId: string) => {
     selectedAccountId.value = accountId
     const [ledgerResponse, eventsResponse, totalsResponse, dashboardResponse] = await Promise.all([
-      marketplaceSettlementService.listLedger(accountId),
-      marketplaceSettlementService.listEvents(accountId),
+      marketplaceSettlementService.listLedger(accountId, {
+        page: ledgerMeta.value.page,
+        perPage: ledgerMeta.value.perPage,
+      }),
+      marketplaceSettlementService.listEvents(accountId, {
+        page: eventsMeta.value.page,
+        perPage: eventsMeta.value.perPage,
+      }),
       marketplaceSettlementService.getTotals(accountId),
       marketplaceSettlementService.getDashboard(accountId),
     ])
     const response = ledgerResponse
     ledgerEntries.value = response.data
+    ledgerMeta.value = response.meta
     importedEvents.value = eventsResponse.data
+    eventsMeta.value = eventsResponse.meta
     importedTotals.value = totalsResponse
     dashboard.value = dashboardResponse
+  }
+
+  const setLedgerPage = async (page: number) => {
+    if (!selectedAccountId.value) return
+    const response = await marketplaceSettlementService.listLedger(selectedAccountId.value, {
+      page,
+      perPage: ledgerMeta.value.perPage,
+    })
+    ledgerEntries.value = response.data
+    ledgerMeta.value = response.meta
+  }
+
+  const setEventsPage = async (page: number) => {
+    if (!selectedAccountId.value) return
+    const response = await marketplaceSettlementService.listEvents(selectedAccountId.value, {
+      page,
+      perPage: eventsMeta.value.perPage,
+    })
+    importedEvents.value = response.data
+    eventsMeta.value = response.meta
   }
 
   const createAccount = async (payload: CreateMarketplaceFinancialAccountPayload) => {
@@ -138,12 +168,16 @@ export const useMarketplaceSettlementStore = defineStore('marketplace-settlement
     lastSyncResult,
     selectedAccountId,
     selectedAccount,
+    ledgerMeta,
+    eventsMeta,
     isLoading,
     isMutating,
     isSyncing,
     error,
     fetchAccounts,
     fetchLedger,
+    setLedgerPage,
+    setEventsPage,
     createAccount,
     createAdjustment,
     syncFinancialEvents,

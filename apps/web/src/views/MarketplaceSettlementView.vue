@@ -7,6 +7,7 @@ import AppInput from '../components/common/AppInput.vue'
 import AppLoading from '../components/common/AppLoading.vue'
 import AppModal from '../components/common/AppModal.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
+import AppPagination from '../components/common/AppPagination.vue'
 import AppSelect from '../components/common/AppSelect.vue'
 import { useI18n } from '../composables/useI18n'
 import {
@@ -442,6 +443,13 @@ const submitSync = async () => {
                 </tr>
               </tbody>
             </table>
+            <AppPagination
+              :page="settlementStore.ledgerMeta.page"
+              :total-pages="settlementStore.ledgerMeta.totalPages"
+              :total="settlementStore.ledgerMeta.total"
+              :per-page="settlementStore.ledgerMeta.perPage"
+              @update:page="settlementStore.setLedgerPage"
+            />
           </div>
 
           <div class="lf-settlement-table-wrap">
@@ -476,6 +484,13 @@ const submitSync = async () => {
                 </tr>
               </tbody>
             </table>
+            <AppPagination
+              :page="settlementStore.eventsMeta.page"
+              :total-pages="settlementStore.eventsMeta.totalPages"
+              :total="settlementStore.eventsMeta.total"
+              :per-page="settlementStore.eventsMeta.perPage"
+              @update:page="settlementStore.setEventsPage"
+            />
           </div>
         </section>
       </template>

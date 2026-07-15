@@ -22,6 +22,7 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
   const currentTenantHealth = ref<PlatformTenantHealthResponse | null>(null);
   const currentTenantActivity = ref<PlatformTenantActivityResponse | null>(null);
   const total = ref(0);
+  const meta = ref({ page: 1, perPage: 10, total: 0, totalPages: 1 });
   const loading = ref(false);
   const error = ref<string | null>(null);
 
@@ -35,6 +36,12 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
       const response = await platformTenantsService.findAll(query);
       tenants.value = response.data;
       total.value = response.total;
+      meta.value = {
+        page: response.page,
+        perPage: response.perPage,
+        total: response.total,
+        totalPages: Math.max(1, Math.ceil(response.total / response.perPage)),
+      };
     } catch (err: any) {
       error.value = err.message || 'Failed to fetch tenants';
       toastStore.error(error.value || '', t('platform.error.loadFailed'));
@@ -185,6 +192,7 @@ export const usePlatformTenantsStore = defineStore('platformTenants', () => {
     tenants,
     currentTenant,
     total,
+    meta,
     loading,
     error,
     fetchTenants,

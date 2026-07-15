@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from '../composables/useI18n';
 import { usePlatformAuditStore } from '../stores/platform-audit.store';
 import AppPageHeader from '../components/common/AppPageHeader.vue';
+import AppPagination from '../components/common/AppPagination.vue';
 import PlatformAuditFilters from '../components/platform/PlatformAuditFilters.vue';
 import PlatformAuditTable from '../components/platform/PlatformAuditTable.vue';
 
@@ -83,10 +84,13 @@ onMounted(() => {
           :is-loading="auditStore.isLoading"
         />
 
-        <!-- Pagination placeholder -->
-        <div v-if="auditStore.meta.totalPages > 1" class="px-4 py-3 border-t border-slate-200 text-sm text-slate-500 text-center">
-          Página {{ auditStore.meta.page }} de {{ auditStore.meta.totalPages }}
-        </div>
+        <AppPagination
+          :page="auditStore.meta.page"
+          :total-pages="auditStore.meta.totalPages"
+          :total="auditStore.meta.total"
+          :per-page="auditStore.meta.perPage"
+          @update:page="handlePageChange"
+        />
       </div>
     </div>
   </div>

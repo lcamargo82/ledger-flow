@@ -128,6 +128,8 @@ onMounted(() => {
         :is-loading="exportsStore.isLoading"
         :empty-title="t('exports.empty.title')"
         :empty-description="t('exports.empty.description')"
+        :pagination="exportsStore.meta"
+        @update:page="exportsStore.setPage"
       >
         <template #createdAt="{ item }">
           {{ formatDateTime(item.createdAt, currentLocale) }}

@@ -212,6 +212,8 @@ const errorKey = (error: unknown) => {
         :is-loading="inventoryStore.isLoading"
         :empty-title="t('inventory.transfers.empty.title')"
         :empty-description="t('inventory.transfers.empty.description')"
+        :pagination="inventoryStore.transferMeta"
+        @update:page="inventoryStore.setTransferPage"
       >
         <template #status="{ item }">
           <AppBadge :variant="statusVariant(item.status)">
