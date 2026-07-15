@@ -248,6 +248,7 @@ export class PrismaChannelsRepository implements ChannelsRepository {
 
   listSkuOptions(params: { tenantId: string; search?: string; limit: number }) {
     const search = params.search?.trim();
+    const normalizedSearch = search?.toUpperCase();
     return this.prisma.productSku.findMany({
       where: {
         tenantId: params.tenantId,
@@ -255,8 +256,9 @@ export class PrismaChannelsRepository implements ChannelsRepository {
         ...(search && {
           OR: [
             { product: { name: { contains: search, mode: 'insensitive' } } },
-            { skuCanonical: { contains: search.toUpperCase() } },
+            { skuCanonical: { contains: normalizedSearch, mode: 'insensitive' } },
             { skuDisplay: { contains: search, mode: 'insensitive' } },
+            { barcode: { contains: search, mode: 'insensitive' } },
           ],
         }),
       },

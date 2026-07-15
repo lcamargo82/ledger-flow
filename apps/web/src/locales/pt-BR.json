@@ -719,6 +719,7 @@
       "timeout": "A importação excedeu o tempo esperado. Tente novamente; o processamento pode continuar no servidor.",
       "importFailed": "Não foi possível concluir a importação dos anúncios. A tela foi mantida para permitir uma nova tentativa.",
       "skuOptionsUnavailable": "Não foi possível carregar os produtos e SKUs disponíveis.",
+      "skuNotFound": "Nenhum produto ou SKU ativo foi encontrado para “{search}”. Confira o código no Catálogo.",
       "skuRequired": "Selecione um produto e SKU para concluir o vínculo.",
       "mappingFailed": "Não foi possível vincular o anúncio ao SKU selecionado.",
       "forbidden": "Você não possui acesso a canais.",
