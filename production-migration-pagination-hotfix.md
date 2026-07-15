@@ -12,11 +12,11 @@ Recover the blocked Sales Intelligence production migration and expose paginatio
 - [x] Add independent inventory page state and controls for all inventory lists → Verify: each tab changes only its own page.
 - [x] Audit other table views with paginated contracts and include prepared gaps in scope → Verify: no paginated store metadata is left disconnected without an explicit reason.
 - [x] Run focused and full web tests, lint, i18n and builds; validate Prisma migration history → Verify: all commands pass.
-- [ ] Commit and push the hotfix directly to `develop` → Verify: clean worktree synchronized with `origin/develop`.
+- [x] Commit and push the hotfix directly to `develop` → Verify: clean worktree synchronized with `origin/develop`.
 
 ## Done When
 
-- [ ] Production can mark the failed attempt rolled back and re-run the corrected migration, and every in-scope paginated table exposes functional navigation.
+- [x] Production can mark the failed attempt rolled back and re-run the corrected migration, and every in-scope paginated table exposes functional navigation.
 
 ## Notes
 
