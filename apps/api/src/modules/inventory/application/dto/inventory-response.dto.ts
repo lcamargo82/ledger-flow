@@ -6,6 +6,17 @@ import {
   CycleCountStatus,
 } from '@prisma/client';
 
+export class InventoryProductIdentityResponseDto {
+  @ApiProperty({ example: 'CONTROLLER-GAMEPAD' }) skuDisplay: string;
+  @ApiProperty({ example: { name: 'Controle Gamepad Wireless' } })
+  product: { name: string };
+}
+
+export class InventoryWarehouseIdentityResponseDto {
+  @ApiProperty({ example: 'Estoque principal' }) name: string;
+  @ApiProperty({ example: 'MAIN' }) code: string;
+}
+
 export class WarehouseResponseDto {
   @ApiProperty() id: string;
   @ApiProperty() tenantId: string;
@@ -32,6 +43,10 @@ export class InventoryMovementResponseDto {
   @ApiProperty() occurredAt: Date;
   @ApiPropertyOptional() createdByUserId?: string;
   @ApiProperty() createdAt: Date;
+  @ApiProperty({ type: InventoryProductIdentityResponseDto })
+  sku: InventoryProductIdentityResponseDto;
+  @ApiProperty({ type: InventoryWarehouseIdentityResponseDto })
+  warehouse: InventoryWarehouseIdentityResponseDto;
 }
 
 export class InventoryBalanceResponseDto {
@@ -44,6 +59,10 @@ export class InventoryBalanceResponseDto {
   @ApiProperty() availableQuantity: string;
   @ApiProperty() version: number;
   @ApiProperty() updatedAt: Date;
+  @ApiProperty({ type: InventoryProductIdentityResponseDto })
+  sku: InventoryProductIdentityResponseDto;
+  @ApiProperty({ type: InventoryWarehouseIdentityResponseDto })
+  warehouse: InventoryWarehouseIdentityResponseDto;
 }
 
 export class InventoryReservationResponseDto {
@@ -63,6 +82,10 @@ export class InventoryReservationResponseDto {
   @ApiPropertyOptional() consumedAt?: Date;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
+  @ApiProperty({ type: InventoryProductIdentityResponseDto })
+  sku: InventoryProductIdentityResponseDto;
+  @ApiProperty({ type: InventoryWarehouseIdentityResponseDto })
+  warehouse: InventoryWarehouseIdentityResponseDto;
 }
 
 export class InventoryTransferItemResponseDto {
@@ -73,6 +96,8 @@ export class InventoryTransferItemResponseDto {
   @ApiProperty() quantity: string;
   @ApiPropertyOptional() unitCostSnapshot?: string;
   @ApiProperty() createdAt: Date;
+  @ApiProperty({ type: InventoryProductIdentityResponseDto })
+  sku: InventoryProductIdentityResponseDto;
 }
 
 export class InventoryTransferResponseDto {
@@ -94,6 +119,10 @@ export class InventoryTransferResponseDto {
   @ApiProperty() updatedAt: Date;
   @ApiProperty({ type: [InventoryTransferItemResponseDto] })
   items: InventoryTransferItemResponseDto[];
+  @ApiProperty({ type: InventoryWarehouseIdentityResponseDto })
+  sourceWarehouse: InventoryWarehouseIdentityResponseDto;
+  @ApiProperty({ type: InventoryWarehouseIdentityResponseDto })
+  destinationWarehouse: InventoryWarehouseIdentityResponseDto;
 }
 
 export class CycleCountItemResponseDto {
@@ -110,6 +139,8 @@ export class CycleCountItemResponseDto {
   @ApiPropertyOptional() adjustmentMovementId?: string;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
+  @ApiProperty({ type: InventoryProductIdentityResponseDto })
+  sku: InventoryProductIdentityResponseDto;
 }
 
 export class CycleCountResponseDto {
@@ -134,6 +165,8 @@ export class CycleCountResponseDto {
   @ApiProperty() updatedAt: Date;
   @ApiProperty({ type: [CycleCountItemResponseDto] })
   items: CycleCountItemResponseDto[];
+  @ApiProperty({ type: InventoryWarehouseIdentityResponseDto })
+  warehouse: InventoryWarehouseIdentityResponseDto;
 }
 
 export class PaginatedMetaDto {

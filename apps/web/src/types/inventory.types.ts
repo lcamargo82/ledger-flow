@@ -23,6 +23,16 @@ export interface Warehouse {
   updatedAt: string
 }
 
+export interface InventorySkuIdentity {
+  skuDisplay: string
+  product: { name: string }
+}
+
+export interface InventoryWarehouseIdentity {
+  name: string
+  code: string
+}
+
 export interface InventoryBalance {
   id: string
   tenantId: string
@@ -33,6 +43,8 @@ export interface InventoryBalance {
   availableQuantity: string
   version: number
   updatedAt: string
+  sku: InventorySkuIdentity
+  warehouse: InventoryWarehouseIdentity
 }
 
 export interface InventoryMovement {
@@ -51,6 +63,8 @@ export interface InventoryMovement {
   occurredAt: string
   createdByUserId?: string | null
   createdAt: string
+  sku: InventorySkuIdentity
+  warehouse: InventoryWarehouseIdentity
 }
 
 export interface InventoryReservation {
@@ -70,6 +84,8 @@ export interface InventoryReservation {
   consumedAt?: string | null
   createdAt: string
   updatedAt: string
+  sku: InventorySkuIdentity
+  warehouse: InventoryWarehouseIdentity
 }
 
 export interface InventoryTransferItem {
@@ -80,6 +96,7 @@ export interface InventoryTransferItem {
   quantity: string
   unitCostSnapshot?: string | null
   createdAt: string
+  sku: InventorySkuIdentity
 }
 
 export interface InventoryTransfer {
@@ -100,6 +117,8 @@ export interface InventoryTransfer {
   createdAt: string
   updatedAt: string
   items: InventoryTransferItem[]
+  sourceWarehouse: InventoryWarehouseIdentity
+  destinationWarehouse: InventoryWarehouseIdentity
 }
 
 export interface CycleCountItem {
@@ -116,6 +135,7 @@ export interface CycleCountItem {
   adjustmentMovementId?: string | null
   createdAt: string
   updatedAt: string
+  sku: InventorySkuIdentity
 }
 
 export interface CycleCount {
@@ -139,6 +159,7 @@ export interface CycleCount {
   createdAt: string
   updatedAt: string
   items: CycleCountItem[]
+  warehouse: InventoryWarehouseIdentity
 }
 
 export interface PaginatedMeta {

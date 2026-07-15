@@ -5,6 +5,9 @@ import enUS from '../locales/en-US.json'
 import { inventoryService } from '../services/inventory.service'
 import { useInventoryStore } from '../stores/inventory.store'
 import { validateWarehouseForm } from '../utils/inventory-validation'
+import inventoryFoundationSource from '../views/InventoryFoundationView.vue?raw'
+import inventoryTransfersSource from '../views/InventoryTransfersView.vue?raw'
+import inventoryCycleCountsSource from '../views/InventoryCycleCountsView.vue?raw'
 
 vi.mock('../services/inventory.service', () => ({
   inventoryService: {
@@ -36,6 +39,24 @@ describe('inventory UI translations', () => {
     expect(enUS.inventory.form.validation.nameMinLength).toBe(
       'Name must be at least 2 characters.',
     )
+  })
+})
+
+describe('inventory list identities', () => {
+  it('uses readable product, SKU and warehouse fields instead of UUID columns', () => {
+    expect(inventoryFoundationSource).toContain("{ key: 'product'")
+    expect(inventoryFoundationSource).toContain('item.sku.skuDisplay')
+    expect(inventoryFoundationSource).toContain('item.warehouse.name')
+    expect(inventoryFoundationSource).not.toContain("{ key: 'skuId', label")
+    expect(inventoryFoundationSource).not.toContain("{ key: 'warehouseId', label")
+
+    expect(inventoryTransfersSource).toContain("{ key: 'sourceWarehouse'")
+    expect(inventoryTransfersSource).toContain('transferItem.sku.product.name')
+    expect(inventoryTransfersSource).not.toContain('#sourceWarehouseId')
+
+    expect(inventoryCycleCountsSource).toContain("{ key: 'warehouse'")
+    expect(inventoryCycleCountsSource).toContain('item.sku.skuDisplay')
+    expect(inventoryCycleCountsSource).not.toContain('#warehouseId')
   })
 })
 

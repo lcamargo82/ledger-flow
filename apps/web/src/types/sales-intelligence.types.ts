@@ -55,7 +55,6 @@ export interface SalesIntelligenceOrder {
 }
 
 export interface SalesIntelligenceDetail extends Omit<SalesIntelligenceOrder, 'items'> {
-  customerName?: string | null
   permissions: {
     canViewProfitability: boolean
     canViewSettlement: boolean

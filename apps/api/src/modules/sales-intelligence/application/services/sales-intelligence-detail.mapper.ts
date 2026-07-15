@@ -69,7 +69,6 @@ export function mapSalesIntelligenceDetail(
 
   return {
     ...summary,
-    customerName: order.customerName,
     permissions,
     items: order.items.map((item) => {
       const snapshot = componentItems.get(item.id);

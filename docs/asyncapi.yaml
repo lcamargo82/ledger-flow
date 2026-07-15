@@ -86,8 +86,49 @@ channels:
         $ref: '#/components/messages/MarketplaceSettlementEventReceived'
       cashPositionUnexplainedDifference:
         $ref: '#/components/messages/CashPositionUnexplainedDifference'
+      salesIntelligenceAlert:
+        $ref: '#/components/messages/SalesIntelligenceAlert'
 components:
   messages:
+    SalesIntelligenceAlert:
+      name: sale.alert_detected
+      title: Sanitized Sales Intelligence Alert
+      summary: Permission-aware alert delivered through the signed, idempotent notification webhook pipeline.
+      payload:
+        type: object
+        required: [id, type, category, severity, occurredAt, source, data]
+        properties:
+          id:
+            type: string
+          type:
+            type: string
+            enum:
+              - sale.loss_detected
+              - sale.low_margin_detected
+              - sale.missing_cost_detected
+              - sale.stock_not_consumed
+              - sale.shipping_delayed
+              - sale.settlement_divergent
+              - sale.cash_release_blocked
+          category:
+            type: string
+          severity:
+            type: string
+          occurredAt:
+            type: string
+            format: date-time
+          source:
+            type: object
+            properties:
+              type: { type: string }
+              id: { type: string }
+          data:
+            type: object
+            properties:
+              orderNumber: { type: string }
+              margin: { type: string }
+              threshold: { type: string }
+              estimated: { type: boolean }
     PaymentChargeRequested:
       name: payment.provider_charge_creation_requested
       title: Provider Charge Creation Requested

@@ -11,6 +11,7 @@ import {
   ReconciliationCaseStatus,
   ReconciliationMatchType,
   WebhookProvider,
+  InternalOrderStatus,
 } from '@prisma/client';
 import { ExportJobsService } from './export-jobs.service';
 
@@ -88,6 +89,63 @@ describe('ExportJobsService', () => {
         parameters: { includeSettlement: true },
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('streams Sales Intelligence in bounded batches and neutralizes formulas', async () => {
+    const pendingJob = {
+      id: 'sales-volume-job',
+      tenantId: 'tenant-1',
+      requestedByUserId: 'user-1',
+      type: ExportJobType.SALES_INTELLIGENCE,
+      format: ExportJobFormat.CSV,
+      status: ExportJobStatus.PENDING,
+      parameters: { includeProfitability: false, includeSettlement: false },
+      filePath: null,
+      fileName: null,
+      mimeType: null,
+      rowCount: 0,
+      errorCode: null,
+      errorSummary: null,
+      expiresAt: null,
+      startedAt: null,
+      completedAt: null,
+      cancelledAt: null,
+      createdAt: new Date('2026-07-14T12:00:00.000Z'),
+      updatedAt: new Date('2026-07-14T12:00:00.000Z'),
+    };
+    let completedJob: any;
+    prisma.exportJob.findMany.mockResolvedValueOnce([pendingJob]);
+    prisma.exportJob.update.mockImplementation(({ data }: any) => {
+      if (data.status === ExportJobStatus.PROCESSING) {
+        return Promise.resolve({ ...pendingJob, ...data });
+      }
+      completedJob = { ...pendingJob, ...data };
+      return Promise.resolve(completedJob);
+    });
+    const orders = Array.from({ length: 101 }, (_, index) => ({
+      id: `order-${String(index).padStart(3, '0')}`,
+      orderNumber: index === 0 ? '=FORMULA()' : `ML-${index}`,
+      status: InternalOrderStatus.FULFILLED,
+      createdAt: new Date('2026-07-14T12:00:00.000Z'),
+      items: [],
+      financialFacts: [],
+      reconciliationCases: [],
+    }));
+    prisma.internalOrder.findMany
+      .mockResolvedValueOnce(orders.slice(0, 100))
+      .mockResolvedValueOnce(orders.slice(100))
+      .mockResolvedValueOnce([]);
+
+    await service.processSalesIntelligencePending('tenant-1', 'user-1');
+    const file = await readFile(completedJob.filePath, 'utf8');
+
+    expect(completedJob.rowCount).toBe(101);
+    expect(prisma.internalOrder.findMany).toHaveBeenCalledTimes(3);
+    expect(prisma.internalOrder.findMany).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ take: 100, cursor: { id: 'order-099' }, skip: 1 }),
+    );
+    expect(file).toContain('"\'=FORMULA()"');
   });
 
   it('streams catalog products into CSV and preserves SKU as spreadsheet text', async () => {

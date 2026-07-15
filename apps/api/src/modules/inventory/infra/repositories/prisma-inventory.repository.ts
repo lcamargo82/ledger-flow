@@ -34,6 +34,15 @@ import {
   UpdateInventoryTransferDraftData,
 } from '../../domain/repositories/inventory.repository';
 
+const inventoryRowIdentityInclude = {
+  sku: { select: { skuDisplay: true, product: { select: { name: true } } } },
+  warehouse: { select: { name: true, code: true } },
+} as const;
+
+const inventoryItemIdentityInclude = {
+  sku: { select: { skuDisplay: true, product: { select: { name: true } } } },
+} as const;
+
 @Injectable()
 export class PrismaInventoryRepository implements InventoryRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -319,6 +328,7 @@ export class PrismaInventoryRepository implements InventoryRepository {
     const [data, total] = await Promise.all([
       this.prisma.inventoryReservation.findMany({
         where,
+        include: inventoryRowIdentityInclude,
         skip,
         take,
         orderBy: { createdAt: 'desc' },
@@ -341,6 +351,7 @@ export class PrismaInventoryRepository implements InventoryRepository {
     const [data, total] = await Promise.all([
       this.prisma.inventoryBalance.findMany({
         where,
+        include: inventoryRowIdentityInclude,
         skip,
         take,
         orderBy: { updatedAt: 'desc' },
@@ -407,7 +418,11 @@ export class PrismaInventoryRepository implements InventoryRepository {
     const [data, total] = await Promise.all([
       this.prisma.inventoryTransfer.findMany({
         where,
-        include: { items: true },
+        include: {
+          sourceWarehouse: { select: { name: true, code: true } },
+          destinationWarehouse: { select: { name: true, code: true } },
+          items: { include: inventoryItemIdentityInclude },
+        },
         skip,
         take,
         orderBy: { createdAt: 'desc' },
@@ -705,7 +720,10 @@ export class PrismaInventoryRepository implements InventoryRepository {
     const [data, total] = await Promise.all([
       this.prisma.cycleCount.findMany({
         where,
-        include: { items: true },
+        include: {
+          warehouse: { select: { name: true, code: true } },
+          items: { include: inventoryItemIdentityInclude },
+        },
         skip,
         take,
         orderBy: { createdAt: 'desc' },
@@ -1227,6 +1245,7 @@ export class PrismaInventoryRepository implements InventoryRepository {
     const [data, total] = await Promise.all([
       this.prisma.inventoryMovement.findMany({
         where,
+        include: inventoryRowIdentityInclude,
         skip,
         take,
         orderBy: { occurredAt: 'desc' },
