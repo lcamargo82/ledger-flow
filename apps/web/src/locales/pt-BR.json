@@ -622,8 +622,16 @@
       "nameLabel": "Nome",
       "webhookSecretLabel": "Segredo do webhook",
       "skuIdLabel": "ID do SKU",
+      "skuSearchLabel": "Buscar produto ou SKU",
+      "skuSearchPlaceholder": "Digite o nome do produto ou o código SKU",
+      "productSkuLabel": "Produto / SKU",
+      "loadingSkuOptions": "Carregando produtos e SKUs...",
+      "selectSkuPlaceholder": "Selecione um produto e SKU",
       "reasonLabel": "Motivo",
       "mercadoLivreOAuthDescription": "A conexão será feita via OAuth do Mercado Livre. Tokens da loja não são digitados nem exibidos no painel."
+    },
+    "mapping": {
+      "success": "Anúncio vinculado ao SKU com sucesso."
     },
     "provider": {
       "MOCK": "Mock",
@@ -710,6 +718,9 @@
       "default": "Não foi possível processar a operação de canais.",
       "timeout": "A importação excedeu o tempo esperado. Tente novamente; o processamento pode continuar no servidor.",
       "importFailed": "Não foi possível concluir a importação dos anúncios. A tela foi mantida para permitir uma nova tentativa.",
+      "skuOptionsUnavailable": "Não foi possível carregar os produtos e SKUs disponíveis.",
+      "skuRequired": "Selecione um produto e SKU para concluir o vínculo.",
+      "mappingFailed": "Não foi possível vincular o anúncio ao SKU selecionado.",
       "forbidden": "Você não possui acesso a canais.",
       "invalid": "Revise as informações de canais."
     }

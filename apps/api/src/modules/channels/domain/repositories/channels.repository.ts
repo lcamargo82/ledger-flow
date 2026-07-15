@@ -86,7 +86,16 @@ export interface ListChannelListingsParams {
 }
 
 export interface PaginatedChannelListingsResult {
-  data: ChannelListing[];
+  data: Array<
+    ChannelListing & {
+      candidateSkus: Array<{
+        id: string;
+        skuCanonical: string;
+        skuDisplay: string;
+        product: { name: string };
+      }>;
+    }
+  >;
   meta: {
     page: number;
     perPage: number;
@@ -193,6 +202,14 @@ export interface ChannelsRepository {
   findSkuMatchCandidates(tenantId: string, externalSku: string): Promise<ProductSku[]>;
   upsertListing(data: UpsertChannelListingData): Promise<ChannelListing>;
   listListings(params: ListChannelListingsParams): Promise<PaginatedChannelListingsResult>;
+  listSkuOptions(params: { tenantId: string; search?: string; limit: number }): Promise<
+    Array<{
+      id: string;
+      skuCanonical: string;
+      skuDisplay: string;
+      product: { name: string };
+    }>
+  >;
   findListingById(id: string, tenantId: string): Promise<ChannelListing | null>;
   findListingByExternalId(params: {
     tenantId: string;

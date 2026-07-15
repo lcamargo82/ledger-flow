@@ -17,6 +17,7 @@ import { CreateChannelIntegrationDto } from '../../application/dto/create-channe
 import { ImportChannelListingsDto } from '../../application/dto/import-channel-listings.dto';
 import { ListChannelInboxQueryDto } from '../../application/dto/list-channel-inbox-query.dto';
 import { ListChannelListingsQueryDto } from '../../application/dto/list-channel-listings-query.dto';
+import { ListChannelSkuOptionsQueryDto } from '../../application/dto/list-channel-sku-options-query.dto';
 import { ListInventorySyncQueryDto } from '../../application/dto/list-inventory-sync-query.dto';
 import { MapChannelListingDto } from '../../application/dto/map-channel-listing.dto';
 import { UpdateChannelIntegrationSettingsDto } from '../../application/dto/update-channel-integration-settings.dto';
@@ -29,6 +30,7 @@ import {
   ChannelIntegrationMutationResponseDto,
   ChannelIntegrationsResponseDto,
   ChannelReplayResponseDto,
+  ChannelSkuOptionsResponseDto,
   ChannelBulkReplayResponseDto,
   PaginatedChannelInventorySyncResponseDto,
   PaginatedChannelListingsResponseDto,
@@ -164,6 +166,21 @@ export class ChannelsController {
     @Body() dto: ReplayChannelWebhooksDto,
   ) {
     return this.healthReplayService.replayFailedWebhooks(user.tenantId, user.id, dto);
+  }
+
+  @Get('skus/options')
+  @RequirePermissions('channels:read')
+  @RequireCapabilities(CommerceCapabilities.ChannelsMappingManage)
+  @ApiOperation({ summary: 'Pesquisar opções sanitizadas de produto e SKU para mapeamento' })
+  @ApiOkResponse({ type: ChannelSkuOptionsResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de mapping' })
+  async listSkuOptions(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListChannelSkuOptionsQueryDto,
+  ) {
+    const data = await this.channelsService.listSkuOptions(user.tenantId, query);
+    return { data };
   }
 
   @Post('integrations/:id/import-listings')

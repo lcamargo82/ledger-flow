@@ -79,10 +79,18 @@ export interface ChannelListing {
   matchStatus: ChannelListingMatchStatus
   matchedSkuId?: string | null
   candidateSkuIds?: string[] | null
+  candidateSkus?: ChannelSkuOption[]
   importedAt: string
   ignoredAt?: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface ChannelSkuOption {
+  id: string
+  skuCanonical: string
+  skuDisplay: string
+  product: { name: string }
 }
 
 export interface ChannelListingsImportSummary {

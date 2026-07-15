@@ -112,4 +112,13 @@ describe('ChannelsView Mercado Livre connection', () => {
     expect(channelsViewSource).toContain('item.sku.skuDisplay')
     expect(channelsViewSource).not.toContain('#skuId')
   })
+
+  it('maps a listing through a readable product and SKU selector', () => {
+    expect(channelsViewSource).toContain('channelsService.listSkuOptions')
+    expect(channelsViewSource).toContain('listing.candidateSkus || []')
+    expect(channelsViewSource).toContain('sku.product.name')
+    expect(channelsViewSource).toContain('sku.skuDisplay')
+    expect(channelsViewSource).toContain('id="channel-mapping-sku"')
+    expect(channelsViewSource).not.toContain(':label="t(\'channels.form.skuIdLabel\')"')
+  })
 })

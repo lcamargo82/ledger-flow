@@ -61,10 +61,25 @@ export class ChannelListingResponseDto {
   @ApiProperty({ enum: ChannelListingMatchStatus }) matchStatus: ChannelListingMatchStatus;
   @ApiPropertyOptional() matchedSkuId?: string;
   @ApiPropertyOptional({ type: [String] }) candidateSkuIds?: string[];
+  @ApiPropertyOptional({ type: () => [ChannelSkuOptionResponseDto] })
+  candidateSkus?: ChannelSkuOptionResponseDto[];
   @ApiProperty() importedAt: Date;
   @ApiPropertyOptional() ignoredAt?: Date;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
+}
+
+export class ChannelSkuOptionResponseDto {
+  @ApiProperty() id: string;
+  @ApiProperty() skuCanonical: string;
+  @ApiProperty() skuDisplay: string;
+  @ApiProperty({ example: { name: 'Controle Gamepad Wireless' } })
+  product: { name: string };
+}
+
+export class ChannelSkuOptionsResponseDto {
+  @ApiProperty({ type: [ChannelSkuOptionResponseDto] })
+  data: ChannelSkuOptionResponseDto[];
 }
 
 export class ChannelListingsImportSummaryDto {

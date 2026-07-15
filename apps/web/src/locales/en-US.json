@@ -623,8 +623,16 @@
       "nameLabel": "Name",
       "webhookSecretLabel": "Webhook secret",
       "skuIdLabel": "SKU ID",
+      "skuSearchLabel": "Search product or SKU",
+      "skuSearchPlaceholder": "Enter the product name or SKU code",
+      "productSkuLabel": "Product / SKU",
+      "loadingSkuOptions": "Loading products and SKUs...",
+      "selectSkuPlaceholder": "Select a product and SKU",
       "reasonLabel": "Reason",
       "mercadoLivreOAuthDescription": "Connection uses Mercado Livre OAuth. Store tokens are never typed or displayed in the panel."
+    },
+    "mapping": {
+      "success": "Listing mapped to the SKU successfully."
     },
     "provider": {
       "MOCK": "Mock",
@@ -711,6 +719,9 @@
       "default": "Could not process the channel operation.",
       "timeout": "The import exceeded the expected time. Try again; processing may continue on the server.",
       "importFailed": "Could not complete the listing import. The current screen was kept available so you can try again.",
+      "skuOptionsUnavailable": "Could not load the available products and SKUs.",
+      "skuRequired": "Select a product and SKU to complete the mapping.",
+      "mappingFailed": "Could not map the listing to the selected SKU.",
       "forbidden": "You do not have channel access.",
       "invalid": "Review the channel information."
     }

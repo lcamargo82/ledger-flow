@@ -208,7 +208,7 @@ export class PrismaChannelsRepository implements ChannelsRepository {
       matchStatus: status,
     };
 
-    const [data, total] = await Promise.all([
+    const [listings, total] = await Promise.all([
       this.prisma.channelListing.findMany({
         where,
         skip,
@@ -218,10 +218,57 @@ export class PrismaChannelsRepository implements ChannelsRepository {
       this.prisma.channelListing.count({ where }),
     ]);
 
+    const candidateIds = [
+      ...new Set(listings.flatMap((listing) => this.candidateSkuIds(listing.candidateSkuIds))),
+    ];
+    const candidateSkus = candidateIds.length
+      ? await this.prisma.productSku.findMany({
+          where: { tenantId, id: { in: candidateIds } },
+          select: {
+            id: true,
+            skuCanonical: true,
+            skuDisplay: true,
+            product: { select: { name: true } },
+          },
+        })
+      : [];
+    const candidateById = new Map(candidateSkus.map((sku) => [sku.id, sku]));
+    const data = listings.map((listing) => ({
+      ...listing,
+      candidateSkus: this.candidateSkuIds(listing.candidateSkuIds)
+        .map((id) => candidateById.get(id))
+        .filter((sku): sku is (typeof candidateSkus)[number] => Boolean(sku)),
+    }));
+
     return {
       data,
       meta: { page, perPage: take, total, totalPages: Math.ceil(total / take) },
     };
+  }
+
+  listSkuOptions(params: { tenantId: string; search?: string; limit: number }) {
+    const search = params.search?.trim();
+    return this.prisma.productSku.findMany({
+      where: {
+        tenantId: params.tenantId,
+        product: { status: 'ACTIVE' },
+        ...(search && {
+          OR: [
+            { product: { name: { contains: search, mode: 'insensitive' } } },
+            { skuCanonical: { contains: search.toUpperCase() } },
+            { skuDisplay: { contains: search, mode: 'insensitive' } },
+          ],
+        }),
+      },
+      select: {
+        id: true,
+        skuCanonical: true,
+        skuDisplay: true,
+        product: { select: { name: true } },
+      },
+      take: Math.min(params.limit, 100),
+      orderBy: [{ product: { name: 'asc' } }, { skuDisplay: 'asc' }],
+    });
   }
 
   findListingById(id: string, tenantId: string) {
@@ -521,5 +568,10 @@ export class PrismaChannelsRepository implements ChannelsRepository {
         lastErrorSummary: params.errorSummary,
       },
     });
+  }
+
+  private candidateSkuIds(value: Prisma.JsonValue | null): string[] {
+    if (!Array.isArray(value)) return [];
+    return value.filter((item): item is string => typeof item === 'string');
   }
 }

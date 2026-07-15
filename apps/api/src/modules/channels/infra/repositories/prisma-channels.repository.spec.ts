@@ -7,6 +7,10 @@ describe('PrismaChannelsRepository inventory sync identities', () => {
       findMany: jest.fn(),
       count: jest.fn(),
     },
+    channelListing: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+    },
     productSku: { findMany: jest.fn() },
   };
 
@@ -46,6 +50,74 @@ describe('PrismaChannelsRepository inventory sync identities', () => {
         skuDisplay: 'CONTROLLER-GAMEPAD',
         product: { name: 'Controle Gamepad Wireless' },
       },
+    });
+  });
+
+  it('enriches listing candidates with tenant-scoped readable product and SKU data', async () => {
+    prisma.channelListing.findMany.mockResolvedValue([
+      {
+        id: 'listing-1',
+        tenantId: 'tenant-1',
+        candidateSkuIds: ['sku-uuid-1'],
+      },
+    ]);
+    prisma.channelListing.count.mockResolvedValue(1);
+    prisma.productSku.findMany.mockResolvedValue([
+      {
+        id: 'sku-uuid-1',
+        skuCanonical: 'CONTROLLER-GAMEPAD',
+        skuDisplay: 'CONTROLLER-GAMEPAD',
+        product: { name: 'Controle Gamepad Wireless' },
+      },
+    ]);
+    const repository = new PrismaChannelsRepository(prisma as never);
+
+    const result = await repository.listListings({ tenantId: 'tenant-1' });
+
+    expect(prisma.productSku.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { tenantId: 'tenant-1', id: { in: ['sku-uuid-1'] } },
+      }),
+    );
+    expect(result.data[0]).toMatchObject({
+      candidateSkus: [
+        {
+          id: 'sku-uuid-1',
+          skuDisplay: 'CONTROLLER-GAMEPAD',
+          product: { name: 'Controle Gamepad Wireless' },
+        },
+      ],
+    });
+  });
+
+  it('lists active tenant SKU options by readable product or SKU search', async () => {
+    prisma.productSku.findMany.mockResolvedValue([]);
+    const repository = new PrismaChannelsRepository(prisma as never);
+
+    await repository.listSkuOptions({
+      tenantId: 'tenant-1',
+      search: 'gamepad',
+      limit: 50,
+    });
+
+    expect(prisma.productSku.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        product: { status: 'ACTIVE' },
+        OR: [
+          { product: { name: { contains: 'gamepad', mode: 'insensitive' } } },
+          { skuCanonical: { contains: 'GAMEPAD' } },
+          { skuDisplay: { contains: 'gamepad', mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        skuCanonical: true,
+        skuDisplay: true,
+        product: { select: { name: true } },
+      },
+      take: 50,
+      orderBy: [{ product: { name: 'asc' } }, { skuDisplay: 'asc' }],
     });
   });
 });
