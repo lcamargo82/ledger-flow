@@ -106,8 +106,9 @@ describe('PrismaChannelsRepository inventory sync identities', () => {
         product: { status: 'ACTIVE' },
         OR: [
           { product: { name: { contains: 'gamepad', mode: 'insensitive' } } },
-          { skuCanonical: { contains: 'GAMEPAD' } },
+          { skuCanonical: { contains: 'GAMEPAD', mode: 'insensitive' } },
           { skuDisplay: { contains: 'gamepad', mode: 'insensitive' } },
+          { barcode: { contains: 'gamepad', mode: 'insensitive' } },
         ],
       },
       select: {

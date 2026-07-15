@@ -47,8 +47,11 @@ const selectedListing = ref<ChannelListing | null>(null)
 const mappingSearch = ref('')
 const mappingSkuOptions = ref<ChannelSkuOption[]>([])
 const mappingError = ref('')
+const mappingSearchFeedback = ref('')
+const mappingSearchFailed = ref(false)
 const isLoadingSkuOptions = ref(false)
 let mappingSearchTimer: ReturnType<typeof setTimeout> | null = null
+let mappingSearchRequestId = 0
 
 const integrationForm = reactive({
   provider: 'MOCK' as ChannelProvider,
@@ -304,21 +307,42 @@ const disconnectIntegration = (integration: ChannelIntegration) =>
   })
 
 const loadMappingSkuOptions = async (search = '') => {
+  const requestId = ++mappingSearchRequestId
   isLoadingSkuOptions.value = true
-  mappingError.value = ''
+  mappingSearchFeedback.value = ''
+  mappingSearchFailed.value = false
   try {
-    mappingSkuOptions.value = await channelsService.listSkuOptions({ search, limit: 50 })
+    const options = await channelsService.listSkuOptions({ search, limit: 50 })
+    if (requestId !== mappingSearchRequestId) return
+
+    mappingSkuOptions.value = options
+    const normalizedSearch = search.trim().toUpperCase()
+    if (normalizedSearch) {
+      const exactMatch = options.find(
+        (option) =>
+          option.skuCanonical.toUpperCase() === normalizedSearch ||
+          option.skuDisplay.toUpperCase() === normalizedSearch,
+      )
+      mappingForm.skuId = exactMatch?.id || ''
+      if (!options.length) {
+        mappingSearchFeedback.value = t('channels.errors.skuNotFound', { search: search.trim() })
+      }
+    }
   } catch {
+    if (requestId !== mappingSearchRequestId) return
     mappingSkuOptions.value = []
-    mappingError.value = t('channels.errors.skuOptionsUnavailable')
+    mappingForm.skuId = ''
+    mappingSearchFeedback.value = t('channels.errors.skuOptionsUnavailable')
+    mappingSearchFailed.value = true
   } finally {
-    isLoadingSkuOptions.value = false
+    if (requestId === mappingSearchRequestId) isLoadingSkuOptions.value = false
   }
 }
 
 watch(mappingSearch, (search) => {
   if (!isMapModalOpen.value) return
   if (mappingSearchTimer) clearTimeout(mappingSearchTimer)
+  mappingError.value = ''
   mappingSearchTimer = setTimeout(() => loadMappingSkuOptions(search.trim()), 250)
 })
 
@@ -328,6 +352,8 @@ const openMapModal = (listing: ChannelListing) => {
   mappingForm.reason = ''
   mappingSearch.value = ''
   mappingError.value = ''
+  mappingSearchFeedback.value = ''
+  mappingSearchFailed.value = false
   mappingSkuOptions.value = listing.candidateSkus || []
   isMapModalOpen.value = true
   void loadMappingSkuOptions()
@@ -805,7 +831,7 @@ const mapListing = async () => {
     </AppModal>
 
     <AppModal v-model="isMapModalOpen" :title="t('channels.form.mappingTitle')" size="md">
-      <form class="space-y-4" @submit.prevent="mapListing">
+      <form class="space-y-4" novalidate @submit.prevent="mapListing">
         <p class="text-sm text-[var(--lf-text-secondary)]">
           {{ selectedListing?.title }}
         </p>
@@ -816,6 +842,16 @@ const mapListing = async () => {
           :placeholder="t('channels.form.skuSearchPlaceholder')"
           autocomplete="off"
         />
+        <p
+          v-if="mappingSearchFeedback"
+          class="text-sm"
+          :class="
+            mappingSearchFailed ? 'text-[var(--lf-danger)]' : 'text-[var(--lf-text-secondary)]'
+          "
+          role="status"
+        >
+          {{ mappingSearchFeedback }}
+        </p>
         <AppSelect
           id="channel-mapping-sku"
           v-model="mappingForm.skuId"

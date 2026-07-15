@@ -121,4 +121,12 @@ describe('ChannelsView Mercado Livre connection', () => {
     expect(channelsViewSource).toContain('id="channel-mapping-sku"')
     expect(channelsViewSource).not.toContain(':label="t(\'channels.form.skuIdLabel\')"')
   })
+
+  it('uses custom feedback and automatically selects an exact readable SKU match', () => {
+    expect(channelsViewSource).toContain('novalidate @submit.prevent="mapListing"')
+    expect(channelsViewSource).toContain('option.skuCanonical.toUpperCase() === normalizedSearch')
+    expect(channelsViewSource).toContain("mappingForm.skuId = exactMatch?.id || ''")
+    expect(channelsViewSource).toContain("t('channels.errors.skuNotFound'")
+    expect(channelsViewSource).toContain('requestId !== mappingSearchRequestId')
+  })
 })

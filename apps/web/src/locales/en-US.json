@@ -720,6 +720,7 @@
       "timeout": "The import exceeded the expected time. Try again; processing may continue on the server.",
       "importFailed": "Could not complete the listing import. The current screen was kept available so you can try again.",
       "skuOptionsUnavailable": "Could not load the available products and SKUs.",
+      "skuNotFound": "No active product or SKU was found for “{search}”. Check the code in Catalog.",
       "skuRequired": "Select a product and SKU to complete the mapping.",
       "mappingFailed": "Could not map the listing to the selected SKU.",
       "forbidden": "You do not have channel access.",
