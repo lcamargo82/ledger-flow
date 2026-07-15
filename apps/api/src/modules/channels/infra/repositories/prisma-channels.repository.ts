@@ -348,7 +348,7 @@ export class PrismaChannelsRepository implements ChannelsRepository {
       status,
     };
 
-    const [data, total] = await Promise.all([
+    const [states, total] = await Promise.all([
       this.prisma.channelInventorySyncState.findMany({
         where,
         skip,
@@ -357,6 +357,26 @@ export class PrismaChannelsRepository implements ChannelsRepository {
       }),
       this.prisma.channelInventorySyncState.count({ where }),
     ]);
+
+    const skus = states.length
+      ? await this.prisma.productSku.findMany({
+          where: {
+            tenantId,
+            id: { in: [...new Set(states.map((state) => state.skuId))] },
+          },
+          select: {
+            id: true,
+            skuCanonical: true,
+            skuDisplay: true,
+            product: { select: { name: true } },
+          },
+        })
+      : [];
+    const skuById = new Map(skus.map((sku) => [sku.id, sku]));
+    const data = states.map((state) => ({
+      ...state,
+      sku: skuById.get(state.skuId) ?? null,
+    }));
 
     return {
       data,

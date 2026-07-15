@@ -101,6 +101,11 @@ export interface ChannelInventorySyncState {
   provider: ChannelProvider
   externalListingId: string
   skuId: string
+  sku?: {
+    skuCanonical: string
+    skuDisplay: string
+    product: { name: string }
+  } | null
   status: ChannelInventorySyncStatus
   circuitState: ChannelCircuitState
   targetAvailableQuantity: string
