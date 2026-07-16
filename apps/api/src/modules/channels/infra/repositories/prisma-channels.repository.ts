@@ -177,6 +177,7 @@ export class PrismaChannelsRepository implements ChannelsRepository {
       update: {
         title: data.title,
         externalSku: data.externalSku,
+        externalUserProductId: data.externalUserProductId,
         matchStatus: data.matchStatus,
         matchedSkuId: data.matchedSkuId,
         candidateSkuIds: data.candidateSkuIds,
@@ -188,6 +189,7 @@ export class PrismaChannelsRepository implements ChannelsRepository {
         integrationId: data.integrationId,
         provider: data.provider,
         externalListingId: data.externalListingId,
+        externalUserProductId: data.externalUserProductId,
         title: data.title,
         externalSku: data.externalSku,
         matchStatus: data.matchStatus,
@@ -210,6 +212,7 @@ export class PrismaChannelsRepository implements ChannelsRepository {
       ...(search && {
         OR: [
           { externalListingId: { contains: search, mode: 'insensitive' } },
+          { externalUserProductId: { contains: search, mode: 'insensitive' } },
           { title: { contains: search, mode: 'insensitive' } },
           { externalSku: { contains: search, mode: 'insensitive' } },
           { matchedSku: { skuCanonical: { contains: search, mode: 'insensitive' } } },
@@ -312,43 +315,63 @@ export class PrismaChannelsRepository implements ChannelsRepository {
     });
   }
 
-  createManualMapping(params: {
+  createManualMappingGroup(params: {
     tenantId: string;
     listingId: string;
+    integrationId: string;
+    externalUserProductId?: string | null;
     skuId: string;
     actorUserId: string;
     reason?: string | null;
   }) {
     return this.prisma.$transaction(async (tx) => {
-      await tx.listingSkuMapping.upsert({
-        where: {
-          tenantId_listingId: {
-            tenantId: params.tenantId,
-            listingId: params.listingId,
-          },
-        },
-        update: {
-          skuId: params.skuId,
-          mappedByUserId: params.actorUserId,
-          reason: params.reason,
-        },
-        create: {
-          tenantId: params.tenantId,
-          listingId: params.listingId,
-          skuId: params.skuId,
-          mappedByUserId: params.actorUserId,
-          reason: params.reason,
-        },
-      });
+      const relatedListings = params.externalUserProductId
+        ? await tx.channelListing.findMany({
+            where: {
+              tenantId: params.tenantId,
+              integrationId: params.integrationId,
+              externalUserProductId: params.externalUserProductId,
+            },
+            select: { id: true },
+          })
+        : [{ id: params.listingId }];
+      const listingIds = relatedListings.map((listing) => listing.id);
 
-      return tx.channelListing.update({
-        where: { id: params.listingId },
+      for (const relatedListingId of listingIds) {
+        await tx.listingSkuMapping.upsert({
+          where: {
+            tenantId_listingId: {
+              tenantId: params.tenantId,
+              listingId: relatedListingId,
+            },
+          },
+          update: {
+            skuId: params.skuId,
+            mappedByUserId: params.actorUserId,
+            reason: params.reason,
+          },
+          create: {
+            tenantId: params.tenantId,
+            listingId: relatedListingId,
+            skuId: params.skuId,
+            mappedByUserId: params.actorUserId,
+            reason: params.reason,
+          },
+        });
+      }
+
+      await tx.channelListing.updateMany({
+        where: { tenantId: params.tenantId, id: { in: listingIds } },
         data: {
           matchedSkuId: params.skuId,
           matchStatus: ChannelListingMatchStatus.MATCHED,
           candidateSkuIds: Prisma.JsonNull,
           ignoredAt: null,
         },
+      });
+
+      return tx.channelListing.findFirstOrThrow({
+        where: { id: params.listingId, tenantId: params.tenantId },
       });
     });
   }
@@ -369,6 +392,7 @@ export class PrismaChannelsRepository implements ChannelsRepository {
         integrationId: true,
         provider: true,
         externalListingId: true,
+        externalUserProductId: true,
         matchedSkuId: true,
       },
     });

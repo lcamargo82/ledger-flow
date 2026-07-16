@@ -236,10 +236,13 @@ export const useChannelsStore = defineStore('channels', () => {
     fetchInventorySyncStatus()
   }
 
-  const importListings = async (integrationId: string) => {
+  const importListings = async (
+    integrationId: string,
+    payload: { externalUserProductId?: string } = {},
+  ) => {
     isMutating.value = true
     try {
-      const response = await channelsService.importListings(integrationId)
+      const response = await channelsService.importListings(integrationId, payload)
       lastImportSummary.value = response.summary
       await fetchListings()
       return response

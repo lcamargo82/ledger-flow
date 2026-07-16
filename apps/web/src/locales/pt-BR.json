@@ -593,7 +593,7 @@
       "statusLabel": "Status",
       "statusAll": "Todos",
       "listingSearchLabel": "Buscar anúncio",
-      "listingSearchPlaceholder": "ID do anúncio, título, produto ou SKU..."
+      "listingSearchPlaceholder": "ID MLB/MLBU, título, produto ou SKU..."
     },
     "table": {
       "provider": "Provider",
@@ -607,6 +607,7 @@
       "failureReason": "Falha",
       "importedAt": "Importado em",
       "title": "Anúncio",
+      "externalIds": "IDs Mercado Livre",
       "externalSku": "SKU externo",
       "candidates": "Candidatos",
       "actions": "Ações",
@@ -661,7 +662,16 @@
       "syncEnabled": "Sincronização de estoque ativa",
       "stockSyncModeAvailable": "Modo de saldo: disponível",
       "saved": "Configuração da integração salva.",
-      "importListingsOnConnect": "Importar anúncios após conectar"
+      "importListingsOnConnect": "Importar anúncios após conectar",
+      "mercadoLivreWarehouseStoreId": "ID da loja do depósito no Mercado Livre",
+      "mercadoLivreWarehouseNetworkNodeId": "ID do nó logístico no Mercado Livre",
+      "mercadoLivreWarehouseHelp": "Obrigatório para sincronizar contas Mercado Livre com estoque multi-origem. Os dois identificadores devem corresponder ao depósito padrão selecionado."
+    },
+    "import": {
+      "title": "Importar anúncios",
+      "userProductId": "User Product do Mercado Livre (opcional)",
+      "userProductIdPlaceholder": "Ex.: MLBU4292355491",
+      "userProductIdHelp": "Informe um MLBU para localizar exatamente esse User Product e todos os anúncios vinculados. Deixe vazio para importar todo o catálogo."
     },
     "disconnect": {
       "title": "Desconectar Mercado Livre",
@@ -1214,8 +1224,10 @@
     "pagination": {
       "total": "Total: {total}",
       "pageOf": "Página {page} de {totalPages}",
+      "first": "Primeira página",
       "previous": "Página anterior",
-      "next": "Próxima página"
+      "next": "Próxima página",
+      "last": "Última página"
     }
   },
   "errors": {

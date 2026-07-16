@@ -168,6 +168,8 @@ const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
         :is-loading="ordersStore.isLoading"
         :empty-title="t('orders.empty.title')"
         :empty-description="t('orders.empty.description')"
+        :pagination="ordersStore.meta"
+        @update:page="ordersStore.setPage"
       >
         <template #status="{ item }">
           <AppBadge :variant="statusVariant(item.status)">
@@ -260,34 +262,6 @@ const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
         </template>
       </AppTable>
 
-      <div v-if="ordersStore.totalPages > 1" class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-gray-700 dark:text-gray-300">
-          {{
-            t('orders.pagination.pageOf', {
-              page: ordersStore.currentPage,
-              totalPages: ordersStore.totalPages,
-            })
-          }}
-        </div>
-        <div class="flex gap-2">
-          <AppButton
-            variant="secondary"
-            size="small"
-            :disabled="ordersStore.currentPage <= 1 || ordersStore.isLoading"
-            @click="ordersStore.setPage(ordersStore.currentPage - 1)"
-          >
-            {{ t('orders.pagination.previous') }}
-          </AppButton>
-          <AppButton
-            variant="secondary"
-            size="small"
-            :disabled="ordersStore.currentPage >= ordersStore.totalPages || ordersStore.isLoading"
-            @click="ordersStore.setPage(ordersStore.currentPage + 1)"
-          >
-            {{ t('orders.pagination.next') }}
-          </AppButton>
-        </div>
-      </div>
     </template>
 
     <AppModal v-model="isCreateModalOpen" :title="t('orders.form.createTitle')" size="lg">

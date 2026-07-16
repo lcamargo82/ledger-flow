@@ -74,4 +74,57 @@ describe('MercadoLivreApiClient token lifecycle', () => {
     expect(requestUrl.searchParams.get('scroll_id')).toBe('cursor-1');
     expect(requestUrl.searchParams.has('offset')).toBe(false);
   });
+
+  it('locates all item identities associated with a specific User Product', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: jest.fn().mockResolvedValue({
+        results: ['MLB-1', 'MLB-2'],
+        paging: { total: 2, offset: 0, limit: 100 },
+      }),
+    });
+
+    await new MercadoLivreApiClient().searchSellerItems({
+      accessToken: 'access-token',
+      sellerId: 'seller-1',
+      limit: 100,
+      userProductId: 'MLBU4292355491',
+    });
+
+    const requestUrl = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(requestUrl.searchParams.get('user_product_id')).toBe('MLBU4292355491');
+    expect(requestUrl.searchParams.has('search_type')).toBe(false);
+  });
+
+  it('uses the provider stock version when updating a seller warehouse', async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        headers: { get: jest.fn().mockReturnValue('9') },
+        json: jest.fn().mockResolvedValue({
+          id: 'MLBU4292355491',
+          locations: [{ type: 'seller_warehouse', store_id: 'store-1' }],
+        }),
+      })
+      .mockResolvedValueOnce({ ok: true });
+    const client = new MercadoLivreApiClient();
+
+    const stock = await client.getUserProductStock('access-token', 'MLBU4292355491');
+    await client.updateUserProductSellerWarehouseStock({
+      accessToken: 'access-token',
+      externalUserProductId: 'MLBU4292355491',
+      version: stock.version!,
+      storeId: 'store-1',
+      networkNodeId: 'node-1',
+      availableQuantity: 4,
+    });
+
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({
+      method: 'PUT',
+      headers: expect.objectContaining({ 'x-version': '9' }),
+      body: JSON.stringify({
+        locations: [{ store_id: 'store-1', network_node_id: 'node-1', quantity: 4 }],
+      }),
+    });
+  });
 });

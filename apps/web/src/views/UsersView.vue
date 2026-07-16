@@ -220,6 +220,8 @@ const filterRoleOptions = computed(() => [
         :is-loading="usersStore.isLoading"
         :empty-title="t('users.emptyTitle')"
         :empty-description="t('users.emptyDescription')"
+        :pagination="usersStore.meta"
+        @update:page="usersStore.setPage"
       >
         <template #name="{ item }">
           <span class="font-medium text-gray-900 dark:text-white">{{ item.name }}</span>
@@ -290,30 +292,6 @@ const filterRoleOptions = computed(() => [
         </template>
       </AppTable>
 
-      <!-- Pagination -->
-      <div v-if="usersStore.totalPages > 1" class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-gray-700 dark:text-gray-300">
-          {{ t('users.pagination.pageOf', { page: usersStore.currentPage, totalPages: usersStore.totalPages }) }}
-        </div>
-        <div class="flex gap-2">
-          <AppButton 
-            variant="secondary" 
-            size="small" 
-            :disabled="usersStore.currentPage <= 1 || usersStore.isLoading"
-            @click="usersStore.setPage(usersStore.currentPage - 1)"
-          >
-            {{ t('users.pagination.previous') }}
-          </AppButton>
-          <AppButton 
-            variant="secondary" 
-            size="small" 
-            :disabled="usersStore.currentPage >= usersStore.totalPages || usersStore.isLoading"
-            @click="usersStore.setPage(usersStore.currentPage + 1)"
-          >
-            {{ t('users.pagination.next') }}
-          </AppButton>
-        </div>
-      </div>
     </template>
 
     <!-- Details Modal -->

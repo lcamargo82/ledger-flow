@@ -18,6 +18,12 @@ export class MockChannelListingDto {
   @MaxLength(120)
   externalListingId: string;
 
+  @ApiPropertyOptional({ example: 'MLBU4292355491' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  externalUserProductId?: string;
+
   @ApiProperty({ example: 'Camiseta LedgerFlow Azul' })
   @IsString()
   @MaxLength(180)
@@ -31,6 +37,15 @@ export class MockChannelListingDto {
 }
 
 export class ImportChannelListingsDto {
+  @ApiPropertyOptional({
+    example: 'MLBU4292355491',
+    description: 'Importa somente os itens associados ao User Product informado.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  externalUserProductId?: string;
+
   @ApiPropertyOptional({
     type: [MockChannelListingDto],
     description: 'Payload opcional para simular retorno do provider MOCK.',

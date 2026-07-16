@@ -105,7 +105,31 @@ export class ChannelsService {
       importListingsOnConnect:
         dto.importListingsOnConnect ??
         this.asBoolean(currentSettings.importListingsOnConnect, false),
+      mercadoLivreWarehouseStoreId:
+        dto.mercadoLivreWarehouseStoreId !== undefined
+          ? dto.mercadoLivreWarehouseStoreId?.trim() || null
+          : this.asNullableString(currentSettings.mercadoLivreWarehouseStoreId),
+      mercadoLivreWarehouseNetworkNodeId:
+        dto.mercadoLivreWarehouseNetworkNodeId !== undefined
+          ? dto.mercadoLivreWarehouseNetworkNodeId?.trim() || null
+          : this.asNullableString(currentSettings.mercadoLivreWarehouseNetworkNodeId),
     };
+    const hasMercadoLivreStore = Boolean(settingsJson.mercadoLivreWarehouseStoreId);
+    const hasMercadoLivreNode = Boolean(settingsJson.mercadoLivreWarehouseNetworkNodeId);
+    if (hasMercadoLivreStore !== hasMercadoLivreNode) {
+      throw new BadRequestException(
+        'Mercado Livre store and network node identifiers must be configured together.',
+      );
+    }
+    const resultingWarehouseId =
+      dto.defaultWarehouseId !== undefined
+        ? dto.defaultWarehouseId || null
+        : integration.defaultWarehouseId;
+    if (hasMercadoLivreStore && !resultingWarehouseId) {
+      throw new BadRequestException(
+        'A default warehouse is required for Mercado Livre multi-origin inventory sync.',
+      );
+    }
     const updated = await this.channelsRepository.updateIntegrationSettings(id, tenantId, {
       ...(dto.defaultWarehouseId !== undefined && {
         defaultWarehouseId: dto.defaultWarehouseId || null,
@@ -201,12 +225,25 @@ export class ChannelsService {
     };
 
     for (const listing of importedListings) {
-      const decision = await this.classifyListing(tenantId, listing);
+      const existing = await this.channelsRepository.findListingByExternalId({
+        tenantId,
+        integrationId: integration.id,
+        externalListingId: listing.externalListingId,
+      });
+      const decision =
+        existing?.matchStatus === ChannelListingMatchStatus.MATCHED && existing.matchedSkuId
+          ? {
+              status: ChannelListingMatchStatus.MATCHED,
+              matchedSkuId: existing.matchedSkuId,
+              candidateSkuIds: [existing.matchedSkuId],
+            }
+          : await this.classifyListing(tenantId, listing);
       const saved = await this.channelsRepository.upsertListing({
         tenantId,
         integrationId: integration.id,
         provider: integration.provider,
         externalListingId: listing.externalListingId,
+        externalUserProductId: listing.externalUserProductId?.trim() || null,
         title: listing.title,
         externalSku: listing.externalSku?.trim() || null,
         matchStatus: decision.status,
@@ -259,9 +296,11 @@ export class ChannelsService {
       throw new BadRequestException('SKU does not belong to this tenant.');
     }
 
-    const mappedListing = await this.channelsRepository.createManualMapping({
+    const mappedListing = await this.channelsRepository.createManualMappingGroup({
       tenantId,
       listingId,
+      integrationId: listing.integrationId,
+      externalUserProductId: listing.externalUserProductId,
       skuId: dto.skuId,
       actorUserId,
       reason: dto.reason,
@@ -274,6 +313,7 @@ export class ChannelsService {
       mappedListing.id,
       {
         listingId,
+        externalUserProductId: listing.externalUserProductId,
         skuId: dto.skuId,
         previousStatus: listing.matchStatus,
         reason: dto.reason,
@@ -336,6 +376,10 @@ export class ChannelsService {
         syncEnabled: this.asBoolean(settings.syncEnabled, true),
         stockSyncMode: this.asString(settings.stockSyncMode, 'AVAILABLE'),
         importListingsOnConnect: this.asBoolean(settings.importListingsOnConnect, false),
+        mercadoLivreWarehouseStoreId: this.asNullableString(settings.mercadoLivreWarehouseStoreId),
+        mercadoLivreWarehouseNetworkNodeId: this.asNullableString(
+          settings.mercadoLivreWarehouseNetworkNodeId,
+        ),
       },
       healthStatus: this.integrationHealth(integration),
       requiresReauth: integration.status === ChannelIntegrationStatus.REAUTH_REQUIRED,
@@ -371,6 +415,10 @@ export class ChannelsService {
 
   private asString(value: unknown, fallback: string) {
     return typeof value === 'string' && value.trim() ? value : fallback;
+  }
+
+  private asNullableString(value: unknown) {
+    return typeof value === 'string' && value.trim() ? value.trim() : null;
   }
 
   private assertSafePanelConfiguration(value: unknown) {
@@ -491,6 +539,9 @@ export class ChannelsService {
       externalAccountId: integration.externalAccountId,
       maxPages: dto.maxPages,
       pageSize: dto.pageSize,
+      ...(dto.externalUserProductId?.trim() && {
+        externalUserProductId: dto.externalUserProductId.trim().toUpperCase(),
+      }),
     });
   }
 

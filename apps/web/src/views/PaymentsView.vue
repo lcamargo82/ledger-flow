@@ -260,6 +260,8 @@ const canCancel = (status: string) => {
         :is-loading="paymentsStore.isLoading"
         :empty-title="t('payments.empty.title')"
         :empty-description="t('payments.empty.description')"
+        :pagination="paymentsStore.meta"
+        @update:page="paymentsStore.setPage"
       >
         <template #reference="{ item }">
           <span class="font-medium text-gray-900 dark:text-white">{{ item.reference }}</span>
@@ -328,30 +330,6 @@ const canCancel = (status: string) => {
         </template>
       </AppTable>
 
-      <!-- Pagination -->
-      <div v-if="paymentsStore.totalPages > 1" class="mt-4 flex items-center justify-between">
-        <div class="text-sm text-gray-700 dark:text-gray-300">
-          {{ t('payments.pagination.pageOf', { page: paymentsStore.currentPage, totalPages: paymentsStore.totalPages }) }}
-        </div>
-        <div class="flex gap-2">
-          <AppButton 
-            variant="secondary" 
-            size="small" 
-            :disabled="paymentsStore.currentPage <= 1 || paymentsStore.isLoading"
-            @click="paymentsStore.setPage(paymentsStore.currentPage - 1)"
-          >
-            {{ t('payments.pagination.previous') }}
-          </AppButton>
-          <AppButton 
-            variant="secondary" 
-            size="small" 
-            :disabled="paymentsStore.currentPage >= paymentsStore.totalPages || paymentsStore.isLoading"
-            @click="paymentsStore.setPage(paymentsStore.currentPage + 1)"
-          >
-            {{ t('payments.pagination.next') }}
-          </AppButton>
-        </div>
-      </div>
     </template>
 
     <!-- Create Modal -->

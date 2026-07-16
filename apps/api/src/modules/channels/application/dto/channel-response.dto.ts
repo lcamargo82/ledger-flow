@@ -56,6 +56,7 @@ export class ChannelListingResponseDto {
   @ApiProperty() integrationId: string;
   @ApiProperty({ enum: ChannelProvider }) provider: ChannelProvider;
   @ApiProperty() externalListingId: string;
+  @ApiPropertyOptional({ example: 'MLBU4292355491' }) externalUserProductId?: string;
   @ApiProperty() title: string;
   @ApiPropertyOptional() externalSku?: string;
   @ApiProperty({ enum: ChannelListingMatchStatus }) matchStatus: ChannelListingMatchStatus;
