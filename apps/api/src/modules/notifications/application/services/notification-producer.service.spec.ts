@@ -155,4 +155,30 @@ describe('NotificationProducerService', () => {
       }),
     );
   });
+
+  it('uses a safe status placeholder for shipping notifications without provider status', async () => {
+    config.get.mockReturnValue('true');
+    notifications.createEvent.mockResolvedValue({ created: true });
+
+    await service.channelOrderShippingSummaryUpdated({
+      tenantId: 'tenant-1',
+      shippingSummaryId: 'shipping-summary-1',
+      orderId: 'order-1',
+      externalOrderId: '2000000001',
+      externalShipmentId: null,
+      status: null,
+      changedAt: new Date('2026-07-12T18:00:00.000Z'),
+    });
+
+    expect(notifications.createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        translationArgs: expect.objectContaining({
+          status: 'UNKNOWN',
+        }),
+        metadata: expect.objectContaining({
+          status: 'UNKNOWN',
+        }),
+      }),
+    );
+  });
 });

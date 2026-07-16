@@ -208,6 +208,9 @@
       "title": "Could not load notifications",
       "load": "Please try again in a few moments."
     },
+    "fallbacks": {
+      "unavailable": "not available"
+    },
     "events": {
       "channelInventorySyncFailed": {
         "title": "Inventory synchronization failed",

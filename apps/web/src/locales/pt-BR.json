@@ -207,6 +207,9 @@
       "title": "Não foi possível carregar as notificações",
       "load": "Tente novamente em alguns instantes."
     },
+    "fallbacks": {
+      "unavailable": "não informado"
+    },
     "events": {
       "channelInventorySyncFailed": {
         "title": "Falha na sincronização de estoque",

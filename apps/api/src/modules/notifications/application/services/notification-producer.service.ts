@@ -113,6 +113,8 @@ export class NotificationProducerService {
   }) {
     if (!this.isEnabled()) return;
 
+    const status = input.status ?? 'UNKNOWN';
+
     await this.notifications.createEvent({
       tenantId: input.tenantId,
       eventType: 'channel.order.shipping_summary.updated',
@@ -124,13 +126,13 @@ export class NotificationProducerService {
         orderId: input.orderId,
         externalOrderId: input.externalOrderId,
         externalShipmentId: input.externalShipmentId ?? null,
-        status: input.status ?? null,
+        status,
       },
       metadata: {
         orderId: input.orderId,
         externalOrderId: input.externalOrderId,
         externalShipmentId: input.externalShipmentId ?? null,
-        status: input.status ?? null,
+        status,
       },
     });
   }

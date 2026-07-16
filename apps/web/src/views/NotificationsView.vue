@@ -37,12 +37,18 @@ const requestFilters = computed(() => ({
 }))
 
 const translateArgs = (item: NotificationItem) => {
-  const entries = Object.entries(item.translationArgs || {}).filter(
-    (entry): entry is [string, string | number] =>
-      typeof entry[1] === 'string' || typeof entry[1] === 'number',
-  )
+  const entries = Object.entries(item.translationArgs || {}).flatMap(([key, value]) => {
+    if (typeof value === 'string' && value.toUpperCase() === 'UNKNOWN') {
+      return [[key, t('notifications.fallbacks.unavailable')] as const]
+    }
+    if (typeof value === 'string' || typeof value === 'number') return [[key, value] as const]
+    if (value === null) return [[key, t('notifications.fallbacks.unavailable')] as const]
+    return []
+  })
   return Object.fromEntries(entries)
 }
+const translateNotification = (key: string, item: NotificationItem) =>
+  t(key, translateArgs(item)).replace(/\{[^{}]+\}/g, t('notifications.fallbacks.unavailable'))
 const severityVariant = (item: NotificationItem) =>
   ({ INFO: 'info', SUCCESS: 'success', WARNING: 'warning', ERROR: 'danger' })[item.severity] as
     | 'info'
@@ -114,8 +120,8 @@ onMounted(safeRefresh)
             </AppBadge>
             <span class="text-xs text-muted">{{ t(`notifications.categories.${item.category}`) }}</span>
           </div>
-          <h2 class="notification-item__title">{{ t(item.titleKey, translateArgs(item)) }}</h2>
-          <p class="notification-item__message">{{ t(item.messageKey, translateArgs(item)) }}</p>
+          <h2 class="notification-item__title">{{ translateNotification(item.titleKey, item) }}</h2>
+          <p class="notification-item__message">{{ translateNotification(item.messageKey, item) }}</p>
           <time class="text-xs text-muted" :datetime="item.occurredAt">
             {{ formatDateTime(item.occurredAt, currentLocale) }}
           </time>
