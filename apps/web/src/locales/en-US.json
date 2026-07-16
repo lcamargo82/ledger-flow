@@ -302,6 +302,10 @@
         "OTHER": "Other"
       }
     },
+    "filters": {
+      "searchLabel": "Search inventory",
+      "searchPlaceholder": "Product, SKU, warehouse, reason, or reference..."
+    },
     "transfers": {
       "title": "Warehouse transfers",
       "description": "Create, track, and complete atomic transfers between warehouses using the inventory ledger.",
@@ -593,6 +597,8 @@
     "filters": {
       "statusLabel": "Status",
       "statusAll": "All",
+      "inboxSearchLabel": "Search failure or listing",
+      "inboxSearchPlaceholder": "MLB/MLBU, event, resource, or failure message...",
       "listingSearchLabel": "Search listings",
       "listingSearchPlaceholder": "MLB/MLBU ID, title, product, or SKU..."
     },

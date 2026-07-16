@@ -50,6 +50,7 @@ export interface ListChannelInboxParams {
   perPage?: number;
   provider?: ChannelProvider;
   status?: ChannelWebhookStatus;
+  search?: string;
 }
 
 export interface PaginatedChannelInboxResult {

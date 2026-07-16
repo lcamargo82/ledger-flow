@@ -301,6 +301,10 @@
         "OTHER": "Outro"
       }
     },
+    "filters": {
+      "searchLabel": "Buscar no estoque",
+      "searchPlaceholder": "Produto, SKU, warehouse, motivo ou referência..."
+    },
     "transfers": {
       "title": "Transferências entre warehouses",
       "description": "Crie, acompanhe e conclua transferências atômicas entre warehouses usando o ledger de estoque.",
@@ -592,6 +596,8 @@
     "filters": {
       "statusLabel": "Status",
       "statusAll": "Todos",
+      "inboxSearchLabel": "Buscar falha ou anúncio",
+      "inboxSearchPlaceholder": "MLB/MLBU, evento, recurso ou mensagem de falha...",
       "listingSearchLabel": "Buscar anúncio",
       "listingSearchPlaceholder": "ID MLB/MLBU, título, produto ou SKU..."
     },

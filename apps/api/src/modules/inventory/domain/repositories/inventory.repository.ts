@@ -192,6 +192,7 @@ export interface ListInventoryParams {
   perPage?: number;
   skuId?: string;
   warehouseId?: string;
+  search?: string;
   type?: InventoryMovementType;
   status?: InventoryReservationStatus;
 }
@@ -202,6 +203,7 @@ export interface ListInventoryTransfersParams {
   perPage?: number;
   status?: InventoryTransferStatus;
   warehouseId?: string;
+  search?: string;
 }
 
 export interface ListCycleCountsParams {
@@ -210,6 +212,7 @@ export interface ListCycleCountsParams {
   perPage?: number;
   status?: CycleCountStatus;
   warehouseId?: string;
+  search?: string;
 }
 
 export const INVENTORY_REPOSITORY = Symbol('INVENTORY_REPOSITORY');

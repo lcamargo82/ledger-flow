@@ -27,4 +27,9 @@ export class ListInventoryTransfersQueryDto {
   @IsOptional()
   @IsString()
   warehouseId?: string;
+
+  @ApiPropertyOptional({ example: 'CONTROLLER-GAMEPAD' })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

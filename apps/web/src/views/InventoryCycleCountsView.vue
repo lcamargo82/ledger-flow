@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import axios from 'axios'
 import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
@@ -26,6 +26,8 @@ const authStore = useAuthStore()
 const inventoryStore = useInventoryStore()
 
 const isCreateModalOpen = ref(false)
+const inventorySearch = ref(inventoryStore.search)
+let inventorySearchTimer: ReturnType<typeof setTimeout> | null = null
 const countModal = ref<{ count: CycleCount; item: CycleCountItem } | null>(null)
 const approvalCount = ref<CycleCount | null>(null)
 const cancelCount = ref<CycleCount | null>(null)
@@ -71,6 +73,17 @@ const reasonOptions = computed(() =>
 onMounted(async () => {
   await Promise.all([inventoryStore.fetchWarehouses(), inventoryStore.fetchCycleCounts()])
 })
+
+onBeforeUnmount(() => {
+  if (inventorySearchTimer) clearTimeout(inventorySearchTimer)
+})
+
+const scheduleInventorySearch = () => {
+  if (inventorySearchTimer) clearTimeout(inventorySearchTimer)
+  inventorySearchTimer = setTimeout(() => {
+    inventoryStore.setCycleCountSearch(inventorySearch.value.trim())
+  }, 400)
+}
 
 const statusVariant = (status: CycleCountStatus) => {
   if (status === 'APPROVED') return 'success'
@@ -224,6 +237,20 @@ const errorKey = (error: unknown) => {
     <template v-else>
       <AppCard v-if="transitionError">
         <p class="lf-error-message" role="alert">{{ t(transitionError) }}</p>
+      </AppCard>
+
+      <AppCard>
+        <div class="lf-filter-container">
+          <div class="lf-filter-item lf-filter-item--large">
+            <AppInput
+              id="inventory-cycle-count-search"
+              v-model="inventorySearch"
+              :label="t('inventory.filters.searchLabel')"
+              :placeholder="t('inventory.filters.searchPlaceholder')"
+              @input="scheduleInventorySearch"
+            />
+          </div>
+        </div>
       </AppCard>
 
       <AppTable

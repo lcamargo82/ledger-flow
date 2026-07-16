@@ -37,6 +37,7 @@ export const useInventoryStore = defineStore('inventory', () => {
   const reservationMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const transferMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
   const cycleCountMeta = ref<PaginatedMeta>({ page: 1, perPage: 10, total: 0, totalPages: 1 })
+  const search = ref('')
 
   const isLoading = ref(false)
   const isMutating = ref(false)
@@ -78,6 +79,7 @@ export const useInventoryStore = defineStore('inventory', () => {
       const response = await inventoryService.listWarehouses({
         page: warehouseMeta.value.page,
         perPage: warehouseMeta.value.perPage,
+        search: search.value || undefined,
       })
       warehouses.value = response.data
       warehouseMeta.value = response.meta
@@ -93,6 +95,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     const response = await inventoryService.listBalances({
       page: balanceMeta.value.page,
       perPage: balanceMeta.value.perPage,
+      search: search.value || undefined,
     })
     balances.value = response.data
     balanceMeta.value = response.meta
@@ -102,6 +105,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     const response = await inventoryService.listMovements({
       page: movementMeta.value.page,
       perPage: movementMeta.value.perPage,
+      search: search.value || undefined,
     })
     movements.value = response.data
     movementMeta.value = response.meta
@@ -111,6 +115,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     const response = await inventoryService.listReservations({
       page: reservationMeta.value.page,
       perPage: reservationMeta.value.perPage,
+      search: search.value || undefined,
     })
     reservations.value = response.data
     reservationMeta.value = response.meta
@@ -120,6 +125,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     const response = await inventoryService.listTransfers({
       page: transferMeta.value.page,
       perPage: transferMeta.value.perPage,
+      search: search.value || undefined,
     })
     transfers.value = response.data
     transferMeta.value = response.meta
@@ -129,6 +135,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     const response = await inventoryService.listCycleCounts({
       page: cycleCountMeta.value.page,
       perPage: cycleCountMeta.value.perPage,
+      search: search.value || undefined,
     })
     cycleCounts.value = response.data
     cycleCountMeta.value = response.meta
@@ -174,6 +181,29 @@ export const useInventoryStore = defineStore('inventory', () => {
 
   const setCycleCountPage = (page: number) => {
     cycleCountMeta.value.page = page
+    fetchCycleCounts()
+  }
+
+  const setSearch = (value: string) => {
+    search.value = value
+    warehouseMeta.value.page = 1
+    balanceMeta.value.page = 1
+    movementMeta.value.page = 1
+    reservationMeta.value.page = 1
+    transferMeta.value.page = 1
+    cycleCountMeta.value.page = 1
+    fetchInventory()
+  }
+
+  const setTransferSearch = (value: string) => {
+    search.value = value
+    transferMeta.value.page = 1
+    fetchTransfers()
+  }
+
+  const setCycleCountSearch = (value: string) => {
+    search.value = value
+    cycleCountMeta.value.page = 1
     fetchCycleCounts()
   }
 
@@ -415,6 +445,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     reservationMeta,
     transferMeta,
     cycleCountMeta,
+    search,
     activeWarehouses,
     isLoading,
     isMutating,
@@ -433,6 +464,9 @@ export const useInventoryStore = defineStore('inventory', () => {
     setReservationPage,
     setTransferPage,
     setCycleCountPage,
+    setSearch,
+    setTransferSearch,
+    setCycleCountSearch,
     createWarehouse,
     updateWarehouse,
     recordAdjustment,

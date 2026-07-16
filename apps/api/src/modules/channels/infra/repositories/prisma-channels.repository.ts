@@ -125,12 +125,25 @@ export class PrismaChannelsRepository implements ChannelsRepository {
 
   async listInbox(params: ListChannelInboxParams) {
     const { tenantId, page = 1, perPage = 10, provider, status } = params;
+    const search = params.search?.trim();
     const take = Math.min(perPage, 100);
     const skip = (page - 1) * take;
     const where: Prisma.ChannelWebhookInboxEventWhereInput = {
       tenantId,
       provider,
       status,
+      ...(search && {
+        OR: [
+          { providerEventId: { contains: search, mode: 'insensitive' } },
+          { eventType: { contains: search, mode: 'insensitive' } },
+          { failureReason: { contains: search, mode: 'insensitive' } },
+          { payloadHash: { contains: search, mode: 'insensitive' } },
+          { payloadSummary: { path: ['resource'], string_contains: search } },
+          { payloadSummary: { path: ['topic'], string_contains: search } },
+          { payloadSummary: { path: ['user_id'], string_contains: search } },
+          { payloadSummary: { path: ['application_id'], string_contains: search } },
+        ],
+      }),
     };
 
     const [data, total] = await Promise.all([

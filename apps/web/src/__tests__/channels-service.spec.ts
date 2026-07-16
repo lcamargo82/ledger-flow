@@ -73,6 +73,28 @@ describe('ChannelsService', () => {
     })
   })
 
+  it('sends the webhook inbox search together with pagination and status', async () => {
+    vi.mocked(httpClient.get).mockResolvedValue({
+      data: { data: [], meta: { page: 1, perPage: 10, total: 0, totalPages: 0 } },
+    })
+
+    await channelsService.listInbox({
+      page: 1,
+      perPage: 10,
+      status: 'RECEIVED',
+      search: 'MLB7160087552',
+    })
+
+    expect(httpClient.get).toHaveBeenCalledWith('/channels/webhook-inbox', {
+      params: {
+        page: 1,
+        perPage: 10,
+        status: 'RECEIVED',
+        search: 'MLB7160087552',
+      },
+    })
+  })
+
   it('updates operational integration settings through the tenant-scoped endpoint', async () => {
     vi.mocked(httpClient.patch).mockResolvedValue({
       data: { integration: { id: 'integration-1' } },

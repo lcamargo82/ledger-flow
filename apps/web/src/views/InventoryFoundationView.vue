@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import axios from 'axios'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
@@ -44,6 +44,8 @@ const isReserveModalOpen = ref(false)
 const isTransitionModalOpen = ref(false)
 const transitionMode = ref<'release' | 'consume'>('consume')
 const selectedReservation = ref<InventoryReservation | null>(null)
+const inventorySearch = ref(inventoryStore.search)
+let inventorySearchTimer: ReturnType<typeof setTimeout> | null = null
 
 const warehouseForm = reactive({ id: '', code: '', name: '' })
 const warehouseFormErrors = ref<WarehouseFormErrors>({})
@@ -128,6 +130,10 @@ onMounted(() => {
   inventoryStore.fetchInventory()
 })
 
+onBeforeUnmount(() => {
+  if (inventorySearchTimer) clearTimeout(inventorySearchTimer)
+})
+
 watch(
   () => route.name,
   () => {
@@ -145,6 +151,13 @@ const navigateTab = (tab: InventoryTab) => {
 
   activeTab.value = tab
   router.push({ name: routeNameByTab[tab] })
+}
+
+const scheduleInventorySearch = () => {
+  if (inventorySearchTimer) clearTimeout(inventorySearchTimer)
+  inventorySearchTimer = setTimeout(() => {
+    inventoryStore.setSearch(inventorySearch.value.trim())
+  }, 400)
 }
 
 const openWarehouseModal = () => {
@@ -359,6 +372,20 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           >
             {{ t('inventory.tabs.reservations') }}
           </AppButton>
+        </div>
+      </AppCard>
+
+      <AppCard>
+        <div class="lf-filter-container">
+          <div class="lf-filter-item lf-filter-item--large">
+            <AppInput
+              id="inventory-search"
+              v-model="inventorySearch"
+              :label="t('inventory.filters.searchLabel')"
+              :placeholder="t('inventory.filters.searchPlaceholder')"
+              @input="scheduleInventorySearch"
+            />
+          </div>
         </div>
       </AppCard>
 

@@ -46,6 +46,7 @@ const selectedIntegration = ref<ChannelIntegration | null>(null)
 const selectedImportIntegration = ref<ChannelIntegration | null>(null)
 const warehouses = ref<Warehouse[]>([])
 const selectedListing = ref<ChannelListing | null>(null)
+const inboxSearch = ref(channelsStore.filters.search || '')
 const listingSearch = ref(channelsStore.listingFilters.search || '')
 const mappingSearch = ref('')
 const mappingSkuOptions = ref<ChannelSkuOption[]>([])
@@ -54,6 +55,7 @@ const mappingSearchFeedback = ref('')
 const mappingSearchFailed = ref(false)
 const isLoadingSkuOptions = ref(false)
 let mappingSearchTimer: ReturnType<typeof setTimeout> | null = null
+let inboxSearchTimer: ReturnType<typeof setTimeout> | null = null
 let listingSearchTimer: ReturnType<typeof setTimeout> | null = null
 let mappingSearchRequestId = 0
 
@@ -187,8 +189,16 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener('storage', refreshFromOtherTab)
   if (mappingSearchTimer) clearTimeout(mappingSearchTimer)
+  if (inboxSearchTimer) clearTimeout(inboxSearchTimer)
   if (listingSearchTimer) clearTimeout(listingSearchTimer)
 })
+
+const scheduleInboxSearch = () => {
+  if (inboxSearchTimer) clearTimeout(inboxSearchTimer)
+  inboxSearchTimer = setTimeout(() => {
+    channelsStore.setInboxSearch(inboxSearch.value.trim() || undefined)
+  }, 400)
+}
 
 const scheduleListingSearch = () => {
   if (listingSearchTimer) clearTimeout(listingSearchTimer)
@@ -570,22 +580,34 @@ const mapListing = async () => {
 
       <div v-if="activeTab === 'inbox'" class="space-y-4">
         <AppCard>
-          <div class="flex flex-wrap items-end justify-between gap-3">
-            <AppSelect
-              id="channel-inbox-status"
-              :model-value="channelsStore.filters.status || ''"
-              :label="t('channels.filters.statusLabel')"
-              :options="statusOptions"
-              @update:model-value="
-                channelsStore.setInboxStatus(
-                  ($event || undefined) as ChannelWebhookStatus | undefined,
-                )
-              "
-            />
+          <div class="lf-filter-container">
+            <div class="lf-filter-item lf-filter-item--large">
+              <AppInput
+                id="channel-inbox-search"
+                v-model="inboxSearch"
+                :label="t('channels.filters.inboxSearchLabel')"
+                :placeholder="t('channels.filters.inboxSearchPlaceholder')"
+                @input="scheduleInboxSearch"
+              />
+            </div>
+            <div class="lf-filter-item">
+              <AppSelect
+                id="channel-inbox-status"
+                :model-value="channelsStore.filters.status || ''"
+                :label="t('channels.filters.statusLabel')"
+                :options="statusOptions"
+                @update:model-value="
+                  channelsStore.setInboxStatus(
+                    ($event || undefined) as ChannelWebhookStatus | undefined,
+                  )
+                "
+              />
+            </div>
             <AppButton
               v-if="canReplayWebhooks"
               variant="secondary"
               :loading="channelsStore.isMutating"
+              class="self-end"
               @click="replayFailedWebhooks"
             >
               {{ t('channels.actions.replayFailed') }}

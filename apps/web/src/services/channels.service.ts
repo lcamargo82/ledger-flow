@@ -81,6 +81,7 @@ export class ChannelsService {
     perPage?: number
     provider?: ChannelProvider
     status?: ChannelWebhookStatus
+    search?: string
   }): Promise<PaginatedChannelInboxResponse> {
     const { data } = await httpClient.get<PaginatedChannelInboxResponse>(
       '/channels/webhook-inbox',

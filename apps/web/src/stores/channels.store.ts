@@ -39,6 +39,7 @@ export const useChannelsStore = defineStore('channels', () => {
     perPage: number
     provider?: ChannelProvider
     status?: ChannelWebhookStatus
+    search?: string
   }>({ page: 1, perPage: 10 })
   const listingFilters = ref<{
     page: number
@@ -203,6 +204,12 @@ export const useChannelsStore = defineStore('channels', () => {
     fetchChannels()
   }
 
+  const setInboxSearch = (search?: string) => {
+    filters.value.search = search
+    filters.value.page = 1
+    fetchChannels()
+  }
+
   const setInboxPage = (page: number) => {
     filters.value.page = page
     fetchChannels()
@@ -334,6 +341,7 @@ export const useChannelsStore = defineStore('channels', () => {
     reactivateIntegration,
     disconnectMercadoLivre,
     setInboxStatus,
+    setInboxSearch,
     setInboxPage,
     setListingStatus,
     setListingSearch,

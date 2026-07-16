@@ -28,6 +28,11 @@ export class ListInventoryQueryDto {
   @IsString()
   warehouseId?: string;
 
+  @ApiPropertyOptional({ example: 'CONTROLLER-GAMEPAD' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
   @ApiPropertyOptional({ enum: InventoryMovementType })
   @IsOptional()
   @IsEnum(InventoryMovementType)

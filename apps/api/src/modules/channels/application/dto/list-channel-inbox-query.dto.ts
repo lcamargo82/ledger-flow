@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ChannelProvider, ChannelWebhookStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class ListChannelInboxQueryDto {
   @ApiPropertyOptional({ example: 1, minimum: 1 })
@@ -27,4 +27,9 @@ export class ListChannelInboxQueryDto {
   @IsOptional()
   @IsEnum(ChannelWebhookStatus)
   status?: ChannelWebhookStatus;
+
+  @ApiPropertyOptional({ example: 'MLB7160087552' })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }

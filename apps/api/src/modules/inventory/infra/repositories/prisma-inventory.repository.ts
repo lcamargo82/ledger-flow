@@ -321,9 +321,24 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
   async listReservations(params: ListInventoryParams) {
     const { tenantId, page = 1, perPage = 10, skuId, warehouseId, status } = params;
+    const search = params.search?.trim();
     const take = Math.min(perPage, 100);
     const skip = (page - 1) * take;
-    const where: Prisma.InventoryReservationWhereInput = { tenantId, skuId, warehouseId, status };
+    const where: Prisma.InventoryReservationWhereInput = {
+      tenantId,
+      skuId,
+      warehouseId,
+      status,
+      ...(search && {
+        OR: [
+          ...this.inventoryReservationSearch(search),
+          { sourceType: this.containsInsensitive(search) },
+          { sourceId: this.containsInsensitive(search) },
+          { reasonCode: this.containsInsensitive(search) },
+          { notes: this.containsInsensitive(search) },
+        ],
+      }),
+    };
 
     const [data, total] = await Promise.all([
       this.prisma.inventoryReservation.findMany({
@@ -344,9 +359,15 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
   async listBalances(params: ListInventoryParams) {
     const { tenantId, page = 1, perPage = 10, skuId, warehouseId } = params;
+    const search = params.search?.trim();
     const take = Math.min(perPage, 100);
     const skip = (page - 1) * take;
-    const where: Prisma.InventoryBalanceWhereInput = { tenantId, skuId, warehouseId };
+    const where: Prisma.InventoryBalanceWhereInput = {
+      tenantId,
+      skuId,
+      warehouseId,
+      ...(search && { OR: this.inventoryBalanceSearch(search) }),
+    };
 
     const [data, total] = await Promise.all([
       this.prisma.inventoryBalance.findMany({
@@ -405,6 +426,7 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
   async listTransfers(params: ListInventoryTransfersParams) {
     const { tenantId, page = 1, perPage = 10, status, warehouseId } = params;
+    const search = params.search?.trim();
     const take = Math.min(perPage, 100);
     const skip = (page - 1) * take;
     const where: Prisma.InventoryTransferWhereInput = {
@@ -412,6 +434,30 @@ export class PrismaInventoryRepository implements InventoryRepository {
       status,
       ...(warehouseId && {
         OR: [{ sourceWarehouseId: warehouseId }, { destinationWarehouseId: warehouseId }],
+      }),
+      ...(search && {
+        AND: [
+          {
+            OR: [
+              { transferNumber: this.containsInsensitive(search) },
+              { reasonCode: this.containsInsensitive(search) },
+              { notes: this.containsInsensitive(search) },
+              { sourceWarehouse: { is: { name: this.containsInsensitive(search) } } },
+              { sourceWarehouse: { is: { code: this.containsInsensitive(search) } } },
+              {
+                destinationWarehouse: {
+                  is: { name: this.containsInsensitive(search) },
+                },
+              },
+              {
+                destinationWarehouse: {
+                  is: { code: this.containsInsensitive(search) },
+                },
+              },
+              { items: { some: { sku: { is: this.skuSearch(search) } } } },
+            ],
+          },
+        ],
       }),
     };
 
@@ -713,9 +759,24 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
   async listCycleCounts(params: ListCycleCountsParams) {
     const { tenantId, page = 1, perPage = 10, status, warehouseId } = params;
+    const search = params.search?.trim();
     const take = Math.min(perPage, 100);
     const skip = (page - 1) * take;
-    const where: Prisma.CycleCountWhereInput = { tenantId, status, warehouseId };
+    const where: Prisma.CycleCountWhereInput = {
+      tenantId,
+      status,
+      warehouseId,
+      ...(search && {
+        OR: [
+          { countNumber: this.containsInsensitive(search) },
+          { reasonCode: this.containsInsensitive(search) },
+          { notes: this.containsInsensitive(search) },
+          { warehouse: { is: { name: this.containsInsensitive(search) } } },
+          { warehouse: { is: { code: this.containsInsensitive(search) } } },
+          { items: { some: { sku: { is: this.skuSearch(search) } } } },
+        ],
+      }),
+    };
 
     const [data, total] = await Promise.all([
       this.prisma.cycleCount.findMany({
@@ -1233,6 +1294,7 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
   async listMovements(params: ListInventoryParams) {
     const { tenantId, page = 1, perPage = 10, skuId, warehouseId, type } = params;
+    const search = params.search?.trim();
     const take = Math.min(perPage, 100);
     const skip = (page - 1) * take;
     const where: Prisma.InventoryMovementWhereInput = {
@@ -1240,6 +1302,15 @@ export class PrismaInventoryRepository implements InventoryRepository {
       skuId,
       warehouseId,
       type,
+      ...(search && {
+        OR: [
+          ...this.inventoryMovementSearch(search),
+          { sourceType: this.containsInsensitive(search) },
+          { sourceId: this.containsInsensitive(search) },
+          { reasonCode: this.containsInsensitive(search) },
+          { notes: this.containsInsensitive(search) },
+        ],
+      }),
     };
 
     const [data, total] = await Promise.all([
@@ -1261,6 +1332,45 @@ export class PrismaInventoryRepository implements InventoryRepository {
 
   private createTransferNumber() {
     return `TRF-${randomUUID().slice(0, 8).toUpperCase()}`;
+  }
+
+  private containsInsensitive(search: string): Prisma.StringFilter {
+    return { contains: search, mode: 'insensitive' };
+  }
+
+  private skuSearch(search: string): Prisma.ProductSkuWhereInput {
+    return {
+      OR: [
+        { skuCanonical: this.containsInsensitive(search) },
+        { skuDisplay: this.containsInsensitive(search) },
+        { barcode: this.containsInsensitive(search) },
+        { product: { is: { name: this.containsInsensitive(search) } } },
+      ],
+    };
+  }
+
+  private inventoryBalanceSearch(search: string): Prisma.InventoryBalanceWhereInput[] {
+    return [
+      { sku: { is: this.skuSearch(search) } },
+      { warehouse: { is: { name: this.containsInsensitive(search) } } },
+      { warehouse: { is: { code: this.containsInsensitive(search) } } },
+    ];
+  }
+
+  private inventoryMovementSearch(search: string): Prisma.InventoryMovementWhereInput[] {
+    return [
+      { sku: { is: this.skuSearch(search) } },
+      { warehouse: { is: { name: this.containsInsensitive(search) } } },
+      { warehouse: { is: { code: this.containsInsensitive(search) } } },
+    ];
+  }
+
+  private inventoryReservationSearch(search: string): Prisma.InventoryReservationWhereInput[] {
+    return [
+      { sku: { is: this.skuSearch(search) } },
+      { warehouse: { is: { name: this.containsInsensitive(search) } } },
+      { warehouse: { is: { code: this.containsInsensitive(search) } } },
+    ];
   }
 
   private createCycleCountNumber() {
