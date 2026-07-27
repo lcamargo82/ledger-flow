@@ -1,0 +1,339 @@
+{
+  "name": "LedgerFlow -> Telegram Alerts",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Configuracao obrigatoria\n\n1. Crie as variables do n8n: LEDGERFLOW_WEBHOOK_SECRET e TELEGRAM_CHAT_ID.\n2. Configure a credencial Telegram API no node Telegram.\n3. Ative o workflow e use a Production URL no LedgerFlow.",
+        "height": 220,
+        "width": 360
+      },
+      "id": "6f2c9e90-0c38-46b6-8f65-02d49cd101b6",
+      "name": "Leia antes de ativar",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        -260
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ledgerflow/telegram",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "25b7f965-2b61-4747-9e0e-9171705360f1",
+      "name": "LedgerFlow Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -720,
+        40
+      ],
+      "webhookId": "ledgerflow-telegram-alerts"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first();\nconst binary = input.binary?.data?.data;\nconst headers = input.json.headers || {};\n\nconst header = (name) => {\n  const lower = name.toLowerCase();\n  for (const [key, value] of Object.entries(headers)) {\n    if (key.toLowerCase() === lower) return Array.isArray(value) ? value[0] : value;\n  }\n  return undefined;\n};\n\nconst rawBody = binary ? Buffer.from(binary, 'base64').toString('utf8') : '';\nlet event = null;\nlet parseError = null;\ntry {\n  event = JSON.parse(rawBody);\n} catch (error) {\n  parseError = error.message;\n}\n\nconst timestamp = header('x-ledgerflow-timestamp');\nconst receivedSignature = String(header('x-ledgerflow-signature') || '').replace(/^v1=/, '');\nconst idempotencyKey = String(header('idempotency-key') || '');\nconst deliveryId = String(header('x-ledgerflow-delivery-id') || '');\n\nreturn [{\n  json: {\n    rawBody,\n    verificationPayload: `${timestamp || ''}.${rawBody}`,\n    timestamp,\n    receivedSignature,\n    idempotencyKey,\n    deliveryId,\n    event,\n    parseError\n  }\n}];"
+      },
+      "id": "81f3ab34-0f1a-498b-85ce-131bc7ea4e37",
+      "name": "Prepare LedgerFlow Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -500,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "action": "hmac",
+        "type": "SHA256",
+        "value": "={{ $json.verificationPayload }}",
+        "dataPropertyName": "expectedSignature",
+        "secret": "={{ $vars.LEDGERFLOW_WEBHOOK_SECRET }}",
+        "encoding": "hex"
+      },
+      "id": "76ad7e22-184a-49be-a57b-008ee7b77e4e",
+      "name": "Calculate HMAC",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst nowSeconds = Math.floor(Date.now() / 1000);\nconst timestampNumber = Number(item.timestamp);\nconst timestampFresh = Number.isFinite(timestampNumber) && Math.abs(nowSeconds - timestampNumber) <= 300;\nconst signaturePattern = /^[a-f0-9]{64}$/i;\n\nfunction fixedTimeEqualHex(a, b) {\n  if (!signaturePattern.test(a || '') || !signaturePattern.test(b || '')) return false;\n  let diff = 0;\n  for (let i = 0; i < 64; i += 1) {\n    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);\n  }\n  return diff === 0;\n}\n\nconst hasSecret = Boolean($vars.LEDGERFLOW_WEBHOOK_SECRET && $vars.LEDGERFLOW_WEBHOOK_SECRET !== 'CHANGE_ME');\nconst signatureValid = fixedTimeEqualHex(String(item.expectedSignature || ''), String(item.receivedSignature || ''));\nconst valid = hasSecret && !item.parseError && item.event && item.idempotencyKey && timestampFresh && signatureValid;\n\nconst staticData = $getWorkflowStaticData('global');\nif (!staticData.ledgerflowProcessedKeys) staticData.ledgerflowProcessedKeys = {};\nconst processed = staticData.ledgerflowProcessedKeys;\nconst duplicate = valid && Boolean(processed[item.idempotencyKey]);\n\nif (valid && !duplicate) {\n  processed[item.idempotencyKey] = new Date().toISOString();\n  const keys = Object.keys(processed);\n  if (keys.length > 5000) {\n    keys.sort((a, b) => String(processed[a]).localeCompare(String(processed[b])));\n    for (const key of keys.slice(0, keys.length - 5000)) delete processed[key];\n  }\n}\n\nconst event = item.event || {};\nconst data = event.data || {};\nconst source = event.source || {};\nconst severityIcon = {\n  ERROR: '[ERRO]',\n  WARNING: '[ALERTA]',\n  INFO: '[INFO]',\n  SUCCESS: '[OK]'\n}[event.severity] || '[INFO]';\n\nconst money = (minor, currency) => {\n  if (minor === undefined || minor === null || minor === '') return null;\n  const number = Number(minor) / 100;\n  if (!Number.isFinite(number)) return String(minor);\n  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: currency || 'BRL' }).format(number);\n};\n\nconst summaryByType = {\n  'mercado_pago.payment_status_updated': () => `Pagamento ${data.paymentReference || source.id || '-'} mudou de ${data.previousStatus || '-'} para ${data.currentStatus || '-'}.`,\n  'mercado_pago.connection_reauth_required': () => `Reconecte a conta ${data.provider || 'Mercado Pago'} no LedgerFlow.`,\n  'marketplace_settlement.event_received': () => {\n    const amount = money(data.netAmountMinor, data.currency);\n    return `Settlement recebido de ${data.provider || 'provider'}${data.providerPaymentId ? ` para pagamento ${data.providerPaymentId}` : ''}${amount ? ` no valor liquido ${amount}` : ''}.`;\n  },\n  'cash_position.unexplained_difference': () => {\n    const amount = money(data.differenceAmountMinor, data.currency);\n    return `Diferenca de caixa sem explicacao${amount ? `: ${amount}` : ''}.`;\n  },\n  'channel.inventory_sync.failed': () => `Falha ao sincronizar estoque do listing ${data.listingId || source.id || '-'}.`,\n  'channel.order.shipping_summary.updated': () => `Resumo de envio atualizado para pedido ${data.externalOrderId || data.orderId || source.id || '-'}.`,\n  'reconciliation.case.divergent': () => `Caso de conciliacao divergente: ${data.caseId || source.id || '-'}.`,\n  'sale.loss_detected': () => 'Venda com prejuizo detectada.',\n  'sale.low_margin_detected': () => 'Venda com margem baixa detectada.',\n  'sale.missing_cost_detected': () => 'Venda sem custo cadastrado detectada.',\n  'sale.stock_not_consumed': () => 'Venda sem consumo de estoque detectada.',\n  'sale.shipping_delayed': () => 'Possivel atraso de envio detectado.',\n  'sale.settlement_divergent': () => 'Divergencia de settlement detectada.',\n  'sale.cash_release_blocked': () => 'Liberacao de caixa bloqueada detectada.'\n};\n\nconst occurredAt = event.occurredAt ? new Date(event.occurredAt).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : '-';\nconst summary = (summaryByType[event.type] || (() => `Evento LedgerFlow recebido: ${event.type || 'desconhecido'}.`))();\nconst telegramMessage = [\n  `${severityIcon} LedgerFlow`,\n  `Tipo: ${event.type || '-'}`,\n  `Categoria: ${event.category || '-'}`,\n  `Quando: ${occurredAt}`,\n  '',\n  summary,\n  '',\n  `Evento: ${event.id || '-'}`,\n  `Delivery: ${item.deliveryId || '-'}`\n].join('\\n');\n\nlet invalidReason = null;\nif (!hasSecret) invalidReason = 'LEDGERFLOW_WEBHOOK_SECRET ausente ou ainda CHANGE_ME';\nelse if (item.parseError) invalidReason = `JSON invalido: ${item.parseError}`;\nelse if (!item.idempotencyKey) invalidReason = 'Idempotency-Key ausente';\nelse if (!timestampFresh) invalidReason = 'Timestamp ausente ou fora da janela de 5 minutos';\nelse if (!signatureValid) invalidReason = 'Assinatura HMAC invalida';\n\nreturn [{\n  json: {\n    ...item,\n    valid,\n    duplicate,\n    shouldNotify: valid && !duplicate,\n    invalidReason,\n    telegramMessage,\n    response: valid\n      ? { ok: true, duplicate, eventId: event.id || null, deliveryId: item.deliveryId || null }\n      : { ok: false, error: invalidReason }\n  }\n}];"
+      },
+      "id": "5b84d381-87ce-4fd8-a069-01d82dca4797",
+      "name": "Validate Dedupe Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -60,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0b95582a-4c18-4142-b6b4-bca157444809",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fd232819-8aa3-40b1-9ec4-ee8102707812",
+      "name": "Signature OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "53db95ca-e399-4049-98c6-bb1af7f7b997",
+              "leftValue": "={{ $json.shouldNotify }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f1f29b0d-3796-4598-a577-81fa48c00941",
+      "name": "Not Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        380,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $vars.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.telegramMessage }}",
+        "replyMarkup": "none",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_web_page_preview": true,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "16cbda6f-f947-412a-a80e-a4ecb85b7705",
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        600,
+        -120
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "",
+          "name": "Telegram Bot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('Validate Dedupe Format').item.json.response }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "0d705f70-3025-4c6f-aa40-6d5d52117be7",
+      "name": "Respond Delivered",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        820,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.response }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "3678f982-e6f8-4efb-84b6-21aca22ad043e",
+      "name": "Respond Duplicate",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        600,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.response }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "e2c25f40-62da-47e8-ad8e-97cbda58830a",
+      "name": "Respond Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        380,
+        160
+      ]
+    }
+  ],
+  "connections": {
+    "LedgerFlow Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare LedgerFlow Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare LedgerFlow Payload": {
+      "main": [
+        [
+          {
+            "node": "Calculate HMAC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate HMAC": {
+      "main": [
+        [
+          {
+            "node": "Validate Dedupe Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Dedupe Format": {
+      "main": [
+        [
+          {
+            "node": "Signature OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signature OK?": {
+      "main": [
+        [
+          {
+            "node": "Not Duplicate?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Not Duplicate?": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Message": {
+      "main": [
+        [
+          {
+            "node": "Respond Delivered",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "ledgerflow"
+    },
+    {
+      "name": "telegram"
+    }
+  ],
+  "active": false,
+  "versionId": "b5722e36-0c7a-4cc0-8943-6f275b9b7cbf",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
