@@ -16,6 +16,7 @@ export const getSwaggerConfig = () => {
       },
       'access-token',
     )
+    .addServer('/', 'Current host')
     .addServer('http://localhost:3010', 'Local Development Server')
     .addTag('App', 'Status básico da API')
     .addTag('Health', 'Endpoints de monitoramento e readiness')
