@@ -74,13 +74,20 @@ export class MercadoLivreOAuthService {
 
     const externalAccountId = credentials.externalAccountId;
     const fingerprint = this.encryptionService.createFingerprint(credentials);
+    const integrationIdentity = {
+      tenantId: stateData.tenantId,
+      provider: ChannelProvider.MERCADO_LIVRE,
+      externalAccountId,
+    };
+    const existingIntegration = await this.prisma.channelIntegration.findUnique({
+      where: {
+        tenantId_provider_externalAccountId: integrationIdentity,
+      },
+    });
+    const safeDefaultSettings = this.safeDefaultSettings(credentials.scope);
     const integration = await this.prisma.channelIntegration.upsert({
       where: {
-        tenantId_provider_externalAccountId: {
-          tenantId: stateData.tenantId,
-          provider: ChannelProvider.MERCADO_LIVRE,
-          externalAccountId,
-        },
+        tenantId_provider_externalAccountId: integrationIdentity,
       },
       create: {
         tenantId: stateData.tenantId,
@@ -92,12 +99,7 @@ export class MercadoLivreOAuthService {
         encryptedCredentials: encryptedCredentials as Prisma.InputJsonValue,
         credentialsVersion: 1,
         credentialsFingerprint: fingerprint,
-        settingsJson: {
-          scopes: credentials.scope ? String(credentials.scope).split(' ') : [],
-          syncEnabled: false,
-          stockSyncMode: 'AVAILABLE',
-          importListingsOnConnect: false,
-        },
+        settingsJson: safeDefaultSettings,
         createdByUserId: stateData.userId,
         lastSuccessfulOperationAt: new Date(),
       },
@@ -109,6 +111,9 @@ export class MercadoLivreOAuthService {
         displayName: `Mercado Livre ${externalAccountId}`,
         lastSuccessfulOperationAt: new Date(),
         lastFailureAt: null,
+        ...(this.shouldResetOperationalSettings(existingIntegration) && {
+          settingsJson: safeDefaultSettings,
+        }),
       },
     });
 
@@ -171,6 +176,31 @@ export class MercadoLivreOAuthService {
       scope: tokenResponse.scope,
       provider: ChannelProvider.MERCADO_LIVRE,
     };
+  }
+
+  private safeDefaultSettings(scope: unknown): Prisma.InputJsonValue {
+    return {
+      scopes: scope ? String(scope).split(' ') : [],
+      syncEnabled: false,
+      stockSyncMode: 'AVAILABLE',
+      importListingsOnConnect: false,
+    };
+  }
+
+  private shouldResetOperationalSettings(
+    integration: { status: ChannelIntegrationStatus; settingsJson: unknown } | null,
+  ) {
+    if (!integration) return false;
+    if (integration.status === ChannelIntegrationStatus.DISABLED) return true;
+
+    const settings = this.asRecord(integration.settingsJson);
+    return typeof settings.syncEnabled !== 'boolean';
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> {
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
   }
 
   private async audit(

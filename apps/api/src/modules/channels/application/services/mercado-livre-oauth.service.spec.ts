@@ -17,6 +17,7 @@ describe('MercadoLivreOAuthService', () => {
   };
   const prisma = {
     channelIntegration: {
+      findUnique: jest.fn(),
       upsert: jest.fn(),
       updateMany: jest.fn(),
     },
@@ -56,6 +57,7 @@ describe('MercadoLivreOAuthService', () => {
       externalAccountId: '123456',
     });
     encryptionService.createFingerprint.mockReturnValue('fingerprint-123');
+    prisma.channelIntegration.findUnique.mockResolvedValue(null);
     prisma.channelIntegration.upsert.mockResolvedValue({
       id: 'integration-1',
       tenantId: 'tenant-1',
@@ -180,6 +182,64 @@ describe('MercadoLivreOAuthService', () => {
       integrationId: 'integration-1',
       status: ChannelIntegrationStatus.ACTIVE,
     });
+  });
+
+  it('resets inventory sync to disabled when reconnecting a disabled Mercado Livre integration', async () => {
+    prisma.channelIntegration.findUnique.mockResolvedValueOnce({
+      id: 'integration-1',
+      tenantId: 'tenant-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      externalAccountId: '123456',
+      status: ChannelIntegrationStatus.DISABLED,
+      settingsJson: {
+        syncEnabled: true,
+        stockSyncMode: 'AVAILABLE',
+        importListingsOnConnect: true,
+      },
+    });
+    const service = makeService();
+
+    await service.handleCallback('auth-code', 'secure-state');
+
+    expect(prisma.channelIntegration.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.objectContaining({
+          status: ChannelIntegrationStatus.ACTIVE,
+          settingsJson: {
+            scopes: ['read', 'write'],
+            syncEnabled: false,
+            stockSyncMode: 'AVAILABLE',
+            importListingsOnConnect: false,
+          },
+        }),
+      }),
+    );
+  });
+
+  it('keeps explicit operational settings when refreshing an active connection', async () => {
+    prisma.channelIntegration.findUnique.mockResolvedValueOnce({
+      id: 'integration-1',
+      tenantId: 'tenant-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      externalAccountId: '123456',
+      status: ChannelIntegrationStatus.ACTIVE,
+      settingsJson: {
+        syncEnabled: true,
+        stockSyncMode: 'AVAILABLE',
+        importListingsOnConnect: false,
+      },
+    });
+    const service = makeService();
+
+    await service.handleCallback('auth-code', 'secure-state');
+
+    expect(prisma.channelIntegration.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: expect.not.objectContaining({
+          settingsJson: expect.anything(),
+        }),
+      }),
+    );
   });
 
   it('stores Mercado Livre user_id as a string without numeric coercion', async () => {
