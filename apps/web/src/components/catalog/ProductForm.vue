@@ -40,12 +40,17 @@ const form = reactive({
 
 const skuManuallyEdited = ref(false)
 const skuTouched = ref(false)
+const nameManuallyEdited = ref(false)
 const brandManuallyEdited = ref(false)
 const categoryManuallyEdited = ref(false)
 
 const onSkuInput = () => {
   skuManuallyEdited.value = true
   skuTouched.value = true
+}
+
+const onNameInput = () => {
+  nameManuallyEdited.value = true
 }
 
 const onBrandInput = () => {
@@ -101,7 +106,7 @@ const submit = () => {
   }
 
   const basePayload = {
-    name: form.name,
+    name: form.name || selectedParent.value?.name || '',
     description: form.description || undefined,
     brand:
       isVariant.value && form.brand === (selectedParent.value?.brand || '')
@@ -144,6 +149,7 @@ watch(
   [() => form.type, () => form.parentProductId],
   () => {
     if (props.mode !== 'create' || !isVariant.value) return
+    if (!nameManuallyEdited.value) form.name = selectedParent.value?.name || ''
     if (!brandManuallyEdited.value) form.brand = selectedParent.value?.brand || ''
     if (!categoryManuallyEdited.value) form.category = selectedParent.value?.category || ''
   },
@@ -173,6 +179,7 @@ watch(
         v-model="form.name"
         :label="t('catalog.form.nameLabel')"
         :placeholder="t('catalog.form.namePlaceholder')"
+        @input="onNameInput"
       />
       <AppInput
         id="product-brand"

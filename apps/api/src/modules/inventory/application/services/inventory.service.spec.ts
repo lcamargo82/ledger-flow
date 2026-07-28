@@ -41,6 +41,9 @@ describe('InventoryService', () => {
     outboxEvent: {
       create: jest.fn(),
     },
+    inventoryBalance: {
+      findMany: jest.fn(),
+    },
   };
 
   let service: InventoryService;
@@ -183,6 +186,72 @@ describe('InventoryService', () => {
       expect.objectContaining({
         skuId: 'sku-1',
         unitCost: 40,
+      }),
+    );
+  });
+
+  it('calculates inventory valuation from balances grouped by inherited brand', async () => {
+    prisma.inventoryBalance.findMany.mockResolvedValue([
+      {
+        skuId: 'sku-1',
+        warehouseId: 'warehouse-1',
+        onHandQuantity: '2',
+        reservedQuantity: '0.5',
+        availableQuantity: '1.5',
+        sku: {
+          id: 'sku-1',
+          skuCanonical: 'CHAVEIRO-ARGOLA-AZUL',
+          skuDisplay: 'CHAVEIRO-ARGOLA-AZUL',
+          averageCost: '10.50',
+          currency: 'BRL',
+          product: {
+            id: 'variant-1',
+            name: 'Chaveiro Argola Azul',
+            brand: null,
+            category: null,
+            parentProduct: {
+              id: 'parent-1',
+              name: 'Chaveiro Argola',
+              brand: 'Marca Pai',
+              category: 'Acessórios',
+            },
+          },
+        },
+        warehouse: {
+          id: 'warehouse-1',
+          name: 'Casa',
+          code: 'HOME',
+        },
+      },
+    ]);
+
+    const result = await service.inventoryValuation('tenant-1', { groupBy: 'BRAND' });
+
+    expect(prisma.inventoryBalance.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        warehouseId: undefined,
+      },
+      include: expect.any(Object),
+    });
+    expect(result.summary).toEqual(
+      expect.objectContaining({
+        onHandQuantity: '2',
+        reservedQuantity: '0.5',
+        availableQuantity: '1.5',
+        totalValue: '21.0000',
+        availableValue: '15.7500',
+        skuCount: 1,
+        warehouseCount: 1,
+        currency: 'BRL',
+      }),
+    );
+    expect(result.groups[0]).toEqual(
+      expect.objectContaining({
+        groupKey: 'Marca Pai',
+        groupLabel: 'Marca Pai',
+        groupType: 'BRAND',
+        totalValue: '21.0000',
       }),
     );
   });

@@ -88,6 +88,21 @@ export const useInventoryStore = defineStore('inventory', () => {
     error.value = null
   }
 
+  const resetValuation = () => {
+    valuationSummary.value = {
+      onHandQuantity: '0',
+      reservedQuantity: '0',
+      availableQuantity: '0',
+      totalValue: '0',
+      reservedValue: '0',
+      availableValue: '0',
+      skuCount: 0,
+      warehouseCount: 0,
+      currency: 'BRL',
+    }
+    valuationGroups.value = []
+  }
+
   const fetchWarehouses = async () => {
     isLoading.value = true
     error.value = null
@@ -118,12 +133,16 @@ export const useInventoryStore = defineStore('inventory', () => {
   }
 
   const fetchValuation = async () => {
-    const response = await inventoryService.getValuation({
-      groupBy: valuationGroupBy.value,
-      search: search.value || undefined,
-    })
-    valuationSummary.value = response.summary
-    valuationGroups.value = response.groups
+    try {
+      const response = await inventoryService.getValuation({
+        groupBy: valuationGroupBy.value,
+        search: search.value || undefined,
+      })
+      valuationSummary.value = response.summary
+      valuationGroups.value = response.groups
+    } catch {
+      resetValuation()
+    }
   }
 
   const fetchMovements = async () => {

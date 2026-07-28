@@ -44,6 +44,21 @@ import {
   isInventoryReasonCode,
 } from '../../domain/constants/inventory-reason-code-registry';
 
+type InventoryValuationBalance = Prisma.InventoryBalanceGetPayload<{
+  include: {
+    sku: {
+      include: {
+        product: {
+          include: {
+            parentProduct: true;
+          };
+        };
+      };
+    };
+    warehouse: true;
+  };
+}>;
+
 @Injectable()
 export class InventoryService {
   constructor(
@@ -171,92 +186,71 @@ export class InventoryService {
 
   async inventoryValuation(tenantId: string, query: ListInventoryValuationQueryDto) {
     const groupBy = query.groupBy ?? 'SKU';
-    const { key, label, type } = this.inventoryValuationGrouping(groupBy);
     const search = query.search?.trim();
-    const warehouseFilter = query.warehouseId
-      ? Prisma.sql`AND ib.warehouse_id = ${query.warehouseId}`
-      : Prisma.empty;
-    const searchFilter = search
-      ? Prisma.sql`AND (
-          ps.sku_canonical ILIKE ${`%${search}%`}
-          OR ps.sku_display ILIKE ${`%${search}%`}
-          OR p.name ILIKE ${`%${search}%`}
-          OR parent.name ILIKE ${`%${search}%`}
-          OR COALESCE(p.brand, parent.brand, '') ILIKE ${`%${search}%`}
-          OR COALESCE(p.category, parent.category, '') ILIKE ${`%${search}%`}
-          OR w.name ILIKE ${`%${search}%`}
-          OR w.code ILIKE ${`%${search}%`}
-        )`
-      : Prisma.empty;
 
-    type ValuationRow = {
-      groupKey?: string | null;
-      groupLabel?: string | null;
-      groupType?: string | null;
-      onHandQuantity: string | null;
-      reservedQuantity: string | null;
-      availableQuantity: string | null;
-      totalValue: string | null;
-      reservedValue: string | null;
-      availableValue: string | null;
-      skuCount: bigint | number | null;
-      warehouseCount: bigint | number | null;
-      currency: string | null;
-    };
+    const balances = await this.prisma.inventoryBalance.findMany({
+      where: {
+        tenantId,
+        warehouseId: query.warehouseId,
+      },
+      include: {
+        sku: {
+          include: {
+            product: {
+              include: {
+                parentProduct: true,
+              },
+            },
+          },
+        },
+        warehouse: true,
+      },
+    });
 
-    const baseFrom = Prisma.sql`
-      FROM inventory_balances ib
-      JOIN product_skus ps ON ps.id = ib.sku_id
-      JOIN products p ON p.id = ps.product_id
-      LEFT JOIN products parent ON parent.id = p.parent_product_id
-      JOIN warehouses w ON w.id = ib.warehouse_id
-      WHERE ib.tenant_id = ${tenantId}
-      ${warehouseFilter}
-      ${searchFilter}
-    `;
+    const filteredBalances = search
+      ? balances.filter((balance) => this.inventoryValuationMatchesSearch(balance, search))
+      : balances;
 
-    const [summary] = await this.prisma.$queryRaw<ValuationRow[]>(Prisma.sql`
-      SELECT
-        SUM(ib.on_hand_quantity)::text AS "onHandQuantity",
-        SUM(ib.reserved_quantity)::text AS "reservedQuantity",
-        SUM(ib.available_quantity)::text AS "availableQuantity",
-        SUM(ib.on_hand_quantity * ps.average_cost)::text AS "totalValue",
-        SUM(ib.reserved_quantity * ps.average_cost)::text AS "reservedValue",
-        SUM(ib.available_quantity * ps.average_cost)::text AS "availableValue",
-        COUNT(DISTINCT ib.sku_id) AS "skuCount",
-        COUNT(DISTINCT ib.warehouse_id) AS "warehouseCount",
-        COALESCE(MAX(ps.currency), 'BRL') AS "currency"
-      ${baseFrom}
-    `);
+    const summary = this.emptyInventoryValuationSummary();
+    const groups = new Map<string, ReturnType<typeof this.emptyInventoryValuationGroup>>();
+    const seenSummarySkus = new Set<string>();
+    const seenSummaryWarehouses = new Set<string>();
 
-    const groups = await this.prisma.$queryRaw<ValuationRow[]>(Prisma.sql`
-      SELECT
-        ${key}::text AS "groupKey",
-        ${label}::text AS "groupLabel",
-        ${type}::text AS "groupType",
-        SUM(ib.on_hand_quantity)::text AS "onHandQuantity",
-        SUM(ib.reserved_quantity)::text AS "reservedQuantity",
-        SUM(ib.available_quantity)::text AS "availableQuantity",
-        SUM(ib.on_hand_quantity * ps.average_cost)::text AS "totalValue",
-        SUM(ib.reserved_quantity * ps.average_cost)::text AS "reservedValue",
-        SUM(ib.available_quantity * ps.average_cost)::text AS "availableValue",
-        COUNT(DISTINCT ib.sku_id) AS "skuCount",
-        COUNT(DISTINCT ib.warehouse_id) AS "warehouseCount",
-        COALESCE(MAX(ps.currency), 'BRL') AS "currency"
-      ${baseFrom}
-      GROUP BY ${key}, ${label}, ${type}
-      ORDER BY SUM(ib.on_hand_quantity * ps.average_cost) DESC, ${label} ASC
-      LIMIT 100
-    `);
+    for (const balance of filteredBalances) {
+      const row = this.inventoryValuationRowAmounts(balance);
+      this.addInventoryValuationAmounts(summary, row);
+      seenSummarySkus.add(balance.skuId);
+      seenSummaryWarehouses.add(balance.warehouseId);
+      summary.currency = row.currency;
+
+      const groupIdentity = this.inventoryValuationGroupIdentity(balance, groupBy);
+      const group =
+        groups.get(groupIdentity.key) ??
+        this.emptyInventoryValuationGroup(groupIdentity.key, groupIdentity.label, groupIdentity.type);
+
+      this.addInventoryValuationAmounts(group, row);
+      group.seenSkus.add(balance.skuId);
+      group.seenWarehouses.add(balance.warehouseId);
+      group.skuCount = group.seenSkus.size;
+      group.warehouseCount = group.seenWarehouses.size;
+      group.currency = row.currency;
+      groups.set(groupIdentity.key, group);
+    }
+
+    summary.skuCount = seenSummarySkus.size;
+    summary.warehouseCount = seenSummaryWarehouses.size;
 
     return {
-      summary: this.toInventoryValuationSummary(summary),
-      groups: groups.map((row) => ({
-        groupKey: row.groupKey ?? '',
-        groupLabel: row.groupLabel ?? '',
-        groupType: row.groupType ?? groupBy,
-        ...this.toInventoryValuationSummary(row),
-      })),
+      summary: this.formatInventoryValuationSummary(summary),
+      groups: Array.from(groups.values())
+        .sort((a, b) => b.totalValue - a.totalValue || a.groupLabel.localeCompare(b.groupLabel))
+        .slice(0, 100)
+        .map((group) => ({
+          groupKey: group.groupKey,
+          groupLabel: group.groupLabel,
+          groupType: group.groupType,
+          ...this.formatInventoryValuationSummary(group),
+        })),
     };
   }
 
@@ -814,64 +808,134 @@ export class InventoryService {
     });
   }
 
-  private inventoryValuationGrouping(groupBy: InventoryValuationGroupBy) {
-    const inheritedBrand = Prisma.sql`COALESCE(NULLIF(p.brand, ''), NULLIF(parent.brand, ''), 'Sem marca')`;
-    const inheritedCategory = Prisma.sql`COALESCE(NULLIF(p.category, ''), NULLIF(parent.category, ''), 'Sem categoria')`;
-    const parentProductId = Prisma.sql`COALESCE(parent.id, p.id)`;
-    const parentProductName = Prisma.sql`COALESCE(parent.name, p.name)`;
+  private inventoryValuationMatchesSearch(balance: InventoryValuationBalance, search: string) {
+    const normalizedSearch = search.toLowerCase();
+    const product = balance.sku.product;
+    const parent = product.parentProduct;
+    const haystack = [
+      balance.sku.skuCanonical,
+      balance.sku.skuDisplay,
+      product.name,
+      parent?.name,
+      product.brand || parent?.brand,
+      product.category || parent?.category,
+      balance.warehouse.name,
+      balance.warehouse.code,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
 
-    const groupings = {
+    return haystack.includes(normalizedSearch);
+  }
+
+  private inventoryValuationRowAmounts(balance: InventoryValuationBalance) {
+    const onHandQuantity = Number(balance.onHandQuantity);
+    const reservedQuantity = Number(balance.reservedQuantity);
+    const availableQuantity = Number(balance.availableQuantity);
+    const averageCost = Number(balance.sku.averageCost);
+
+    return {
+      onHandQuantity,
+      reservedQuantity,
+      availableQuantity,
+      totalValue: onHandQuantity * averageCost,
+      reservedValue: reservedQuantity * averageCost,
+      availableValue: availableQuantity * averageCost,
+      currency: balance.sku.currency || 'BRL',
+    };
+  }
+
+  private inventoryValuationGroupIdentity(
+    balance: InventoryValuationBalance,
+    groupBy: InventoryValuationGroupBy,
+  ) {
+    const product = balance.sku.product;
+    const parent = product.parentProduct;
+    const parentId = parent?.id ?? product.id;
+    const parentName = parent?.name ?? product.name;
+    const brand = product.brand || parent?.brand || 'Sem marca';
+    const category = product.category || parent?.category || 'Sem categoria';
+
+    const groupings: Record<InventoryValuationGroupBy, { key: string; label: string; type: string }> = {
       SKU: {
-        key: Prisma.sql`ps.id`,
-        label: Prisma.sql`ps.sku_display || ' · ' || p.name`,
-        type: Prisma.sql`'SKU'`,
+        key: balance.sku.id,
+        label: `${balance.sku.skuDisplay} · ${product.name}`,
+        type: 'SKU',
       },
       PRODUCT: {
-        key: parentProductId,
-        label: parentProductName,
-        type: Prisma.sql`'PRODUCT'`,
+        key: parentId,
+        label: parentName,
+        type: 'PRODUCT',
       },
       CATEGORY: {
-        key: inheritedCategory,
-        label: inheritedCategory,
-        type: Prisma.sql`'CATEGORY'`,
+        key: category,
+        label: category,
+        type: 'CATEGORY',
       },
       BRAND: {
-        key: inheritedBrand,
-        label: inheritedBrand,
-        type: Prisma.sql`'BRAND'`,
+        key: brand,
+        label: brand,
+        type: 'BRAND',
       },
       WAREHOUSE: {
-        key: Prisma.sql`w.id`,
-        label: Prisma.sql`w.name || ' · ' || w.code`,
-        type: Prisma.sql`'WAREHOUSE'`,
+        key: balance.warehouse.id,
+        label: `${balance.warehouse.name} · ${balance.warehouse.code}`,
+        type: 'WAREHOUSE',
       },
-    } satisfies Record<InventoryValuationGroupBy, { key: Prisma.Sql; label: Prisma.Sql; type: Prisma.Sql }>;
+    };
 
     return groupings[groupBy];
   }
 
-  private toInventoryValuationSummary(row?: {
-    onHandQuantity: string | null;
-    reservedQuantity: string | null;
-    availableQuantity: string | null;
-    totalValue: string | null;
-    reservedValue: string | null;
-    availableValue: string | null;
-    skuCount: bigint | number | null;
-    warehouseCount: bigint | number | null;
-    currency: string | null;
-  }) {
+  private emptyInventoryValuationSummary() {
     return {
-      onHandQuantity: row?.onHandQuantity ?? '0',
-      reservedQuantity: row?.reservedQuantity ?? '0',
-      availableQuantity: row?.availableQuantity ?? '0',
-      totalValue: row?.totalValue ?? '0',
-      reservedValue: row?.reservedValue ?? '0',
-      availableValue: row?.availableValue ?? '0',
-      skuCount: Number(row?.skuCount ?? 0),
-      warehouseCount: Number(row?.warehouseCount ?? 0),
-      currency: row?.currency ?? 'BRL',
+      onHandQuantity: 0,
+      reservedQuantity: 0,
+      availableQuantity: 0,
+      totalValue: 0,
+      reservedValue: 0,
+      availableValue: 0,
+      skuCount: 0,
+      warehouseCount: 0,
+      currency: 'BRL',
+    };
+  }
+
+  private emptyInventoryValuationGroup(groupKey: string, groupLabel: string, groupType: string) {
+    return {
+      groupKey,
+      groupLabel,
+      groupType,
+      ...this.emptyInventoryValuationSummary(),
+      seenSkus: new Set<string>(),
+      seenWarehouses: new Set<string>(),
+    };
+  }
+
+  private addInventoryValuationAmounts(
+    target: ReturnType<typeof this.emptyInventoryValuationSummary>,
+    amounts: ReturnType<typeof this.inventoryValuationRowAmounts>,
+  ) {
+    target.onHandQuantity += amounts.onHandQuantity;
+    target.reservedQuantity += amounts.reservedQuantity;
+    target.availableQuantity += amounts.availableQuantity;
+    target.totalValue += amounts.totalValue;
+    target.reservedValue += amounts.reservedValue;
+    target.availableValue += amounts.availableValue;
+  }
+
+  private formatInventoryValuationSummary(row: ReturnType<typeof this.emptyInventoryValuationSummary>) {
+    return {
+      onHandQuantity: String(row.onHandQuantity),
+      reservedQuantity: String(row.reservedQuantity),
+      availableQuantity: String(row.availableQuantity),
+      totalValue: row.totalValue.toFixed(4),
+      reservedValue: row.reservedValue.toFixed(4),
+      availableValue: row.availableValue.toFixed(4),
+      skuCount: row.skuCount,
+      warehouseCount: row.warehouseCount,
+      currency: row.currency,
     };
   }
 

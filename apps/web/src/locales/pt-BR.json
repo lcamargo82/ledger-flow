@@ -1090,7 +1090,7 @@
       "costChangeReasonLabel": "Motivo da alteração de custo",
       "costChangeReasonPlaceholder": "Informe o motivo ao alterar o custo",
       "parentSkuNotice": "Produto pai agrupa variantes e não possui SKU próprio.",
-      "variantInheritanceNotice": "Marca e categoria são herdadas do produto pai quando deixadas iguais ou vazias.",
+      "variantInheritanceNotice": "Nome, marca e categoria são herdados do produto pai quando deixados iguais ou vazios.",
       "validation": {
         "skuRequired": "Informe o SKU do produto.",
         "skuLength": "O SKU deve ter entre 8 e 20 caracteres.",

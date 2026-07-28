@@ -36,7 +36,7 @@ export class CatalogProductsService {
       tenantId,
       type: createProductDto.type,
       parentProductId: createProductDto.parentProductId ?? null,
-      name: createProductDto.name,
+      name: this.resolveVariantInheritedRequiredField(createProductDto.name, parent?.name),
       description: createProductDto.description ?? null,
       brand: this.resolveVariantInheritedField(createProductDto.brand, parent?.brand),
       category: this.resolveVariantInheritedField(createProductDto.category, parent?.category),
@@ -175,6 +175,12 @@ export class CatalogProductsService {
     const trimmed = value?.trim();
     if (trimmed) return trimmed;
     return parentValue ?? null;
+  }
+
+  private resolveVariantInheritedRequiredField(value: string | undefined, parentValue: string | undefined) {
+    const trimmed = value?.trim();
+    if (trimmed) return trimmed;
+    return parentValue ?? '';
   }
 
   private async buildSkuCreateData(

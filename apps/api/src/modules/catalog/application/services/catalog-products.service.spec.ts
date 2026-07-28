@@ -84,10 +84,11 @@ describe('CatalogProductsService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('inherits brand and category from parent when creating a variant without duplicated fields', async () => {
+  it('inherits name, brand and category from parent when creating a variant without duplicated fields', async () => {
     repository.findByIdAndTenant.mockResolvedValue({
       id: 'parent-1',
       type: ProductType.PARENT,
+      name: 'Produto Pai',
       brand: 'Marca Pai',
       category: 'Categoria Pai',
     });
@@ -102,7 +103,7 @@ describe('CatalogProductsService', () => {
     await service.create('tenant-1', 'user-1', {
       type: ProductType.VARIANT,
       parentProductId: 'parent-1',
-      name: 'Produto variante',
+      name: ' ',
       sku: {
         sku: 'variant_01',
         averageCost: 10,
@@ -114,6 +115,7 @@ describe('CatalogProductsService', () => {
     expect(repository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         parentProductId: 'parent-1',
+        name: 'Produto Pai',
         brand: 'Marca Pai',
         category: 'Categoria Pai',
       }),
@@ -124,6 +126,7 @@ describe('CatalogProductsService', () => {
     repository.findByIdAndTenant.mockResolvedValue({
       id: 'parent-1',
       type: ProductType.PARENT,
+      name: 'Produto Pai',
       brand: 'Marca Pai',
       category: 'Categoria Pai',
     });
