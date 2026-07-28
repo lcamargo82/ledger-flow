@@ -2179,7 +2179,8 @@
     "errors": {
       "loadFailed": "Could not load integrations.",
       "mpAuthFailed": "Mercado Pago authorization failed.",
-      "mpConnectionFailed": "Could not connect Mercado Pago."
+      "mpConnectionFailed": "Could not connect Mercado Pago.",
+      "statusUpdateFailed": "Could not update connection status."
     }
   },
   "reconciliation": {

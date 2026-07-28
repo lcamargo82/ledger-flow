@@ -77,8 +77,9 @@
       :is-open="isStatusModalOpen"
       :connection="selectedConnection"
       :action="statusAction"
+      :loading="isUpdatingStatus"
       @close="closeStatusModal"
-      @success="handleConnectionUpdated"
+      @confirm="handleStatusChange"
     />
 
     <GatewayConnectionDisconnectModal
@@ -126,6 +127,7 @@ const isDisconnectOpen = ref(false);
 const selectedConnection = ref<GatewayConnection | null>(null);
 const statusAction = ref<'activate' | 'deactivate'>('activate');
 const isConnectingMp = ref(false);
+const isUpdatingStatus = ref(false);
 
 const hasConnections = computed(() => connections.value.length > 0);
 
@@ -218,8 +220,27 @@ const confirmStatusChange = (connection: GatewayConnection, action: 'activate' |
   isStatusModalOpen.value = true;
 };
 const closeStatusModal = () => {
+  if (isUpdatingStatus.value) return;
   isStatusModalOpen.value = false;
   selectedConnection.value = null;
+};
+const handleStatusChange = async () => {
+  if (!selectedConnection.value || isUpdatingStatus.value) return;
+
+  isUpdatingStatus.value = true;
+  try {
+    await GatewayConnectionsService.updateStatus(selectedConnection.value.id, {
+      status: statusAction.value === 'activate' ? 'ACTIVE' : 'INACTIVE',
+    });
+    toast.success(t('gateways.messages.statusUpdated'));
+    isUpdatingStatus.value = false;
+    closeStatusModal();
+    await loadConnections();
+  } catch (err: any) {
+    toast.error(err.response?.data?.message || t('gateways.errors.statusUpdateFailed'));
+  } finally {
+    isUpdatingStatus.value = false;
+  }
 };
 
 // Disconnect Modal

@@ -2183,7 +2183,8 @@
     "errors": {
       "loadFailed": "Não foi possível carregar as integrações.",
       "mpAuthFailed": "Falha na autorização do Mercado Pago.",
-      "mpConnectionFailed": "Não foi possível conectar o Mercado Pago."
+      "mpConnectionFailed": "Não foi possível conectar o Mercado Pago.",
+      "statusUpdateFailed": "Não foi possível alterar o status da conexão."
     }
   },
   "reconciliation": {

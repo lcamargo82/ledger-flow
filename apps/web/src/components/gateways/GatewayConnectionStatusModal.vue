@@ -5,6 +5,8 @@
     :title="isActivating ? t('gateways.actions.activate') : t('gateways.deactivate.title')"
     :message="isActivating ? `Tem certeza que deseja ativar a conexão ${connection?.displayName || connection?.provider}?` : t('gateways.deactivate.message')"
     :confirm-variant="isActivating ? 'primary' : 'danger'"
+    :confirm-text="isActivating ? t('gateways.actions.activate') : t('gateways.deactivate.confirm')"
+    :loading="loading"
     @confirm="submit"
     @cancel="$emit('close')"
   />
@@ -22,6 +24,7 @@ const props = defineProps<{
   isOpen: boolean;
   connection: GatewayConnection | null;
   action: 'activate' | 'deactivate';
+  loading?: boolean;
 }>();
 
 const emit = defineEmits(['close', 'confirm']);
@@ -32,5 +35,4 @@ const submit = () => {
   emit('confirm');
 };
 </script>
-
 
