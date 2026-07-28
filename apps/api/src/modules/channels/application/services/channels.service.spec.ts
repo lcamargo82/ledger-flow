@@ -148,6 +148,27 @@ describe('ChannelsService', () => {
     expect(JSON.stringify(result)).not.toContain('webhookSecretHash');
   });
 
+  it('defaults inventory sync to disabled when older integrations have no explicit setting', async () => {
+    repository.listIntegrations.mockResolvedValue([
+      {
+        id: 'integration-1',
+        tenantId: 'tenant-1',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        name: 'Mercado Livre seller-1',
+        status: ChannelIntegrationStatus.ACTIVE,
+        settingsJson: {},
+        defaultWarehouseId: null,
+        lastSuccessfulOperationAt: new Date('2026-07-11T18:00:00.000Z'),
+        createdAt: new Date('2026-07-11T17:00:00.000Z'),
+        updatedAt: new Date('2026-07-11T18:00:00.000Z'),
+      },
+    ]);
+
+    const result = await makeService().listIntegrations('tenant-1');
+
+    expect(result[0].settings.syncEnabled).toBe(false);
+  });
+
   it('updates operational settings only with a warehouse from the same tenant', async () => {
     repository.findIntegrationById.mockResolvedValue({
       id: 'integration-1',

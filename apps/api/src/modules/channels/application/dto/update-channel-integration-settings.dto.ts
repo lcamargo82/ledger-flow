@@ -7,7 +7,7 @@ export class UpdateChannelIntegrationSettingsDto {
   @IsString()
   defaultWarehouseId?: string | null;
 
-  @ApiPropertyOptional({ default: true })
+  @ApiPropertyOptional({ default: false })
   @IsOptional()
   @IsBoolean()
   syncEnabled?: boolean;

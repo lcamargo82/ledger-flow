@@ -397,6 +397,10 @@ export class PrismaChannelsRepository implements ChannelsRepository {
         matchStatus: ChannelListingMatchStatus.MATCHED,
         integration: {
           status: ChannelIntegrationStatus.ACTIVE,
+          settingsJson: {
+            path: ['syncEnabled'],
+            equals: true,
+          },
         },
       },
       select: {

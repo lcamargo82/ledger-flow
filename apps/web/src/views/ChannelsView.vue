@@ -86,7 +86,7 @@ const readableSkuOptions = computed(() =>
 
 const settingsForm = reactive({
   defaultWarehouseId: '',
-  syncEnabled: true,
+  syncEnabled: false,
   importListingsOnConnect: false,
   mercadoLivreWarehouseStoreId: '',
   mercadoLivreWarehouseNetworkNodeId: '',

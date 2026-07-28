@@ -126,6 +126,7 @@ export class ChannelInventorySyncService {
 
       if (
         result.errorCode === 'INTEGRATION_NOT_SYNCABLE' ||
+        result.errorCode === 'INTEGRATION_SYNC_DISABLED' ||
         result.errorCode === 'WAREHOUSE_MAPPING_REQUIRED' ||
         result.errorCode === 'WAREHOUSE_MAPPING_INVALID' ||
         state.attemptCount + 1 >= this.maxAttemptsBeforeCircuit
@@ -278,6 +279,15 @@ export class ChannelInventorySyncService {
       };
     }
 
+    const settings = this.asRecord(integration.settingsJson);
+    if (!this.asBoolean(settings.syncEnabled, false)) {
+      return {
+        ok: false as const,
+        errorCode: 'INTEGRATION_SYNC_DISABLED',
+        errorSummary: 'Channel integration inventory sync is disabled.',
+      };
+    }
+
     return null;
   }
 
@@ -295,6 +305,10 @@ export class ChannelInventorySyncService {
     return value && typeof value === 'object' && !Array.isArray(value)
       ? (value as Record<string, unknown>)
       : {};
+  }
+
+  private asBoolean(value: unknown, fallback: boolean) {
+    return typeof value === 'boolean' ? value : fallback;
   }
 
   private asOptionalString(value: unknown) {

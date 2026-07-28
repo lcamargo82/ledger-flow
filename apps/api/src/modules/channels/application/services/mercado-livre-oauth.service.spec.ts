@@ -147,6 +147,12 @@ describe('MercadoLivreOAuthService', () => {
         },
         credentialsFingerprint: 'fingerprint-123',
         credentialsVersion: 1,
+        settingsJson: {
+          scopes: ['read', 'write'],
+          syncEnabled: false,
+          stockSyncMode: 'AVAILABLE',
+          importListingsOnConnect: false,
+        },
         status: ChannelIntegrationStatus.ACTIVE,
       }),
       update: expect.objectContaining({

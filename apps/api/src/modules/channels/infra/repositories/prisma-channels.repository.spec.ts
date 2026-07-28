@@ -153,4 +153,35 @@ describe('PrismaChannelsRepository inventory sync identities', () => {
       orderBy: [{ product: { name: 'asc' } }, { skuDisplay: 'asc' }],
     });
   });
+
+  it('only returns matched listings from integrations with inventory sync explicitly enabled', async () => {
+    prisma.channelListing.findMany.mockResolvedValue([]);
+    const repository = new PrismaChannelsRepository(prisma as never);
+
+    await repository.findSyncableListingsBySku('tenant-1', 'sku-1');
+
+    expect(prisma.channelListing.findMany).toHaveBeenCalledWith({
+      where: {
+        tenantId: 'tenant-1',
+        matchedSkuId: 'sku-1',
+        matchStatus: 'MATCHED',
+        integration: {
+          status: 'ACTIVE',
+          settingsJson: {
+            path: ['syncEnabled'],
+            equals: true,
+          },
+        },
+      },
+      select: {
+        id: true,
+        tenantId: true,
+        integrationId: true,
+        provider: true,
+        externalListingId: true,
+        externalUserProductId: true,
+        matchedSkuId: true,
+      },
+    });
+  });
 });

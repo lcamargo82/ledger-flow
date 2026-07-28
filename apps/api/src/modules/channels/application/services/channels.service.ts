@@ -100,7 +100,7 @@ export class ChannelsService {
     const currentSettings = this.asRecord(integration.settingsJson);
     const settingsJson = {
       ...currentSettings,
-      syncEnabled: dto.syncEnabled ?? this.asBoolean(currentSettings.syncEnabled, true),
+      syncEnabled: dto.syncEnabled ?? this.asBoolean(currentSettings.syncEnabled, false),
       stockSyncMode: dto.stockSyncMode ?? this.asString(currentSettings.stockSyncMode, 'AVAILABLE'),
       importListingsOnConnect:
         dto.importListingsOnConnect ??
@@ -373,7 +373,7 @@ export class ChannelsService {
       status: integration.status,
       defaultWarehouseId: integration.defaultWarehouseId,
       settings: {
-        syncEnabled: this.asBoolean(settings.syncEnabled, true),
+        syncEnabled: this.asBoolean(settings.syncEnabled, false),
         stockSyncMode: this.asString(settings.stockSyncMode, 'AVAILABLE'),
         importListingsOnConnect: this.asBoolean(settings.importListingsOnConnect, false),
         mercadoLivreWarehouseStoreId: this.asNullableString(settings.mercadoLivreWarehouseStoreId),

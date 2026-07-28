@@ -236,6 +236,7 @@ describe('ChannelInventorySyncService', () => {
         algorithm: 'aes-256-gcm',
         ciphertext: 'ciphertext',
       },
+      settingsJson: { syncEnabled: true },
     });
     channelsRepository.markInventorySyncSuccess.mockResolvedValue({
       id: 'sync-ml-1',
@@ -289,6 +290,7 @@ describe('ChannelInventorySyncService', () => {
       provider: ChannelProvider.MERCADO_LIVRE,
       status: ChannelIntegrationStatus.ACTIVE,
       encryptedCredentials: { ciphertext: 'ciphertext' },
+      settingsJson: { syncEnabled: true },
     });
     mercadoLivreAdapter.updateListingStock.mockResolvedValueOnce({
       ok: false,
@@ -350,6 +352,45 @@ describe('ChannelInventorySyncService', () => {
       expect.objectContaining({
         id: 'sync-ml-1',
         errorCode: 'INTEGRATION_NOT_SYNCABLE',
+      }),
+    );
+  });
+
+  it('does not call Mercado Livre when inventory sync is disabled', async () => {
+    channelsRepository.findPendingInventorySyncStates.mockResolvedValue([
+      {
+        id: 'sync-ml-1',
+        tenantId: 'tenant-1',
+        integrationId: 'integration-1',
+        provider: ChannelProvider.MERCADO_LIVRE,
+        externalListingId: 'MLB-1',
+        targetAvailableQuantity: '8',
+        attemptCount: 0,
+      },
+    ]);
+    channelsRepository.findIntegrationById.mockResolvedValueOnce({
+      id: 'integration-1',
+      tenantId: 'tenant-1',
+      provider: ChannelProvider.MERCADO_LIVRE,
+      status: ChannelIntegrationStatus.ACTIVE,
+      encryptedCredentials: { ciphertext: 'ciphertext' },
+      settingsJson: { syncEnabled: false },
+    });
+    const service = new ChannelInventorySyncService(
+      channelsRepository as never,
+      prisma as never,
+      mercadoLivreAdapter as never,
+      credentialsEncryptionService as never,
+    );
+
+    const result = await service.processPending('tenant-1');
+
+    expect(result.circuitOpened).toBe(1);
+    expect(mercadoLivreAdapter.updateListingStock).not.toHaveBeenCalled();
+    expect(channelsRepository.markInventorySyncCircuitOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'sync-ml-1',
+        errorCode: 'INTEGRATION_SYNC_DISABLED',
       }),
     );
   });

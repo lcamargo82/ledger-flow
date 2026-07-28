@@ -94,6 +94,9 @@ export class MercadoLivreOAuthService {
         credentialsFingerprint: fingerprint,
         settingsJson: {
           scopes: credentials.scope ? String(credentials.scope).split(' ') : [],
+          syncEnabled: false,
+          stockSyncMode: 'AVAILABLE',
+          importListingsOnConnect: false,
         },
         createdByUserId: stateData.userId,
         lastSuccessfulOperationAt: new Date(),
