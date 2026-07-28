@@ -486,6 +486,30 @@
       "TRANSFER_OUT": "Transferência de saída",
       "TRANSFER_IN": "Transferência de entrada"
     },
+    "valuation": {
+      "title": "Valoração do estoque",
+      "totalValue": "Valor total em estoque",
+      "availableValue": "Valor disponível",
+      "reservedValue": "Valor reservado",
+      "skuCount": "SKUs com saldo",
+      "groupByLabel": "Agrupar valoração por",
+      "groupBy": {
+        "SKU": "SKU",
+        "PRODUCT": "Produto pai",
+        "CATEGORY": "Categoria",
+        "BRAND": "Marca",
+        "WAREHOUSE": "Warehouse"
+      },
+      "table": {
+        "group": "Agrupamento",
+        "skus": "SKUs",
+        "warehouses": "Warehouses",
+        "totalValue": "Valor físico",
+        "availableValue": "Valor disponível"
+      },
+      "emptyTitle": "Nenhuma valoração disponível",
+      "emptyDescription": "A valoração aparece após saldos com custo médio no estoque."
+    },
     "empty": {
       "warehousesTitle": "Nenhum warehouse cadastrado",
       "warehousesDescription": "Cadastre o primeiro warehouse para registrar ajustes de estoque.",
@@ -1066,6 +1090,7 @@
       "costChangeReasonLabel": "Motivo da alteração de custo",
       "costChangeReasonPlaceholder": "Informe o motivo ao alterar o custo",
       "parentSkuNotice": "Produto pai agrupa variantes e não possui SKU próprio.",
+      "variantInheritanceNotice": "Marca e categoria são herdadas do produto pai quando deixadas iguais ou vazias.",
       "validation": {
         "skuRequired": "Informe o SKU do produto.",
         "skuLength": "O SKU deve ter entre 8 e 20 caracteres.",

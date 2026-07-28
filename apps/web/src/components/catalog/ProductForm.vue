@@ -40,10 +40,20 @@ const form = reactive({
 
 const skuManuallyEdited = ref(false)
 const skuTouched = ref(false)
+const brandManuallyEdited = ref(false)
+const categoryManuallyEdited = ref(false)
 
 const onSkuInput = () => {
   skuManuallyEdited.value = true
   skuTouched.value = true
+}
+
+const onBrandInput = () => {
+  brandManuallyEdited.value = true
+}
+
+const onCategoryInput = () => {
+  categoryManuallyEdited.value = true
 }
 
 watch(() => form.name, (newName) => {
@@ -56,6 +66,9 @@ const isParent = computed(() => form.type === 'PARENT')
 const isVariant = computed(() => form.type === 'VARIANT')
 const requiresSku = computed(() => form.type === 'SIMPLE' || form.type === 'VARIANT')
 const canEditSku = computed(() => props.mode === 'create')
+const selectedParent = computed(() =>
+  (props.parentOptions || []).find((product) => product.id === form.parentProductId),
+)
 
 const typeOptions = computed(() => [
   { value: 'SIMPLE', label: t('catalog.type.SIMPLE') },
@@ -90,8 +103,14 @@ const submit = () => {
   const basePayload = {
     name: form.name,
     description: form.description || undefined,
-    brand: form.brand || undefined,
-    category: form.category || undefined,
+    brand:
+      isVariant.value && form.brand === (selectedParent.value?.brand || '')
+        ? undefined
+        : form.brand || undefined,
+    category:
+      isVariant.value && form.category === (selectedParent.value?.category || '')
+        ? undefined
+        : form.category || undefined,
   }
 
   const skuPayload = requiresSku.value
@@ -120,6 +139,16 @@ const submit = () => {
     costChangeReason: form.costChangeReason || undefined,
   })
 }
+
+watch(
+  [() => form.type, () => form.parentProductId],
+  () => {
+    if (props.mode !== 'create' || !isVariant.value) return
+    if (!brandManuallyEdited.value) form.brand = selectedParent.value?.brand || ''
+    if (!categoryManuallyEdited.value) form.category = selectedParent.value?.category || ''
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -150,14 +179,20 @@ const submit = () => {
         v-model="form.brand"
         :label="t('catalog.form.brandLabel')"
         :placeholder="t('catalog.form.brandPlaceholder')"
+        @input="onBrandInput"
       />
       <AppInput
         id="product-category"
         v-model="form.category"
         :label="t('catalog.form.categoryLabel')"
         :placeholder="t('catalog.form.categoryPlaceholder')"
+        @input="onCategoryInput"
       />
     </div>
+
+    <p v-if="mode === 'create' && isVariant && selectedParent" class="text-sm text-gray-500 dark:text-gray-400">
+      {{ t('catalog.form.variantInheritanceNotice') }}
+    </p>
 
     <AppInput
       id="product-description"

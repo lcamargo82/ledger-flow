@@ -17,12 +17,14 @@ import { RequirePermissions } from '../../../auth/presentation/decorators/requir
 import { CommerceCapabilities } from '../../../platform/domain/constants/platform-capabilities';
 import {
   InventoryAdjustmentResponseDto,
+  InventoryValuationResponseDto,
   InventoryReservationOperationResponseDto,
   PaginatedBalancesResponseDto,
   PaginatedMovementsResponseDto,
   PaginatedReservationsResponseDto,
 } from '../../application/dto/inventory-response.dto';
 import { ListInventoryQueryDto } from '../../application/dto/list-inventory-query.dto';
+import { ListInventoryValuationQueryDto } from '../../application/dto/list-inventory-valuation-query.dto';
 import { RecordAdjustmentDto } from '../../application/dto/record-adjustment.dto';
 import { ReservationTransitionDto } from '../../application/dto/reservation-transition.dto';
 import { ReserveStockDto } from '../../application/dto/reserve-stock.dto';
@@ -52,6 +54,17 @@ export class InventoryLedgerController {
   @ApiOkResponse({ type: PaginatedBalancesResponseDto })
   listBalances(@CurrentUser() user: AuthenticatedUser, @Query() query: ListInventoryQueryDto) {
     return this.inventoryService.listBalances(user.tenantId, query);
+  }
+
+  @Get('valuation')
+  @RequirePermissions('inventory:read')
+  @ApiOperation({ summary: 'Resumo de valoração de estoque por agrupamento operacional' })
+  @ApiOkResponse({ type: InventoryValuationResponseDto })
+  inventoryValuation(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: ListInventoryValuationQueryDto,
+  ) {
+    return this.inventoryService.inventoryValuation(user.tenantId, query);
   }
 
   @Get('movements')

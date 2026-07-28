@@ -26,7 +26,7 @@ export class CatalogProductsService {
   ) {}
 
   async create(tenantId: string, actorUserId: string, createProductDto: CreateProductDto) {
-    await this.validateProductShape(tenantId, createProductDto);
+    const parent = await this.validateProductShape(tenantId, createProductDto);
 
     const sku = createProductDto.sku
       ? await this.buildSkuCreateData(tenantId, createProductDto.sku)
@@ -38,8 +38,8 @@ export class CatalogProductsService {
       parentProductId: createProductDto.parentProductId ?? null,
       name: createProductDto.name,
       description: createProductDto.description ?? null,
-      brand: createProductDto.brand ?? null,
-      category: createProductDto.category ?? null,
+      brand: this.resolveVariantInheritedField(createProductDto.brand, parent?.brand),
+      category: this.resolveVariantInheritedField(createProductDto.category, parent?.category),
       attributes: createProductDto.attributes ?? null,
       sku,
     });
@@ -142,7 +142,7 @@ export class CatalogProductsService {
     return archivedProduct;
   }
 
-  private async validateProductShape(tenantId: string, dto: CreateProductDto): Promise<void> {
+  private async validateProductShape(tenantId: string, dto: CreateProductDto) {
     if (dto.type === ProductType.PARENT && dto.sku) {
       throw new BadRequestException('Parent products cannot have SKU.');
     }
@@ -164,7 +164,17 @@ export class CatalogProductsService {
       if (!parent || parent.type !== ProductType.PARENT) {
         throw new BadRequestException('Variant parent must be a parent product.');
       }
+
+      return parent;
     }
+
+    return null;
+  }
+
+  private resolveVariantInheritedField(value: string | undefined, parentValue: string | null | undefined) {
+    const trimmed = value?.trim();
+    if (trimmed) return trimmed;
+    return parentValue ?? null;
   }
 
   private async buildSkuCreateData(

@@ -13,6 +13,9 @@ import type {
   CreateWarehouseRequest,
   CycleCount,
   InventoryBalance,
+  InventoryValuationGroup,
+  InventoryValuationGroupBy,
+  InventoryValuationSummary,
   InventoryMovement,
   InventoryReservation,
   InventoryTransfer,
@@ -27,6 +30,19 @@ import type {
 export const useInventoryStore = defineStore('inventory', () => {
   const warehouses = ref<Warehouse[]>([])
   const balances = ref<InventoryBalance[]>([])
+  const valuationSummary = ref<InventoryValuationSummary>({
+    onHandQuantity: '0',
+    reservedQuantity: '0',
+    availableQuantity: '0',
+    totalValue: '0',
+    reservedValue: '0',
+    availableValue: '0',
+    skuCount: 0,
+    warehouseCount: 0,
+    currency: 'BRL',
+  })
+  const valuationGroups = ref<InventoryValuationGroup[]>([])
+  const valuationGroupBy = ref<InventoryValuationGroupBy>('SKU')
   const movements = ref<InventoryMovement[]>([])
   const reservations = ref<InventoryReservation[]>([])
   const transfers = ref<InventoryTransfer[]>([])
@@ -101,6 +117,15 @@ export const useInventoryStore = defineStore('inventory', () => {
     balanceMeta.value = response.meta
   }
 
+  const fetchValuation = async () => {
+    const response = await inventoryService.getValuation({
+      groupBy: valuationGroupBy.value,
+      search: search.value || undefined,
+    })
+    valuationSummary.value = response.summary
+    valuationGroups.value = response.groups
+  }
+
   const fetchMovements = async () => {
     const response = await inventoryService.listMovements({
       page: movementMeta.value.page,
@@ -145,7 +170,13 @@ export const useInventoryStore = defineStore('inventory', () => {
     isLoading.value = true
     error.value = null
     try {
-      await Promise.all([fetchWarehouses(), fetchBalances(), fetchMovements(), fetchReservations()])
+      await Promise.all([
+        fetchWarehouses(),
+        fetchBalances(),
+        fetchValuation(),
+        fetchMovements(),
+        fetchReservations(),
+      ])
     } catch (err) {
       error.value = extractErrorMessage(err)
       throw err
@@ -162,6 +193,11 @@ export const useInventoryStore = defineStore('inventory', () => {
   const setBalancePage = (page: number) => {
     balanceMeta.value.page = page
     fetchBalances()
+  }
+
+  const setValuationGroupBy = (groupBy: InventoryValuationGroupBy) => {
+    valuationGroupBy.value = groupBy
+    fetchValuation()
   }
 
   const setMovementPage = (page: number) => {
@@ -238,7 +274,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     error.value = null
     try {
       const response = await inventoryService.recordAdjustment(payload)
-      await Promise.all([fetchBalances(), fetchMovements()])
+      await Promise.all([fetchBalances(), fetchValuation(), fetchMovements()])
       return response
     } catch (err) {
       error.value = extractErrorMessage(err)
@@ -253,7 +289,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     error.value = null
     try {
       const response = await inventoryService.reserveStock(payload)
-      await Promise.all([fetchBalances(), fetchMovements(), fetchReservations()])
+      await Promise.all([fetchBalances(), fetchValuation(), fetchMovements(), fetchReservations()])
       return response
     } catch (err) {
       error.value = extractErrorMessage(err)
@@ -268,7 +304,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     error.value = null
     try {
       const response = await inventoryService.releaseReservation(id, payload)
-      await Promise.all([fetchBalances(), fetchMovements(), fetchReservations()])
+      await Promise.all([fetchBalances(), fetchValuation(), fetchMovements(), fetchReservations()])
       return response
     } catch (err) {
       error.value = extractErrorMessage(err)
@@ -283,7 +319,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     error.value = null
     try {
       const response = await inventoryService.consumeReservation(id, payload)
-      await Promise.all([fetchBalances(), fetchMovements(), fetchReservations()])
+      await Promise.all([fetchBalances(), fetchValuation(), fetchMovements(), fetchReservations()])
       return response
     } catch (err) {
       error.value = extractErrorMessage(err)
@@ -328,7 +364,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     error.value = null
     try {
       const response = await inventoryService.completeTransfer(id, payload)
-      await Promise.all([fetchTransfers(), fetchBalances(), fetchMovements()])
+      await Promise.all([fetchTransfers(), fetchBalances(), fetchValuation(), fetchMovements()])
       return response
     } catch (err) {
       error.value = extractErrorMessage(err)
@@ -407,7 +443,7 @@ export const useInventoryStore = defineStore('inventory', () => {
     error.value = null
     try {
       const response = await inventoryService.approveCycleCount(id, payload)
-      await Promise.all([fetchCycleCounts(), fetchBalances(), fetchMovements()])
+      await Promise.all([fetchCycleCounts(), fetchBalances(), fetchValuation(), fetchMovements()])
       return response
     } catch (err) {
       error.value = extractErrorMessage(err)
@@ -435,6 +471,9 @@ export const useInventoryStore = defineStore('inventory', () => {
   return {
     warehouses,
     balances,
+    valuationSummary,
+    valuationGroups,
+    valuationGroupBy,
     movements,
     reservations,
     transfers,
@@ -454,12 +493,14 @@ export const useInventoryStore = defineStore('inventory', () => {
     fetchInventory,
     fetchWarehouses,
     fetchBalances,
+    fetchValuation,
     fetchMovements,
     fetchReservations,
     fetchTransfers,
     fetchCycleCounts,
     setWarehousePage,
     setBalancePage,
+    setValuationGroupBy,
     setMovementPage,
     setReservationPage,
     setTransferPage,

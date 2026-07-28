@@ -5,8 +5,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
 import { useInventoryStore } from '../stores/inventory.store'
-import type { InventoryReservation, Warehouse } from '../types/inventory.types'
+import type {
+  InventoryReservation,
+  InventoryValuationGroupBy,
+  Warehouse,
+} from '../types/inventory.types'
 import { formatDateTime } from '../utils/date-format'
+import { formatMoney } from '../utils/money-format'
 import {
   validateWarehouseForm,
   type WarehouseFormErrors,
@@ -18,6 +23,8 @@ import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
 import AppNumberInput from '../components/common/AppNumberInput.vue'
 import AppModal from '../components/common/AppModal.vue'
+import AppMetricCard from '../components/common/AppMetricCard.vue'
+import AppMetricGrid from '../components/common/AppMetricGrid.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
 import AppTable from '../components/common/AppTable.vue'
@@ -91,6 +98,20 @@ const balanceColumns = computed(() => [
   { key: 'updatedAt', label: t('inventory.table.updatedAt') },
 ])
 
+const valuationColumns = computed(() => [
+  { key: 'groupLabel', label: t('inventory.valuation.table.group') },
+  { key: 'skuCount', label: t('inventory.valuation.table.skus') },
+  { key: 'warehouseCount', label: t('inventory.valuation.table.warehouses') },
+  { key: 'onHandQuantity', label: t('inventory.table.onHand') },
+  { key: 'availableQuantity', label: t('inventory.table.available') },
+  { key: 'totalValue', label: t('inventory.valuation.table.totalValue'), align: 'right' as const },
+  {
+    key: 'availableValue',
+    label: t('inventory.valuation.table.availableValue'),
+    align: 'right' as const,
+  },
+])
+
 const movementColumns = computed(() => [
   { key: 'occurredAt', label: t('inventory.table.occurredAt') },
   { key: 'type', label: t('inventory.table.type') },
@@ -125,6 +146,21 @@ const movementTypeOptions = computed(() => [
   { value: 'ADJUSTMENT_IN', label: t('inventory.movementType.ADJUSTMENT_IN') },
   { value: 'ADJUSTMENT_OUT', label: t('inventory.movementType.ADJUSTMENT_OUT') },
 ])
+
+const valuationGroupOptions = computed(() => [
+  { value: 'SKU', label: t('inventory.valuation.groupBy.SKU') },
+  { value: 'PRODUCT', label: t('inventory.valuation.groupBy.PRODUCT') },
+  { value: 'CATEGORY', label: t('inventory.valuation.groupBy.CATEGORY') },
+  { value: 'BRAND', label: t('inventory.valuation.groupBy.BRAND') },
+  { value: 'WAREHOUSE', label: t('inventory.valuation.groupBy.WAREHOUSE') },
+])
+
+const formatQuantity = (value: string | number) =>
+  new Intl.NumberFormat(currentLocale.value, { maximumFractionDigits: 6 }).format(Number(value))
+
+const setValuationGroupBy = (value: string) => {
+  inventoryStore.setValuationGroupBy(value as InventoryValuationGroupBy)
+}
 
 onMounted(() => {
   inventoryStore.fetchInventory()
@@ -388,6 +424,78 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           </div>
         </div>
       </AppCard>
+
+      <template v-if="activeTab === 'balances'">
+        <AppMetricGrid :accessible-label="t('inventory.valuation.title')">
+          <AppMetricCard
+            :label="t('inventory.valuation.totalValue')"
+            :value="
+              formatMoney(
+                inventoryStore.valuationSummary.totalValue,
+                inventoryStore.valuationSummary.currency,
+                currentLocale,
+              )
+            "
+          />
+          <AppMetricCard
+            :label="t('inventory.valuation.availableValue')"
+            :value="
+              formatMoney(
+                inventoryStore.valuationSummary.availableValue,
+                inventoryStore.valuationSummary.currency,
+                currentLocale,
+              )
+            "
+          />
+          <AppMetricCard
+            :label="t('inventory.valuation.reservedValue')"
+            :value="
+              formatMoney(
+                inventoryStore.valuationSummary.reservedValue,
+                inventoryStore.valuationSummary.currency,
+                currentLocale,
+              )
+            "
+          />
+          <AppMetricCard
+            :label="t('inventory.valuation.skuCount')"
+            :value="String(inventoryStore.valuationSummary.skuCount)"
+          />
+        </AppMetricGrid>
+
+        <AppCard>
+          <div class="lf-filter-container">
+            <div class="lf-filter-item">
+              <AppSelect
+                id="inventory-valuation-group"
+                :model-value="inventoryStore.valuationGroupBy"
+                :label="t('inventory.valuation.groupByLabel')"
+                :options="valuationGroupOptions"
+                @update:model-value="setValuationGroupBy"
+              />
+            </div>
+          </div>
+        </AppCard>
+
+        <AppTable
+          :columns="valuationColumns"
+          :items="inventoryStore.valuationGroups"
+          :is-loading="inventoryStore.isLoading"
+          :empty-title="t('inventory.valuation.emptyTitle')"
+          :empty-description="t('inventory.valuation.emptyDescription')"
+        >
+          <template #onHandQuantity="{ item }">{{ formatQuantity(item.onHandQuantity) }}</template>
+          <template #availableQuantity="{ item }">
+            {{ formatQuantity(item.availableQuantity) }}
+          </template>
+          <template #totalValue="{ item }">
+            {{ formatMoney(item.totalValue, item.currency, currentLocale) }}
+          </template>
+          <template #availableValue="{ item }">
+            {{ formatMoney(item.availableValue, item.currency, currentLocale) }}
+          </template>
+        </AppTable>
+      </template>
 
       <AppTable
         v-if="activeTab === 'warehouses'"

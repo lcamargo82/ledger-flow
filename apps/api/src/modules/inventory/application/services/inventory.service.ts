@@ -26,6 +26,10 @@ import {
 import { ListCycleCountsQueryDto } from '../dto/list-cycle-counts-query.dto';
 import { ListInventoryQueryDto } from '../dto/list-inventory-query.dto';
 import { ListInventoryTransfersQueryDto } from '../dto/list-inventory-transfers-query.dto';
+import {
+  InventoryValuationGroupBy,
+  ListInventoryValuationQueryDto,
+} from '../dto/list-inventory-valuation-query.dto';
 import { ListWarehousesQueryDto } from '../dto/list-warehouses-query.dto';
 import { RecordAdjustmentDto } from '../dto/record-adjustment.dto';
 import { ReservationTransitionDto } from '../dto/reservation-transition.dto';
@@ -163,6 +167,97 @@ export class InventoryService {
 
   listBalances(tenantId: string, query: ListInventoryQueryDto) {
     return this.inventoryRepository.listBalances({ tenantId, ...query });
+  }
+
+  async inventoryValuation(tenantId: string, query: ListInventoryValuationQueryDto) {
+    const groupBy = query.groupBy ?? 'SKU';
+    const { key, label, type } = this.inventoryValuationGrouping(groupBy);
+    const search = query.search?.trim();
+    const warehouseFilter = query.warehouseId
+      ? Prisma.sql`AND ib.warehouse_id = ${query.warehouseId}`
+      : Prisma.empty;
+    const searchFilter = search
+      ? Prisma.sql`AND (
+          ps.sku_canonical ILIKE ${`%${search}%`}
+          OR ps.sku_display ILIKE ${`%${search}%`}
+          OR p.name ILIKE ${`%${search}%`}
+          OR parent.name ILIKE ${`%${search}%`}
+          OR COALESCE(p.brand, parent.brand, '') ILIKE ${`%${search}%`}
+          OR COALESCE(p.category, parent.category, '') ILIKE ${`%${search}%`}
+          OR w.name ILIKE ${`%${search}%`}
+          OR w.code ILIKE ${`%${search}%`}
+        )`
+      : Prisma.empty;
+
+    type ValuationRow = {
+      groupKey?: string | null;
+      groupLabel?: string | null;
+      groupType?: string | null;
+      onHandQuantity: string | null;
+      reservedQuantity: string | null;
+      availableQuantity: string | null;
+      totalValue: string | null;
+      reservedValue: string | null;
+      availableValue: string | null;
+      skuCount: bigint | number | null;
+      warehouseCount: bigint | number | null;
+      currency: string | null;
+    };
+
+    const baseFrom = Prisma.sql`
+      FROM inventory_balances ib
+      JOIN product_skus ps ON ps.id = ib.sku_id
+      JOIN products p ON p.id = ps.product_id
+      LEFT JOIN products parent ON parent.id = p.parent_product_id
+      JOIN warehouses w ON w.id = ib.warehouse_id
+      WHERE ib.tenant_id = ${tenantId}
+      ${warehouseFilter}
+      ${searchFilter}
+    `;
+
+    const [summary] = await this.prisma.$queryRaw<ValuationRow[]>(Prisma.sql`
+      SELECT
+        SUM(ib.on_hand_quantity)::text AS "onHandQuantity",
+        SUM(ib.reserved_quantity)::text AS "reservedQuantity",
+        SUM(ib.available_quantity)::text AS "availableQuantity",
+        SUM(ib.on_hand_quantity * ps.average_cost)::text AS "totalValue",
+        SUM(ib.reserved_quantity * ps.average_cost)::text AS "reservedValue",
+        SUM(ib.available_quantity * ps.average_cost)::text AS "availableValue",
+        COUNT(DISTINCT ib.sku_id) AS "skuCount",
+        COUNT(DISTINCT ib.warehouse_id) AS "warehouseCount",
+        COALESCE(MAX(ps.currency), 'BRL') AS "currency"
+      ${baseFrom}
+    `);
+
+    const groups = await this.prisma.$queryRaw<ValuationRow[]>(Prisma.sql`
+      SELECT
+        ${key}::text AS "groupKey",
+        ${label}::text AS "groupLabel",
+        ${type}::text AS "groupType",
+        SUM(ib.on_hand_quantity)::text AS "onHandQuantity",
+        SUM(ib.reserved_quantity)::text AS "reservedQuantity",
+        SUM(ib.available_quantity)::text AS "availableQuantity",
+        SUM(ib.on_hand_quantity * ps.average_cost)::text AS "totalValue",
+        SUM(ib.reserved_quantity * ps.average_cost)::text AS "reservedValue",
+        SUM(ib.available_quantity * ps.average_cost)::text AS "availableValue",
+        COUNT(DISTINCT ib.sku_id) AS "skuCount",
+        COUNT(DISTINCT ib.warehouse_id) AS "warehouseCount",
+        COALESCE(MAX(ps.currency), 'BRL') AS "currency"
+      ${baseFrom}
+      GROUP BY ${key}, ${label}, ${type}
+      ORDER BY SUM(ib.on_hand_quantity * ps.average_cost) DESC, ${label} ASC
+      LIMIT 100
+    `);
+
+    return {
+      summary: this.toInventoryValuationSummary(summary),
+      groups: groups.map((row) => ({
+        groupKey: row.groupKey ?? '',
+        groupLabel: row.groupLabel ?? '',
+        groupType: row.groupType ?? groupBy,
+        ...this.toInventoryValuationSummary(row),
+      })),
+    };
   }
 
   listMovements(tenantId: string, query: ListInventoryQueryDto) {
@@ -717,6 +812,67 @@ export class InventoryService {
         metadata: (metadata as Prisma.InputJsonValue) ?? undefined,
       },
     });
+  }
+
+  private inventoryValuationGrouping(groupBy: InventoryValuationGroupBy) {
+    const inheritedBrand = Prisma.sql`COALESCE(NULLIF(p.brand, ''), NULLIF(parent.brand, ''), 'Sem marca')`;
+    const inheritedCategory = Prisma.sql`COALESCE(NULLIF(p.category, ''), NULLIF(parent.category, ''), 'Sem categoria')`;
+    const parentProductId = Prisma.sql`COALESCE(parent.id, p.id)`;
+    const parentProductName = Prisma.sql`COALESCE(parent.name, p.name)`;
+
+    const groupings = {
+      SKU: {
+        key: Prisma.sql`ps.id`,
+        label: Prisma.sql`ps.sku_display || ' · ' || p.name`,
+        type: Prisma.sql`'SKU'`,
+      },
+      PRODUCT: {
+        key: parentProductId,
+        label: parentProductName,
+        type: Prisma.sql`'PRODUCT'`,
+      },
+      CATEGORY: {
+        key: inheritedCategory,
+        label: inheritedCategory,
+        type: Prisma.sql`'CATEGORY'`,
+      },
+      BRAND: {
+        key: inheritedBrand,
+        label: inheritedBrand,
+        type: Prisma.sql`'BRAND'`,
+      },
+      WAREHOUSE: {
+        key: Prisma.sql`w.id`,
+        label: Prisma.sql`w.name || ' · ' || w.code`,
+        type: Prisma.sql`'WAREHOUSE'`,
+      },
+    } satisfies Record<InventoryValuationGroupBy, { key: Prisma.Sql; label: Prisma.Sql; type: Prisma.Sql }>;
+
+    return groupings[groupBy];
+  }
+
+  private toInventoryValuationSummary(row?: {
+    onHandQuantity: string | null;
+    reservedQuantity: string | null;
+    availableQuantity: string | null;
+    totalValue: string | null;
+    reservedValue: string | null;
+    availableValue: string | null;
+    skuCount: bigint | number | null;
+    warehouseCount: bigint | number | null;
+    currency: string | null;
+  }) {
+    return {
+      onHandQuantity: row?.onHandQuantity ?? '0',
+      reservedQuantity: row?.reservedQuantity ?? '0',
+      availableQuantity: row?.availableQuantity ?? '0',
+      totalValue: row?.totalValue ?? '0',
+      reservedValue: row?.reservedValue ?? '0',
+      availableValue: row?.availableValue ?? '0',
+      skuCount: Number(row?.skuCount ?? 0),
+      warehouseCount: Number(row?.warehouseCount ?? 0),
+      currency: row?.currency ?? 'BRL',
+    };
   }
 
   private async publishBalanceChanged(

@@ -12,6 +12,7 @@ import type {
   CycleCountApprovalResponse,
   InventoryAdjustmentResponse,
   InventoryBalance,
+  InventoryValuationResponse,
   InventoryMovement,
   InventoryReservation,
   InventoryReservationOperationResponse,
@@ -60,6 +61,13 @@ export class InventoryService {
       '/inventory/balances',
       { params },
     )
+    return data
+  }
+
+  async getValuation(params?: Record<string, unknown>): Promise<InventoryValuationResponse> {
+    const { data } = await httpClient.get<InventoryValuationResponse>('/inventory/valuation', {
+      params,
+    })
     return data
   }
 

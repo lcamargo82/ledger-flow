@@ -47,6 +47,31 @@ export interface InventoryBalance {
   warehouse: InventoryWarehouseIdentity
 }
 
+export type InventoryValuationGroupBy = 'SKU' | 'PRODUCT' | 'CATEGORY' | 'BRAND' | 'WAREHOUSE'
+
+export interface InventoryValuationSummary {
+  onHandQuantity: string
+  reservedQuantity: string
+  availableQuantity: string
+  totalValue: string
+  reservedValue: string
+  availableValue: string
+  skuCount: number
+  warehouseCount: number
+  currency: string
+}
+
+export interface InventoryValuationGroup extends InventoryValuationSummary {
+  groupKey: string
+  groupLabel: string
+  groupType: InventoryValuationGroupBy
+}
+
+export interface InventoryValuationResponse {
+  summary: InventoryValuationSummary
+  groups: InventoryValuationGroup[]
+}
+
 export interface InventoryMovement {
   id: string
   tenantId: string

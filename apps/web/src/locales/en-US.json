@@ -487,6 +487,30 @@
       "TRANSFER_OUT": "Transfer out",
       "TRANSFER_IN": "Transfer in"
     },
+    "valuation": {
+      "title": "Inventory valuation",
+      "totalValue": "Total inventory value",
+      "availableValue": "Available value",
+      "reservedValue": "Reserved value",
+      "skuCount": "SKUs with balance",
+      "groupByLabel": "Group valuation by",
+      "groupBy": {
+        "SKU": "SKU",
+        "PRODUCT": "Parent product",
+        "CATEGORY": "Category",
+        "BRAND": "Brand",
+        "WAREHOUSE": "Warehouse"
+      },
+      "table": {
+        "group": "Group",
+        "skus": "SKUs",
+        "warehouses": "Warehouses",
+        "totalValue": "On-hand value",
+        "availableValue": "Available value"
+      },
+      "emptyTitle": "No valuation available",
+      "emptyDescription": "Valuation appears after balances with average cost exist in inventory."
+    },
     "empty": {
       "warehousesTitle": "No warehouses yet",
       "warehousesDescription": "Create the first warehouse to record stock adjustments.",
@@ -1064,6 +1088,7 @@
       "costChangeReasonLabel": "Cost change reason",
       "costChangeReasonPlaceholder": "Explain the reason when changing cost",
       "parentSkuNotice": "Parent products group variants and do not have their own SKU.",
+      "variantInheritanceNotice": "Brand and category are inherited from the parent product when left equal or blank.",
       "validation": {
         "skuRequired": "Enter the product SKU.",
         "skuLength": "SKU must be between 8 and 20 characters.",

@@ -191,6 +191,32 @@ export class PaginatedBalancesResponseDto {
   @ApiProperty({ type: PaginatedMetaDto }) meta: PaginatedMetaDto;
 }
 
+export class InventoryValuationSummaryDto {
+  @ApiProperty() onHandQuantity: string;
+  @ApiProperty() reservedQuantity: string;
+  @ApiProperty() availableQuantity: string;
+  @ApiProperty() totalValue: string;
+  @ApiProperty() reservedValue: string;
+  @ApiProperty() availableValue: string;
+  @ApiProperty() skuCount: number;
+  @ApiProperty() warehouseCount: number;
+  @ApiProperty() currency: string;
+}
+
+export class InventoryValuationGroupDto extends InventoryValuationSummaryDto {
+  @ApiProperty() groupKey: string;
+  @ApiProperty() groupLabel: string;
+  @ApiProperty() groupType: string;
+}
+
+export class InventoryValuationResponseDto {
+  @ApiProperty({ type: InventoryValuationSummaryDto })
+  summary: InventoryValuationSummaryDto;
+
+  @ApiProperty({ type: [InventoryValuationGroupDto] })
+  groups: InventoryValuationGroupDto[];
+}
+
 export class PaginatedReservationsResponseDto {
   @ApiProperty({ type: [InventoryReservationResponseDto] })
   data: InventoryReservationResponseDto[];
