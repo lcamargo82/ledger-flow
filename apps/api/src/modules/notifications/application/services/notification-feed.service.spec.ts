@@ -38,6 +38,26 @@ describe('NotificationFeedService', () => {
     });
   });
 
+  it('suppresses technical shipping summary events from the user feed', async () => {
+    accessPolicy.getVisibleEventTypes.mockResolvedValueOnce([
+      'channel.inventory_sync.failed',
+      'channel.order.shipping_summary.updated',
+    ]);
+    let findManyArgs: unknown;
+    prisma.notificationRecipient.findMany.mockImplementation((args) => {
+      findManyArgs = args;
+      return Promise.resolve([]);
+    });
+
+    await service.list('tenant-1', 'user-1', { limit: 20 });
+
+    expect(findManyArgs).toMatchObject({
+      where: {
+        notificationEvent: { eventType: { in: ['channel.inventory_sync.failed'] } },
+      },
+    });
+  });
+
   it('uses the same visibility policy for unread count', async () => {
     prisma.notificationRecipient.count.mockResolvedValue(2);
 

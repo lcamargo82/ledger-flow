@@ -5,6 +5,7 @@ import { ListNotificationsQueryDto } from '../dto/list-notifications-query.dto';
 import { NotificationAccessPolicyService } from './notification-access-policy.service';
 
 const EVENT_INCLUDE = { notificationEvent: true } satisfies Prisma.NotificationRecipientInclude;
+const USER_FEED_SUPPRESSED_EVENT_TYPES = new Set(['channel.order.shipping_summary.updated']);
 
 @Injectable()
 export class NotificationFeedService {
@@ -14,7 +15,9 @@ export class NotificationFeedService {
   ) {}
 
   async list(tenantId: string, userId: string, query: ListNotificationsQueryDto) {
-    const eventTypes = await this.accessPolicy.getVisibleEventTypes(tenantId, userId);
+    const eventTypes = this.userFeedEventTypes(
+      await this.accessPolicy.getVisibleEventTypes(tenantId, userId),
+    );
     if (!eventTypes.length) return { data: [], meta: { nextCursor: null } };
 
     const limit = query.limit ?? 20;
@@ -35,7 +38,9 @@ export class NotificationFeedService {
   }
 
   async unreadCount(tenantId: string, userId: string) {
-    const eventTypes = await this.accessPolicy.getVisibleEventTypes(tenantId, userId);
+    const eventTypes = this.userFeedEventTypes(
+      await this.accessPolicy.getVisibleEventTypes(tenantId, userId),
+    );
     if (!eventTypes.length) return { count: 0 };
     const count = await this.prisma.notificationRecipient.count({
       where: this.baseWhere(tenantId, userId, eventTypes, true),
@@ -44,7 +49,9 @@ export class NotificationFeedService {
   }
 
   async markRead(tenantId: string, userId: string, id: string) {
-    const eventTypes = await this.accessPolicy.getVisibleEventTypes(tenantId, userId);
+    const eventTypes = this.userFeedEventTypes(
+      await this.accessPolicy.getVisibleEventTypes(tenantId, userId),
+    );
     const result = await this.prisma.notificationRecipient.updateMany({
       where: { ...this.baseWhere(tenantId, userId, eventTypes), id },
       data: { readAt: new Date() },
@@ -54,7 +61,9 @@ export class NotificationFeedService {
   }
 
   async markAllRead(tenantId: string, userId: string) {
-    const eventTypes = await this.accessPolicy.getVisibleEventTypes(tenantId, userId);
+    const eventTypes = this.userFeedEventTypes(
+      await this.accessPolicy.getVisibleEventTypes(tenantId, userId),
+    );
     const result = await this.prisma.notificationRecipient.updateMany({
       where: this.baseWhere(tenantId, userId, eventTypes, true),
       data: { readAt: new Date() },
@@ -63,7 +72,9 @@ export class NotificationFeedService {
   }
 
   async dismiss(tenantId: string, userId: string, id: string) {
-    const eventTypes = await this.accessPolicy.getVisibleEventTypes(tenantId, userId);
+    const eventTypes = this.userFeedEventTypes(
+      await this.accessPolicy.getVisibleEventTypes(tenantId, userId),
+    );
     const result = await this.prisma.notificationRecipient.updateMany({
       where: { ...this.baseWhere(tenantId, userId, eventTypes), id },
       data: { dismissedAt: new Date() },
@@ -79,6 +90,10 @@ export class NotificationFeedService {
       ...(unread && { readAt: null }),
       notificationEvent: { eventType: { in: eventTypes } },
     } satisfies Prisma.NotificationRecipientWhereInput;
+  }
+
+  private userFeedEventTypes(eventTypes: string[]) {
+    return eventTypes.filter((eventType) => !USER_FEED_SUPPRESSED_EVENT_TYPES.has(eventType));
   }
 
   private buildWhere(

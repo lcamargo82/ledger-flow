@@ -27,6 +27,17 @@ describe('notification event registry', () => {
     });
   });
 
+  it('defines the authorized contract for confirmed sales', () => {
+    expect(getNotificationEventContract('sale.confirmed')).toEqual({
+      category: NotificationCategory.ORDERS,
+      severity: NotificationSeverity.SUCCESS,
+      titleKey: 'notifications.events.saleConfirmed.title',
+      messageKey: 'notifications.events.saleConfirmed.message',
+      requiredPermissions: ['orders:read', 'sales-intelligence:read'],
+      requiredCapabilities: ['notifications.read', 'orders.manage'],
+    });
+  });
+
   it('rejects event types that are not registered', () => {
     expect(() => getNotificationEventContract('arbitrary.event')).toThrow(
       'Notification event type is not registered: arbitrary.event',
@@ -91,6 +102,12 @@ describe('notification event registry', () => {
     expect(
       getVisibleNotificationEventTypes(['orders:read'], ['notifications.read', 'orders.manage']),
     ).toContain('channel.order.shipping_summary.updated');
+  });
+
+  it('exposes confirmed sales to order-capable notification readers', () => {
+    expect(
+      getVisibleNotificationEventTypes(['orders:read'], ['notifications.read', 'orders.manage']),
+    ).toContain('sale.confirmed');
   });
 
   it('exposes Mercado Pago reauthorization notifications to gateway-capable readers', () => {

@@ -156,7 +156,7 @@ describe('NotificationProducerService', () => {
     );
   });
 
-  it('uses a safe status placeholder for shipping notifications without provider status', async () => {
+  it('does not produce a shipping notification without an informative provider status', async () => {
     config.get.mockReturnValue('true');
     notifications.createEvent.mockResolvedValue({ created: true });
 
@@ -170,14 +170,51 @@ describe('NotificationProducerService', () => {
       changedAt: new Date('2026-07-12T18:00:00.000Z'),
     });
 
+    expect(notifications.createEvent).not.toHaveBeenCalled();
+  });
+
+  it('produces one enriched confirmed sale notification per order when enabled', async () => {
+    config.get.mockReturnValue('true');
+    notifications.createEvent.mockResolvedValue({ created: true });
+
+    await service.saleConfirmed({
+      tenantId: 'tenant-1',
+      orderId: 'order-1',
+      externalOrderId: '2000000001',
+      buyerName: 'Jonas',
+      productName: 'Controle Bluetooth',
+      quantity: 2,
+      valueAmount: '163.8',
+      currency: 'BRL',
+      paymentStatus: 'paid',
+      shippingMode: 'me2',
+      logisticType: 'drop_off',
+      handlingEstimateAt: new Date('2026-07-12T10:00:00.000Z'),
+      deliveryEstimateAt: new Date('2026-07-15T10:00:00.000Z'),
+      postedAt: null,
+    });
+
     expect(notifications.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        translationArgs: expect.objectContaining({
-          status: 'UNKNOWN',
-        }),
-        metadata: expect.objectContaining({
-          status: 'UNKNOWN',
-        }),
+        eventType: 'sale.confirmed',
+        idempotencyKey: 'sale-confirmed:order-1',
+        sourceType: 'InternalOrder',
+        sourceId: 'order-1',
+        translationArgs: {
+          orderId: 'order-1',
+          externalOrderId: '2000000001',
+          buyerName: 'Jonas',
+          productName: 'Controle Bluetooth',
+          quantity: 2,
+          valueAmount: '163.8',
+          currency: 'BRL',
+          paymentStatus: 'paid',
+          shippingMode: 'me2',
+          logisticType: 'drop_off',
+          handlingEstimateAt: '2026-07-12T10:00:00.000Z',
+          deliveryEstimateAt: '2026-07-15T10:00:00.000Z',
+          postedAt: null,
+        },
       }),
     );
   });

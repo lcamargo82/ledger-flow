@@ -220,6 +220,10 @@
         "title": "Shipping summary updated",
         "message": "Mercado Livre order {externalOrderId} had its shipping status updated to {status}."
       },
+      "saleConfirmed": {
+        "title": "Sale confirmed",
+        "message": "Order {externalOrderId}: {quantity} unit(s) of {productName} for {buyerName}."
+      },
       "reconciliationDivergence": {
         "title": "Reconciliation divergence identified",
         "message": "Case {caseId} requires review."

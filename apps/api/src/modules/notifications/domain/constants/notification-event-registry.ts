@@ -35,6 +35,14 @@ const NOTIFICATION_EVENT_REGISTRY = {
     requiredPermissions: ['orders:read', 'channels:read'],
     requiredCapabilities: [NotificationCapabilities.Read, CommerceCapabilities.OrdersManage],
   },
+  'sale.confirmed': {
+    category: NotificationCategory.ORDERS,
+    severity: NotificationSeverity.SUCCESS,
+    titleKey: 'notifications.events.saleConfirmed.title',
+    messageKey: 'notifications.events.saleConfirmed.message',
+    requiredPermissions: ['orders:read', 'sales-intelligence:read'],
+    requiredCapabilities: [NotificationCapabilities.Read, CommerceCapabilities.OrdersManage],
+  },
   'reconciliation.case.divergent': {
     category: NotificationCategory.RECONCILIATION,
     severity: NotificationSeverity.WARNING,

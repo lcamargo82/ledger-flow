@@ -113,7 +113,8 @@ export class NotificationProducerService {
   }) {
     if (!this.isEnabled()) return;
 
-    const status = input.status ?? 'UNKNOWN';
+    const status = input.status?.trim();
+    if (!status || status === 'UNKNOWN') return;
 
     await this.notifications.createEvent({
       tenantId: input.tenantId,
@@ -133,6 +134,53 @@ export class NotificationProducerService {
         externalOrderId: input.externalOrderId,
         externalShipmentId: input.externalShipmentId ?? null,
         status,
+      },
+    });
+  }
+
+  async saleConfirmed(input: {
+    tenantId: string;
+    orderId: string;
+    externalOrderId: string;
+    buyerName?: string | null;
+    productName?: string | null;
+    quantity: number;
+    valueAmount?: string | null;
+    currency?: string | null;
+    paymentStatus?: string | null;
+    shippingMode?: string | null;
+    logisticType?: string | null;
+    handlingEstimateAt?: Date | null;
+    deliveryEstimateAt?: Date | null;
+    postedAt?: Date | null;
+  }) {
+    if (!this.isEnabled()) return;
+
+    await this.notifications.createEvent({
+      tenantId: input.tenantId,
+      eventType: 'sale.confirmed',
+      idempotencyKey: `sale-confirmed:${input.orderId}`,
+      sourceType: 'InternalOrder',
+      sourceId: input.orderId,
+      occurredAt: new Date(),
+      translationArgs: {
+        orderId: input.orderId,
+        externalOrderId: input.externalOrderId,
+        buyerName: input.buyerName ?? null,
+        productName: input.productName ?? null,
+        quantity: input.quantity,
+        valueAmount: input.valueAmount ?? null,
+        currency: input.currency ?? 'BRL',
+        paymentStatus: input.paymentStatus ?? null,
+        shippingMode: input.shippingMode ?? null,
+        logisticType: input.logisticType ?? null,
+        handlingEstimateAt: input.handlingEstimateAt?.toISOString() ?? null,
+        deliveryEstimateAt: input.deliveryEstimateAt?.toISOString() ?? null,
+        postedAt: input.postedAt?.toISOString() ?? null,
+      },
+      metadata: {
+        orderId: input.orderId,
+        externalOrderId: input.externalOrderId,
       },
     });
   }

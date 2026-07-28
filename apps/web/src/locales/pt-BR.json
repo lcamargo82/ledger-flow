@@ -219,6 +219,10 @@
         "title": "Resumo logístico atualizado",
         "message": "O pedido Mercado Livre {externalOrderId} teve o status logístico atualizado para {status}."
       },
+      "saleConfirmed": {
+        "title": "Venda confirmada",
+        "message": "Pedido {externalOrderId}: {quantity} unidade(s) de {productName} para {buyerName}."
+      },
       "reconciliationDivergence": {
         "title": "Divergência de conciliação identificada",
         "message": "O caso {caseId} requer análise."

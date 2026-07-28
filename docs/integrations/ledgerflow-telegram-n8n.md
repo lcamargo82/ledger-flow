@@ -51,12 +51,12 @@ curl -sS -X POST "$LEDGERFLOW_API_URL/notification-webhook-subscriptions" \
     "name": "n8n Telegram",
     "endpointUrl": "https://SEU_N8N/webhook/ledgerflow/telegram",
     "eventTypes": [
+      "sale.confirmed",
       "mercado_pago.payment_status_updated",
       "mercado_pago.connection_reauth_required",
       "marketplace_settlement.event_received",
       "cash_position.unexplained_difference",
       "channel.inventory_sync.failed",
-      "channel.order.shipping_summary.updated",
       "reconciliation.case.divergent",
       "sale.loss_detected",
       "sale.low_margin_detected",

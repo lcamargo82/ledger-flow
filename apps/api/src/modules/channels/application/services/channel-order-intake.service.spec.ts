@@ -42,6 +42,7 @@ describe('ChannelOrderIntakeService', () => {
   };
   const notificationProducer = {
     channelOrderShippingSummaryUpdated: jest.fn(),
+    saleConfirmed: jest.fn(),
   };
 
   const integration = {
@@ -188,6 +189,17 @@ describe('ChannelOrderIntakeService', () => {
     );
     expect(result.orderId).toBe('order-1');
     expect(result.status).toBe(InternalOrderStatus.CONFIRMED);
+    expect(notificationProducer.saleConfirmed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        orderId: 'order-1',
+        externalOrderId: '2000000001',
+        buyerName: 'Comprador Teste',
+        productName: 'Produto Teste',
+        quantity: 2,
+        paymentStatus: 'paid',
+      }),
+    );
   });
 
   it('creates operational financial facts when Mercado Livre financial data is available', async () => {
@@ -296,15 +308,15 @@ describe('ChannelOrderIntakeService', () => {
         }),
       }),
     });
-    expect(notificationProducer.channelOrderShippingSummaryUpdated).toHaveBeenCalledWith({
-      tenantId: 'tenant-1',
-      shippingSummaryId: 'shipping-summary-1',
-      orderId: 'order-1',
-      externalOrderId: '2000000001',
-      externalShipmentId: '987654321',
-      status: 'ready_to_ship',
-      changedAt: new Date('2026-07-12T18:00:00.000Z'),
-    });
+    expect(notificationProducer.channelOrderShippingSummaryUpdated).not.toHaveBeenCalled();
+    expect(notificationProducer.saleConfirmed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        shippingMode: 'me2',
+        logisticType: 'drop_off',
+        handlingEstimateAt: new Date('2026-07-12T10:00:00.000Z'),
+        deliveryEstimateAt: new Date('2026-07-15T10:00:00.000Z'),
+      }),
+    );
     expect(JSON.stringify(prisma.outboxEvent.create.mock.calls)).not.toContain('ml-access-token');
   });
 
@@ -383,6 +395,7 @@ describe('ChannelOrderIntakeService', () => {
       },
     );
     expect(ordersService.confirm).not.toHaveBeenCalled();
+    expect(notificationProducer.saleConfirmed).not.toHaveBeenCalled();
   });
 
   it('fails closed when order items are not mapped to a SKU', async () => {

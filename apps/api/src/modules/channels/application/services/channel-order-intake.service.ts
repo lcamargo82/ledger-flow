@@ -126,6 +126,11 @@ export class ChannelOrderIntakeService {
       integration.tenantId,
       inboxEvent.provider,
     );
+    await this.emitSaleConfirmedNotification(
+      order,
+      transitioned?.order.id ?? created.order.id,
+      integration.tenantId,
+    );
 
     return {
       orderId: transitioned?.order.id ?? created.order.id,
@@ -223,16 +228,42 @@ export class ChannelOrderIntakeService {
         payloadHash: createHash('sha256').update(JSON.stringify(payload)).digest('hex'),
       },
     });
+  }
 
-    await this.notificationProducer?.channelOrderShippingSummaryUpdated({
+  private async emitSaleConfirmedNotification(
+    order: ChannelOrderDetails,
+    orderId: string,
+    tenantId: string,
+  ) {
+    const status = order.status.toLowerCase();
+    if (status !== 'paid' && status !== 'delivered') return;
+
+    await this.notificationProducer?.saleConfirmed({
       tenantId,
-      shippingSummaryId: summary.id,
       orderId,
       externalOrderId: order.externalOrderId,
-      externalShipmentId: order.shipping.externalShipmentId ?? null,
-      status: order.shipping.status ?? null,
-      changedAt: summary.updatedAt,
+      buyerName: order.buyerName ?? null,
+      productName: this.productSummary(order.items),
+      quantity: order.items.reduce((total, item) => total + item.quantity, 0),
+      valueAmount: order.financial?.paidAmount ?? order.financial?.revenueAmount ?? null,
+      currency: order.financial?.currency ?? 'BRL',
+      paymentStatus: order.financial?.paymentStatus ?? order.status,
+      shippingMode: order.shipping?.shippingMode ?? null,
+      logisticType: order.shipping?.logisticType ?? null,
+      handlingEstimateAt: this.toDate(order.shipping?.handlingEstimateAt) ?? null,
+      deliveryEstimateAt: this.toDate(order.shipping?.deliveryEstimateAt) ?? null,
+      postedAt: this.toDate(order.shipping?.postedAt) ?? null,
     });
+  }
+
+  private productSummary(items: ChannelOrderItem[]) {
+    const titles = items
+      .map((item) => item.title?.trim())
+      .filter((title): title is string => Boolean(title));
+    if (titles.length === 0) return null;
+    if (titles.length === 1) return titles[0];
+
+    return `${titles[0]} + ${titles.length - 1} item(ns)`;
   }
 
   private async mapOrderItems(integration: ChannelIntegration, items: ChannelOrderItem[]) {
