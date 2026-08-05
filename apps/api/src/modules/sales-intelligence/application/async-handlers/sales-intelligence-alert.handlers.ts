@@ -38,6 +38,13 @@ export class FinancialFactSalesAlertHandler extends SalesIntelligenceAlertHandle
   readonly eventType = 'financial.order_fact.created';
   readonly consumerName = 'FinancialFactSalesAlertHandler';
 
+  constructor(
+    prisma: PrismaService,
+    alerts: SalesIntelligenceAlertService,
+  ) {
+    super(prisma, alerts);
+  }
+
   protected resolveOrder(id: string) {
     return this.prisma.orderFinancialFact.findUnique({
       where: { id },
@@ -50,6 +57,13 @@ export class FinancialFactSalesAlertHandler extends SalesIntelligenceAlertHandle
 export class ShippingSalesAlertHandler extends SalesIntelligenceAlertHandler {
   readonly eventType = 'channel.order.shipping_summary.updated';
   readonly consumerName = 'ShippingSalesAlertHandler';
+
+  constructor(
+    prisma: PrismaService,
+    alerts: SalesIntelligenceAlertService,
+  ) {
+    super(prisma, alerts);
+  }
 
   protected resolveOrder(id: string) {
     return this.prisma.orderShippingSummary.findUnique({
@@ -64,6 +78,13 @@ export class SettlementSalesAlertHandler extends SalesIntelligenceAlertHandler {
   readonly eventType = 'reconciliation.settlement_received';
   readonly consumerName = 'SettlementSalesAlertHandler';
 
+  constructor(
+    prisma: PrismaService,
+    alerts: SalesIntelligenceAlertService,
+  ) {
+    super(prisma, alerts);
+  }
+
   protected resolveOrder(id: string) {
     return this.prisma.reconciliationCase.findFirst({
       where: { settlementEventId: id, orderId: { not: null } },
@@ -76,6 +97,13 @@ export class SettlementSalesAlertHandler extends SalesIntelligenceAlertHandler {
 export class InventorySalesAlertHandler extends SalesIntelligenceAlertHandler {
   readonly eventType = 'inventory.reservation.consumed';
   readonly consumerName = 'InventorySalesAlertHandler';
+
+  constructor(
+    prisma: PrismaService,
+    alerts: SalesIntelligenceAlertService,
+  ) {
+    super(prisma, alerts);
+  }
 
   protected resolveOrder(id: string) {
     return this.prisma.internalOrderItem.findFirst({
