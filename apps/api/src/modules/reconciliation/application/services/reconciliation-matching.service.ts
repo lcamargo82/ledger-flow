@@ -8,6 +8,7 @@ import {
   ReconciliationCase,
   ReconciliationCaseStatus,
   ReconciliationMatchType,
+  WebhookProvider,
 } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { NotificationProducerService } from '../../../notifications/application/services/notification-producer.service';
@@ -23,6 +24,7 @@ type MatchResult = {
   order?: MarketplaceOrderMatch | null;
   matchType: ReconciliationMatchType;
   ambiguous?: boolean;
+  expectedAmountMinor?: Prisma.Decimal;
 };
 
 type MarketplaceOrderMatch = {
@@ -34,6 +36,7 @@ type MarketplaceOrderMatch = {
   estimatedNetAmount: Prisma.Decimal | null;
   currency: string;
   calculatedAt: Date;
+  expectedAmountMinor?: Prisma.Decimal;
 };
 
 @Injectable()
@@ -185,7 +188,7 @@ export class ReconciliationMatchingService {
     const references = this.extractMarketplaceOrderReferences(settlement);
     if (references.length === 0) return null;
 
-    return this.prisma.orderFinancialFact.findFirst({
+    const order = await this.prisma.orderFinancialFact.findFirst({
       where: {
         tenantId: settlement.tenantId,
         channelProvider: ChannelProvider.MERCADO_LIVRE,
@@ -193,6 +196,50 @@ export class ReconciliationMatchingService {
       },
       orderBy: [{ version: 'desc' }, { calculatedAt: 'desc' }],
     });
+    if (!order) return null;
+
+    return {
+      ...order,
+      expectedAmountMinor: await this.resolveMarketplaceOrderExpectedAmountMinor(
+        settlement,
+        order,
+        references,
+      ),
+    };
+  }
+
+  private async resolveMarketplaceOrderExpectedAmountMinor(
+    settlement: ProviderSettlementEvent,
+    order: MarketplaceOrderMatch,
+    references: string[],
+  ) {
+    const orderExpectedAmountMinor = this.majorDecimalToMinor(
+      order.estimatedNetAmount ?? order.revenueAmount,
+    );
+    if (!settlement.tenantId || references.length === 0) return orderExpectedAmountMinor;
+
+    const settlements = await this.prisma.providerSettlementEvent.findMany({
+      where: {
+        tenantId: settlement.tenantId,
+        provider: settlement.provider,
+        eventType: 'payment',
+        currency: settlement.currency,
+        externalReference: { in: references },
+      },
+    });
+    if (settlements.length <= 1) return orderExpectedAmountMinor;
+
+    const totalReceived = settlements.reduce(
+      (sum, item) => sum.add(this.resolveSettlementReceivedAmountMinor(item) ?? 0),
+      new Prisma.Decimal(0),
+    );
+    const currentReceived = this.resolveSettlementReceivedAmountMinor(settlement);
+
+    if (currentReceived && totalReceived.equals(orderExpectedAmountMinor)) {
+      return currentReceived;
+    }
+
+    return orderExpectedAmountMinor;
   }
 
   private async findAmountCandidates(settlement: ProviderSettlementEvent) {
@@ -325,7 +372,9 @@ export class ReconciliationMatchingService {
   }
 
   private resolveExpectedAmountMinor(match: MatchResult | null) {
+    if (match?.expectedAmountMinor) return match.expectedAmountMinor;
     if (match?.payment) return new Prisma.Decimal(match.payment.amount);
+    if (match?.order?.expectedAmountMinor) return match.order.expectedAmountMinor;
     if (match?.order) {
       return this.majorDecimalToMinor(match.order.estimatedNetAmount ?? match.order.revenueAmount);
     }

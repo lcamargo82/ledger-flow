@@ -7,6 +7,7 @@ const CASE_INCLUDE = {
   settlementEvent: {
     select: {
       id: true,
+      provider: true,
       providerEventId: true,
       providerPaymentId: true,
       externalReference: true,

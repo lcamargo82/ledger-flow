@@ -66,7 +66,7 @@ describe('MercadoPagoFinancialReadService', () => {
     expect(JSON.stringify(page.data[0].normalizedPayload)).not.toContain('SECRET_BASE64');
   });
 
-  it('uses gross amount minus fee details as marketplace net when provider net differs', async () => {
+  it('keeps provider net for a single Mercado Pago event in combined payments', async () => {
     const apiClient = {
       searchPayments: jest.fn().mockResolvedValue({
         paging: { total: 1, limit: 50, offset: 0 },
@@ -100,11 +100,7 @@ describe('MercadoPagoFinancialReadService', () => {
     expect(page.data[0]).toMatchObject({
       amountMinor: '5242',
       feeAmountMinor: '1404',
-      netAmountMinor: '3838',
-    });
-    expect(page.data[0].normalizedPayload).toMatchObject({
-      netAmountSource: 'transaction_amount_minus_fee_details',
-      providerNetAmountMinor: '1838',
+      netAmountMinor: '1838',
     });
   });
 });
