@@ -43,7 +43,7 @@ export class MarketplaceFinancialIngestionService {
 
   async syncMercadoPagoByPeriod(
     tenantId: string,
-    actorUserId: string,
+    actorUserId: string | null,
     accountId: string,
     dto: SyncMarketplaceFinancialEventsDto,
   ): Promise<MarketplaceSettlementSyncResponseDto> {
@@ -518,7 +518,7 @@ export class MarketplaceFinancialIngestionService {
 
   private async auditSync(
     tenantId: string,
-    actorUserId: string,
+    actorUserId: string | null,
     accountId: string,
     result: MarketplaceSettlementSyncResponseDto,
   ) {
@@ -526,7 +526,7 @@ export class MarketplaceFinancialIngestionService {
       data: {
         tenantId,
         actorUserId,
-        actorType: AuditActorType.USER,
+        actorType: actorUserId ? AuditActorType.USER : AuditActorType.WORKER,
         severity: AuditSeverity.INFO,
         source: 'marketplace-settlement',
         entityType: 'OperationalFinancialAccount',
