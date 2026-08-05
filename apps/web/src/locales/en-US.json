@@ -580,7 +580,8 @@
     "shipping": {
       "shipment": "Shipment",
       "tracking": "Tracking",
-      "statusUnknown": "Status not provided"
+      "statusUnknown": "Status not provided",
+      "awaitingStatus": "Awaiting shipping update"
     },
     "form": {
       "createTitle": "New internal order",
@@ -588,12 +589,40 @@
       "cancelTitle": "Cancel order",
       "fulfillTitle": "Fulfill order",
       "transitionConfirmation": "The operation will be applied to order {orderNumber}.",
+      "confirmImpact": "Confirms the order and creates stock reservations for items that do not have a reservation yet.",
+      "cancelImpact": "Cancels the order and releases linked reservations that are still active.",
+      "fulfillImpact": "Fulfills the order. Active reservations will be consumed; already consumed reservations will be recognized without another deduction.",
       "customerNameLabel": "Customer",
       "skuIdLabel": "SKU",
       "warehouseIdLabel": "Warehouse",
       "quantityLabel": "Quantity",
       "reasonCodeLabel": "Reason",
       "notesLabel": "Notes"
+    },
+    "reservation": {
+      "none": "No linked reservation",
+      "unknown": "Linked reservation",
+      "ACTIVE": "Active reservation",
+      "RELEASED": "Released reservation",
+      "CONSUMED": "Consumed reservation"
+    },
+    "reasonCodes": {
+      "confirm": {
+        "ORDER_CONFIRMED": "Order confirmed",
+        "MARKETPLACE_ORDER_PAID": "Marketplace order paid",
+        "MANUAL_CONFIRMATION": "Manual confirmation"
+      },
+      "cancel": {
+        "ORDER_CANCELLED": "Order cancelled",
+        "CUSTOMER_CANCELLED": "Customer cancelled",
+        "OUT_OF_STOCK": "Out of stock",
+        "OTHER": "Other reason"
+      },
+      "fulfill": {
+        "ORDER_FULFILLED": "Order shipped or completed",
+        "MARKETPLACE_FULFILLMENT": "Marketplace fulfillment",
+        "MANUAL_FULFILLMENT": "Manual operational fulfillment"
+      }
     },
     "status": {
       "DRAFT": "Draft",

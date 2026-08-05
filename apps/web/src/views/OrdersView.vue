@@ -35,6 +35,7 @@ const transitionForm = reactive({
   reasonCode: '',
   notes: '',
 })
+const transitionSubmitError = ref('')
 
 const columns = computed(() => [
   { key: 'orderNumber', label: t('orders.table.orderNumber') },
@@ -53,6 +54,21 @@ const statusOptions = computed(() => [
   { value: 'CANCELLED', label: t('orders.status.CANCELLED') },
   { value: 'FULFILLED', label: t('orders.status.FULFILLED') },
 ])
+
+const transitionReasonOptions = computed(() => {
+  const codesByAction = {
+    confirm: ['ORDER_CONFIRMED', 'MARKETPLACE_ORDER_PAID', 'MANUAL_CONFIRMATION'],
+    cancel: ['ORDER_CANCELLED', 'CUSTOMER_CANCELLED', 'OUT_OF_STOCK', 'OTHER'],
+    fulfill: ['ORDER_FULFILLED', 'MARKETPLACE_FULFILLMENT', 'MANUAL_FULFILLMENT'],
+  }
+
+  return codesByAction[transitionAction.value].map((code) => ({
+    value: code,
+    label: t(`orders.reasonCodes.${transitionAction.value}.${code}`),
+  }))
+})
+
+const transitionImpact = computed(() => t(`orders.form.${transitionAction.value}Impact`))
 
 onMounted(() => {
   ordersStore.fetchOrders()
@@ -98,19 +114,30 @@ const openTransition = (order: InternalOrder, action: 'confirm' | 'cancel' | 'fu
         ? 'ORDER_CANCELLED'
         : 'ORDER_FULFILLED'
   transitionForm.notes = ''
+  transitionSubmitError.value = ''
   isTransitionModalOpen.value = true
 }
 
 const transitionOrder = async () => {
   if (!selectedOrder.value) return
-  await ordersStore.transitionOrder(selectedOrder.value.id, transitionAction.value, {
-    reasonCode: transitionForm.reasonCode,
-    notes: transitionForm.notes || undefined,
-    idempotencyKey: `${transitionAction.value}-${selectedOrder.value.id}`,
-  })
+  transitionSubmitError.value = ''
+
+  try {
+    await ordersStore.transitionOrder(selectedOrder.value.id, transitionAction.value, {
+      reasonCode: transitionForm.reasonCode.trim(),
+      notes: transitionForm.notes || undefined,
+      idempotencyKey: `${transitionAction.value}-${selectedOrder.value.id}`,
+    })
+  } catch {
+    transitionSubmitError.value = ordersStore.error || 'orders.errors.default'
+    ordersStore.clearError()
+    return
+  }
+
   selectedOrder.value = null
   transitionForm.reasonCode = ''
   transitionForm.notes = ''
+  transitionSubmitError.value = ''
   isTransitionModalOpen.value = false
 }
 
@@ -122,6 +149,34 @@ const statusVariant = (status: InternalOrderStatus) => {
 }
 
 const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
+const shippingStatusLabel = (order: InternalOrder) => {
+  const shipping = primaryShipping(order)
+  return (
+    shipping?.status ||
+    shipping?.substatus ||
+    shipping?.logisticType ||
+    shipping?.shippingMode ||
+    t('orders.shipping.awaitingStatus')
+  )
+}
+
+const reservationStatusLabel = (orderItem: InternalOrder['items'][number]) => {
+  if (!orderItem.reservationId) return t('orders.reservation.none')
+  return orderItem.reservation?.status
+    ? t(`orders.reservation.${orderItem.reservation.status}`)
+    : t('orders.reservation.unknown')
+}
+
+const orderItemName = (orderItem: InternalOrder['items'][number]) =>
+  orderItem.sku?.product.name || orderItem.skuId
+
+const orderItemSkuLabel = (orderItem: InternalOrder['items'][number]) =>
+  orderItem.sku?.skuDisplay || orderItem.skuId
+
+const orderItemWarehouseLabel = (orderItem: InternalOrder['items'][number]) =>
+  orderItem.warehouse
+    ? `${orderItem.warehouse.name} · ${orderItem.warehouse.code}`
+    : orderItem.warehouseId
 </script>
 
 <template>
@@ -184,8 +239,14 @@ const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
         <template #items="{ item }">
           <div class="space-y-1 text-sm">
             <div v-for="orderItem in item.items" :key="orderItem.id">
-              <span class="font-mono">{{ orderItem.skuId }}</span>
-              <span> / {{ orderItem.warehouseId }} / {{ orderItem.quantity }}</span>
+              <div>{{ orderItemName(orderItem) }}</div>
+              <small class="block text-[var(--lf-text-secondary)]">
+                <span class="font-mono">{{ orderItemSkuLabel(orderItem) }}</span>
+                <span> · {{ orderItemWarehouseLabel(orderItem) }} · {{ orderItem.quantity }}</span>
+              </small>
+              <small class="block text-[var(--lf-text-secondary)]">
+                {{ reservationStatusLabel(orderItem) }}
+              </small>
             </div>
           </div>
         </template>
@@ -196,7 +257,7 @@ const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
               <AppBadge variant="info">
                 {{ primaryShipping(item)?.provider }}
               </AppBadge>
-              <span>{{ primaryShipping(item)?.status || t('orders.shipping.statusUnknown') }}</span>
+              <span>{{ shippingStatusLabel(item) }}</span>
             </div>
             <div class="text-xs text-[var(--lf-text-secondary)]">
               <span v-if="primaryShipping(item)?.externalShipmentId">
@@ -324,6 +385,9 @@ const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
       size="md"
     >
       <form class="space-y-4" @submit.prevent="transitionOrder">
+        <div v-if="transitionSubmitError" class="lf-error-message" role="alert">
+          {{ t(transitionSubmitError) }}
+        </div>
         <p v-if="selectedOrder" class="text-sm text-[var(--lf-text-secondary)]">
           {{
             t('orders.form.transitionConfirmation', {
@@ -331,10 +395,15 @@ const primaryShipping = (order: InternalOrder) => order.shippingSummaries?.[0]
             })
           }}
         </p>
-        <AppInput
+        <p class="text-sm text-[var(--lf-text-secondary)]">
+          {{ transitionImpact }}
+        </p>
+        <AppSelect
           id="order-transition-reason"
           v-model="transitionForm.reasonCode"
           :label="t('orders.form.reasonCodeLabel')"
+          :options="transitionReasonOptions"
+          required
         />
         <AppInput
           id="order-transition-notes"

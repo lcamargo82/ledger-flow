@@ -1,12 +1,21 @@
 import {
+  InventoryReservation,
   InternalOrder,
   InternalOrderItem,
   InternalOrderStatus,
   OrderShippingSummary,
+  ProductSku,
+  Warehouse,
 } from '@prisma/client';
 
+export type InternalOrderItemWithReservation = InternalOrderItem & {
+  sku?: Pick<ProductSku, 'skuDisplay'> & { product: { name: string } };
+  warehouse?: Pick<Warehouse, 'name' | 'code'>;
+  reservation?: Pick<InventoryReservation, 'id' | 'status'> | null;
+};
+
 export type InternalOrderWithItems = InternalOrder & {
-  items: InternalOrderItem[];
+  items: InternalOrderItemWithReservation[];
   shippingSummaries: OrderShippingSummary[];
 };
 

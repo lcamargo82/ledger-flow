@@ -220,6 +220,37 @@ describe('OrdersService', () => {
     expect(result.order.status).toBe(InternalOrderStatus.FULFILLED);
   });
 
+  it('fulfills a confirmed order when linked reservations were already consumed', async () => {
+    ordersRepository.findById.mockResolvedValue({
+      ...draftOrder,
+      status: InternalOrderStatus.CONFIRMED,
+      items: [
+        {
+          ...draftOrder.items[0],
+          reservationId: 'reservation-1',
+          reservation: { id: 'reservation-1', status: 'CONSUMED' },
+        },
+      ],
+    });
+    ordersRepository.updateStatus.mockResolvedValue({
+      ...draftOrder,
+      status: InternalOrderStatus.FULFILLED,
+    });
+
+    const result = await service.fulfill('order-1', 'tenant-1', 'user-1', {
+      reasonCode: 'ORDER_FULFILLED',
+      idempotencyKey: 'fulfill-order-1',
+    });
+
+    expect(inventoryService.consumeReservation).not.toHaveBeenCalled();
+    expect(financialIntelligenceService.createFulfilledOrderFact).toHaveBeenCalledWith(
+      'order-1',
+      'tenant-1',
+      'user-1',
+    );
+    expect(result.order.status).toBe(InternalOrderStatus.FULFILLED);
+  });
+
   it('rejects confirmation for cancelled orders', async () => {
     ordersRepository.findById.mockResolvedValue({
       ...draftOrder,

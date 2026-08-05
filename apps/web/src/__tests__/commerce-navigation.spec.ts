@@ -4,6 +4,7 @@ import router, { advancedInventoryRouteDefinitions } from '../router'
 import { useAuthStore } from '../stores/auth.store'
 import ptBR from '../locales/pt-BR.json'
 import enUS from '../locales/en-US.json'
+import ordersViewSource from '../views/OrdersView.vue?raw'
 
 describe('commerce navigation foundation', () => {
   beforeEach(() => {
@@ -92,6 +93,10 @@ describe('commerce navigation foundation', () => {
     expect(enUS.nav.inventory).toBe('Inventory')
     expect(ptBR.nav.orders).toBe('Pedidos')
     expect(ptBR.orders.actions.confirm).toBe('Confirmar')
+    expect(ptBR.orders.form.fulfillImpact).toContain('Reservas ativas serão consumidas')
+    expect(ptBR.orders.reservation.CONSUMED).toBe('Reserva consumida')
+    expect(ptBR.orders.shipping.awaitingStatus).toBe('Aguardando atualização do envio')
+    expect(ptBR.orders.reasonCodes.fulfill.ORDER_FULFILLED).toBe('Pedido enviado ou concluído')
     expect(enUS.orders.status.FULFILLED).toBe('Fulfilled')
     expect(ptBR.nav.channels).toBe('Canais')
     expect(ptBR.channels.tabs.inbox).toBe('Inbox')
@@ -147,5 +152,13 @@ describe('commerce navigation foundation', () => {
     expect(enUS.inventory.advanced.transfers.title).toBe('Warehouse transfers')
     expect(ptBR.inventory.advanced.foundationOnly).toContain('não altera saldos')
     expect(enUS.inventory.advanced.foundationOnly).toContain('does not change balances')
+  })
+
+  it('surfaces reservation state and transition impact in the orders screen', () => {
+    expect(ordersViewSource).toContain('reservationStatusLabel')
+    expect(ordersViewSource).toContain('transitionImpact')
+    expect(ordersViewSource).toContain('transitionReasonOptions')
+    expect(ordersViewSource).toContain('orderItemName')
+    expect(ordersViewSource).toContain('shippingStatusLabel')
   })
 })

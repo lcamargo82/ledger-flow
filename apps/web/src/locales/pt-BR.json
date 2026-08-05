@@ -579,7 +579,8 @@
     "shipping": {
       "shipment": "Envio",
       "tracking": "Tracking",
-      "statusUnknown": "Status não informado"
+      "statusUnknown": "Status não informado",
+      "awaitingStatus": "Aguardando atualização do envio"
     },
     "form": {
       "createTitle": "Novo pedido interno",
@@ -587,12 +588,40 @@
       "cancelTitle": "Cancelar pedido",
       "fulfillTitle": "Concluir pedido",
       "transitionConfirmation": "A operação será aplicada ao pedido {orderNumber}.",
+      "confirmImpact": "Confirma o pedido e cria reservas de estoque para os itens que ainda não têm reserva.",
+      "cancelImpact": "Cancela o pedido e libera as reservas vinculadas que ainda estiverem ativas.",
+      "fulfillImpact": "Conclui o pedido. Reservas ativas serão consumidas; reservas já consumidas serão reconhecidas sem nova baixa.",
       "customerNameLabel": "Cliente",
       "skuIdLabel": "SKU",
       "warehouseIdLabel": "Warehouse",
       "quantityLabel": "Quantidade",
       "reasonCodeLabel": "Motivo",
       "notesLabel": "Observações"
+    },
+    "reservation": {
+      "none": "Sem reserva vinculada",
+      "unknown": "Reserva vinculada",
+      "ACTIVE": "Reserva ativa",
+      "RELEASED": "Reserva liberada",
+      "CONSUMED": "Reserva consumida"
+    },
+    "reasonCodes": {
+      "confirm": {
+        "ORDER_CONFIRMED": "Pedido confirmado",
+        "MARKETPLACE_ORDER_PAID": "Pedido marketplace pago",
+        "MANUAL_CONFIRMATION": "Confirmação manual"
+      },
+      "cancel": {
+        "ORDER_CANCELLED": "Pedido cancelado",
+        "CUSTOMER_CANCELLED": "Cliente cancelou",
+        "OUT_OF_STOCK": "Sem estoque",
+        "OTHER": "Outro motivo"
+      },
+      "fulfill": {
+        "ORDER_FULFILLED": "Pedido enviado ou concluído",
+        "MARKETPLACE_FULFILLMENT": "Fulfillment do marketplace",
+        "MANUAL_FULFILLMENT": "Baixa operacional manual"
+      }
     },
     "status": {
       "DRAFT": "Rascunho",

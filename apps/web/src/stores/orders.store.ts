@@ -33,6 +33,10 @@ export const useOrdersStore = defineStore('orders', () => {
     return 'orders.errors.default'
   }
 
+  const clearError = () => {
+    error.value = null
+  }
+
   const fetchOrders = async () => {
     isLoading.value = true
     error.value = null
@@ -105,6 +109,7 @@ export const useOrdersStore = defineStore('orders', () => {
     isLoading,
     isMutating,
     error,
+    clearError,
     totalPages,
     currentPage,
     fetchOrders,

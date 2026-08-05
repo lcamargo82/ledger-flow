@@ -103,7 +103,29 @@ export class PrismaOrdersRepository implements OrdersRepository {
 
   private orderInclude() {
     return {
-      items: { orderBy: { createdAt: 'asc' as const } },
+      items: {
+        orderBy: { createdAt: 'asc' as const },
+        include: {
+          sku: {
+            select: {
+              skuDisplay: true,
+              product: { select: { name: true } },
+            },
+          },
+          warehouse: {
+            select: {
+              name: true,
+              code: true,
+            },
+          },
+          reservation: {
+            select: {
+              id: true,
+              status: true,
+            },
+          },
+        },
+      },
       shippingSummaries: { orderBy: { lastSyncedAt: 'desc' as const } },
     };
   }

@@ -5,7 +5,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InternalOrderItem, InternalOrderStatus, Prisma } from '@prisma/client';
+import {
+  InventoryReservationStatus,
+  InternalOrderStatus,
+  Prisma,
+} from '@prisma/client';
 import { createHash } from 'crypto';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { FinancialIntelligenceService } from '../../../financial-intelligence/application/services/financial-intelligence.service';
@@ -14,6 +18,7 @@ import { CreateOrderDto } from '../dto/create-order.dto';
 import { ListOrdersQueryDto } from '../dto/list-orders-query.dto';
 import { OrderTransitionDto } from '../dto/order-transition.dto';
 import {
+  InternalOrderItemWithReservation,
   InternalOrderWithItems,
   ORDERS_REPOSITORY,
 } from '../../domain/repositories/orders.repository';
@@ -165,6 +170,13 @@ export class OrdersService {
 
     for (const item of order.items) {
       this.assertReservation(item);
+      if (item.reservation?.status === InventoryReservationStatus.CONSUMED) {
+        continue;
+      }
+      if (item.reservation?.status === InventoryReservationStatus.RELEASED) {
+        throw new BadRequestException('Order item reservation was released and cannot be fulfilled.');
+      }
+
       await this.inventoryService.consumeReservation(item.reservationId, tenantId, actorUserId, {
         reasonCode: dto.reasonCode,
         idempotencyKey: this.itemIdempotencyKey(dto.idempotencyKey, item.id),
@@ -202,7 +214,9 @@ export class OrdersService {
     return order;
   }
 
-  private assertReservation(item: InternalOrderItem): asserts item is InternalOrderItem & {
+  private assertReservation(
+    item: InternalOrderItemWithReservation,
+  ): asserts item is InternalOrderItemWithReservation & {
     reservationId: string;
   } {
     if (!item.reservationId) {

@@ -7,7 +7,19 @@ export interface InternalOrderItem {
   skuId: string
   warehouseId: string
   quantity: string
+  sku?: {
+    skuDisplay: string
+    product: { name: string }
+  }
+  warehouse?: {
+    name: string
+    code: string
+  }
   reservationId?: string | null
+  reservation?: {
+    id: string
+    status: 'ACTIVE' | 'RELEASED' | 'CONSUMED'
+  } | null
   createdAt: string
   updatedAt: string
 }

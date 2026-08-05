@@ -1,5 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ChannelProvider, InternalOrderStatus } from '@prisma/client';
+import { ChannelProvider, InventoryReservationStatus, InternalOrderStatus } from '@prisma/client';
+
+export class OrderItemReservationResponseDto {
+  @ApiProperty() id: string;
+  @ApiProperty({ enum: InventoryReservationStatus }) status: InventoryReservationStatus;
+}
+
+export class OrderItemSkuResponseDto {
+  @ApiProperty() skuDisplay: string;
+  @ApiProperty() product: { name: string };
+}
+
+export class OrderItemWarehouseResponseDto {
+  @ApiProperty() name: string;
+  @ApiProperty() code: string;
+}
 
 export class OrderItemResponseDto {
   @ApiProperty() id: string;
@@ -9,6 +24,12 @@ export class OrderItemResponseDto {
   @ApiProperty() warehouseId: string;
   @ApiProperty() quantity: string;
   @ApiPropertyOptional() reservationId?: string;
+  @ApiPropertyOptional({ type: OrderItemReservationResponseDto })
+  reservation?: OrderItemReservationResponseDto | null;
+  @ApiPropertyOptional({ type: OrderItemSkuResponseDto })
+  sku?: OrderItemSkuResponseDto;
+  @ApiPropertyOptional({ type: OrderItemWarehouseResponseDto })
+  warehouse?: OrderItemWarehouseResponseDto;
   @ApiProperty() createdAt: Date;
   @ApiProperty() updatedAt: Date;
 }
