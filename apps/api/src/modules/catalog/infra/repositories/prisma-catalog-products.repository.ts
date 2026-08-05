@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, ProductStatus } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import {
   CatalogProductsRepository,
@@ -21,7 +21,7 @@ export class PrismaCatalogProductsRepository implements CatalogProductsRepositor
 
     const where: Prisma.ProductWhereInput = { tenantId };
     if (type) where.type = type;
-    if (status) where.status = status;
+    where.status = status ?? ProductStatus.ACTIVE;
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -120,6 +120,17 @@ export class PrismaCatalogProductsRepository implements CatalogProductsRepositor
       data: {
         status: 'ARCHIVED',
         archivedAt: new Date(),
+      },
+      include: { sku: true },
+    });
+  }
+
+  async unarchive(id: string, tenantId: string): Promise<ProductWithSku> {
+    return this.prisma.product.update({
+      where: { id },
+      data: {
+        status: ProductStatus.ACTIVE,
+        archivedAt: null,
       },
       include: { sku: true },
     });

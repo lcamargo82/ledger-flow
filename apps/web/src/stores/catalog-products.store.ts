@@ -23,6 +23,7 @@ export const useCatalogProductsStore = defineStore('catalogProducts', () => {
   const isCreating = ref(false)
   const isUpdating = ref(false)
   const isArchiving = ref(false)
+  const isUnarchiving = ref(false)
   const error = ref<string | null>(null)
 
   const totalPages = computed(() => meta.value.totalPages)
@@ -119,6 +120,21 @@ export const useCatalogProductsStore = defineStore('catalogProducts', () => {
     }
   }
 
+  const unarchiveProduct = async (id: string) => {
+    isUnarchiving.value = true
+    error.value = null
+    try {
+      const response = await catalogProductsService.unarchiveProduct(id)
+      await fetchProducts()
+      return response.product
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isUnarchiving.value = false
+    }
+  }
+
   const setPage = (page: number) => {
     filters.value.page = page
     fetchProducts()
@@ -157,6 +173,7 @@ export const useCatalogProductsStore = defineStore('catalogProducts', () => {
     isCreating,
     isUpdating,
     isArchiving,
+    isUnarchiving,
     error,
     totalPages,
     currentPage,
@@ -165,6 +182,7 @@ export const useCatalogProductsStore = defineStore('catalogProducts', () => {
     createProduct,
     updateProduct,
     archiveProduct,
+    unarchiveProduct,
     setPage,
     setSearch,
     setType,

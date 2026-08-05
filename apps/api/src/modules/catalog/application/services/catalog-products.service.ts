@@ -142,6 +142,20 @@ export class CatalogProductsService {
     return archivedProduct;
   }
 
+  async unarchive(id: string, tenantId: string, actorUserId: string) {
+    const product = await this.findOne(id, tenantId);
+
+    if (product.status === ProductStatus.ACTIVE) {
+      return product;
+    }
+
+    const unarchivedProduct = await this.productsRepository.unarchive(id, tenantId);
+
+    await this.auditLog(tenantId, actorUserId, 'catalog.product.unarchived', unarchivedProduct.id);
+
+    return unarchivedProduct;
+  }
+
   private async validateProductShape(tenantId: string, dto: CreateProductDto) {
     if (dto.type === ProductType.PARENT && dto.sku) {
       throw new BadRequestException('Parent products cannot have SKU.');

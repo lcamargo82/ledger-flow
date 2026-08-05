@@ -60,4 +60,5 @@ export interface CatalogProductsRepository {
   create(data: ProductCreateData): Promise<ProductWithSku>;
   update(id: string, tenantId: string, data: ProductUpdateData): Promise<ProductWithSku>;
   archive(id: string, tenantId: string): Promise<ProductWithSku>;
+  unarchive(id: string, tenantId: string): Promise<ProductWithSku>;
 }

@@ -1040,6 +1040,7 @@
       "create": "New product",
       "edit": "Edit",
       "archive": "Archive",
+      "unarchive": "Unarchive",
       "save": "Save",
       "clearFilters": "Clear"
     },
@@ -1049,7 +1050,8 @@
       "typeLabel": "Type",
       "typeAll": "All types",
       "statusLabel": "Status",
-      "statusAll": "All statuses"
+      "statusAll": "All statuses",
+      "statusActive": "Active"
     },
     "table": {
       "name": "Product",
@@ -1104,6 +1106,12 @@
       "title": "No products found",
       "description": "Create a product or adjust filters to view the catalog."
     },
+    "stockPrompt": {
+      "title": "Add initial stock?",
+      "description": "The product was created with SKU {sku}. You can record the initial balance now.",
+      "skip": "Not now",
+      "addStock": "Add stock"
+    },
     "errors": {
       "title": "Could not load catalog",
       "default": "Could not process the catalog operation.",
@@ -1121,7 +1129,9 @@
     },
     "toast": {
       "created": "Product created successfully.",
-      "updated": "Product updated successfully."
+      "updated": "Product updated successfully.",
+      "unarchived": "Product unarchived successfully.",
+      "stockAdjusted": "Initial stock recorded successfully."
     }
   },
   "users": {

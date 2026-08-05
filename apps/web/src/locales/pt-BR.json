@@ -1042,6 +1042,7 @@
       "create": "Novo produto",
       "edit": "Editar",
       "archive": "Arquivar",
+      "unarchive": "Desarquivar",
       "save": "Salvar",
       "clearFilters": "Limpar"
     },
@@ -1051,7 +1052,8 @@
       "typeLabel": "Tipo",
       "typeAll": "Todos os tipos",
       "statusLabel": "Status",
-      "statusAll": "Todos os status"
+      "statusAll": "Todos os status",
+      "statusActive": "Ativos"
     },
     "table": {
       "name": "Produto",
@@ -1106,6 +1108,12 @@
       "title": "Nenhum produto encontrado",
       "description": "Crie um produto ou ajuste os filtros para visualizar o catálogo."
     },
+    "stockPrompt": {
+      "title": "Adicionar estoque inicial?",
+      "description": "O produto foi criado com o SKU {sku}. Você pode registrar o saldo inicial agora.",
+      "skip": "Agora não",
+      "addStock": "Adicionar estoque"
+    },
     "errors": {
       "title": "Não foi possível carregar o catálogo",
       "default": "Não foi possível processar a operação de catálogo.",
@@ -1123,7 +1131,9 @@
     },
     "toast": {
       "created": "Produto criado com sucesso.",
-      "updated": "Produto atualizado com sucesso."
+      "updated": "Produto atualizado com sucesso.",
+      "unarchived": "Produto desarquivado com sucesso.",
+      "stockAdjusted": "Estoque inicial registrado com sucesso."
     }
   },
   "users": {

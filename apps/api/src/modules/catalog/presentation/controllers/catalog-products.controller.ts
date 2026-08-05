@@ -105,4 +105,16 @@ export class CatalogProductsController {
     const product = await this.catalogProductsService.archive(id, user.tenantId, user.id);
     return { product };
   }
+
+  @Post(':id/unarchive')
+  @RequirePermissions('catalog:manage')
+  @ApiOperation({ summary: 'Desarquivar produto e voltar a exibir na listagem ativa' })
+  @ApiOkResponse({ type: ProductMutationResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({ description: 'Sem permissão ou capability de catálogo' })
+  @ApiNotFoundResponse({ description: 'Produto não encontrado' })
+  async unarchive(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    const product = await this.catalogProductsService.unarchive(id, user.tenantId, user.id);
+    return { product };
+  }
 }

@@ -10,6 +10,7 @@ describe('CatalogProductsService', () => {
     create: jest.fn(),
     update: jest.fn(),
     archive: jest.fn(),
+    unarchive: jest.fn(),
   };
 
   const prisma = {
@@ -194,6 +195,27 @@ describe('CatalogProductsService', () => {
     expect(prisma.auditLog.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         action: 'catalog.product.archived',
+        entityId: 'product-1',
+      }),
+    });
+  });
+
+  it('unarchives a product and writes audit log', async () => {
+    repository.findByIdAndTenant.mockResolvedValue({
+      id: 'product-1',
+      status: ProductStatus.ARCHIVED,
+    });
+    repository.unarchive.mockResolvedValue({
+      id: 'product-1',
+      status: ProductStatus.ACTIVE,
+    });
+
+    await service.unarchive('product-1', 'tenant-1', 'user-1');
+
+    expect(repository.unarchive).toHaveBeenCalledWith('product-1', 'tenant-1');
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'catalog.product.unarchived',
         entityId: 'product-1',
       }),
     });

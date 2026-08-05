@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { useDebounceFn } from '../composables/useDebounce'
 import { useAuthStore } from '../stores/auth.store'
 import { useCatalogProductsStore } from '../stores/catalog-products.store'
+import { useInventoryStore } from '../stores/inventory.store'
 import { useToastStore } from '../stores/toast.store'
 import { formatDateTime } from '../utils/date-format'
 import { formatMoney } from '../utils/money-format'
@@ -14,6 +15,7 @@ import AppCard from '../components/common/AppCard.vue'
 import AppErrorState from '../components/common/AppErrorState.vue'
 import AppInput from '../components/common/AppInput.vue'
 import AppModal from '../components/common/AppModal.vue'
+import AppNumberInput from '../components/common/AppNumberInput.vue'
 import AppPageHeader from '../components/common/AppPageHeader.vue'
 import AppSelect from '../components/common/AppSelect.vue'
 import AppTable from '../components/common/AppTable.vue'
@@ -22,13 +24,27 @@ import ProductForm from '../components/catalog/ProductForm.vue'
 const { t, currentLocale } = useI18n()
 const authStore = useAuthStore()
 const catalogStore = useCatalogProductsStore()
+const inventoryStore = useInventoryStore()
 const toast = useToastStore()
 
 const searchInput = ref(catalogStore.filters.search || '')
 const isCreateModalOpen = ref(false)
 const isEditModalOpen = ref(false)
+const isStockPromptOpen = ref(false)
+const isAdjustmentModalOpen = ref(false)
 const targetProduct = ref<ProductListItem | null>(null)
+const createdProductForStock = ref<ProductListItem | null>(null)
 const formErrors = ref<Record<string, string>>({})
+const adjustmentSubmitError = ref('')
+
+const adjustmentForm = reactive({
+  skuId: '',
+  warehouseId: '',
+  type: 'ADJUSTMENT_IN' as 'ADJUSTMENT_IN' | 'ADJUSTMENT_OUT',
+  quantity: null as number | null,
+  reasonCode: '',
+  notes: '',
+})
 
 const columns = computed(() => [
   { key: 'name', label: t('catalog.table.name') },
@@ -48,9 +64,16 @@ const typeOptions = computed(() => [
 ])
 
 const statusOptions = computed(() => [
-  { value: '', label: t('catalog.filters.statusAll') },
-  { value: 'ACTIVE', label: t('catalog.status.ACTIVE') },
+  { value: '', label: t('catalog.filters.statusActive') },
   { value: 'ARCHIVED', label: t('catalog.status.ARCHIVED') },
+])
+
+const warehouseOptions = computed(() => [
+  { value: '', label: t('inventory.form.warehousePlaceholder') },
+  ...inventoryStore.activeWarehouses.map((warehouse) => ({
+    value: warehouse.id,
+    label: `${warehouse.code} - ${warehouse.name}`,
+  })),
 ])
 
 onMounted(() => {
@@ -93,8 +116,12 @@ const catalogErrorMessage = (err: any) => {
 const handleCreateProduct = async (payload: any) => {
   formErrors.value = {}
   try {
-    await catalogStore.createProduct(payload)
+    const product = await catalogStore.createProduct(payload)
     isCreateModalOpen.value = false
+    if (product.sku && authStore.checkAllPermissions(['inventory:adjust'])) {
+      createdProductForStock.value = product
+      isStockPromptOpen.value = true
+    }
     toast.success(t('catalog.toast.created') || 'Produto criado com sucesso!')
   } catch (err: any) {
     const errorMessage = catalogErrorMessage(err)
@@ -127,6 +154,56 @@ const handleUpdateProduct = async (payload: any) => {
 
 const archiveProduct = async (product: ProductListItem) => {
   await catalogStore.archiveProduct(product.id)
+}
+
+const unarchiveProduct = async (product: ProductListItem) => {
+  await catalogStore.unarchiveProduct(product.id)
+  toast.success(t('catalog.toast.unarchived'))
+}
+
+const openInitialStockAdjustment = async () => {
+  if (!createdProductForStock.value?.sku) return
+  adjustmentSubmitError.value = ''
+  adjustmentForm.skuId = createdProductForStock.value.sku.skuDisplay
+  adjustmentForm.warehouseId = ''
+  adjustmentForm.type = 'ADJUSTMENT_IN'
+  adjustmentForm.quantity = null
+  adjustmentForm.reasonCode = 'INITIAL_STOCK'
+  adjustmentForm.notes = ''
+  await inventoryStore.fetchWarehouses()
+  isStockPromptOpen.value = false
+  isAdjustmentModalOpen.value = true
+}
+
+const skipInitialStockAdjustment = () => {
+  createdProductForStock.value = null
+  isStockPromptOpen.value = false
+}
+
+const recordAdjustment = async () => {
+  adjustmentSubmitError.value = ''
+
+  try {
+    await inventoryStore.recordAdjustment({
+      skuId: adjustmentForm.skuId.trim(),
+      warehouseId: adjustmentForm.warehouseId,
+      type: adjustmentForm.type,
+      quantity: Number(adjustmentForm.quantity),
+      reasonCode: adjustmentForm.reasonCode,
+      notes: adjustmentForm.notes || undefined,
+    })
+    isAdjustmentModalOpen.value = false
+    createdProductForStock.value = null
+    adjustmentForm.skuId = ''
+    adjustmentForm.warehouseId = ''
+    adjustmentForm.quantity = null
+    adjustmentForm.reasonCode = ''
+    adjustmentForm.notes = ''
+    toast.success(t('catalog.toast.stockAdjusted'))
+  } catch {
+    adjustmentSubmitError.value = inventoryStore.error || 'inventory.errors.default'
+    inventoryStore.clearError()
+  }
 }
 </script>
 
@@ -255,6 +332,18 @@ const archiveProduct = async (product: ProductListItem) => {
                 <span class="material-symbols-outlined text-[18px]">archive</span>
               </template>
             </AppButton>
+            <AppButton
+              v-if="authStore.checkAllPermissions(['catalog:manage']) && item.status === 'ARCHIVED'"
+              variant="secondary"
+              size="small"
+              icon-only
+              :title="t('catalog.actions.unarchive')"
+              @click="unarchiveProduct(item)"
+            >
+              <template #icon>
+                <span class="material-symbols-outlined text-[18px]">unarchive</span>
+              </template>
+            </AppButton>
           </div>
         </template>
       </AppTable>
@@ -282,6 +371,84 @@ const archiveProduct = async (product: ProductListItem) => {
         @submit="handleUpdateProduct"
         @cancel="isEditModalOpen = false"
       />
+    </AppModal>
+
+    <AppModal v-model="isStockPromptOpen" :title="t('catalog.stockPrompt.title')" size="md">
+      <div class="space-y-4">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{
+            t('catalog.stockPrompt.description', {
+              sku: createdProductForStock?.sku?.skuDisplay || '',
+            })
+          }}
+        </p>
+        <div class="flex justify-end gap-2">
+          <AppButton type="button" variant="secondary" @click="skipInitialStockAdjustment">
+            {{ t('catalog.stockPrompt.skip') }}
+          </AppButton>
+          <AppButton type="button" variant="primary" @click="openInitialStockAdjustment">
+            {{ t('catalog.stockPrompt.addStock') }}
+          </AppButton>
+        </div>
+      </div>
+    </AppModal>
+
+    <AppModal
+      v-model="isAdjustmentModalOpen"
+      :title="t('inventory.form.adjustmentTitle')"
+      size="md"
+    >
+      <form class="space-y-4" @submit.prevent="recordAdjustment">
+        <div v-if="adjustmentSubmitError" class="lf-error-message" role="alert">
+          {{ t(adjustmentSubmitError) }}
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AppInput
+            id="catalog-adjustment-sku"
+            v-model="adjustmentForm.skuId"
+            :label="t('inventory.form.skuIdLabel')"
+            :placeholder="t('inventory.form.skuIdPlaceholder')"
+            required
+            @input="adjustmentSubmitError = ''"
+          />
+          <AppSelect
+            id="catalog-adjustment-warehouse"
+            v-model="adjustmentForm.warehouseId"
+            :label="t('inventory.form.warehouseLabel')"
+            :options="warehouseOptions"
+            required
+          />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <AppNumberInput
+            id="catalog-adjustment-quantity"
+            v-model="adjustmentForm.quantity"
+            :allow-decimals="true"
+            :label="t('inventory.form.quantityLabel')"
+            required
+          />
+          <AppInput
+            id="catalog-adjustment-reason"
+            v-model="adjustmentForm.reasonCode"
+            :label="t('inventory.form.reasonCodeLabel')"
+            class="md:col-span-1"
+            required
+          />
+        </div>
+        <AppInput
+          id="catalog-adjustment-notes"
+          v-model="adjustmentForm.notes"
+          :label="t('inventory.form.notesLabel')"
+        />
+        <div class="flex justify-end gap-2">
+          <AppButton type="button" variant="secondary" @click="isAdjustmentModalOpen = false">
+            {{ t('common.cancel') }}
+          </AppButton>
+          <AppButton type="submit" variant="primary" :loading="inventoryStore.isMutating">
+            {{ t('inventory.actions.adjust') }}
+          </AppButton>
+        </div>
+      </form>
     </AppModal>
   </div>
 </template>

@@ -35,6 +35,11 @@ export class CatalogProductsService {
     const { data } = await httpClient.post<ProductMutationResponse>(`${this.baseUrl}/${id}/archive`)
     return data
   }
+
+  async unarchiveProduct(id: string): Promise<ProductMutationResponse> {
+    const { data } = await httpClient.post<ProductMutationResponse>(`${this.baseUrl}/${id}/unarchive`)
+    return data
+  }
 }
 
 export const catalogProductsService = new CatalogProductsService()
