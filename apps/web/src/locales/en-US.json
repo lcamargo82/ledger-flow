@@ -469,10 +469,27 @@
       "sourceTypeLabel": "Source type",
       "sourceIdLabel": "Source ID",
       "reasonCodeLabel": "Reason",
+      "reasonCodePlaceholder": "Select a reason",
       "notesLabel": "Notes",
       "validation": {
         "codeLength": "Code must be between 2 and 20 characters.",
-        "nameMinLength": "Name must be at least 2 characters."
+        "nameMinLength": "Name must be at least 2 characters.",
+        "reasonRequired": "Enter a reason to continue."
+      }
+    },
+    "reservationReasons": {
+      "release": {
+        "ORDER_CANCELLED": "Order cancelled",
+        "CUSTOMER_CANCELLED": "Customer cancelled",
+        "DUPLICATE_RESERVATION": "Duplicate reservation",
+        "WRONG_SKU": "Wrong SKU",
+        "OTHER": "Other reason"
+      },
+      "consume": {
+        "ORDER_FULFILLED": "Order shipped or completed",
+        "MANUAL_FULFILLMENT": "Manual operational fulfillment",
+        "MARKETPLACE_FULFILLMENT": "Marketplace fulfillment",
+        "OTHER": "Other reason"
       }
     },
     "reservationStatus": {
@@ -2256,6 +2273,7 @@
     },
     "actions": {
       "review": "Review",
+      "viewHistory": "View history",
       "COMMENT": "Comment",
       "MANUAL_MATCH": "Manual match",
       "RESOLVE_EXCEPTION": "Resolve exception",
@@ -2269,7 +2287,14 @@
       "reasonCode": "Reason code",
       "comment": "Comment",
       "commentRequired": "Comment required",
-      "submit": "Register decision"
+      "submit": "Register decision",
+      "impact": {
+        "COMMENT": "Only records a timeline note. It does not change the status or remove the case from the list.",
+        "MANUAL_MATCH": "Manually links a payment and moves the case to manual match.",
+        "RESOLVE_EXCEPTION": "Closes the divergence as a resolved exception and records the rationale.",
+        "IGNORE": "Ignores the case as operational noise and records the rationale.",
+        "REOPEN": "Reopens the case for another review."
+      }
     },
     "fineMesh": {
       "evidence": "Evidence",

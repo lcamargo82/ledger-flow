@@ -36,6 +36,13 @@ const maxAgingCount = computed(() => {
   const buckets = reconciliationStore.dashboard?.agingBuckets ?? []
   return Math.max(1, ...buckets.map((bucket) => bucket.count))
 })
+const finalStatuses = new Set([
+  'AUTO_MATCHED',
+  'MANUALLY_MATCHED',
+  'RECONCILED',
+  'IGNORED',
+  'RESOLVED_EXCEPTION',
+])
 
 onMounted(() => {
   reconciliationStore.fetchOverview()
@@ -63,6 +70,11 @@ const referenceLabel = (item: ReconciliationCase) => {
   if (item.order?.orderNumber) return `${t('reconciliation.table.order')} ${item.order.orderNumber}`
   return item.settlementEvent.externalReference ?? '-'
 }
+
+const reviewActionLabel = (item: ReconciliationCase) =>
+  finalStatuses.has(item.status)
+    ? t('reconciliation.actions.viewHistory')
+    : t('reconciliation.actions.review')
 
 const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.value) * 100)}%`
 </script>
@@ -218,7 +230,7 @@ const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.valu
               data-testid="open-decision-modal"
               @click="openDecisionModal(item)"
             >
-              {{ t('reconciliation.actions.review') }}
+              {{ reviewActionLabel(item) }}
             </AppButton>
           </template>
         </AppTable>

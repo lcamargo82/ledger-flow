@@ -3,6 +3,8 @@ import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ReconciliationView from '../views/ReconciliationView.vue'
 import { reconciliationService } from '../services/reconciliation.service'
+import reconciliationViewSource from '../views/ReconciliationView.vue?raw'
+import reconciliationDecisionModalSource from '../components/reconciliation/ReconciliationDecisionModal.vue?raw'
 
 vi.mock('../services/reconciliation.service', () => ({
   reconciliationService: {
@@ -164,7 +166,16 @@ describe('reconciliation manual review', () => {
     await flushPromises()
     expect(wrapper.text()).toContain('Evidências')
     expect(wrapper.text()).toContain('pay-1')
+    expect(wrapper.text()).toContain(
+      'Registra apenas uma nota na timeline. Não altera o status e não remove o caso da listagem.',
+    )
     expect(wrapper.get('[name="reasonCode"]').attributes('required')).toBeDefined()
+  })
+
+  it('distinguishes final cases from actionable review items', () => {
+    expect(reconciliationViewSource).toContain('viewHistory')
+    expect(reconciliationViewSource).toContain('finalStatuses')
+    expect(reconciliationDecisionModalSource).toContain('decisionModal.impact')
   })
 })
 

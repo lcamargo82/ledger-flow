@@ -33,6 +33,11 @@ describe('inventory UI translations', () => {
     expect(ptBR.inventory.form.validation.nameMinLength).toBe(
       'O nome deve ter pelo menos 2 caracteres.',
     )
+    expect(ptBR.inventory.form.validation.reasonRequired).toBe('Informe o motivo para continuar.')
+    expect(ptBR.inventory.reservationReasons.release.ORDER_CANCELLED).toBe('Pedido cancelado')
+    expect(ptBR.inventory.reservationReasons.consume.ORDER_FULFILLED).toBe(
+      'Pedido enviado ou concluído',
+    )
     expect(enUS.inventory.form.validation.codeLength).toBe(
       'Code must be between 2 and 20 characters.',
     )
@@ -57,6 +62,13 @@ describe('inventory list identities', () => {
     expect(inventoryCycleCountsSource).toContain("{ key: 'warehouse'")
     expect(inventoryCycleCountsSource).toContain('item.sku.skuDisplay')
     expect(inventoryCycleCountsSource).not.toContain('#warehouseId')
+  })
+
+  it('requires a selected reason before releasing or consuming reservations', () => {
+    expect(inventoryFoundationSource).toContain('reservationTransitionReasonOptions')
+    expect(inventoryFoundationSource).toContain('inventory.form.validation.reasonRequired')
+    expect(inventoryFoundationSource).toContain(':disabled="!transitionForm.reasonCode.trim()"')
+    expect(inventoryFoundationSource).toContain("reasonCode: transitionForm.reasonCode.trim()")
   })
 })
 

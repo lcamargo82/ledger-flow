@@ -79,6 +79,7 @@ const transitionForm = reactive({
   reasonCode: '',
   notes: '',
 })
+const transitionSubmitError = ref('')
 
 const warehouseColumns = computed(() => [
   { key: 'code', label: t('inventory.table.code') },
@@ -154,6 +155,22 @@ const valuationGroupOptions = computed(() => [
   { value: 'BRAND', label: t('inventory.valuation.groupBy.BRAND') },
   { value: 'WAREHOUSE', label: t('inventory.valuation.groupBy.WAREHOUSE') },
 ])
+
+const reservationTransitionReasonOptions = computed(() => {
+  const scope = transitionMode.value === 'consume' ? 'consume' : 'release'
+  const codes =
+    transitionMode.value === 'consume'
+      ? ['ORDER_FULFILLED', 'MANUAL_FULFILLMENT', 'MARKETPLACE_FULFILLMENT', 'OTHER']
+      : ['ORDER_CANCELLED', 'CUSTOMER_CANCELLED', 'DUPLICATE_RESERVATION', 'WRONG_SKU', 'OTHER']
+
+  return [
+    { value: '', label: t('inventory.form.reasonCodePlaceholder') },
+    ...codes.map((code) => ({
+      value: code,
+      label: t(`inventory.reservationReasons.${scope}.${code}`),
+    })),
+  ]
+})
 
 const formatQuantity = (value: string | number) =>
   new Intl.NumberFormat(currentLocale.value, { maximumFractionDigits: 6 }).format(Number(value))
@@ -313,27 +330,41 @@ const openReservationTransition = (
   transitionMode.value = mode
   transitionForm.reasonCode = ''
   transitionForm.notes = ''
+  transitionSubmitError.value = ''
   isTransitionModalOpen.value = true
 }
 
 const transitionReservation = async () => {
   if (!selectedReservation.value) return
+  transitionSubmitError.value = ''
+
+  if (!transitionForm.reasonCode.trim()) {
+    transitionSubmitError.value = 'inventory.form.validation.reasonRequired'
+    return
+  }
 
   const payload = {
-    reasonCode: transitionForm.reasonCode,
+    reasonCode: transitionForm.reasonCode.trim(),
     notes: transitionForm.notes || undefined,
     idempotencyKey: createStableOperationId(transitionMode.value, selectedReservation.value.id),
   }
 
-  if (transitionMode.value === 'consume') {
-    await inventoryStore.consumeReservation(selectedReservation.value.id, payload)
-  } else {
-    await inventoryStore.releaseReservation(selectedReservation.value.id, payload)
+  try {
+    if (transitionMode.value === 'consume') {
+      await inventoryStore.consumeReservation(selectedReservation.value.id, payload)
+    } else {
+      await inventoryStore.releaseReservation(selectedReservation.value.id, payload)
+    }
+  } catch {
+    transitionSubmitError.value = inventoryStore.error || 'inventory.errors.default'
+    inventoryStore.clearError()
+    return
   }
 
   selectedReservation.value = null
   transitionForm.reasonCode = ''
   transitionForm.notes = ''
+  transitionSubmitError.value = ''
   isTransitionModalOpen.value = false
 }
 
@@ -802,6 +833,9 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
       size="md"
     >
       <form class="space-y-4" @submit.prevent="transitionReservation">
+        <div v-if="transitionSubmitError" class="lf-error-message" role="alert">
+          {{ t(transitionSubmitError) }}
+        </div>
         <p v-if="selectedReservation" class="text-sm text-gray-500 dark:text-gray-400">
           {{
             t('inventory.form.reservationConfirmation', {
@@ -811,10 +845,18 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           }}
         </p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <AppInput
+          <AppSelect
             id="reservation-transition-reason"
             v-model="transitionForm.reasonCode"
             :label="t('inventory.form.reasonCodeLabel')"
+            :options="reservationTransitionReasonOptions"
+            :error="
+              transitionSubmitError === 'inventory.form.validation.reasonRequired'
+                ? t(transitionSubmitError)
+                : undefined
+            "
+            required
+            @update:model-value="transitionSubmitError = ''"
           />
           <AppInput
             id="reservation-transition-notes"
@@ -826,7 +868,12 @@ const reservationStatusVariant = (status: InventoryReservation['status']) => {
           <AppButton type="button" variant="secondary" @click="isTransitionModalOpen = false">{{
             t('common.cancel')
           }}</AppButton>
-          <AppButton type="submit" variant="primary" :loading="inventoryStore.isMutating">
+          <AppButton
+            type="submit"
+            variant="primary"
+            :loading="inventoryStore.isMutating"
+            :disabled="!transitionForm.reasonCode.trim()"
+          >
             {{
               transitionMode === 'consume'
                 ? t('inventory.actions.consumeReservation')

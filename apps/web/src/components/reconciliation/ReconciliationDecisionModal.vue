@@ -42,6 +42,7 @@ const selectedReasonCode = computed(() =>
   actionReasonCodes.value.find((reasonCode) => reasonCode.code === form.reasonCode),
 )
 const requiresComment = computed(() => Boolean(selectedReasonCode.value?.requiresComment))
+const actionImpactKey = computed(() => `reconciliation.decisionModal.impact.${form.action}`)
 
 watch(
   () => props.modelValue,
@@ -148,6 +149,9 @@ const submit = () => {
           <option value="IGNORE">{{ t('reconciliation.actions.IGNORE') }}</option>
           <option value="REOPEN">{{ t('reconciliation.actions.REOPEN') }}</option>
         </select>
+        <p class="lf-decision-impact">
+          {{ t(actionImpactKey) }}
+        </p>
       </div>
 
       <AppInput
@@ -220,6 +224,12 @@ const submit = () => {
   display: flex;
   flex-direction: column;
   gap: var(--lf-space-2);
+}
+
+.lf-decision-impact {
+  margin: 0;
+  color: var(--lf-text-muted);
+  font-size: 0.8125rem;
 }
 
 .lf-textarea {

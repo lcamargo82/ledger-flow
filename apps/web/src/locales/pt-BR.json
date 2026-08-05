@@ -468,10 +468,27 @@
       "sourceTypeLabel": "Tipo da origem",
       "sourceIdLabel": "ID da origem",
       "reasonCodeLabel": "Motivo",
+      "reasonCodePlaceholder": "Selecione um motivo",
       "notesLabel": "Observações",
       "validation": {
         "codeLength": "O código deve ter entre 2 e 20 caracteres.",
-        "nameMinLength": "O nome deve ter pelo menos 2 caracteres."
+        "nameMinLength": "O nome deve ter pelo menos 2 caracteres.",
+        "reasonRequired": "Informe o motivo para continuar."
+      }
+    },
+    "reservationReasons": {
+      "release": {
+        "ORDER_CANCELLED": "Pedido cancelado",
+        "CUSTOMER_CANCELLED": "Cliente cancelou",
+        "DUPLICATE_RESERVATION": "Reserva duplicada",
+        "WRONG_SKU": "SKU incorreto",
+        "OTHER": "Outro motivo"
+      },
+      "consume": {
+        "ORDER_FULFILLED": "Pedido enviado ou concluído",
+        "MANUAL_FULFILLMENT": "Baixa operacional manual",
+        "MARKETPLACE_FULFILLMENT": "Fulfillment do marketplace",
+        "OTHER": "Outro motivo"
       }
     },
     "reservationStatus": {
@@ -2260,6 +2277,7 @@
     },
     "actions": {
       "review": "Revisar",
+      "viewHistory": "Ver histórico",
       "COMMENT": "Comentário",
       "MANUAL_MATCH": "Vincular manualmente",
       "RESOLVE_EXCEPTION": "Resolver exceção",
@@ -2273,7 +2291,14 @@
       "reasonCode": "Código do motivo",
       "comment": "Comentário",
       "commentRequired": "Comentário obrigatório",
-      "submit": "Registrar decisão"
+      "submit": "Registrar decisão",
+      "impact": {
+        "COMMENT": "Registra apenas uma nota na timeline. Não altera o status e não remove o caso da listagem.",
+        "MANUAL_MATCH": "Vincula manualmente um pagamento e muda o caso para correspondência manual.",
+        "RESOLVE_EXCEPTION": "Encerra a divergência como exceção resolvida e registra a justificativa.",
+        "IGNORE": "Ignora o caso como ruído operacional e registra a justificativa.",
+        "REOPEN": "Reabre o caso para nova análise."
+      }
     },
     "fineMesh": {
       "evidence": "Evidências",
