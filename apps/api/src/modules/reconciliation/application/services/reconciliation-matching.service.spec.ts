@@ -224,7 +224,11 @@ describe('ReconciliationMatchingService', () => {
     );
     prisma.payment.findFirst.mockResolvedValue(null);
     prisma.orderFinancialFact.findFirst.mockResolvedValue(
-      orderFact({ externalOrderId: '2000000001', revenueAmount: '120.50' }),
+      orderFact({
+        externalOrderId: '2000000001',
+        revenueAmount: '150.00',
+        estimatedNetAmount: '120.50',
+      }),
     );
     prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-ml-divergence' });
 
@@ -253,7 +257,11 @@ describe('ReconciliationMatchingService', () => {
     );
     prisma.payment.findFirst.mockResolvedValue(null);
     prisma.orderFinancialFact.findFirst.mockResolvedValue(
-      orderFact({ externalOrderId: '2000000001', revenueAmount: '38.38' }),
+      orderFact({
+        externalOrderId: '2000000001',
+        revenueAmount: '52.42',
+        estimatedNetAmount: '38.38',
+      }),
     );
     prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-ml-net' });
 
@@ -287,7 +295,11 @@ describe('ReconciliationMatchingService', () => {
     });
     prisma.payment.findFirst.mockResolvedValue(null);
     prisma.orderFinancialFact.findFirst.mockResolvedValue(
-      orderFact({ externalOrderId: '2000000001', revenueAmount: '38.38' }),
+      orderFact({
+        externalOrderId: '2000000001',
+        revenueAmount: '52.42',
+        estimatedNetAmount: '38.38',
+      }),
     );
     prisma.reconciliationCase.update.mockResolvedValue({
       id: 'case-existing',
@@ -321,7 +333,11 @@ describe('ReconciliationMatchingService', () => {
       }),
     );
     prisma.orderFinancialFact.findMany.mockResolvedValue([
-      orderFact({ externalOrderId: '2000000001', revenueAmount: '120.50' }),
+      orderFact({
+        externalOrderId: '2000000001',
+        revenueAmount: '150.00',
+        estimatedNetAmount: '120.50',
+      }),
     ]);
     prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-candidate' });
 
@@ -388,11 +404,16 @@ describe('ReconciliationMatchingService', () => {
       externalOrderId: '2000000001',
       channelProvider: ChannelProvider.MERCADO_LIVRE,
       revenueAmount: new Prisma.Decimal('120.50'),
+      estimatedNetAmount: new Prisma.Decimal('120.50'),
       currency: 'BRL',
       calculatedAt: new Date('2026-07-03T09:55:00.000Z'),
       version: 1,
       ...overrides,
       revenueAmount: new Prisma.Decimal(String(overrides.revenueAmount ?? '120.50')),
+      estimatedNetAmount:
+        overrides.estimatedNetAmount === null
+          ? null
+          : new Prisma.Decimal(String(overrides.estimatedNetAmount ?? '120.50')),
     };
   }
 });

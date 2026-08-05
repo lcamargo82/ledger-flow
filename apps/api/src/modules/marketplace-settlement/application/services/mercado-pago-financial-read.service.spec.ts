@@ -65,4 +65,46 @@ describe('MercadoPagoFinancialReadService', () => {
     expect(JSON.stringify(page.data[0].normalizedPayload)).not.toContain('SECRET_QR_PAYLOAD');
     expect(JSON.stringify(page.data[0].normalizedPayload)).not.toContain('SECRET_BASE64');
   });
+
+  it('uses gross amount minus fee details as marketplace net when provider net differs', async () => {
+    const apiClient = {
+      searchPayments: jest.fn().mockResolvedValue({
+        paging: { total: 1, limit: 50, offset: 0 },
+        results: [
+          {
+            id: 171281344103,
+            status: 'approved',
+            transaction_amount: 52.42,
+            external_reference: '2000017768812630',
+            currency_id: 'BRL',
+            fee_details: [
+              { type: 'mercadolibre_fee', amount: 13.44, fee_payer: 'collector' },
+              { type: 'mercadopago_fee', amount: 0.58, fee_payer: 'collector' },
+              { type: 'financing_fee', amount: 0.02, fee_payer: 'collector' },
+            ],
+            transaction_details: { net_received_amount: 18.38 },
+          },
+        ],
+      }),
+    };
+    const service = new MercadoPagoFinancialReadService(apiClient as never);
+
+    const page = await service.fetchPaymentEvents({
+      accessToken: 'token',
+      gatewayConfigurationId: 'gateway-1',
+      operationalFinancialAccountId: 'account-1',
+      from: new Date('2026-08-05T00:00:00.000Z'),
+      to: new Date('2026-08-05T23:59:59.999Z'),
+    });
+
+    expect(page.data[0]).toMatchObject({
+      amountMinor: '5242',
+      feeAmountMinor: '1404',
+      netAmountMinor: '3838',
+    });
+    expect(page.data[0].normalizedPayload).toMatchObject({
+      netAmountSource: 'transaction_amount_minus_fee_details',
+      providerNetAmountMinor: '1838',
+    });
+  });
 });

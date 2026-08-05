@@ -31,6 +31,7 @@ type MarketplaceOrderMatch = {
   orderId: string;
   externalOrderId: string | null;
   revenueAmount: Prisma.Decimal;
+  estimatedNetAmount: Prisma.Decimal | null;
   currency: string;
   calculatedAt: Date;
 };
@@ -233,7 +234,9 @@ export class ReconciliationMatchingService {
     ]);
     const orderCandidates = rawOrderCandidates
       .filter((fact) =>
-        this.majorDecimalToMinor(fact.revenueAmount).equals(receivedAmountMinor),
+        this.majorDecimalToMinor(fact.estimatedNetAmount ?? fact.revenueAmount).equals(
+          receivedAmountMinor,
+        ),
       )
       .slice(0, 2);
 
@@ -323,7 +326,9 @@ export class ReconciliationMatchingService {
 
   private resolveExpectedAmountMinor(match: MatchResult | null) {
     if (match?.payment) return new Prisma.Decimal(match.payment.amount);
-    if (match?.order) return this.majorDecimalToMinor(match.order.revenueAmount);
+    if (match?.order) {
+      return this.majorDecimalToMinor(match.order.estimatedNetAmount ?? match.order.revenueAmount);
+    }
     return undefined;
   }
 

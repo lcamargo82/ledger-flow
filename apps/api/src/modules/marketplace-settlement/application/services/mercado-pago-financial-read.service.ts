@@ -58,11 +58,14 @@ export class MercadoPagoFinancialReadService {
   ): NormalizedSettlementEvent {
     const amountMinor = this.moneyToMinor(payment.transaction_amount);
     const feeAmountMinor = this.moneyToMinor(this.sumFees(payment));
-    const netAmountMinor = this.moneyToMinor(this.resolveNetAmount(payment));
+    const netAmount = this.resolveNetAmount(payment);
+    const netAmountMinor = this.moneyToMinor(netAmount.amount);
     const normalizedPayload = this.sanitizePayment(payment, {
       grossAmountMinor: amountMinor,
       feeAmountMinor,
       netAmountMinor,
+      netAmountSource: netAmount.source,
+      providerNetAmountMinor: this.moneyToMinor(payment.transaction_details?.net_received_amount),
     });
 
     return {
@@ -98,14 +101,33 @@ export class MercadoPagoFinancialReadService {
   }
 
   private resolveNetAmount(payment: MercadoPagoPaymentResponse) {
+    if (typeof payment.transaction_amount === 'number' && (payment.fee_details ?? []).length > 0) {
+      return {
+        amount: payment.transaction_amount - this.sumFees(payment),
+        source: 'transaction_amount_minus_fee_details',
+      };
+    }
+
     const providerNet = payment.transaction_details?.net_received_amount;
-    if (typeof providerNet === 'number') return providerNet;
-    return Number(payment.transaction_amount ?? 0) - this.sumFees(payment);
+    if (typeof providerNet === 'number') {
+      return { amount: providerNet, source: 'transaction_details.net_received_amount' };
+    }
+
+    return {
+      amount: Number(payment.transaction_amount ?? 0) - this.sumFees(payment),
+      source: 'transaction_amount_minus_fee_details',
+    };
   }
 
   private sanitizePayment(
     payment: MercadoPagoPaymentResponse,
-    totals: { grossAmountMinor?: string; feeAmountMinor?: string; netAmountMinor?: string },
+    totals: {
+      grossAmountMinor?: string;
+      feeAmountMinor?: string;
+      netAmountMinor?: string;
+      netAmountSource: string;
+      providerNetAmountMinor?: string;
+    },
   ): Record<string, unknown> {
     return {
       source: 'mercado_pago_payments_search',
@@ -118,6 +140,8 @@ export class MercadoPagoFinancialReadService {
       grossAmountMinor: totals.grossAmountMinor,
       feeAmountMinor: totals.feeAmountMinor,
       netAmountMinor: totals.netAmountMinor,
+      netAmountSource: totals.netAmountSource,
+      providerNetAmountMinor: totals.providerNetAmountMinor,
       dateCreated: payment.date_created,
       dateApproved: payment.date_approved,
       dateLastUpdated: payment.date_last_updated,
