@@ -242,10 +242,10 @@ const orderItemWarehouseLabel = (orderItem: InternalOrder['items'][number]) =>
               <div>{{ orderItemName(orderItem) }}</div>
               <small class="block text-[var(--lf-text-secondary)]">
                 <span class="font-mono">{{ orderItemSkuLabel(orderItem) }}</span>
-                <span> · {{ orderItemWarehouseLabel(orderItem) }} · {{ orderItem.quantity }}</span>
-              </small>
-              <small class="block text-[var(--lf-text-secondary)]">
-                {{ reservationStatusLabel(orderItem) }}
+                <span>
+                  · {{ orderItemWarehouseLabel(orderItem) }} · {{ orderItem.quantity }}
+                  {{ reservationStatusLabel(orderItem) }}
+                </span>
               </small>
             </div>
           </div>
