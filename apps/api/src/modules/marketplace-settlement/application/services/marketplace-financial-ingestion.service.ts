@@ -69,6 +69,7 @@ export class MarketplaceFinancialIngestionService {
       pagesFetched: 0,
       received: 0,
       created: 0,
+      updated: 0,
       duplicates: 0,
       from,
       to,
@@ -107,6 +108,8 @@ export class MarketplaceFinancialIngestionService {
             netAmountMinor: ingested.settlementEvent.netAmountMinor?.toString() ?? null,
             currency: ingested.settlementEvent.currency,
           });
+        } else if (ingested.updated && ingested.settlementEvent) {
+          result.updated += 1;
         } else {
           result.duplicates += 1;
         }

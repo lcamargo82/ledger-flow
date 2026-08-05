@@ -63,15 +63,22 @@ export class ReconciliationMatchingService {
         },
       },
     });
-    if (existing) {
-      await this.notifyDivergence(existing);
-      return { case: existing, created: false };
-    }
 
     const policy = await this.findPolicy(settlement);
     const match = await this.findMatch(settlement);
+    const caseData = this.buildCaseData(settlement, match, policy);
+
+    if (existing) {
+      const reconciliationCase = await this.prisma.reconciliationCase.update({
+        where: { id: existing.id },
+        data: this.toCaseUpdateData(caseData),
+      });
+      await this.notifyDivergence(reconciliationCase);
+      return { case: reconciliationCase, created: false };
+    }
+
     const reconciliationCase = await this.prisma.reconciliationCase.create({
-      data: this.buildCaseData(settlement, match, policy),
+      data: caseData,
     });
     await this.notifyDivergence(reconciliationCase);
 
@@ -188,7 +195,8 @@ export class ReconciliationMatchingService {
   }
 
   private async findAmountCandidates(settlement: ProviderSettlementEvent) {
-    if (!settlement.tenantId || !settlement.amountMinor || !settlement.occurredAt) {
+    const receivedAmountMinor = this.resolveSettlementReceivedAmountMinor(settlement);
+    if (!settlement.tenantId || !receivedAmountMinor || !settlement.occurredAt) {
       return { paymentCandidates: [], orderCandidates: [] };
     }
 
@@ -200,7 +208,7 @@ export class ReconciliationMatchingService {
         where: {
           tenantId: settlement.tenantId,
           provider: settlement.provider,
-          amount: Number(settlement.amountMinor.toString()),
+          amount: Number(receivedAmountMinor.toString()),
           currency: settlement.currency,
           createdAt: {
             gte: new Date(occurredAt - dayMs),
@@ -225,7 +233,7 @@ export class ReconciliationMatchingService {
     ]);
     const orderCandidates = rawOrderCandidates
       .filter((fact) =>
-        this.majorDecimalToMinor(fact.revenueAmount).equals(settlement.amountMinor!),
+        this.majorDecimalToMinor(fact.revenueAmount).equals(receivedAmountMinor),
       )
       .slice(0, 2);
 
@@ -238,10 +246,7 @@ export class ReconciliationMatchingService {
     policy: { version: number; amountToleranceMinor: Prisma.Decimal } | null,
   ): Prisma.ReconciliationCaseUncheckedCreateInput {
     const expectedAmountMinor = this.resolveExpectedAmountMinor(match);
-    const receivedAmountMinor =
-      settlement.amountMinor === null || settlement.amountMinor === undefined
-        ? undefined
-        : new Prisma.Decimal(settlement.amountMinor);
+    const receivedAmountMinor = this.resolveSettlementReceivedAmountMinor(settlement);
     const differenceAmountMinor =
       expectedAmountMinor && receivedAmountMinor
         ? receivedAmountMinor.sub(expectedAmountMinor)
@@ -265,6 +270,26 @@ export class ReconciliationMatchingService {
       policyVersion: policy?.version ?? 1,
       matchedAt: match?.payment || match?.order ? new Date() : undefined,
       reconciledAt: status === ReconciliationCaseStatus.RECONCILED ? new Date() : undefined,
+    };
+  }
+
+  private toCaseUpdateData(
+    data: Prisma.ReconciliationCaseUncheckedCreateInput,
+  ): Prisma.ReconciliationCaseUncheckedUpdateInput {
+    return {
+      provider: data.provider,
+      status: data.status,
+      matchType: data.matchType,
+      paymentId: data.paymentId ?? null,
+      orderId: data.orderId ?? null,
+      expectedAmountMinor: data.expectedAmountMinor ?? null,
+      receivedAmountMinor: data.receivedAmountMinor ?? null,
+      differenceAmountMinor: data.differenceAmountMinor ?? null,
+      currency: data.currency,
+      currencyExponent: data.currencyExponent,
+      policyVersion: data.policyVersion,
+      matchedAt: data.matchedAt ?? null,
+      reconciledAt: data.reconciledAt ?? null,
     };
   }
 
@@ -300,6 +325,11 @@ export class ReconciliationMatchingService {
     if (match?.payment) return new Prisma.Decimal(match.payment.amount);
     if (match?.order) return this.majorDecimalToMinor(match.order.revenueAmount);
     return undefined;
+  }
+
+  private resolveSettlementReceivedAmountMinor(settlement: ProviderSettlementEvent) {
+    const amount = settlement.netAmountMinor ?? settlement.amountMinor;
+    return amount === null || amount === undefined ? undefined : new Prisma.Decimal(amount);
   }
 
   private extractMarketplaceOrderReferences(settlement: ProviderSettlementEvent) {

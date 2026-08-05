@@ -154,6 +154,7 @@ describe('MarketplaceFinancialIngestionService', () => {
       pagesFetched: 1,
       received: 1,
       created: 1,
+      updated: 0,
       duplicates: 0,
     });
   });
@@ -179,7 +180,42 @@ describe('MarketplaceFinancialIngestionService', () => {
     expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
     expect(notificationProducer.marketplaceSettlementEventReceived).not.toHaveBeenCalled();
     expect(result.created).toBe(0);
+    expect(result.updated).toBe(0);
     expect(result.duplicates).toBe(1);
+  });
+
+  it('counts updated provider rows without emitting duplicate marketplace notifications', async () => {
+    const reconciliationIngestion = {
+      ingestNormalizedSettlement: jest.fn().mockResolvedValue({
+        created: false,
+        updated: true,
+        settlementEvent: {
+          id: 'settlement-1',
+          operationalFinancialAccountId: 'account-1',
+          provider: 'MERCADO_PAGO',
+          providerEventId: 'mp-payment:gateway-1:123',
+          providerPaymentId: '123',
+          netAmountMinor: new Prisma.Decimal('3838'),
+          currency: 'BRL',
+        },
+      }),
+    };
+    const notificationProducer = {
+      marketplaceSettlementEventReceived: jest.fn().mockResolvedValue(undefined),
+    };
+    const { service, prisma } = makeService({ reconciliationIngestion, notificationProducer });
+
+    const result = await service.syncMercadoPagoByPeriod('tenant-1', 'user-1', 'account-1', {
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-31T23:59:59.999Z',
+      maxPages: 1,
+    });
+
+    expect(prisma.outboxEvent.create).not.toHaveBeenCalled();
+    expect(notificationProducer.marketplaceSettlementEventReceived).not.toHaveBeenCalled();
+    expect(result.created).toBe(0);
+    expect(result.updated).toBe(1);
+    expect(result.duplicates).toBe(0);
   });
 
   it('rejects invalid sync periods before provider IO', async () => {

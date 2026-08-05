@@ -70,6 +70,9 @@ export class MarketplaceSettlementSyncResponseDto {
   created: number;
 
   @ApiProperty()
+  updated: number;
+
+  @ApiProperty()
   duplicates: number;
 
   @ApiProperty()

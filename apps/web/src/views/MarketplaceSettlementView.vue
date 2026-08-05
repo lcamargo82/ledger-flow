@@ -292,6 +292,7 @@ const submitSync = async () => {
               t('marketplaceSettlement.sync.result', {
                 received: settlementStore.lastSyncResult.received,
                 created: settlementStore.lastSyncResult.created,
+                updated: settlementStore.lastSyncResult.updated,
                 duplicates: settlementStore.lastSyncResult.duplicates,
               })
             }}

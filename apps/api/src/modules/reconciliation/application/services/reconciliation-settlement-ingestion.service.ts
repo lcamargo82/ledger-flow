@@ -9,6 +9,7 @@ import { NormalizedSettlementEvent } from '../../domain/interfaces/reconciliatio
 interface IngestionResult {
   settlementEvent: ProviderSettlementEvent | null;
   created: boolean;
+  updated: boolean;
 }
 
 @Injectable()
@@ -24,7 +25,7 @@ export class ReconciliationSettlementIngestionService {
     );
 
     if (!normalized) {
-      return { settlementEvent: null, created: false };
+      return { settlementEvent: null, created: false, updated: false };
     }
 
     return this.ingestNormalizedSettlement(
@@ -52,34 +53,52 @@ export class ReconciliationSettlementIngestionService {
       });
 
       if (existing) {
-        return { settlementEvent: existing, created: false };
+        const data = this.toUpdateInput(normalized, tenantId, sourceWebhookInboxEventId, receivedAt);
+        if (!this.hasMeaningfulChange(existing, data)) {
+          return { settlementEvent: existing, created: false, updated: false };
+        }
+
+        const settlementEvent = await tx.providerSettlementEvent.update({
+          where: { id: existing.id },
+          data,
+        });
+        await this.enqueueSettlementReceived(tx, settlementEvent);
+
+        return { settlementEvent, created: false, updated: true };
       }
 
       const settlementEvent = await tx.providerSettlementEvent.create({
         data: this.toCreateInput(normalized, tenantId, sourceWebhookInboxEventId, receivedAt),
       });
 
-      const outboxPayload = {
-        providerSettlementEventId: settlementEvent.id,
-        provider: settlementEvent.provider,
-        providerEventId: settlementEvent.providerEventId,
-        providerPaymentId: settlementEvent.providerPaymentId,
-        externalReference: settlementEvent.externalReference,
-      };
+      await this.enqueueSettlementReceived(tx, settlementEvent);
 
-      await tx.outboxEvent.create({
-        data: {
-          tenantId: settlementEvent.tenantId,
-          aggregateType: 'ProviderSettlementEvent',
-          aggregateId: settlementEvent.id,
-          eventType: 'reconciliation.settlement_received',
-          eventVersion: 1,
-          payload: outboxPayload,
-          payloadHash: this.hash(outboxPayload),
-        },
-      });
+      return { settlementEvent, created: true, updated: false };
+    });
+  }
 
-      return { settlementEvent, created: true };
+  private async enqueueSettlementReceived(
+    tx: Prisma.TransactionClient,
+    settlementEvent: ProviderSettlementEvent,
+  ) {
+    const outboxPayload = {
+      providerSettlementEventId: settlementEvent.id,
+      provider: settlementEvent.provider,
+      providerEventId: settlementEvent.providerEventId,
+      providerPaymentId: settlementEvent.providerPaymentId,
+      externalReference: settlementEvent.externalReference,
+    };
+
+    await tx.outboxEvent.create({
+      data: {
+        tenantId: settlementEvent.tenantId,
+        aggregateType: 'ProviderSettlementEvent',
+        aggregateId: settlementEvent.id,
+        eventType: 'reconciliation.settlement_received',
+        eventVersion: 1,
+        payload: outboxPayload,
+        payloadHash: this.hash(outboxPayload),
+      },
     });
   }
 
@@ -130,6 +149,92 @@ export class ReconciliationSettlementIngestionService {
       sourceWebhookInboxEventId,
       receivedAt,
     };
+  }
+
+  private toUpdateInput(
+    normalized: NormalizedSettlementEvent,
+    tenantId: string | null,
+    sourceWebhookInboxEventId: string | undefined,
+    receivedAt: Date,
+  ): Prisma.ProviderSettlementEventUncheckedUpdateInput {
+    return {
+      tenantId,
+      operationalFinancialAccountId: normalized.operationalFinancialAccountId,
+      providerSettlementId: normalized.providerSettlementId,
+      providerPaymentId: normalized.providerPaymentId,
+      externalReference: normalized.externalReference,
+      eventType: normalized.eventType,
+      providerStatus: normalized.providerStatus,
+      amountMinor: this.toDecimal(normalized.amountMinor),
+      feeAmountMinor: this.toDecimal(normalized.feeAmountMinor),
+      netAmountMinor: this.toDecimal(normalized.netAmountMinor),
+      currency: normalized.currency,
+      currencyExponent: normalized.currencyExponent,
+      occurredAt: normalized.occurredAt,
+      availableAt: normalized.availableAt,
+      payloadHash: normalized.payloadHash,
+      normalizedPayload: normalized.normalizedPayload as Prisma.InputJsonValue,
+      sourceWebhookInboxEventId,
+      receivedAt,
+    };
+  }
+
+  private hasMeaningfulChange(
+    existing: ProviderSettlementEvent,
+    data: Prisma.ProviderSettlementEventUncheckedUpdateInput,
+  ) {
+    const keys: Array<keyof Prisma.ProviderSettlementEventUncheckedUpdateInput> = [
+      'tenantId',
+      'operationalFinancialAccountId',
+      'providerSettlementId',
+      'providerPaymentId',
+      'externalReference',
+      'eventType',
+      'providerStatus',
+      'amountMinor',
+      'feeAmountMinor',
+      'netAmountMinor',
+      'currency',
+      'currencyExponent',
+      'occurredAt',
+      'availableAt',
+      'payloadHash',
+      'normalizedPayload',
+    ];
+
+    return keys.some((key) => {
+      const nextValue = data[key];
+      if (nextValue === undefined) return false;
+      return !this.areEqual((existing as Record<string, unknown>)[key], nextValue);
+    });
+  }
+
+  private areEqual(current: unknown, next: unknown) {
+    if (current instanceof Prisma.Decimal || next instanceof Prisma.Decimal) {
+      return this.decimalString(current) === this.decimalString(next);
+    }
+    if (current instanceof Date || next instanceof Date) {
+      return this.dateTime(current) === this.dateTime(next);
+    }
+    if (this.isPlainObject(current) || this.isPlainObject(next)) {
+      return JSON.stringify(current ?? null) === JSON.stringify(next ?? null);
+    }
+
+    return current === next;
+  }
+
+  private decimalString(value: unknown) {
+    if (value === null || value === undefined) return null;
+    return new Prisma.Decimal(value as Prisma.Decimal.Value).toString();
+  }
+
+  private dateTime(value: unknown) {
+    if (value === null || value === undefined) return null;
+    return value instanceof Date ? value.getTime() : new Date(String(value)).getTime();
+  }
+
+  private isPlainObject(value: unknown) {
+    return value !== null && typeof value === 'object' && !(value instanceof Date);
   }
 
   private resolveAmountInCents(payloadSummary: Record<string, unknown>) {

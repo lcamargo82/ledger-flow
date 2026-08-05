@@ -16,6 +16,7 @@ describe('ReconciliationMatchingService', () => {
     reconciliationCase: {
       findUnique: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
     reconciliationPolicy: {
       findFirst: jest.fn(),
@@ -237,6 +238,75 @@ describe('ReconciliationMatchingService', () => {
         expectedAmountMinor: new Prisma.Decimal('12050'),
         receivedAmountMinor: new Prisma.Decimal('11500'),
         differenceAmountMinor: new Prisma.Decimal('-550'),
+      }),
+    });
+  });
+
+  it('matches Mercado Pago settlement by net amount when provider sends gross and net values', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({
+        provider: PaymentProvider.MERCADO_PAGO,
+        externalReference: '2000000001',
+        amountMinor: '5242',
+        netAmountMinor: '3838',
+      }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(null);
+    prisma.orderFinancialFact.findFirst.mockResolvedValue(
+      orderFact({ externalOrderId: '2000000001', revenueAmount: '38.38' }),
+    );
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-ml-net' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.RECONCILED,
+        matchType: ReconciliationMatchType.MARKETPLACE_ORDER_ID,
+        expectedAmountMinor: new Prisma.Decimal('3838'),
+        receivedAmountMinor: new Prisma.Decimal('3838'),
+        differenceAmountMinor: new Prisma.Decimal('0'),
+      }),
+    });
+  });
+
+  it('recalculates an existing case when the settlement net amount changes', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({
+        provider: PaymentProvider.MERCADO_PAGO,
+        externalReference: '2000000001',
+        amountMinor: '5242',
+        netAmountMinor: '3838',
+      }),
+    );
+    prisma.reconciliationCase.findUnique.mockResolvedValue({
+      id: 'case-existing',
+      tenantId: 'tenant-1',
+      settlementEventId: 'settlement-1',
+      status: ReconciliationCaseStatus.AMOUNT_DIVERGENCE,
+    });
+    prisma.payment.findFirst.mockResolvedValue(null);
+    prisma.orderFinancialFact.findFirst.mockResolvedValue(
+      orderFact({ externalOrderId: '2000000001', revenueAmount: '38.38' }),
+    );
+    prisma.reconciliationCase.update.mockResolvedValue({
+      id: 'case-existing',
+      status: ReconciliationCaseStatus.RECONCILED,
+    });
+
+    const result = await service.matchSettlement('settlement-1');
+
+    expect(result.created).toBe(false);
+    expect(prisma.reconciliationCase.create).not.toHaveBeenCalled();
+    expect(prisma.reconciliationCase.update).toHaveBeenCalledWith({
+      where: { id: 'case-existing' },
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.RECONCILED,
+        matchType: ReconciliationMatchType.MARKETPLACE_ORDER_ID,
+        expectedAmountMinor: new Prisma.Decimal('3838'),
+        receivedAmountMinor: new Prisma.Decimal('3838'),
+        differenceAmountMinor: new Prisma.Decimal('0'),
+        reconciledAt: expect.any(Date),
       }),
     });
   });

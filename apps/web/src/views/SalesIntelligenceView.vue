@@ -295,7 +295,7 @@ onMounted(() => store.fetchOverview())
           <span class="sales-money">{{ formatMinor(item.feeAmountMinor, item.currency) }}</span>
         </template>
         <template #netAmountMinor="{ item }">
-          <div class="flex flex-col items-end gap-1">
+          <div class="flex flex-wrap items-center justify-end gap-2">
             <span class="sales-money font-semibold">{{
               formatMinor(item.netAmountMinor, item.currency)
             }}</span>

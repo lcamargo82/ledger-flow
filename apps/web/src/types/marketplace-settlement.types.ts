@@ -64,6 +64,7 @@ export interface MarketplaceSettlementSyncResult {
   pagesFetched: number
   received: number
   created: number
+  updated: number
   duplicates: number
   from: string
   to: string

@@ -2399,7 +2399,7 @@
       "to": "Fim",
       "maxPages": "Máximo de páginas",
       "maxPagesValidation": "Informe um número de páginas entre 1 e 10.",
-      "result": "Sincronização concluída: {received} recebidos, {created} novos e {duplicates} duplicados."
+      "result": "Sincronização concluída: {received} recebidos, {created} novos, {updated} atualizados e {duplicates} duplicados."
     },
     "dashboard": {
       "note": "Visão operacional de gestão; não substitui contabilidade oficial.",

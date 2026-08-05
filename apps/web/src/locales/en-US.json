@@ -2395,7 +2395,7 @@
       "to": "End",
       "maxPages": "Max pages",
       "maxPagesValidation": "Enter a page count between 1 and 10.",
-      "result": "Sync completed: {received} received, {created} new and {duplicates} duplicates."
+      "result": "Sync completed: {received} received, {created} new, {updated} updated and {duplicates} duplicates."
     },
     "dashboard": {
       "note": "Operational management view; not a replacement for official accounting.",
