@@ -29,7 +29,10 @@ export class NotificationsService {
 
   async createEvent(input: CreateNotificationEventInput) {
     const contract = getNotificationEventContract(input.eventType);
-    const userIds = await this.audienceResolver.resolve(input.tenantId, contract);
+    const userIds =
+      contract.audienceDelivery === false
+        ? []
+        : await this.audienceResolver.resolve(input.tenantId, contract);
 
     try {
       return await this.prisma.$transaction(async (transaction) => {
@@ -74,11 +77,13 @@ export class NotificationsService {
           });
         }
 
-        await this.deliveryPlanner.plan(transaction, {
-          tenantId: input.tenantId,
-          notificationEventId: event.id,
-          eventType: input.eventType,
-        });
+        if (contract.webhookDelivery !== false) {
+          await this.deliveryPlanner.plan(transaction, {
+            tenantId: input.tenantId,
+            notificationEventId: event.id,
+            eventType: input.eventType,
+          });
+        }
 
         return { event, created: true };
       });

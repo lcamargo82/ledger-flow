@@ -13,6 +13,8 @@ export interface NotificationEventContract {
   messageKey: string;
   requiredPermissions: string[];
   requiredCapabilities: PlatformCapability[];
+  audienceDelivery?: boolean;
+  webhookDelivery?: boolean;
 }
 
 const NOTIFICATION_EVENT_REGISTRY = {
@@ -62,6 +64,8 @@ const NOTIFICATION_EVENT_REGISTRY = {
       ReconciliationCapabilities.Read,
       ReconciliationCapabilities.MarketplaceSettlementRead,
     ],
+    audienceDelivery: false,
+    webhookDelivery: false,
   },
   'cash_position.unexplained_difference': {
     category: NotificationCategory.RECONCILIATION,

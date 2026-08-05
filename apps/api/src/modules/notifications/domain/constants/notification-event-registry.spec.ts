@@ -78,6 +78,8 @@ describe('notification event registry', () => {
         'reconciliation.read',
         'marketplace_settlement.read',
       ],
+      audienceDelivery: false,
+      webhookDelivery: false,
     });
     expect(getNotificationEventContract('cash_position.unexplained_difference')).toEqual({
       category: NotificationCategory.RECONCILIATION,

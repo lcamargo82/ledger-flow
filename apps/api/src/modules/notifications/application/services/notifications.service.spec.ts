@@ -103,6 +103,34 @@ describe('NotificationsService', () => {
     expect(deliveryPlanner.plan).not.toHaveBeenCalled();
   });
 
+  it('keeps settlement ingestion events technical without audience or webhook delivery', async () => {
+    audienceResolver.resolve.mockResolvedValue(['user-1']);
+    transaction.notificationEvent.findUnique.mockResolvedValue(null);
+    transaction.notificationEvent.create.mockResolvedValue({ id: 'event-settlement-1' });
+
+    await expect(
+      service.createEvent({
+        tenantId: 'tenant-1',
+        eventType: 'marketplace_settlement.event_received',
+        idempotencyKey: 'marketplace-settlement:settlement-1:received',
+        sourceType: 'ProviderSettlementEvent',
+        sourceId: 'settlement-1',
+        occurredAt: new Date('2026-08-05T21:55:16.000Z'),
+        translationArgs: {
+          provider: 'MERCADO_PAGO',
+          providerPaymentId: '170013289911',
+          netAmountMinor: '688',
+          currency: 'BRL',
+        },
+      }),
+    ).resolves.toEqual({ event: { id: 'event-settlement-1' }, created: true });
+
+    expect(transaction.notificationEvent.create).toHaveBeenCalled();
+    expect(audienceResolver.resolve).not.toHaveBeenCalled();
+    expect(transaction.notificationRecipient.createMany).not.toHaveBeenCalled();
+    expect(deliveryPlanner.plan).not.toHaveBeenCalled();
+  });
+
   it('returns the winning event when concurrent creation hits the unique constraint', async () => {
     prisma.$transaction.mockRejectedValueOnce(
       new Prisma.PrismaClientKnownRequestError('duplicate', {
