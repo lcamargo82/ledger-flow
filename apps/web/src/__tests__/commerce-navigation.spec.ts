@@ -138,10 +138,10 @@ describe('commerce navigation foundation', () => {
     expect(cycleCountRoute?.meta?.capabilities).toEqual(['inventory.cycle_count'])
   })
 
-  it('keeps advanced inventory routes unregistered while feature flags are disabled', () => {
+  it('registers transfer routes by default and keeps cycle counts behind a feature flag', () => {
     expect(
       router.getRoutes().find((route) => route.path === '/inventory/transfers'),
-    ).toBeUndefined()
+    ).toBeDefined()
     expect(
       router.getRoutes().find((route) => route.path === '/inventory/cycle-counts'),
     ).toBeUndefined()

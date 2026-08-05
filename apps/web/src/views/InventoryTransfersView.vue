@@ -4,7 +4,12 @@ import axios from 'axios'
 import { useI18n } from '../composables/useI18n'
 import { useAuthStore } from '../stores/auth.store'
 import { useInventoryStore } from '../stores/inventory.store'
-import type { InventoryTransfer, InventoryTransferStatus } from '../types/inventory.types'
+import { inventoryService } from '../services/inventory.service'
+import type {
+  InventoryBalance,
+  InventoryTransfer,
+  InventoryTransferStatus,
+} from '../types/inventory.types'
 import { formatDateTime } from '../utils/date-format'
 import AppBadge from '../components/common/AppBadge.vue'
 import AppButton from '../components/common/AppButton.vue'
@@ -28,6 +33,7 @@ const inventoryStore = useInventoryStore()
 
 const isCreateModalOpen = ref(false)
 const inventorySearch = ref(inventoryStore.search)
+const transferBalances = ref<InventoryBalance[]>([])
 let inventorySearchTimer: ReturnType<typeof setTimeout> | null = null
 const submitError = ref('')
 const transitionError = ref('')
@@ -69,8 +75,29 @@ const reasonOptions = computed(() =>
   ),
 )
 
+const skuOptions = computed(() => {
+  const sourceWarehouseId = transferForm.sourceWarehouseId
+  const balances = sourceWarehouseId
+    ? transferBalances.value.filter((balance) => balance.warehouseId === sourceWarehouseId)
+    : transferBalances.value
+
+  return [
+    { value: '', label: t('inventory.transfers.form.skuPlaceholder') },
+    ...balances
+      .filter((balance) => Number(balance.availableQuantity) > 0)
+      .map((balance) => ({
+        value: balance.skuId,
+        label: `${balance.sku.product.name} · ${balance.sku.skuDisplay} · ${balance.warehouse.code} · ${t('inventory.transfers.form.availableQuantity', { quantity: balance.availableQuantity })}`,
+      })),
+  ]
+})
+
 onMounted(async () => {
-  await Promise.all([inventoryStore.fetchWarehouses(), inventoryStore.fetchTransfers()])
+  await Promise.all([
+    inventoryStore.fetchWarehouses(),
+    inventoryStore.fetchTransfers(),
+    fetchTransferBalances(),
+  ])
 })
 
 onBeforeUnmount(() => {
@@ -101,6 +128,11 @@ const openCreateModal = () => {
   isCreateModalOpen.value = true
 }
 
+const fetchTransferBalances = async () => {
+  const response = await inventoryService.listBalances({ page: 1, perPage: 500 })
+  transferBalances.value = response.data
+}
+
 const addItem = () => {
   transferForm.items.push({ skuId: '', quantity: null })
 }
@@ -108,6 +140,10 @@ const addItem = () => {
 const removeItem = (index: number) => {
   transferForm.items.splice(index, 1)
   if (!transferForm.items.length) addItem()
+}
+
+const onSourceWarehouseChange = () => {
+  transferForm.items = transferForm.items.map(() => ({ skuId: '', quantity: null }))
 }
 
 const createStableOperationId = (prefix: string, id?: string) =>
@@ -132,6 +168,7 @@ const createTransfer = async () => {
         quantity: Number(item.quantity),
       })),
     })
+    await fetchTransferBalances()
     isCreateModalOpen.value = false
   } catch (error) {
     submitError.value = errorKey(error)
@@ -153,6 +190,7 @@ const completeTransfer = async (transfer: InventoryTransfer) => {
     await inventoryStore.completeTransfer(transfer.id, {
       idempotencyKey: createStableOperationId('complete-transfer', transfer.id),
     })
+    await fetchTransferBalances()
   } catch (error) {
     transitionError.value = errorKey(error)
   }
@@ -311,6 +349,7 @@ const errorKey = (error: unknown) => {
             :label="t('inventory.transfers.form.sourceWarehouse')"
             :options="warehouseOptions"
             required
+            @update:model-value="onSourceWarehouseChange"
           />
           <AppSelect
             v-model="transferForm.destinationWarehouseId"
@@ -334,7 +373,12 @@ const errorKey = (error: unknown) => {
             :key="index"
             class="grid grid-cols-1 sm:grid-cols-[1fr_160px_auto] gap-3 items-end"
           >
-            <AppInput v-model="item.skuId" :label="t('inventory.form.skuIdLabel')" required />
+            <AppSelect
+              v-model="item.skuId"
+              :label="t('inventory.form.skuIdLabel')"
+              :options="skuOptions"
+              required
+            />
             <AppNumberInput
               v-model="item.quantity"
               :allow-decimals="true"

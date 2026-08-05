@@ -339,7 +339,9 @@
         "createTitle": "New transfer",
         "cancelTitle": "Cancel transfer",
         "sourceWarehouse": "Source warehouse",
-        "destinationWarehouse": "Destination warehouse"
+        "destinationWarehouse": "Destination warehouse",
+        "skuPlaceholder": "Select an SKU with available stock",
+        "availableQuantity": "{quantity} available"
       },
       "empty": {
         "title": "No transfers found",

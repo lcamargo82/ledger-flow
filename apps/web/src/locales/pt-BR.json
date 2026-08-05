@@ -338,7 +338,9 @@
         "createTitle": "Nova transferência",
         "cancelTitle": "Cancelar transferência",
         "sourceWarehouse": "Warehouse de origem",
-        "destinationWarehouse": "Warehouse de destino"
+        "destinationWarehouse": "Warehouse de destino",
+        "skuPlaceholder": "Selecione um SKU com saldo disponível",
+        "availableQuantity": "{quantity} disponível"
       },
       "empty": {
         "title": "Nenhuma transferência encontrada",
