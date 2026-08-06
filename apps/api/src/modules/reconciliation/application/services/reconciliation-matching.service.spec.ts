@@ -281,6 +281,45 @@ describe('ReconciliationMatchingService', () => {
     });
   });
 
+  it('subtracts Mercado Livre seller shipping from expected net when matching Mercado Pago net', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({
+        provider: WebhookProvider.MERCADO_PAGO,
+        providerPaymentId: '171345253335',
+        externalReference: '200000147934',
+        amountMinor: '7664',
+        netAmountMinor: '5343',
+      }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(null);
+    prisma.orderFinancialFact.findFirst.mockResolvedValue(
+      orderFact({
+        externalOrderId: '200000147934',
+        revenueAmount: '76.64',
+        estimatedNetAmount: '66.68',
+        components: {
+          freight: {
+            source: 'Provider order detail when available',
+            amount: '13.25',
+          },
+        },
+      }),
+    );
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-ml-shipping-net' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.RECONCILED,
+        matchType: ReconciliationMatchType.MARKETPLACE_ORDER_ID,
+        expectedAmountMinor: new Prisma.Decimal('5343'),
+        receivedAmountMinor: new Prisma.Decimal('5343'),
+        differenceAmountMinor: new Prisma.Decimal('0'),
+      }),
+    });
+  });
+
   it('reconciles a Mercado Pago split payment when sibling settlements sum to order net', async () => {
     const currentSettlement = settlement({
       provider: WebhookProvider.MERCADO_PAGO,
@@ -451,6 +490,7 @@ describe('ReconciliationMatchingService', () => {
       revenueAmount: new Prisma.Decimal('120.50'),
       estimatedNetAmount: new Prisma.Decimal('120.50'),
       currency: 'BRL',
+      components: {},
       calculatedAt: new Date('2026-07-03T09:55:00.000Z'),
       version: 1,
       ...overrides,

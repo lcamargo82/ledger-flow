@@ -35,6 +35,7 @@ type MarketplaceOrderMatch = {
   revenueAmount: Prisma.Decimal;
   estimatedNetAmount: Prisma.Decimal | null;
   currency: string;
+  components: Prisma.JsonValue;
   calculatedAt: Date;
   expectedAmountMinor?: Prisma.Decimal;
 };
@@ -213,9 +214,7 @@ export class ReconciliationMatchingService {
     order: MarketplaceOrderMatch,
     references: string[],
   ) {
-    const orderExpectedAmountMinor = this.majorDecimalToMinor(
-      order.estimatedNetAmount ?? order.revenueAmount,
-    );
+    const orderExpectedAmountMinor = this.resolveMarketplaceOrderNetAmountMinor(settlement, order);
     if (!settlement.tenantId || references.length === 0) return orderExpectedAmountMinor;
 
     const settlements = await this.prisma.providerSettlementEvent.findMany({
@@ -240,6 +239,20 @@ export class ReconciliationMatchingService {
     }
 
     return orderExpectedAmountMinor;
+  }
+
+  private resolveMarketplaceOrderNetAmountMinor(
+    settlement: ProviderSettlementEvent,
+    order: MarketplaceOrderMatch,
+  ) {
+    const baseAmountMinor = this.majorDecimalToMinor(
+      order.estimatedNetAmount ?? order.revenueAmount,
+    );
+    if (settlement.provider !== WebhookProvider.MERCADO_PAGO || !settlement.netAmountMinor) {
+      return baseAmountMinor;
+    }
+
+    return baseAmountMinor.sub(this.shippingMinor(order.components));
   }
 
   private async findAmountCandidates(settlement: ProviderSettlementEvent) {
@@ -410,6 +423,24 @@ export class ReconciliationMatchingService {
 
   private majorDecimalToMinor(value: Prisma.Decimal) {
     return new Prisma.Decimal(value).mul(100).toDecimalPlaces(0);
+  }
+
+  private shippingMinor(components: Prisma.JsonValue) {
+    if (!components || typeof components !== 'object' || Array.isArray(components)) {
+      return new Prisma.Decimal(0);
+    }
+
+    const freight = (components as Record<string, unknown>).freight;
+    if (!freight || typeof freight !== 'object' || Array.isArray(freight)) {
+      return new Prisma.Decimal(0);
+    }
+
+    const amount = (freight as Record<string, unknown>).amount;
+    if (typeof amount !== 'string' && typeof amount !== 'number') {
+      return new Prisma.Decimal(0);
+    }
+
+    return new Prisma.Decimal(amount).mul(100).toDecimalPlaces(0);
   }
 
   private normalizeProviderStatus(providerStatus?: string | null) {
