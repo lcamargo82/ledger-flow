@@ -34,6 +34,7 @@ type MarketplaceOrderMatch = {
   externalOrderId: string | null;
   revenueAmount: Prisma.Decimal;
   estimatedNetAmount: Prisma.Decimal | null;
+  channelFeeAmount: Prisma.Decimal;
   currency: string;
   components: Prisma.JsonValue;
   calculatedAt: Date;
@@ -251,8 +252,16 @@ export class ReconciliationMatchingService {
     if (settlement.provider !== WebhookProvider.MERCADO_PAGO || !settlement.netAmountMinor) {
       return baseAmountMinor;
     }
+    if (baseAmountMinor.equals(settlement.netAmountMinor)) {
+      return baseAmountMinor;
+    }
 
-    return baseAmountMinor.sub(this.shippingMinor(order.components));
+    const explicitShippingMinor = this.shippingMinor(order.components);
+    if (explicitShippingMinor.gt(0)) {
+      return baseAmountMinor.sub(explicitShippingMinor);
+    }
+
+    return baseAmountMinor.sub(this.inferMercadoPagoSellerShippingMinor(settlement, order));
   }
 
   private async findAmountCandidates(settlement: ProviderSettlementEvent) {
@@ -441,6 +450,21 @@ export class ReconciliationMatchingService {
     }
 
     return new Prisma.Decimal(amount).mul(100).toDecimalPlaces(0);
+  }
+
+  private inferMercadoPagoSellerShippingMinor(
+    settlement: ProviderSettlementEvent,
+    order: MarketplaceOrderMatch,
+  ) {
+    if (!settlement.amountMinor || !settlement.netAmountMinor) return new Prisma.Decimal(0);
+
+    const totalProviderDeductions = new Prisma.Decimal(settlement.amountMinor).sub(
+      settlement.netAmountMinor,
+    );
+    const channelFeeMinor = this.majorDecimalToMinor(order.channelFeeAmount);
+    const inferredShippingMinor = totalProviderDeductions.sub(channelFeeMinor);
+
+    return inferredShippingMinor.gt(0) ? inferredShippingMinor : new Prisma.Decimal(0);
   }
 
   private normalizeProviderStatus(providerStatus?: string | null) {

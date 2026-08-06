@@ -62,7 +62,7 @@ const submitDecision = async (payload: CreateReconciliationDecisionPayload) => {
 
 const reprocessSelectedCase = async () => {
   if (!selectedCase.value) return
-  await reconciliationStore.reprocessCase(selectedCase.value.id)
+  selectedCase.value = await reconciliationStore.reprocessCase(selectedCase.value.id)
 }
 
 const formatMinor = (value?: string | null, currency = 'BRL') => {

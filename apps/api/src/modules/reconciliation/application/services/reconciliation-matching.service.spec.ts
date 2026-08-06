@@ -320,6 +320,40 @@ describe('ReconciliationMatchingService', () => {
     });
   });
 
+  it('infers Mercado Livre seller shipping from Mercado Pago gross and net for old facts without freight', async () => {
+    prisma.providerSettlementEvent.findUnique.mockResolvedValue(
+      settlement({
+        provider: WebhookProvider.MERCADO_PAGO,
+        providerPaymentId: '171345253335',
+        externalReference: '200000147934',
+        amountMinor: '7664',
+        netAmountMinor: '5343',
+      }),
+    );
+    prisma.payment.findFirst.mockResolvedValue(null);
+    prisma.orderFinancialFact.findFirst.mockResolvedValue(
+      orderFact({
+        externalOrderId: '200000147934',
+        revenueAmount: '76.64',
+        estimatedNetAmount: '66.68',
+        channelFeeAmount: '9.96',
+        components: {},
+      }),
+    );
+    prisma.reconciliationCase.create.mockResolvedValue({ id: 'case-ml-inferred-shipping-net' });
+
+    await service.matchSettlement('settlement-1');
+
+    expect(prisma.reconciliationCase.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        status: ReconciliationCaseStatus.RECONCILED,
+        expectedAmountMinor: new Prisma.Decimal('5343'),
+        receivedAmountMinor: new Prisma.Decimal('5343'),
+        differenceAmountMinor: new Prisma.Decimal('0'),
+      }),
+    });
+  });
+
   it('reconciles a Mercado Pago split payment when sibling settlements sum to order net', async () => {
     const currentSettlement = settlement({
       provider: WebhookProvider.MERCADO_PAGO,
@@ -489,12 +523,14 @@ describe('ReconciliationMatchingService', () => {
       channelProvider: ChannelProvider.MERCADO_LIVRE,
       revenueAmount: new Prisma.Decimal('120.50'),
       estimatedNetAmount: new Prisma.Decimal('120.50'),
+      channelFeeAmount: new Prisma.Decimal('0'),
       currency: 'BRL',
       components: {},
       calculatedAt: new Date('2026-07-03T09:55:00.000Z'),
       version: 1,
       ...overrides,
       revenueAmount: new Prisma.Decimal(String(overrides.revenueAmount ?? '120.50')),
+      channelFeeAmount: new Prisma.Decimal(String(overrides.channelFeeAmount ?? '0')),
       estimatedNetAmount:
         overrides.estimatedNetAmount === null
           ? null
