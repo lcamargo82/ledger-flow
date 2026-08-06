@@ -20,12 +20,15 @@ describe('ReconciliationCasesService', () => {
       findMany: jest.fn(),
     },
   };
+  const matchingService = {
+    matchSettlement: jest.fn(),
+  };
 
   let service: ReconciliationCasesService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ReconciliationCasesService(prisma as never);
+    service = new ReconciliationCasesService(prisma as never, matchingService as never);
   });
 
   it('lists tenant-scoped cases with filters and normalized minor-unit fields', async () => {
@@ -136,6 +139,27 @@ describe('ReconciliationCasesService', () => {
         }),
       ]),
     );
+  });
+
+  it('reprocesses a tenant-scoped case through settlement matching and returns updated detail', async () => {
+    prisma.reconciliationCase.findFirst
+      .mockResolvedValueOnce({ settlementEventId: 'settlement-1' })
+      .mockResolvedValueOnce(reconciliationCase({ status: ReconciliationCaseStatus.RECONCILED }));
+    matchingService.matchSettlement.mockResolvedValue({ created: false });
+
+    const result = await service.reprocessCase('tenant-1', 'case-1');
+
+    expect(matchingService.matchSettlement).toHaveBeenCalledWith('settlement-1');
+    expect(result.status).toBe(ReconciliationCaseStatus.RECONCILED);
+  });
+
+  it('blocks reprocessing when the case does not belong to the tenant', async () => {
+    prisma.reconciliationCase.findFirst.mockResolvedValue(null);
+
+    await expect(service.reprocessCase('tenant-1', 'case-1')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    expect(matchingService.matchSettlement).not.toHaveBeenCalled();
   });
 
   function reconciliationCase(overrides: Record<string, unknown> = {}) {

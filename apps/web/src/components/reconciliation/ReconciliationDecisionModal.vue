@@ -23,6 +23,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'update:modelValue', value: boolean): void
   (event: 'submit', payload: CreateReconciliationDecisionPayload): void
+  (event: 'reprocess'): void
 }>()
 
 const { t } = useI18n()
@@ -202,6 +203,9 @@ const submit = () => {
       </div>
 
       <div class="lf-modal-actions">
+        <AppButton type="button" variant="secondary" :disabled="loading" @click="emit('reprocess')">
+          {{ t('reconciliation.decisionModal.reprocess') }}
+        </AppButton>
         <AppButton type="button" variant="secondary" :disabled="loading" @click="close">
           {{ t('common.cancel') }}
         </AppButton>

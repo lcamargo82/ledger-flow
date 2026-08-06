@@ -60,6 +60,11 @@ const submitDecision = async (payload: CreateReconciliationDecisionPayload) => {
   isDecisionModalOpen.value = false
 }
 
+const reprocessSelectedCase = async () => {
+  if (!selectedCase.value) return
+  await reconciliationStore.reprocessCase(selectedCase.value.id)
+}
+
 const formatMinor = (value?: string | null, currency = 'BRL') => {
   if (!value) return '-'
   return formatMoneyFromCents(Number(value), currency, getLocale())
@@ -244,6 +249,7 @@ const agingWidth = (count: number) => `${Math.max(4, (count / maxAgingCount.valu
       :reason-codes="reconciliationStore.reasonCodes"
       :loading="reconciliationStore.isMutating || reconciliationStore.isReviewLoading"
       @submit="submitDecision"
+      @reprocess="reprocessSelectedCase"
     />
   </div>
 </template>

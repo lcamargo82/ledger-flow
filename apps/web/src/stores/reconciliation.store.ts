@@ -94,6 +94,22 @@ export const useReconciliationStore = defineStore('reconciliation', () => {
     }
   }
 
+  const reprocessCase = async (caseId: string) => {
+    isMutating.value = true
+    error.value = null
+    try {
+      const updatedCase = await reconciliationService.reprocessCase(caseId)
+      selectedCase.value = updatedCase
+      await Promise.all([fetchOverview(), fetchReviewContext(caseId)])
+      return updatedCase
+    } catch (err) {
+      error.value = extractErrorMessage(err)
+      throw err
+    } finally {
+      isMutating.value = false
+    }
+  }
+
   const fetchReviewContext = async (caseId: string) => {
     isReviewLoading.value = true
     error.value = null
@@ -144,6 +160,7 @@ export const useReconciliationStore = defineStore('reconciliation', () => {
     fetchReviewContext,
     clearReviewContext,
     createDecision,
+    reprocessCase,
     setPage,
   }
 })

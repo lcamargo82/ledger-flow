@@ -2318,6 +2318,7 @@
       "reasonCode": "Reason code",
       "comment": "Comment",
       "commentRequired": "Comment required",
+      "reprocess": "Reprocess matching",
       "submit": "Register decision",
       "impact": {
         "COMMENT": "Only records a timeline note. It does not change the status or remove the case from the list.",

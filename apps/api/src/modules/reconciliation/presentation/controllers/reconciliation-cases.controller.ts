@@ -102,4 +102,18 @@ export class ReconciliationCasesController {
   ) {
     return this.reconciliationDecisionsService.createDecision(user.tenantId, user.id, id, dto);
   }
+
+  @Post(':id/reprocess')
+  @RequirePermissions('reconciliation:manage')
+  @RequireCapabilities(ReconciliationCapabilities.Manage)
+  @ApiOperation({ summary: 'Reprocessar matching automático de um caso existente' })
+  @ApiOkResponse({ type: ReconciliationCaseResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Não autorizado' })
+  @ApiForbiddenResponse({
+    description: 'Sem permissão ou capability para gerenciar Reconciliation',
+  })
+  @ApiNotFoundResponse({ description: 'Caso de conciliação não encontrado' })
+  reprocess(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.reconciliationCasesService.reprocessCase(user.tenantId, id);
+  }
 }

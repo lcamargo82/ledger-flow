@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../../database/prisma/prisma.service';
 import { ListReconciliationCasesQueryDto } from '../dto/list-reconciliation-cases-query.dto';
+import { ReconciliationMatchingService } from './reconciliation-matching.service';
 
 const CASE_INCLUDE = {
   settlementEvent: {
@@ -43,7 +44,10 @@ const CASE_INCLUDE = {
 
 @Injectable()
 export class ReconciliationCasesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly matchingService: ReconciliationMatchingService,
+  ) {}
 
   async listCases(tenantId: string, query: ListReconciliationCasesQueryDto) {
     const page = query.page ?? 1;
@@ -134,6 +138,21 @@ export class ReconciliationCasesService {
       decisions: normalizedDecisions,
       events,
     };
+  }
+
+  async reprocessCase(tenantId: string, id: string) {
+    const reconciliationCase = await this.prisma.reconciliationCase.findFirst({
+      where: { id, tenantId },
+      select: { settlementEventId: true },
+    });
+
+    if (!reconciliationCase) {
+      throw new NotFoundException('Reconciliation case not found.');
+    }
+
+    await this.matchingService.matchSettlement(reconciliationCase.settlementEventId);
+
+    return this.getCase(tenantId, id);
   }
 
   private buildWhere(

@@ -2322,6 +2322,7 @@
       "reasonCode": "Código do motivo",
       "comment": "Comentário",
       "commentRequired": "Comentário obrigatório",
+      "reprocess": "Reprocessar matching",
       "submit": "Registrar decisão",
       "impact": {
         "COMMENT": "Registra apenas uma nota na timeline. Não altera o status e não remove o caso da listagem.",

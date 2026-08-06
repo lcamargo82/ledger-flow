@@ -47,6 +47,13 @@ export class ReconciliationService {
     const { data } = await httpClient.post(`/reconciliation/cases/${caseId}/decisions`, payload)
     return data
   }
+
+  async reprocessCase(caseId: string): Promise<ReconciliationCase> {
+    const { data } = await httpClient.post<ReconciliationCase>(
+      `/reconciliation/cases/${caseId}/reprocess`,
+    )
+    return data
+  }
 }
 
 export const reconciliationService = new ReconciliationService()

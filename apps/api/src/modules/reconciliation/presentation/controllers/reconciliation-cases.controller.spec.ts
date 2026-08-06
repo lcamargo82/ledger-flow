@@ -22,10 +22,12 @@ describe('ReconciliationCasesController', () => {
     },
   );
 
-  it('protects createDecision with reconciliation manage permission and capability', () => {
+  it.each(['createDecision', 'reprocess'])(
+    'protects %s with reconciliation manage permission and capability',
+    (methodName) => {
     const descriptor = Object.getOwnPropertyDescriptor(
       ReconciliationCasesController.prototype,
-      'createDecision',
+      methodName,
     );
 
     expect(Reflect.getMetadata(REQUIRED_PERMISSIONS_KEY, descriptor?.value)).toEqual([
@@ -34,5 +36,6 @@ describe('ReconciliationCasesController', () => {
     expect(Reflect.getMetadata(REQUIRED_CAPABILITIES_KEY, descriptor?.value)).toEqual([
       ReconciliationCapabilities.Manage,
     ]);
-  });
+    },
+  );
 });
